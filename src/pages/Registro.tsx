@@ -1,35 +1,103 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
-import { Sparkles, Mail, Lock, Eye, EyeOff, User, Check } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { Sparkles, Mail, Lock, Eye, EyeOff, User, Check, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Layout } from "@/components/layout/Layout";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
+import { z } from "zod";
+
+const registerSchema = z.object({
+  name: z.string().min(2, "O nome deve ter pelo menos 2 caracteres"),
+  email: z.string().email("Email inválido"),
+  password: z.string().min(6, "A senha deve ter pelo menos 6 caracteres"),
+  confirmPassword: z.string(),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "As senhas não coincidem",
+  path: ["confirmPassword"],
+});
 
 export default function Registro() {
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     password: "",
     confirmPassword: "",
   });
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [acceptTerms, setAcceptTerms] = useState(false);
+  
+  const { signUp, user } = useAuth();
+  const navigate = useNavigate();
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (user) {
+      navigate("/dashboard");
+    }
+  }, [user, navigate]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+    // Clear error when user starts typing
+    if (errors[e.target.name]) {
+      setErrors({ ...errors, [e.target.name]: "" });
+    }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implement registration logic
-    console.log("Register:", formData);
+    setErrors({});
+
+    if (!acceptTerms) {
+      toast.error("Você precisa aceitar os termos de uso");
+      return;
+    }
+
+    // Validate form
+    const result = registerSchema.safeParse(formData);
+    if (!result.success) {
+      const fieldErrors: Record<string, string> = {};
+      result.error.errors.forEach((err) => {
+        if (err.path[0]) {
+          fieldErrors[err.path[0] as string] = err.message;
+        }
+      });
+      setErrors(fieldErrors);
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const { error } = await signUp(formData.email, formData.password, formData.name);
+      
+      if (error) {
+        if (error.message.includes("User already registered")) {
+          toast.error("Este email já está cadastrado. Tente fazer login.");
+        } else {
+          toast.error(error.message);
+        }
+      } else {
+        toast.success("Conta criada com sucesso! Redirecionando...");
+        navigate("/dashboard");
+      }
+    } catch (err) {
+      toast.error("Erro ao criar conta. Tente novamente.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const benefits = [
     "Acesso a sinais gratuitos",
     "Análise técnica básica",
-    "1 par de moedas (EUR/USD)",
+    "3 pares de moedas (EUR/USD, GBP/USD, USD/JPY)",
     "Suporte da comunidade",
   ];
 
@@ -129,10 +197,14 @@ export default function Registro() {
                         placeholder="João Silva"
                         value={formData.name}
                         onChange={handleChange}
-                        className="pl-10"
+                        className={`pl-10 ${errors.name ? "border-destructive" : ""}`}
+                        disabled={isLoading}
                         required
                       />
                     </div>
+                    {errors.name && (
+                      <p className="text-xs text-destructive">{errors.name}</p>
+                    )}
                   </div>
 
                   <div className="space-y-2">
@@ -146,10 +218,14 @@ export default function Registro() {
                         placeholder="seu@email.com"
                         value={formData.email}
                         onChange={handleChange}
-                        className="pl-10"
+                        className={`pl-10 ${errors.email ? "border-destructive" : ""}`}
+                        disabled={isLoading}
                         required
                       />
                     </div>
+                    {errors.email && (
+                      <p className="text-xs text-destructive">{errors.email}</p>
+                    )}
                   </div>
 
                   <div className="space-y-2">
@@ -163,13 +239,15 @@ export default function Registro() {
                         placeholder="••••••••"
                         value={formData.password}
                         onChange={handleChange}
-                        className="pl-10 pr-10"
+                        className={`pl-10 pr-10 ${errors.password ? "border-destructive" : ""}`}
+                        disabled={isLoading}
                         required
                       />
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
                         className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                        disabled={isLoading}
                       >
                         {showPassword ? (
                           <EyeOff className="h-4 w-4" />
@@ -178,6 +256,9 @@ export default function Registro() {
                         )}
                       </button>
                     </div>
+                    {errors.password && (
+                      <p className="text-xs text-destructive">{errors.password}</p>
+                    )}
                   </div>
 
                   <div className="space-y-2">
@@ -191,18 +272,24 @@ export default function Registro() {
                         placeholder="••••••••"
                         value={formData.confirmPassword}
                         onChange={handleChange}
-                        className="pl-10"
+                        className={`pl-10 ${errors.confirmPassword ? "border-destructive" : ""}`}
+                        disabled={isLoading}
                         required
                       />
                     </div>
+                    {errors.confirmPassword && (
+                      <p className="text-xs text-destructive">{errors.confirmPassword}</p>
+                    )}
                   </div>
 
                   <div className="flex items-start gap-2 text-sm">
                     <input
                       type="checkbox"
                       id="terms"
+                      checked={acceptTerms}
+                      onChange={(e) => setAcceptTerms(e.target.checked)}
                       className="mt-1 rounded border-border"
-                      required
+                      disabled={isLoading}
                     />
                     <label htmlFor="terms" className="text-muted-foreground">
                       Concordo com os{" "}
@@ -216,8 +303,19 @@ export default function Registro() {
                     </label>
                   </div>
 
-                  <Button type="submit" variant="hero" className="w-full">
-                    Criar Conta Grátis
+                  <Button 
+                    type="submit" 
+                    className="w-full"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Criando conta...
+                      </>
+                    ) : (
+                      "Criar Conta Grátis"
+                    )}
                   </Button>
                 </form>
 

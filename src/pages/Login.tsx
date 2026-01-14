@@ -1,21 +1,75 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
-import { Sparkles, Mail, Lock, Eye, EyeOff } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { Sparkles, Mail, Lock, Eye, EyeOff, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Layout } from "@/components/layout/Layout";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
+import { z } from "zod";
+
+const loginSchema = z.object({
+  email: z.string().email("Email inválido"),
+  password: z.string().min(6, "A senha deve ter pelo menos 6 caracteres"),
+});
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+  
+  const { signIn, user } = useAuth();
+  const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Redirect if already logged in
+  useEffect(() => {
+    if (user) {
+      navigate("/dashboard");
+    }
+  }, [user, navigate]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implement login logic
-    console.log("Login:", { email, password });
+    setErrors({});
+
+    // Validate form
+    const result = loginSchema.safeParse({ email, password });
+    if (!result.success) {
+      const fieldErrors: { email?: string; password?: string } = {};
+      result.error.errors.forEach((err) => {
+        if (err.path[0] === "email") fieldErrors.email = err.message;
+        if (err.path[0] === "password") fieldErrors.password = err.message;
+      });
+      setErrors(fieldErrors);
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const { error } = await signIn(email, password);
+      
+      if (error) {
+        if (error.message.includes("Invalid login credentials")) {
+          toast.error("Email ou senha incorretos");
+        } else if (error.message.includes("Email not confirmed")) {
+          toast.error("Por favor, confirme seu email antes de fazer login");
+        } else {
+          toast.error(error.message);
+        }
+      } else {
+        toast.success("Login realizado com sucesso!");
+        navigate("/dashboard");
+      }
+    } catch (err) {
+      toast.error("Erro ao fazer login. Tente novamente.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -56,10 +110,14 @@ export default function Login() {
                       placeholder="seu@email.com"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="pl-10"
+                      className={`pl-10 ${errors.email ? "border-destructive" : ""}`}
+                      disabled={isLoading}
                       required
                     />
                   </div>
+                  {errors.email && (
+                    <p className="text-xs text-destructive">{errors.email}</p>
+                  )}
                 </div>
 
                 <div className="space-y-2">
@@ -72,13 +130,15 @@ export default function Login() {
                       placeholder="••••••••"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="pl-10 pr-10"
+                      className={`pl-10 pr-10 ${errors.password ? "border-destructive" : ""}`}
+                      disabled={isLoading}
                       required
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                      disabled={isLoading}
                     >
                       {showPassword ? (
                         <EyeOff className="h-4 w-4" />
@@ -87,26 +147,24 @@ export default function Login() {
                       )}
                     </button>
                   </div>
+                  {errors.password && (
+                    <p className="text-xs text-destructive">{errors.password}</p>
+                  )}
                 </div>
 
-                <div className="flex items-center justify-between text-sm">
-                  <label className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      className="rounded border-border"
-                    />
-                    <span className="text-muted-foreground">Lembrar-me</span>
-                  </label>
-                  <Link
-                    to="/recuperar-senha"
-                    className="text-primary hover:underline"
-                  >
-                    Esqueceu a senha?
-                  </Link>
-                </div>
-
-                <Button type="submit" variant="hero" className="w-full">
-                  Entrar
+                <Button 
+                  type="submit" 
+                  className="w-full"
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Entrando...
+                    </>
+                  ) : (
+                    "Entrar"
+                  )}
                 </Button>
               </form>
 

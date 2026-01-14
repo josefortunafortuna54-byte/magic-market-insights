@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Sparkles, BarChart3, History, Crown, LogIn } from "lucide-react";
+import { Menu, X, Sparkles, BarChart3, History, Crown, LogIn, LogOut, LayoutDashboard, Shield, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { useAuth } from "@/contexts/AuthContext";
 
 const navLinks = [
-  { href: "/", label: "Home", icon: Sparkles },
   { href: "/analises", label: "Análises", icon: BarChart3 },
   { href: "/historico", label: "Histórico", icon: History },
   { href: "/planos", label: "Planos", icon: Crown },
@@ -14,6 +15,14 @@ const navLinks = [
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, isAdmin, signOut, loading, isPremium } = useAuth();
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/");
+    setIsOpen(false);
+  };
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-xl">
@@ -37,10 +46,7 @@ export function Navbar() {
               const isActive = location.pathname === link.href;
               return (
                 <Link key={link.href} to={link.href}>
-                  <Button
-                    variant={isActive ? "secondary" : "ghost"}
-                    className="gap-2"
-                  >
+                  <Button variant={isActive ? "secondary" : "ghost"} className="gap-2">
                     <Icon className="h-4 w-4" />
                     {link.label}
                   </Button>
@@ -51,30 +57,55 @@ export function Navbar() {
 
           {/* Auth Buttons */}
           <div className="hidden md:flex items-center gap-3">
-            <Link to="/login">
-              <Button variant="ghost" size="sm">
-                <LogIn className="h-4 w-4 mr-2" />
-                Entrar
-              </Button>
-            </Link>
-            <Link to="/registro">
-              <Button variant="hero" size="sm">
-                Criar Conta
-              </Button>
-            </Link>
+            {loading ? (
+              <div className="h-9 w-20 bg-muted animate-pulse rounded-lg" />
+            ) : user ? (
+              <>
+                {isPremium && (
+                  <Badge variant="outline" className="border-primary text-primary">
+                    <Crown className="h-3 w-3 mr-1" />
+                    Premium
+                  </Badge>
+                )}
+                {isAdmin && (
+                  <Link to="/admin">
+                    <Button variant="ghost" size="sm">
+                      <Shield className="h-4 w-4 mr-1" />
+                      Admin
+                    </Button>
+                  </Link>
+                )}
+                <Link to="/dashboard">
+                  <Button variant="ghost" size="sm">
+                    <LayoutDashboard className="h-4 w-4 mr-1" />
+                    Dashboard
+                  </Button>
+                </Link>
+                <Button variant="outline" size="sm" onClick={handleSignOut}>
+                  <LogOut className="h-4 w-4 mr-1" />
+                  Sair
+                </Button>
+              </>
+            ) : (
+              <>
+                <Link to="/login">
+                  <Button variant="ghost" size="sm">
+                    <LogIn className="h-4 w-4 mr-2" />
+                    Entrar
+                  </Button>
+                </Link>
+                <Link to="/registro">
+                  <Button size="sm">
+                    Criar Conta
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
-          <button
-            className="md:hidden p-2"
-            onClick={() => setIsOpen(!isOpen)}
-            aria-label="Toggle menu"
-          >
-            {isOpen ? (
-              <X className="h-6 w-6" />
-            ) : (
-              <Menu className="h-6 w-6" />
-            )}
+          <button className="md:hidden p-2" onClick={() => setIsOpen(!isOpen)} aria-label="Toggle menu">
+            {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>
         </div>
       </div>
@@ -89,22 +120,18 @@ export function Navbar() {
             className="md:hidden border-t border-border/50 bg-background/95 backdrop-blur-xl"
           >
             <div className="container mx-auto px-4 py-4 space-y-2">
+              {user && isPremium && (
+                <Badge variant="outline" className="border-primary text-primary mb-2">
+                  <Crown className="h-3 w-3 mr-1" />
+                  Premium
+                </Badge>
+              )}
               {navLinks.map((link) => {
                 const Icon = link.icon;
                 const isActive = location.pathname === link.href;
                 return (
-                  <Link
-                    key={link.href}
-                    to={link.href}
-                    onClick={() => setIsOpen(false)}
-                  >
-                    <div
-                      className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-                        isActive
-                          ? "bg-secondary text-foreground"
-                          : "text-muted-foreground hover:bg-secondary/50"
-                      }`}
-                    >
+                  <Link key={link.href} to={link.href} onClick={() => setIsOpen(false)}>
+                    <div className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${isActive ? "bg-secondary text-foreground" : "text-muted-foreground hover:bg-secondary/50"}`}>
                       <Icon className="h-5 w-5" />
                       {link.label}
                     </div>
@@ -112,16 +139,39 @@ export function Navbar() {
                 );
               })}
               <div className="pt-4 space-y-2 border-t border-border/50">
-                <Link to="/login" onClick={() => setIsOpen(false)}>
-                  <Button variant="outline" className="w-full">
-                    Entrar
-                  </Button>
-                </Link>
-                <Link to="/registro" onClick={() => setIsOpen(false)}>
-                  <Button variant="hero" className="w-full">
-                    Criar Conta
-                  </Button>
-                </Link>
+                {loading ? (
+                  <div className="h-10 bg-muted animate-pulse rounded-lg" />
+                ) : user ? (
+                  <>
+                    {isAdmin && (
+                      <Link to="/admin" onClick={() => setIsOpen(false)}>
+                        <Button variant="ghost" className="w-full justify-start">
+                          <Shield className="h-4 w-4 mr-2" />
+                          Admin
+                        </Button>
+                      </Link>
+                    )}
+                    <Link to="/dashboard" onClick={() => setIsOpen(false)}>
+                      <Button variant="ghost" className="w-full justify-start">
+                        <LayoutDashboard className="h-4 w-4 mr-2" />
+                        Dashboard
+                      </Button>
+                    </Link>
+                    <Button variant="outline" className="w-full" onClick={handleSignOut}>
+                      <LogOut className="h-4 w-4 mr-2" />
+                      Sair
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Link to="/login" onClick={() => setIsOpen(false)}>
+                      <Button variant="outline" className="w-full">Entrar</Button>
+                    </Link>
+                    <Link to="/registro" onClick={() => setIsOpen(false)}>
+                      <Button className="w-full">Criar Conta</Button>
+                    </Link>
+                  </>
+                )}
               </div>
             </div>
           </motion.div>
