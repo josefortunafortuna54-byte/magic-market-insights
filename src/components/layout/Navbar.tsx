@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Sparkles, BarChart3, History, Crown, LogIn, LogOut, LayoutDashboard, Shield, User } from "lucide-react";
+import { Menu, X, BarChart3, History, Crown, LogIn, LogOut, LayoutDashboard, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
+import logo from "@/assets/logo.png";
 
 const navLinks = [
   { href: "/analises", label: "Análises", icon: BarChart3 },
@@ -30,13 +31,7 @@ export function Navbar() {
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2">
-            <div className="relative">
-              <Sparkles className="h-8 w-8 text-primary" />
-              <div className="absolute inset-0 blur-lg bg-primary/30" />
-            </div>
-            <span className="font-display text-xl font-bold tracking-tight">
-              The Magic <span className="gradient-text">Trader</span>
-            </span>
+            <img src={logo} alt="The Magic Trader" className="h-10 w-auto" />
           </Link>
 
           {/* Desktop Navigation */}
