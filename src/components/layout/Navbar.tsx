@@ -26,16 +26,34 @@ export function Navbar() {
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-xl">
+    <nav className="fixed top-0 left-0 right-0 z-50 border-b border-border/50 bg-background/95 backdrop-blur-xl">
       <div className="container mx-auto px-4">
-        <div className="flex h-16 items-center justify-between">
-          {/* Logo */}
-          <Link to="/" className="flex items-center gap-2">
-            <img src={logo} alt="The Magic Trader" className="h-10 w-auto" />
+        <div className="flex h-20 items-center justify-between">
+          {/* Logo + Brand Name */}
+          <Link to="/" className="flex items-center gap-3 group">
+            {/* Logo with glow effect */}
+            <div className="relative">
+              <img 
+                src={logo} 
+                alt="The Magic Trader" 
+                className="h-12 w-auto sm:h-14 md:h-16 transition-transform duration-300 group-hover:scale-105" 
+              />
+              <div className="absolute inset-0 blur-xl bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            </div>
+            
+            {/* Brand Name */}
+            <div className="flex flex-col">
+              <span className="font-brand text-base sm:text-lg md:text-xl font-semibold tracking-wider text-foreground leading-tight">
+                THE MAGIC
+              </span>
+              <span className="font-brand text-base sm:text-lg md:text-xl font-bold tracking-wider bg-gradient-to-r from-primary via-purple-400 to-primary bg-clip-text text-transparent leading-tight">
+                TRADER
+              </span>
+            </div>
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-1">
+          <div className="hidden lg:flex items-center gap-1">
             {navLinks.map((link) => {
               const Icon = link.icon;
               const isActive = location.pathname === link.href;
@@ -51,7 +69,7 @@ export function Navbar() {
           </div>
 
           {/* Auth Buttons */}
-          <div className="hidden md:flex items-center gap-3">
+          <div className="hidden lg:flex items-center gap-3">
             {loading ? (
               <div className="h-9 w-20 bg-muted animate-pulse rounded-lg" />
             ) : user ? (
@@ -99,7 +117,7 @@ export function Navbar() {
           </div>
 
           {/* Mobile Menu Button */}
-          <button className="md:hidden p-2" onClick={() => setIsOpen(!isOpen)} aria-label="Toggle menu">
+          <button className="lg:hidden p-2" onClick={() => setIsOpen(!isOpen)} aria-label="Toggle menu">
             {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>
         </div>
@@ -112,7 +130,7 @@ export function Navbar() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            className="md:hidden border-t border-border/50 bg-background/95 backdrop-blur-xl"
+            className="lg:hidden border-t border-border/50 bg-background/95 backdrop-blur-xl"
           >
             <div className="container mx-auto px-4 py-4 space-y-2">
               {user && isPremium && (
