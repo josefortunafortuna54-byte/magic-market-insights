@@ -53,13 +53,13 @@ export function Navbar() {
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center gap-1">
+          <div className="hidden md:flex items-center gap-1">
             {navLinks.map((link) => {
               const Icon = link.icon;
               const isActive = location.pathname === link.href;
               return (
                 <Link key={link.href} to={link.href}>
-                  <Button variant={isActive ? "secondary" : "ghost"} className="gap-2">
+                  <Button variant={isActive ? "secondary" : "ghost"} className="gap-2" size="sm">
                     <Icon className="h-4 w-4" />
                     {link.label}
                   </Button>
@@ -69,7 +69,7 @@ export function Navbar() {
           </div>
 
           {/* Auth Buttons */}
-          <div className="hidden lg:flex items-center gap-3">
+          <div className="hidden md:flex items-center gap-2">
             {loading ? (
               <div className="h-9 w-20 bg-muted animate-pulse rounded-lg" />
             ) : user ? (
@@ -117,7 +117,7 @@ export function Navbar() {
           </div>
 
           {/* Mobile Menu Button */}
-          <button className="lg:hidden p-2" onClick={() => setIsOpen(!isOpen)} aria-label="Toggle menu">
+          <button className="md:hidden p-2" onClick={() => setIsOpen(!isOpen)} aria-label="Toggle menu">
             {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>
         </div>
@@ -130,7 +130,7 @@ export function Navbar() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            className="lg:hidden border-t border-border/50 bg-background/95 backdrop-blur-xl"
+            className="md:hidden border-t border-border/50 bg-background/95 backdrop-blur-xl"
           >
             <div className="container mx-auto px-4 py-4 space-y-2">
               {user && isPremium && (
