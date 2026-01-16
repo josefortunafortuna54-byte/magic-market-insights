@@ -35,6 +35,115 @@ export type Database = {
         }
         Relationships: []
       }
+      market_analysis: {
+        Row: {
+          analyzed_at: string
+          confidence: number
+          created_at: string
+          ema_long: number | null
+          ema_short: number | null
+          entry_price: number | null
+          id: string
+          pair_id: string
+          reasons: string[] | null
+          rsi: number | null
+          signal_type: string
+          stop_loss: number | null
+          symbol: string
+          take_profit: number | null
+          timeframe: string
+          trend: string | null
+        }
+        Insert: {
+          analyzed_at?: string
+          confidence: number
+          created_at?: string
+          ema_long?: number | null
+          ema_short?: number | null
+          entry_price?: number | null
+          id?: string
+          pair_id: string
+          reasons?: string[] | null
+          rsi?: number | null
+          signal_type: string
+          stop_loss?: number | null
+          symbol: string
+          take_profit?: number | null
+          timeframe?: string
+          trend?: string | null
+        }
+        Update: {
+          analyzed_at?: string
+          confidence?: number
+          created_at?: string
+          ema_long?: number | null
+          ema_short?: number | null
+          entry_price?: number | null
+          id?: string
+          pair_id?: string
+          reasons?: string[] | null
+          rsi?: number | null
+          signal_type?: string
+          stop_loss?: number | null
+          symbol?: string
+          take_profit?: number | null
+          timeframe?: string
+          trend?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "market_analysis_pair_id_fkey"
+            columns: ["pair_id"]
+            isOneToOne: false
+            referencedRelation: "trading_pairs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      market_prices: {
+        Row: {
+          change_percent: number | null
+          high_24h: number | null
+          id: string
+          low_24h: number | null
+          pair_id: string
+          price: number
+          symbol: string
+          updated_at: string
+          volume: number | null
+        }
+        Insert: {
+          change_percent?: number | null
+          high_24h?: number | null
+          id?: string
+          low_24h?: number | null
+          pair_id: string
+          price: number
+          symbol: string
+          updated_at?: string
+          volume?: number | null
+        }
+        Update: {
+          change_percent?: number | null
+          high_24h?: number | null
+          id?: string
+          low_24h?: number | null
+          pair_id?: string
+          price?: number
+          symbol?: string
+          updated_at?: string
+          volume?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "market_prices_pair_id_fkey"
+            columns: ["pair_id"]
+            isOneToOne: true
+            referencedRelation: "trading_pairs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
