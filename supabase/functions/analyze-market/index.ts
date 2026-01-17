@@ -24,11 +24,11 @@ interface AnalysisResult {
   pair_id: string;
   symbol: string;
   timeframe: string;
-  signal_type: "BUY" | "SELL" | "WAIT";
+  signal_type: "BUY" | "SELL" | "HOLD";
   confidence: number;
   rsi: number;
-  ema_short: number;
-  ema_long: number;
+  ema_20: number;
+  current_price: number;
   trend: "bullish" | "bearish" | "neutral";
   entry_price: number;
   stop_loss: number;
@@ -119,7 +119,10 @@ function determineTrend(
   return "neutral";
 }
 
-// Generate analysis
+// Generate analysis based on the new rules
+// BUY: RSI < 30 (oversold) AND Price > EMA 20 (potential bullish reversal)
+// SELL: RSI > 70 (overbought) AND Price < EMA 20 (potential bearish reversal)
+// HOLD: Conditions not fully met
 function generateAnalysis(
   pair: TradingPair,
   ohlcData: OHLCData[],
@@ -132,60 +135,103 @@ function generateAnalysis(
 
   // Calculate indicators
   const rsi = calculateRSI(closes);
-  const emaShort = calculateEMA(closes, 21);
-  const emaLong = calculateEMA(closes, 50);
-  const trend = determineTrend(emaShort, emaLong, currentPrice);
-
+  const ema20 = calculateEMA(closes, 20);
+  
   // Calculate ATR for stop loss and take profit
   const atr = calculateATR(highs, lows, closes);
 
-  // Generate signal
+  // Determine trend based on price vs EMA 20
+  const trend: "bullish" | "bearish" | "neutral" = 
+    currentPrice > ema20 ? "bullish" : 
+    currentPrice < ema20 ? "bearish" : "neutral";
+
+  // Apply the decision rules
   const reasons: string[] = [];
-  let signalType: "BUY" | "SELL" | "WAIT" = "WAIT";
-  let confidence = 50;
+  let signalType: "BUY" | "SELL" | "HOLD" = "HOLD";
+  let confidence = 0;
 
   // RSI analysis
-  if (rsi < 30) {
-    reasons.push(`RSI(14) em sobrevenda (${rsi.toFixed(1)}) - potencial reversão bullish`);
-    confidence += 15;
-  } else if (rsi > 70) {
-    reasons.push(`RSI(14) em sobrecompra (${rsi.toFixed(1)}) - potencial reversão bearish`);
-    confidence += 15;
-  } else if (rsi > 45 && rsi < 55) {
-    reasons.push(`RSI(14) neutro (${rsi.toFixed(1)}) - aguardar confirmação`);
-  }
+  const isOversold = rsi < 30;
+  const isOverbought = rsi > 70;
+  const priceAboveEma = currentPrice > ema20;
+  const priceBelowEma = currentPrice < ema20;
 
-  // EMA analysis
-  if (emaShort > emaLong) {
-    reasons.push(`EMA 21 acima da EMA 50 - tendência de alta`);
-    confidence += 10;
-  } else if (emaShort < emaLong) {
-    reasons.push(`EMA 21 abaixo da EMA 50 - tendência de baixa`);
-    confidence += 10;
-  }
-
-  // Trend analysis
-  if (trend === "bullish") {
-    reasons.push("Preço acima das médias móveis - momentum bullish");
-    confidence += 10;
-  } else if (trend === "bearish") {
-    reasons.push("Preço abaixo das médias móveis - momentum bearish");
-    confidence += 10;
-  }
-
-  // Determine final signal
-  if (rsi < 35 && trend !== "bearish" && emaShort > emaLong) {
+  // BUY Signal: RSI < 30 AND Price > EMA 20
+  if (isOversold && priceAboveEma) {
     signalType = "BUY";
-    confidence = Math.min(95, confidence + 15);
-  } else if (rsi > 65 && trend !== "bullish" && emaShort < emaLong) {
+    
+    // Calculate confidence based on how strong the signal is
+    // Base confidence starts at 80%
+    confidence = 80;
+    
+    // Add more confidence based on RSI extremity (lower RSI = stronger oversold)
+    const rsiStrength = (30 - rsi) / 30; // 0 to 1 scale
+    confidence += rsiStrength * 10;
+    
+    // Add confidence based on price distance above EMA
+    const priceDistancePercent = ((currentPrice - ema20) / ema20) * 100;
+    if (priceDistancePercent > 0.5) confidence += 5;
+    
+    confidence = Math.min(95, Math.round(confidence));
+    
+    reasons.push(`✅ RSI(14) em ${rsi.toFixed(1)} - mercado SOBREVENDIDO (< 30)`);
+    reasons.push(`✅ Preço ${currentPrice.toFixed(5)} ACIMA da EMA 20 (${ema20.toFixed(5)})`);
+    reasons.push(`📈 Possível reversão de ALTA detectada`);
+    reasons.push(`🎯 Confiança: ${confidence >= 80 ? 'FORTE' : 'MODERADA'} (${confidence}%)`);
+  }
+  // SELL Signal: RSI > 70 AND Price < EMA 20
+  else if (isOverbought && priceBelowEma) {
     signalType = "SELL";
-    confidence = Math.min(95, confidence + 15);
-  } else if (rsi < 40 && emaShort > emaLong) {
-    signalType = "BUY";
-    confidence = Math.min(85, confidence);
-  } else if (rsi > 60 && emaShort < emaLong) {
-    signalType = "SELL";
-    confidence = Math.min(85, confidence);
+    
+    // Base confidence starts at 80%
+    confidence = 80;
+    
+    // Add more confidence based on RSI extremity (higher RSI = stronger overbought)
+    const rsiStrength = (rsi - 70) / 30; // 0 to 1 scale
+    confidence += rsiStrength * 10;
+    
+    // Add confidence based on price distance below EMA
+    const priceDistancePercent = ((ema20 - currentPrice) / ema20) * 100;
+    if (priceDistancePercent > 0.5) confidence += 5;
+    
+    confidence = Math.min(95, Math.round(confidence));
+    
+    reasons.push(`✅ RSI(14) em ${rsi.toFixed(1)} - mercado SOBRECOMPRADO (> 70)`);
+    reasons.push(`✅ Preço ${currentPrice.toFixed(5)} ABAIXO da EMA 20 (${ema20.toFixed(5)})`);
+    reasons.push(`📉 Possível reversão de BAIXA detectada`);
+    reasons.push(`🎯 Confiança: ${confidence >= 80 ? 'FORTE' : 'MODERADA'} (${confidence}%)`);
+  }
+  // HOLD Signal: Conditions not fully met
+  else {
+    signalType = "HOLD";
+    
+    // Calculate confidence based on how close we are to a signal
+    // If one condition is met, confidence is higher (50-70%)
+    // If no conditions are met, confidence is low (< 50%)
+    
+    if (isOversold) {
+      confidence = 55;
+      reasons.push(`⚠️ RSI(14) em ${rsi.toFixed(1)} - SOBREVENDIDO`);
+      reasons.push(`❌ Preço ${priceBelowEma ? 'ABAIXO' : 'na'} EMA 20 - aguardar confirmação`);
+    } else if (isOverbought) {
+      confidence = 55;
+      reasons.push(`⚠️ RSI(14) em ${rsi.toFixed(1)} - SOBRECOMPRADO`);
+      reasons.push(`❌ Preço ${priceAboveEma ? 'ACIMA' : 'na'} EMA 20 - aguardar confirmação`);
+    } else if (priceAboveEma) {
+      confidence = 45;
+      reasons.push(`✅ Preço ACIMA da EMA 20 (tendência de alta)`);
+      reasons.push(`❌ RSI(14) em ${rsi.toFixed(1)} - não está em sobrevenda`);
+    } else if (priceBelowEma) {
+      confidence = 45;
+      reasons.push(`✅ Preço ABAIXO da EMA 20 (tendência de baixa)`);
+      reasons.push(`❌ RSI(14) em ${rsi.toFixed(1)} - não está em sobrecompra`);
+    } else {
+      confidence = 35;
+      reasons.push(`⚠️ RSI(14) em ${rsi.toFixed(1)} - zona neutra`);
+      reasons.push(`⚠️ Preço próximo à EMA 20 - sem tendência clara`);
+    }
+    
+    reasons.push(`⏳ AGUARDAR - condições de entrada não confirmadas`);
   }
 
   // Calculate entry, stop loss, and take profit
@@ -200,14 +246,9 @@ function generateAnalysis(
     stopLoss = currentPrice + atr * atrMultiplier;
     takeProfit = currentPrice - atr * atrMultiplier * 2;
   } else {
+    // For HOLD, show potential levels
     stopLoss = currentPrice - atr * atrMultiplier;
     takeProfit = currentPrice + atr * atrMultiplier;
-  }
-
-  // Add disclaimer reason
-  if (signalType === "WAIT") {
-    reasons.push("Condições de mercado não claras - aguardar melhor setup");
-    confidence = Math.max(30, Math.min(50, confidence));
   }
 
   return {
@@ -215,10 +256,10 @@ function generateAnalysis(
     symbol: pair.symbol.replace("/", ""),
     timeframe,
     signal_type: signalType,
-    confidence: Math.round(confidence),
+    confidence,
     rsi: Math.round(rsi * 100) / 100,
-    ema_short: Math.round(emaShort * 100000) / 100000,
-    ema_long: Math.round(emaLong * 100000) / 100000,
+    ema_20: Math.round(ema20 * 100000) / 100000,
+    current_price: Math.round(currentPrice * 100000) / 100000,
     trend,
     entry_price: Math.round(currentPrice * 100000) / 100000,
     stop_loss: Math.round(stopLoss * 100000) / 100000,
@@ -355,8 +396,8 @@ Deno.serve(async (req) => {
             signal_type: analysis.signal_type,
             confidence: analysis.confidence,
             rsi: analysis.rsi,
-            ema_short: analysis.ema_short,
-            ema_long: analysis.ema_long,
+            ema_short: analysis.ema_20, // Using ema_20 as ema_short for compatibility
+            ema_long: analysis.ema_20, // Same value for now
             trend: analysis.trend,
             entry_price: analysis.entry_price,
             stop_loss: analysis.stop_loss,
