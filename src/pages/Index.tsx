@@ -9,12 +9,13 @@ import {
   ChevronRight,
   BarChart3,
   Zap,
-  Target
+  Target,
+  Activity
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Layout } from "@/components/layout/Layout";
-import { SignalCard } from "@/components/signals/SignalCard";
-import { mockSignals } from "@/data/mockSignals";
+import { LiveMarketWidget } from "@/components/trading/LiveMarketWidget";
+import { LatestAnalysisWidget } from "@/components/trading/LatestAnalysisWidget";
 
 const features = [
   {
@@ -47,7 +48,6 @@ const stats = [
 ];
 
 export default function Index() {
-  const featuredSignals = mockSignals.filter(s => s.status === "active").slice(0, 3);
 
   return (
     <Layout>
@@ -191,7 +191,14 @@ export default function Index() {
         </div>
       </section>
 
-      {/* Featured Signals */}
+      {/* Live Market Section */}
+      <section className="py-12 -mt-12">
+        <div className="container mx-auto px-4">
+          <LiveMarketWidget />
+        </div>
+      </section>
+
+      {/* Latest Analysis Section */}
       <section className="py-24">
         <div className="container mx-auto px-4">
           <motion.div
@@ -201,25 +208,27 @@ export default function Index() {
             className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-12"
           >
             <div>
+              <div className="flex items-center gap-2 mb-2">
+                <Activity className="h-5 w-5 text-green-500 animate-pulse" />
+                <span className="text-sm font-medium text-green-500">TEMPO REAL</span>
+              </div>
               <h2 className="font-display text-3xl sm:text-4xl font-bold mb-2">
-                Sinais em Destaque
+                Análises em Destaque
               </h2>
               <p className="text-muted-foreground">
-                Análises mais recentes com alta confiança
+                Sinais automáticos baseados em análise técnica avançada
               </p>
             </div>
             <Link to="/analises">
               <Button variant="outline">
-                Ver Todos
+                Ver Todas
                 <ChevronRight className="h-4 w-4 ml-2" />
               </Button>
             </Link>
           </motion.div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {featuredSignals.map((signal, i) => (
-              <SignalCard key={signal.id} signal={signal} index={i} />
-            ))}
+          <div className="max-w-3xl mx-auto">
+            <LatestAnalysisWidget maxItems={3} />
           </div>
         </div>
       </section>
