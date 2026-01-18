@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { 
   Users, 
@@ -12,7 +12,8 @@ import {
   Trash2,
   Check,
   X,
-  RefreshCw
+  RefreshCw,
+  Brain
 } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
 import { Badge } from "@/components/ui/badge";
@@ -189,13 +190,23 @@ export default function Admin() {
           animate={{ opacity: 1, y: 0 }}
           className="mb-8"
         >
-          <h1 className="font-display text-2xl sm:text-3xl font-bold flex items-center gap-3">
-            <Settings className="h-8 w-8 text-primary" />
-            Painel do Administrador
-          </h1>
-          <p className="text-muted-foreground mt-2">
-            Gerencie usuários, pares e sinais da plataforma
-          </p>
+          <div className="flex items-center justify-between flex-wrap gap-4">
+            <div>
+              <h1 className="font-display text-2xl sm:text-3xl font-bold flex items-center gap-3">
+                <Settings className="h-8 w-8 text-primary" />
+                Painel do Administrador
+              </h1>
+              <p className="text-muted-foreground mt-2">
+                Gerencie usuários, pares e sinais da plataforma
+              </p>
+            </div>
+            <Link to="/admin/ai-settings">
+              <Button variant="outline" className="gap-2">
+                <Brain className="h-4 w-4" />
+                Configurações da IA
+              </Button>
+            </Link>
+          </div>
         </motion.div>
 
         {/* Stats Cards */}
