@@ -9,12 +9,14 @@ import {
   ChevronRight,
   BarChart3,
   Zap,
-  Target
+  Target,
+  Loader2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Layout } from "@/components/layout/Layout";
 import { SignalCard } from "@/components/signals/SignalCard";
-import { mockSignals } from "@/data/mockSignals";
+import { useSignals } from "@/hooks/useSignals";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const features = [
   {
@@ -47,7 +49,8 @@ const stats = [
 ];
 
 export default function Index() {
-  const featuredSignals = mockSignals.filter(s => s.status === "active").slice(0, 3);
+  const { data: signals, isLoading, error } = useSignals("active");
+  const featuredSignals = signals?.slice(0, 3) || [];
 
   return (
     <Layout>
@@ -216,11 +219,34 @@ export default function Index() {
             </Link>
           </motion.div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {featuredSignals.map((signal, i) => (
-              <SignalCard key={signal.id} signal={signal} index={i} />
-            ))}
-          </div>
+          {isLoading ? (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="glass-card p-6 space-y-4">
+                  <Skeleton className="h-8 w-24" />
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-20 w-full" />
+                  <Skeleton className="h-10 w-full" />
+                </div>
+              ))}
+            </div>
+          ) : featuredSignals.length === 0 ? (
+            <div className="glass-card p-12 text-center">
+              <Sparkles className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className="font-display text-lg font-semibold mb-2">
+                Nenhum sinal ativo no momento
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                Novos sinais serão gerados em breve.
+              </p>
+            </div>
+          ) : (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {featuredSignals.map((signal, i) => (
+                <SignalCard key={signal.id} signal={signal} index={i} />
+              ))}
+            </div>
+          )}
         </div>
       </section>
 

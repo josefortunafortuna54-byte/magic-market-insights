@@ -14,45 +14,276 @@ export type Database = {
   }
   public: {
     Tables: {
-      signals: {
+      app_settings: {
         Row: {
+          id: string
+          key: string
+          updated_at: string
+          value: Json
+        }
+        Insert: {
+          id?: string
+          key: string
+          updated_at?: string
+          value: Json
+        }
+        Update: {
+          id?: string
+          key?: string
+          updated_at?: string
+          value?: Json
+        }
+        Relationships: []
+      }
+      market_analysis: {
+        Row: {
+          analyzed_at: string
           confidence: number
           created_at: string
+          ema_long: number | null
+          ema_short: number | null
+          entry_price: number | null
+          id: string
+          pair_id: string
+          reasons: string[] | null
+          rsi: number | null
+          signal_type: string
+          stop_loss: number | null
+          symbol: string
+          take_profit: number | null
+          timeframe: string
+          trend: string | null
+        }
+        Insert: {
+          analyzed_at?: string
+          confidence: number
+          created_at?: string
+          ema_long?: number | null
+          ema_short?: number | null
+          entry_price?: number | null
+          id?: string
+          pair_id: string
+          reasons?: string[] | null
+          rsi?: number | null
+          signal_type: string
+          stop_loss?: number | null
+          symbol: string
+          take_profit?: number | null
+          timeframe?: string
+          trend?: string | null
+        }
+        Update: {
+          analyzed_at?: string
+          confidence?: number
+          created_at?: string
+          ema_long?: number | null
+          ema_short?: number | null
+          entry_price?: number | null
+          id?: string
+          pair_id?: string
+          reasons?: string[] | null
+          rsi?: number | null
+          signal_type?: string
+          stop_loss?: number | null
+          symbol?: string
+          take_profit?: number | null
+          timeframe?: string
+          trend?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "market_analysis_pair_id_fkey"
+            columns: ["pair_id"]
+            isOneToOne: false
+            referencedRelation: "trading_pairs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      market_prices: {
+        Row: {
+          change_percent: number | null
+          high_24h: number | null
+          id: string
+          low_24h: number | null
+          pair_id: string
+          price: number
+          symbol: string
+          updated_at: string
+          volume: number | null
+        }
+        Insert: {
+          change_percent?: number | null
+          high_24h?: number | null
+          id?: string
+          low_24h?: number | null
+          pair_id: string
+          price: number
+          symbol: string
+          updated_at?: string
+          volume?: number | null
+        }
+        Update: {
+          change_percent?: number | null
+          high_24h?: number | null
+          id?: string
+          low_24h?: number | null
+          pair_id?: string
+          price?: number
+          symbol?: string
+          updated_at?: string
+          volume?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "market_prices_pair_id_fkey"
+            columns: ["pair_id"]
+            isOneToOne: true
+            referencedRelation: "trading_pairs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          email: string | null
+          full_name: string | null
+          id: string
+          is_active: boolean
+          plan: Database["public"]["Enums"]["plan_type"]
+          plan_expires_at: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          is_active?: boolean
+          plan?: Database["public"]["Enums"]["plan_type"]
+          plan_expires_at?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          is_active?: boolean
+          plan?: Database["public"]["Enums"]["plan_type"]
+          plan_expires_at?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      signals: {
+        Row: {
+          closed_at: string | null
+          confidence: number
+          created_at: string
+          created_by: string | null
           entry_price: number
           id: string
-          pair: string
-          reasons: string[]
+          pair_id: string
+          reasons: string[] | null
           signal_type: string
-          status: string | null
+          status: string
           stop_loss: number
           take_profit: number
           timeframe: string
         }
         Insert: {
+          closed_at?: string | null
           confidence: number
           created_at?: string
+          created_by?: string | null
           entry_price: number
           id?: string
-          pair: string
-          reasons: string[]
+          pair_id: string
+          reasons?: string[] | null
           signal_type: string
-          status?: string | null
+          status?: string
           stop_loss: number
           take_profit: number
-          timeframe: string
+          timeframe?: string
         }
         Update: {
+          closed_at?: string | null
           confidence?: number
           created_at?: string
+          created_by?: string | null
           entry_price?: number
           id?: string
-          pair?: string
-          reasons?: string[]
+          pair_id?: string
+          reasons?: string[] | null
           signal_type?: string
-          status?: string | null
+          status?: string
           stop_loss?: number
           take_profit?: number
           timeframe?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "signals_pair_id_fkey"
+            columns: ["pair_id"]
+            isOneToOne: false
+            referencedRelation: "trading_pairs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trading_pairs: {
+        Row: {
+          category: string
+          created_at: string
+          id: string
+          is_active: boolean
+          is_premium: boolean
+          name: string
+          symbol: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          is_premium?: boolean
+          name: string
+          symbol: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          is_premium?: boolean
+          name?: string
+          symbol?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
         }
         Relationships: []
       }
@@ -66,6 +297,7 @@ export type Database = {
           phone_number: string
           timeframes: string[] | null
           updated_at: string
+          user_id: string | null
         }
         Insert: {
           created_at?: string
@@ -76,6 +308,7 @@ export type Database = {
           phone_number: string
           timeframes?: string[] | null
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
           created_at?: string
@@ -86,6 +319,7 @@ export type Database = {
           phone_number?: string
           timeframes?: string[] | null
           updated_at?: string
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -94,10 +328,21 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_user_plan: {
+        Args: { _user_id: string }
+        Returns: Database["public"]["Enums"]["plan_type"]
+      }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user"
+      plan_type: "free" | "premium"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -224,6 +469,9 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user"],
+      plan_type: ["free", "premium"],
+    },
   },
 } as const
