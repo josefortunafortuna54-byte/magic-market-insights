@@ -1,14 +1,17 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
-import { Sparkles, Mail, Lock, Eye, EyeOff, User, Check } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { Sparkles, Mail, Lock, Eye, EyeOff, User, Check, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Layout } from "@/components/layout/Layout";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Registro() {
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -16,14 +19,55 @@ export default function Registro() {
     confirmPassword: "",
   });
 
+  const { signUp } = useAuth();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implement registration logic
-    console.log("Register:", formData);
+
+    if (formData.password !== formData.confirmPassword) {
+      toast({
+        title: "Erro",
+        description: "As senhas não coincidem",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (formData.password.length < 6) {
+      toast({
+        title: "Erro",
+        description: "A senha deve ter pelo menos 6 caracteres",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsLoading(true);
+
+    const { error } = await signUp(formData.email, formData.password, formData.name);
+
+    if (error) {
+      toast({
+        title: "Erro no registro",
+        description: error.message,
+        variant: "destructive",
+      });
+      setIsLoading(false);
+      return;
+    }
+
+    toast({
+      title: "Conta criada!",
+      description: "Verifique seu email para confirmar o registro.",
+    });
+
+    navigate("/login");
   };
 
   const benefits = [
@@ -131,6 +175,7 @@ export default function Registro() {
                         onChange={handleChange}
                         className="pl-10"
                         required
+                        disabled={isLoading}
                       />
                     </div>
                   </div>
@@ -148,6 +193,7 @@ export default function Registro() {
                         onChange={handleChange}
                         className="pl-10"
                         required
+                        disabled={isLoading}
                       />
                     </div>
                   </div>
@@ -165,6 +211,7 @@ export default function Registro() {
                         onChange={handleChange}
                         className="pl-10 pr-10"
                         required
+                        disabled={isLoading}
                       />
                       <button
                         type="button"
@@ -193,6 +240,7 @@ export default function Registro() {
                         onChange={handleChange}
                         className="pl-10"
                         required
+                        disabled={isLoading}
                       />
                     </div>
                   </div>
@@ -216,8 +264,15 @@ export default function Registro() {
                     </label>
                   </div>
 
-                  <Button type="submit" variant="hero" className="w-full">
-                    Criar Conta Grátis
+                  <Button type="submit" variant="hero" className="w-full" disabled={isLoading}>
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                        Criando conta...
+                      </>
+                    ) : (
+                      "Criar Conta Grátis"
+                    )}
                   </Button>
                 </form>
 

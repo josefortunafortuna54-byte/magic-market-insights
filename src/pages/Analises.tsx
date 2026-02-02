@@ -1,29 +1,34 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Filter, Search } from "lucide-react";
+import { Filter, Search, Loader2 } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
 import { SignalCard } from "@/components/signals/SignalCard";
 import { TradingViewChart } from "@/components/signals/TradingViewChart";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { mockSignals } from "@/data/mockSignals";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useSignals } from "@/hooks/useSignals";
+import { useTradingPairs } from "@/hooks/useTradingPairs";
 
-const timeframes = ["Todos", "M5", "M15", "H1"];
-const signalTypes = ["Todos", "BUY", "SELL", "AGUARDAR"];
+const timeframes = ["Todos", "M5", "M15", "H1", "H4", "D1"];
+const signalTypes = ["Todos", "BUY", "SELL"];
 
 export default function Analises() {
   const [selectedTimeframe, setSelectedTimeframe] = useState("Todos");
   const [selectedType, setSelectedType] = useState("Todos");
   const [selectedPair, setSelectedPair] = useState("EUR/USD");
 
-  const filteredSignals = mockSignals.filter((signal) => {
+  const { data: signals, isLoading: signalsLoading } = useSignals();
+  const { data: pairs, isLoading: pairsLoading } = useTradingPairs();
+
+  const filteredSignals = (signals || []).filter((signal) => {
     if (selectedTimeframe !== "Todos" && signal.timeframe !== selectedTimeframe) return false;
     if (selectedType !== "Todos" && signal.type !== selectedType) return false;
     return true;
   });
 
-  const activeSignals = filteredSignals.filter((s) => s.status === "active" || !s.status);
-  const pairs = [...new Set(mockSignals.map((s) => s.pair))];
+  const activeSignals = filteredSignals.filter((s) => s.status === "active");
+  const pairSymbols = pairs?.map((p) => p.symbol) || ["EUR/USD"];
 
   return (
     <Layout>
@@ -51,16 +56,24 @@ export default function Analises() {
           <div className="mb-6">
             <h2 className="font-display text-xl font-semibold mb-4">Gráfico</h2>
             <div className="flex flex-wrap gap-2 mb-4">
-              {pairs.map((pair) => (
-                <Button
-                  key={pair}
-                  variant={selectedPair === pair ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setSelectedPair(pair)}
-                >
-                  {pair}
-                </Button>
-              ))}
+              {pairsLoading ? (
+                <div className="flex gap-2">
+                  {[1, 2, 3].map((i) => (
+                    <Skeleton key={i} className="h-9 w-20" />
+                  ))}
+                </div>
+              ) : (
+                pairSymbols.map((pair) => (
+                  <Button
+                    key={pair}
+                    variant={selectedPair === pair ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setSelectedPair(pair)}
+                  >
+                    {pair}
+                  </Button>
+                ))
+              )}
             </div>
           </div>
           <TradingViewChart symbol={selectedPair} />
@@ -124,14 +137,27 @@ export default function Analises() {
       {/* Signals Grid */}
       <section className="pb-24">
         <div className="container mx-auto px-4">
-          {activeSignals.length === 0 ? (
+          {signalsLoading ? (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[1, 2, 3, 4, 5, 6].map((i) => (
+                <div key={i} className="glass-card p-6 space-y-4">
+                  <Skeleton className="h-8 w-24" />
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-20 w-full" />
+                  <Skeleton className="h-10 w-full" />
+                </div>
+              ))}
+            </div>
+          ) : activeSignals.length === 0 ? (
             <div className="glass-card p-12 text-center">
               <Search className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
               <h3 className="font-display text-lg font-semibold mb-2">
                 Nenhum sinal encontrado
               </h3>
               <p className="text-sm text-muted-foreground">
-                Tente ajustar os filtros para ver mais sinais.
+                {filteredSignals.length === 0 && (signals?.length ?? 0) > 0
+                  ? "Tente ajustar os filtros para ver mais sinais."
+                  : "Novos sinais serão gerados em breve."}
               </p>
             </div>
           ) : (
