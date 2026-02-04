@@ -10,13 +10,23 @@ import {
   BarChart3,
   Zap,
   Target,
-  Loader2
+  Activity,
+  Clock,
+  RefreshCw
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Layout } from "@/components/layout/Layout";
 import { SignalCard } from "@/components/signals/SignalCard";
+import { MarketTicker } from "@/components/market/MarketTicker";
+import { MarketOverview } from "@/components/market/MarketOverview";
 import { useSignals } from "@/hooks/useSignals";
+import { useMarketPrices } from "@/hooks/useMarketPrices";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import { formatDistanceToNow } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
 const features = [
   {
@@ -41,24 +51,69 @@ const features = [
   },
 ];
 
-const stats = [
-  { value: "85%+", label: "Taxa de Acerto" },
-  { value: "1:2.5", label: "RR Médio" },
-  { value: "24/7", label: "Monitoramento" },
-  { value: "15+", label: "Pares Forex" },
-];
-
 export default function Index() {
-  const { data: signals, isLoading, error } = useSignals("active");
+  const { data: signals, isLoading: signalsLoading } = useSignals("active");
+  const { data: prices, isLoading: pricesLoading, refetch: refetchPrices } = useMarketPrices();
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
+  const { toast } = useToast();
+
   const featuredSignals = signals?.slice(0, 3) || [];
+
+  // Calculate live stats from real data
+  const gainers = prices?.filter((p) => (p.change_percent ?? 0) > 0).length ?? 0;
+  const losers = prices?.filter((p) => (p.change_percent ?? 0) < 0).length ?? 0;
+  const totalPairs = prices?.length ?? 0;
+  const activeSignals = signals?.length ?? 0;
+
+  const stats = [
+    { value: activeSignals.toString(), label: "Sinais Ativos", icon: Zap, color: "text-primary" },
+    { value: totalPairs.toString(), label: "Pares Monitorados", icon: Activity, color: "text-warning" },
+    { value: gainers.toString(), label: "Em Alta", icon: TrendingUp, color: "text-success" },
+    { value: losers.toString(), label: "Em Baixa", icon: Target, color: "text-destructive" },
+  ];
+
+  // Function to fetch fresh market prices
+  const refreshMarketData = async () => {
+    setIsRefreshing(true);
+    try {
+      const { error } = await supabase.functions.invoke("fetch-market-prices");
+      if (error) throw error;
+      await refetchPrices();
+      setLastUpdate(new Date());
+      toast({
+        title: "Preços atualizados",
+        description: "Os dados de mercado foram atualizados com sucesso.",
+      });
+    } catch (error) {
+      console.error("Error refreshing prices:", error);
+      toast({
+        title: "Erro ao atualizar",
+        description: "Não foi possível atualizar os preços.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
+  // Update last update time from prices data
+  useEffect(() => {
+    if (prices && prices.length > 0) {
+      const latestUpdate = prices.reduce((latest, p) => {
+        const pDate = new Date(p.updated_at);
+        return pDate > latest ? pDate : latest;
+      }, new Date(0));
+      setLastUpdate(latestUpdate);
+    }
+  }, [prices]);
 
   return (
     <Layout>
       {/* Hero Section */}
-      <section className="relative min-h-[90vh] flex items-center overflow-hidden">
+      <section className="relative min-h-[70vh] flex items-center overflow-hidden trading-grid">
         {/* Background Effects */}
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/20 via-background to-background" />
-        <div className="absolute inset-0 bg-grid-pattern opacity-[0.02]" />
         
         {/* Floating Elements */}
         <motion.div
@@ -74,15 +129,23 @@ export default function Index() {
 
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-4xl mx-auto text-center">
-            {/* Badge */}
+            {/* Live Badge */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-8"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-success/10 border border-success/20 mb-8"
             >
-              <Sparkles className="h-4 w-4 text-primary" />
-              <span className="text-sm font-medium">Análise Inteligente de Forex</span>
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-success"></span>
+              </span>
+              <span className="text-sm font-medium text-success">Mercado ao Vivo</span>
+              {lastUpdate && (
+                <span className="text-xs text-muted-foreground">
+                  • Atualizado {formatDistanceToNow(lastUpdate, { addSuffix: true, locale: ptBR })}
+                </span>
+              )}
             </motion.div>
 
             {/* Headline */}
@@ -93,7 +156,7 @@ export default function Index() {
               className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-6"
             >
               Análise inteligente.{" "}
-              <span className="gradient-text">Entradas estratégicas.</span>
+              <span className="gradient-text">Dados em tempo real.</span>
             </motion.h1>
 
             {/* Subtitle */}
@@ -103,8 +166,8 @@ export default function Index() {
               transition={{ delay: 0.3 }}
               className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-10"
             >
-              Receba análises técnicas detalhadas com pontos de entrada, 
-              stop loss e take profit. Potenciado por IA e indicadores avançados.
+              Monitore o mercado Forex em tempo real com preços atualizados, 
+              sinais de IA e análises técnicas avançadas.
             </motion.p>
 
             {/* CTAs */}
@@ -120,31 +183,69 @@ export default function Index() {
                   Ver Análises
                 </Button>
               </Link>
-              <Link to="/planos">
-                <Button variant="outline" size="xl">
-                  Conhecer Planos
-                  <ChevronRight className="h-5 w-5" />
-                </Button>
-              </Link>
+              <Button 
+                variant="outline" 
+                size="xl"
+                onClick={refreshMarketData}
+                disabled={isRefreshing}
+              >
+                <RefreshCw className={`h-5 w-5 ${isRefreshing ? "animate-spin" : ""}`} />
+                {isRefreshing ? "Atualizando..." : "Atualizar Preços"}
+              </Button>
             </motion.div>
 
-            {/* Stats */}
+            {/* Live Stats */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
-              className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-16 pt-8 border-t border-border/50"
+              className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-16 pt-8 border-t border-border/50"
             >
-              {stats.map((stat, i) => (
-                <div key={i} className="text-center">
-                  <p className="font-display text-2xl sm:text-3xl font-bold gradient-text">
-                    {stat.value}
-                  </p>
-                  <p className="text-sm text-muted-foreground mt-1">{stat.label}</p>
-                </div>
-              ))}
+              {stats.map((stat, i) => {
+                const Icon = stat.icon;
+                return (
+                  <div key={i} className="glass-card-trading p-4 text-center">
+                    <Icon className={`h-5 w-5 ${stat.color} mx-auto mb-2`} />
+                    {pricesLoading || signalsLoading ? (
+                      <Skeleton className="h-8 w-16 mx-auto mb-1" />
+                    ) : (
+                      <p className={`font-display text-2xl sm:text-3xl font-bold ${stat.color}`}>
+                        {stat.value}
+                      </p>
+                    )}
+                    <p className="text-xs text-muted-foreground mt-1">{stat.label}</p>
+                  </div>
+                );
+              })}
             </motion.div>
           </div>
+        </div>
+      </section>
+
+      {/* Live Market Section */}
+      <section className="py-16 relative">
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-card/20 to-transparent" />
+        <div className="container mx-auto px-4 relative z-10">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+          >
+            <MarketTicker />
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Market Overview */}
+      <section className="py-8">
+        <div className="container mx-auto px-4">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+          >
+            <MarketOverview />
+          </motion.div>
         </div>
       </section>
 
@@ -219,7 +320,7 @@ export default function Index() {
             </Link>
           </motion.div>
 
-          {isLoading ? (
+          {signalsLoading ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[1, 2, 3].map((i) => (
                 <div key={i} className="glass-card p-6 space-y-4">

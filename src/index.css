@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 @layer base {
   :root {
@@ -42,18 +42,25 @@
 
     --radius: 0.75rem;
 
+    /* Trading specific colors */
+    --buy: 142 71% 45%;
+    --sell: 0 84% 60%;
+    --hold: 38 92% 50%;
+
     /* Custom gradients */
     --gradient-primary: linear-gradient(135deg, hsl(263 70% 50%) 0%, hsl(280 80% 60%) 100%);
     --gradient-success: linear-gradient(135deg, hsl(142 71% 45%) 0%, hsl(160 84% 39%) 100%);
     --gradient-danger: linear-gradient(135deg, hsl(0 84% 60%) 0%, hsl(15 90% 55%) 100%);
     --gradient-card: linear-gradient(135deg, hsl(222 47% 8%) 0%, hsl(222 47% 5%) 100%);
     --gradient-hero: linear-gradient(180deg, hsl(222 47% 3%) 0%, hsl(263 30% 8%) 50%, hsl(222 47% 3%) 100%);
+    --gradient-trading: linear-gradient(135deg, hsl(222 47% 8%) 0%, hsl(222 47% 4%) 50%, hsl(263 20% 6%) 100%);
 
     /* Shadows */
     --shadow-glow-primary: 0 0 40px hsl(263 70% 50% / 0.3);
     --shadow-glow-success: 0 0 30px hsl(142 71% 45% / 0.3);
     --shadow-glow-danger: 0 0 30px hsl(0 84% 60% / 0.3);
     --shadow-card: 0 4px 24px hsl(0 0% 0% / 0.4);
+    --shadow-trading: 0 8px 32px hsl(0 0% 0% / 0.5), inset 0 1px 0 hsl(0 0% 100% / 0.05);
 
     --sidebar-background: 222 47% 5%;
     --sidebar-foreground: 210 40% 98%;
@@ -79,17 +86,29 @@
   body {
     @apply bg-background text-foreground font-sans antialiased;
     font-family: 'Inter', sans-serif;
+    background-image: var(--gradient-trading);
+    background-attachment: fixed;
   }
 
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Space Grotesk', sans-serif;
+  }
+
+  .font-mono {
+    font-family: 'JetBrains Mono', monospace;
   }
 }
 
 @layer components {
   .glass-card {
     @apply bg-card/50 backdrop-blur-xl border border-border/50 rounded-xl;
-    box-shadow: var(--shadow-card);
+    box-shadow: var(--shadow-trading);
+  }
+
+  .glass-card-trading {
+    @apply bg-card/40 backdrop-blur-2xl border border-border/30 rounded-xl;
+    box-shadow: var(--shadow-trading);
+    background-image: linear-gradient(135deg, hsl(var(--card) / 0.6) 0%, hsl(var(--card) / 0.3) 100%);
   }
 
   .gradient-text {
@@ -120,10 +139,107 @@
   .signal-wait {
     @apply text-warning border-warning/30 bg-warning/10;
   }
+
+  /* Trading-specific components */
+  .price-up {
+    @apply text-success;
+    text-shadow: 0 0 10px hsl(var(--success) / 0.5);
+  }
+
+  .price-down {
+    @apply text-destructive;
+    text-shadow: 0 0 10px hsl(var(--destructive) / 0.5);
+  }
+
+  .market-pulse {
+    animation: market-pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes market-pulse {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.6;
+    }
+  }
+
+  .trading-grid {
+    background-image: 
+      linear-gradient(to right, hsl(var(--border) / 0.1) 1px, transparent 1px),
+      linear-gradient(to bottom, hsl(var(--border) / 0.1) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  /* Animated border */
+  .animated-border {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .animated-border::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    background: linear-gradient(90deg, transparent, hsl(var(--primary)), transparent);
+    animation: border-rotate 3s linear infinite;
+    z-index: -1;
+    border-radius: inherit;
+  }
+
+  @keyframes border-rotate {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+
+  /* Scanline effect */
+  .scanlines::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      hsl(0 0% 0% / 0.03) 2px,
+      hsl(0 0% 0% / 0.03) 4px
+    );
+    pointer-events: none;
+  }
 }
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+
+  .animate-price-flash-up {
+    animation: flash-up 0.5s ease-out;
+  }
+
+  .animate-price-flash-down {
+    animation: flash-down 0.5s ease-out;
+  }
+
+  @keyframes flash-up {
+    0% {
+      background-color: hsl(var(--success) / 0.3);
+    }
+    100% {
+      background-color: transparent;
+    }
+  }
+
+  @keyframes flash-down {
+    0% {
+      background-color: hsl(var(--destructive) / 0.3);
+    }
+    100% {
+      background-color: transparent;
+    }
   }
 }
