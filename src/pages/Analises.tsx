@@ -105,53 +105,6 @@ export default function Analises() {
         </div>
       </section>
 
-      {/* Live Prices Banner */}
-      <section className="pb-8">
-        <div className="container mx-auto px-4">
-          <div className="glass-card-trading p-4 overflow-x-auto">
-            <div className="flex gap-6 min-w-max">
-              {pricesLoading ? (
-                Array(6).fill(0).map((_, i) => (
-                  <div key={i} className="flex items-center gap-3">
-                    <Skeleton className="h-8 w-20" />
-                    <Skeleton className="h-6 w-24" />
-                  </div>
-                ))
-              ) : prices && prices.length > 0 ? (
-                prices.map((price) => {
-                  const isPositive = (price.change_percent ?? 0) >= 0;
-                  return (
-                    <button
-                      key={price.id}
-                      onClick={() => setSelectedPair(price.symbol)}
-                      className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-all ${
-                        selectedPair === price.symbol 
-                          ? "bg-primary/20 border border-primary/30" 
-                          : "hover:bg-secondary/50"
-                      }`}
-                    >
-                      <div className="text-left">
-                        <p className="font-medium text-sm">{price.symbol}</p>
-                        <p className="font-mono text-xs text-muted-foreground">
-                          {price.price < 100 ? price.price.toFixed(5) : price.price.toFixed(2)}
-                        </p>
-                      </div>
-                      <div className={`flex items-center gap-1 ${isPositive ? "text-success" : "text-destructive"}`}>
-                        {isPositive ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
-                        <span className="text-xs font-medium">
-                          {isPositive ? "+" : ""}{(price.change_percent ?? 0).toFixed(2)}%
-                        </span>
-                      </div>
-                    </button>
-                  );
-                })
-              ) : (
-                <p className="text-muted-foreground text-sm">Nenhum preço disponível</p>
-              )}
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* Chart Section */}
       <section className="pb-8">
