@@ -8,6 +8,8 @@ import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import Index from "./pages/Index";
 import Analises from "./pages/Analises";
 import Historico from "./pages/Historico";
+import Resultados from "./pages/Resultados";
+import IATrader from "./pages/IATrader";
 import Planos from "./pages/Planos";
 import Login from "./pages/Login";
 import Registro from "./pages/Registro";
@@ -28,6 +30,8 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/analises" element={<Analises />} />
             <Route path="/historico" element={<Historico />} />
+            <Route path="/resultados" element={<Resultados />} />
+            <Route path="/ia-trader" element={<IATrader />} />
             <Route path="/planos" element={<Planos />} />
             <Route path="/login" element={<Login />} />
             <Route path="/registro" element={<Registro />} />
