@@ -236,6 +236,41 @@ export type Database = {
           },
         ]
       }
+      trades_history: {
+        Row: {
+          closed_at: string
+          created_at: string
+          id: string
+          profit_percent: number
+          result: string
+          signal_id: string
+        }
+        Insert: {
+          closed_at?: string
+          created_at?: string
+          id?: string
+          profit_percent?: number
+          result: string
+          signal_id: string
+        }
+        Update: {
+          closed_at?: string
+          created_at?: string
+          id?: string
+          profit_percent?: number
+          result?: string
+          signal_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trades_history_signal_id_fkey"
+            columns: ["signal_id"]
+            isOneToOne: false
+            referencedRelation: "signals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       trading_pairs: {
         Row: {
           category: string
