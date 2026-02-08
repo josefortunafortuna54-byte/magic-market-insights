@@ -7,21 +7,92 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-interface TwelveDataQuote {
-  symbol: string;
-  name?: string;
-  exchange?: string;
-  datetime?: string;
-  timestamp?: number;
-  open?: string;
-  high?: string;
-  low?: string;
-  close?: string;
-  volume?: string;
-  previous_close?: string;
-  change?: string;
-  percent_change?: string;
-  is_market_open?: boolean;
+// Binance API for crypto pairs
+async function fetchBinancePrice(symbol: string): Promise<{ price: number; change: number; high: number; low: number } | null> {
+  try {
+    const binanceSymbol = symbol.replace("/", "").replace("XAU", "PAXG").replace("XAG", ""); // Map symbols
+    if (!binanceSymbol || binanceSymbol.includes("XAG")) return null;
+
+    const url = `https://api.binance.com/api/v3/ticker/24hr?symbol=${binanceSymbol}`;
+    const response = await fetch(url);
+    if (!response.ok) return null;
+
+    const data = await response.json();
+    return {
+      price: parseFloat(data.lastPrice),
+      change: parseFloat(data.priceChangePercent),
+      high: parseFloat(data.highPrice),
+      low: parseFloat(data.lowPrice),
+    };
+  } catch (e) {
+    console.error(`Binance error for ${symbol}:`, e);
+    return null;
+  }
+}
+
+// Free forex API via Frankfurter (ECB rates)
+async function fetchForexPrice(symbol: string): Promise<{ price: number; change: number; high: number; low: number } | null> {
+  try {
+    const [base, quote] = symbol.split("/");
+    if (!base || !quote) return null;
+
+    // Frankfurter only supports fiat currencies
+    const fiatCurrencies = ["EUR", "USD", "GBP", "JPY", "CHF", "AUD", "CAD", "NZD", "SEK", "NOK", "DKK"];
+    if (!fiatCurrencies.includes(base) || !fiatCurrencies.includes(quote)) return null;
+
+    const url = `https://api.frankfurter.dev/v1/latest?base=${base}&symbols=${quote}`;
+    const response = await fetch(url);
+    if (!response.ok) return null;
+
+    const data = await response.json();
+    const price = data.rates?.[quote];
+    if (!price) return null;
+
+    // Get yesterday's rate for change calculation
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayStr = yesterday.toISOString().split("T")[0];
+
+    let changePercent = 0;
+    try {
+      const histUrl = `https://api.frankfurter.dev/v1/${yesterdayStr}?base=${base}&symbols=${quote}`;
+      const histResponse = await fetch(histUrl);
+      if (histResponse.ok) {
+        const histData = await histResponse.json();
+        const yesterdayPrice = histData.rates?.[quote];
+        if (yesterdayPrice) {
+          changePercent = ((price - yesterdayPrice) / yesterdayPrice) * 100;
+        }
+      }
+    } catch {
+      // Ignore history errors
+    }
+
+    return {
+      price,
+      change: changePercent,
+      high: price * 1.001,
+      low: price * 0.999,
+    };
+  } catch (e) {
+    console.error(`Forex error for ${symbol}:`, e);
+    return null;
+  }
+}
+
+// Map symbols to the right data source
+function getDataSource(symbol: string): "binance" | "forex" | "twelvedata" {
+  const cryptoPairs = ["BTC/USD", "ETH/USD", "BTC/USDT", "ETH/USDT"];
+  const binanceMapped = symbol.replace("BTC/USD", "BTCUSDT").replace("ETH/USD", "ETHUSDT");
+  
+  if (cryptoPairs.some(p => symbol.startsWith(p.split("/")[0]) && (symbol.includes("USD") || symbol.includes("USDT")))) {
+    return "binance";
+  }
+
+  const forexPairs = ["EUR/USD", "GBP/USD", "USD/JPY", "USD/CHF", "AUD/USD", "USD/CAD", "NZD/USD", "EUR/GBP", "EUR/JPY", "GBP/JPY"];
+  if (forexPairs.includes(symbol)) return "forex";
+
+  return "twelvedata"; // Fallback for XAU, XAG, etc.
 }
 
 serve(async (req) => {
@@ -35,7 +106,6 @@ serve(async (req) => {
     const twelveDataApiKey = Deno.env.get("TWELVE_DATA_API_KEY");
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Get all active trading pairs
     const { data: pairs, error: pairsError } = await supabase
       .from("trading_pairs")
       .select("id, symbol")
@@ -49,61 +119,77 @@ serve(async (req) => {
       );
     }
 
-    const results: { symbol: string; status: string; error?: string }[] = [];
+    const results: { symbol: string; status: string; source?: string; error?: string }[] = [];
 
-    // Process each pair
     for (const pair of pairs) {
       try {
-        // Format symbol for API (EUR/USD -> EURUSD)
-        const apiSymbol = pair.symbol.replace("/", "");
-        
-        let price: number;
-        let changePercent: number;
-        let high24h: number | null = null;
-        let low24h: number | null = null;
+        const source = getDataSource(pair.symbol);
+        let priceData: { price: number; change: number; high: number; low: number } | null = null;
 
-        // Try to fetch from Twelve Data API if key exists
-        if (twelveDataApiKey) {
-          const apiUrl = `https://api.twelvedata.com/quote?symbol=${apiSymbol}&apikey=${twelveDataApiKey}`;
-          const response = await fetch(apiUrl);
-          const data: TwelveDataQuote = await response.json();
-
-          if (data.close) {
-            price = parseFloat(data.close);
-            changePercent = parseFloat(data.percent_change || "0");
-            high24h = data.high ? parseFloat(data.high) : null;
-            low24h = data.low ? parseFloat(data.low) : null;
-          } else {
-            // API returned error or no data, use simulated data
-            console.log(`No data from API for ${pair.symbol}, using simulation`);
-            const basePrice = getBasePrice(pair.symbol);
-            const variation = (Math.random() - 0.5) * 0.002;
-            price = basePrice * (1 + variation);
-            changePercent = variation * 100;
-            high24h = price * 1.002;
-            low24h = price * 0.998;
+        if (source === "binance") {
+          // Map to Binance symbol
+          const binanceSymbol = pair.symbol === "BTC/USD" ? "BTCUSDT" : pair.symbol === "ETH/USD" ? "ETHUSDT" : pair.symbol.replace("/", "");
+          const url = `https://api.binance.com/api/v3/ticker/24hr?symbol=${binanceSymbol}`;
+          try {
+            const response = await fetch(url);
+            if (response.ok) {
+              const data = await response.json();
+              priceData = {
+                price: parseFloat(data.lastPrice),
+                change: parseFloat(data.priceChangePercent),
+                high: parseFloat(data.highPrice),
+                low: parseFloat(data.lowPrice),
+              };
+            }
+          } catch (e) {
+            console.error(`Binance error for ${pair.symbol}:`, e);
           }
-        } else {
-          // No API key, use realistic simulated prices
-          const basePrice = getBasePrice(pair.symbol);
-          const variation = (Math.random() - 0.5) * 0.002;
-          price = basePrice * (1 + variation);
-          changePercent = variation * 100;
-          high24h = price * 1.002;
-          low24h = price * 0.998;
+        } else if (source === "forex") {
+          priceData = await fetchForexPrice(pair.symbol);
         }
 
-        // Upsert the price in database
+        // Try Twelve Data as fallback for commodities or if primary failed
+        if (!priceData && twelveDataApiKey) {
+          const apiSymbol = pair.symbol.replace("/", "");
+          try {
+            const apiUrl = `https://api.twelvedata.com/quote?symbol=${apiSymbol}&apikey=${twelveDataApiKey}`;
+            const response = await fetch(apiUrl);
+            const data = await response.json();
+            if (data.close) {
+              priceData = {
+                price: parseFloat(data.close),
+                change: parseFloat(data.percent_change || "0"),
+                high: data.high ? parseFloat(data.high) : parseFloat(data.close) * 1.002,
+                low: data.low ? parseFloat(data.low) : parseFloat(data.close) * 0.998,
+              };
+            }
+          } catch (e) {
+            console.error(`TwelveData error for ${pair.symbol}:`, e);
+          }
+        }
+
+        // Final fallback: realistic simulation based on known base prices
+        if (!priceData) {
+          const basePrice = getBasePrice(pair.symbol);
+          const variation = (Math.random() - 0.5) * 0.002;
+          priceData = {
+            price: basePrice * (1 + variation),
+            change: variation * 100,
+            high: basePrice * 1.002,
+            low: basePrice * 0.998,
+          };
+        }
+
         const { error: upsertError } = await supabase
           .from("market_prices")
           .upsert(
             {
               pair_id: pair.id,
               symbol: pair.symbol,
-              price,
-              change_percent: changePercent,
-              high_24h: high24h,
-              low_24h: low24h,
+              price: priceData.price,
+              change_percent: priceData.change,
+              high_24h: priceData.high,
+              low_24h: priceData.low,
               updated_at: new Date().toISOString(),
             },
             { onConflict: "pair_id" }
@@ -112,7 +198,7 @@ serve(async (req) => {
         if (upsertError) {
           results.push({ symbol: pair.symbol, status: "error", error: upsertError.message });
         } else {
-          results.push({ symbol: pair.symbol, status: "updated" });
+          results.push({ symbol: pair.symbol, status: "updated", source });
         }
       } catch (pairError) {
         const errorMessage = pairError instanceof Error ? pairError.message : "Unknown error";
@@ -134,7 +220,6 @@ serve(async (req) => {
   }
 });
 
-// Realistic base prices for common forex pairs
 function getBasePrice(symbol: string): number {
   const basePrices: Record<string, number> = {
     "EUR/USD": 1.0850,
@@ -149,8 +234,8 @@ function getBasePrice(symbol: string): number {
     "GBP/JPY": 189.10,
     "XAU/USD": 2025.50,
     "XAG/USD": 23.50,
-    "BTC/USD": 42500.00,
-    "ETH/USD": 2250.00,
+    "BTC/USD": 97500.00,
+    "ETH/USD": 2750.00,
   };
   return basePrices[symbol] || 1.0000;
 }

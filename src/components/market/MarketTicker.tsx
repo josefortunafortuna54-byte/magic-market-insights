@@ -53,11 +53,10 @@ function PriceCard({ symbol, price, changePercent, high24h, low24h, updatedAt, i
         </div>
         <div>
           <h3 className="font-display font-bold text-sm">{symbol}</h3>
-          <p className="text-[10px] text-muted-foreground">Forex</p>
+          <p className="text-[10px] text-muted-foreground">{symbol.includes("BTC") || symbol.includes("ETH") ? "Crypto" : symbol.includes("XAU") || symbol.includes("XAG") ? "Metal" : "Forex"}</p>
         </div>
       </div>
 
-      {/* Price */}
       <div className="mb-3">
         <motion.p
           key={price}
@@ -65,7 +64,7 @@ function PriceCard({ symbol, price, changePercent, high24h, low24h, updatedAt, i
           animate={{ scale: 1 }}
           className="font-mono text-xl font-bold"
         >
-          {price.toFixed(5)}
+          {price >= 1000 ? price.toFixed(2) : price < 10 ? price.toFixed(4) : price.toFixed(5)}
         </motion.p>
         <div className={`flex items-center gap-1 ${isPositive ? "text-success" : "text-destructive"}`}>
           {isPositive ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
@@ -80,11 +79,11 @@ function PriceCard({ symbol, price, changePercent, high24h, low24h, updatedAt, i
         <div className="grid grid-cols-2 gap-2 text-xs mb-3">
           <div className="bg-success/10 rounded px-2 py-1">
             <span className="text-muted-foreground">H: </span>
-            <span className="font-mono text-success">{high24h.toFixed(5)}</span>
+            <span className="font-mono text-success">{high24h >= 1000 ? high24h.toFixed(2) : high24h.toFixed(5)}</span>
           </div>
           <div className="bg-destructive/10 rounded px-2 py-1">
             <span className="text-muted-foreground">L: </span>
-            <span className="font-mono text-destructive">{low24h.toFixed(5)}</span>
+            <span className="font-mono text-destructive">{low24h >= 1000 ? low24h.toFixed(2) : low24h.toFixed(5)}</span>
           </div>
         </div>
       )}

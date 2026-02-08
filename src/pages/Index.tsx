@@ -237,7 +237,7 @@ export default function Index() {
               <Brain className="h-3 w-3 mr-1" /> Tecnologia
             </Badge>
             <h2 className="font-display text-3xl sm:text-4xl font-bold mb-4">
-              Porquê <span className="gradient-text">Magic Market</span>?
+              Porquê <span className="gradient-text">Magic Trader</span>?
             </h2>
             <p className="text-muted-foreground max-w-xl mx-auto">
               Combinamos IA avançada com análise técnica profissional para entregar sinais de alta precisão.
