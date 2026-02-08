@@ -31,7 +31,7 @@ export function useMarketPrices() {
 
       return data as MarketPrice[];
     },
-    refetchInterval: 10000, // Refetch every 10 seconds as backup
+    refetchInterval: 15000, // Refetch every 15 seconds for near-real-time
   });
 
   // Real-time subscription for instant updates

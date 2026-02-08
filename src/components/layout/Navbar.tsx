@@ -44,9 +44,9 @@ export function Navbar() {
             </div>
             <div className="flex flex-col">
               <span className="font-brand text-base font-bold tracking-wider leading-tight">
-                MAGIC MARKET
+                THE MAGIC <span className="gradient-text-accent">TRADER</span>
               </span>
-              <span className="text-[10px] text-muted-foreground tracking-[0.2em] uppercase">Insights</span>
+              <span className="text-[10px] text-muted-foreground tracking-[0.2em] uppercase">AI Signals</span>
             </div>
           </Link>
 
