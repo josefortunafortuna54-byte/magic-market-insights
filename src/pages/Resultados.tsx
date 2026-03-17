@@ -6,42 +6,108 @@ import { EquityCurve } from "@/components/dashboard/EquityCurve";
 import { useSignals } from "@/hooks/useSignals";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar, Cell } from "recharts";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
-// Simulated monthly performance
-const monthlyPerformance = [
-  { month: "Set", roi: 22, trades: 45, winrate: 78 },
-  { month: "Out", roi: 31, trades: 52, winrate: 82 },
-  { month: "Nov", roi: 18, trades: 38, winrate: 71 },
-  { month: "Dez", roi: 42, trades: 61, winrate: 85 },
-  { month: "Jan", roi: 37, trades: 55, winrate: 83 },
-  { month: "Fev", roi: 28, trades: 47, winrate: 79 },
-];
+function useTradesHistory() {
+  return useQuery({
+    queryKey: ["trades-history-full"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("trades_history")
+        .select("*")
+        .order("closed_at", { ascending: true });
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+}
 
-const bankSimulation = [
-  { month: "Início", value: 1000 },
-  { month: "Mês 1", value: 1220 },
-  { month: "Mês 2", value: 1598 },
-  { month: "Mês 3", value: 1886 },
-  { month: "Mês 4", value: 2678 },
-  { month: "Mês 5", value: 3669 },
-  { month: "Mês 6", value: 4696 },
-];
+function computeMonthlyPerformance(trades: { profit_percent: number; result: string; closed_at: string }[]) {
+  const byMonth: Record<string, { wins: number; losses: number; totalProfit: number }> = {};
+
+  for (const t of trades) {
+    const d = new Date(t.closed_at);
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+    if (!byMonth[key]) byMonth[key] = { wins: 0, losses: 0, totalProfit: 0 };
+    byMonth[key].totalProfit += t.profit_percent;
+    if (t.result === "win") byMonth[key].wins++;
+    else byMonth[key].losses++;
+  }
+
+  const months = Object.keys(byMonth).sort();
+  return months.map((key) => {
+    const m = byMonth[key];
+    const total = m.wins + m.losses;
+    const [, mm] = key.split("-");
+    const monthNames = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
+    return {
+      month: monthNames[parseInt(mm) - 1],
+      roi: parseFloat(m.totalProfit.toFixed(1)),
+      trades: total,
+      winrate: total > 0 ? parseFloat(((m.wins / total) * 100).toFixed(1)) : 0,
+    };
+  });
+}
+
+function computeBankSimulation(trades: { profit_percent: number; closed_at: string }[]) {
+  const startingBalance = 1000;
+  const riskPercent = 0.02;
+  let balance = startingBalance;
+  const points = [{ label: "Início", value: startingBalance }];
+
+  const byMonth: Record<string, number[]> = {};
+  for (const t of trades) {
+    const d = new Date(t.closed_at);
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+    if (!byMonth[key]) byMonth[key] = [];
+    byMonth[key].push(t.profit_percent);
+  }
+
+  const months = Object.keys(byMonth).sort();
+  const monthNames = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
+
+  for (const key of months) {
+    for (const pct of byMonth[key]) {
+      const riskAmount = balance * riskPercent;
+      balance += riskAmount * (pct / 100) * 50; // simplified leverage effect
+    }
+    const [, mm] = key.split("-");
+    points.push({ label: monthNames[parseInt(mm) - 1], value: Math.round(balance) });
+  }
+
+  return points;
+}
 
 export default function Resultados() {
-  const { data: allSignals, isLoading } = useSignals();
+  const { data: allSignals, isLoading: signalsLoading } = useSignals();
+  const { data: trades, isLoading: tradesLoading } = useTradesHistory();
+
+  const isLoading = signalsLoading || tradesLoading;
 
   const wonSignals = allSignals?.filter(s => s.status === "tp").length ?? 0;
   const lostSignals = allSignals?.filter(s => s.status === "sl").length ?? 0;
   const totalClosed = wonSignals + lostSignals;
-  const winRate = totalClosed > 0 ? ((wonSignals / totalClosed) * 100).toFixed(1) : "82.5";
+  const winRate = totalClosed > 0 ? ((wonSignals / totalClosed) * 100).toFixed(1) : "0.0";
+
+  const monthlyData = trades ? computeMonthlyPerformance(trades) : [];
+  const bankData = trades ? computeBankSimulation(trades) : [{ label: "Início", value: 1000 }];
+
+  const avgMonthlyROI = monthlyData.length > 0
+    ? (monthlyData.reduce((s, m) => s + m.roi, 0) / monthlyData.length).toFixed(1)
+    : "0.0";
+
+  const totalGrowth = bankData.length > 1
+    ? (((bankData[bankData.length - 1].value - bankData[0].value) / bankData[0].value) * 100).toFixed(1)
+    : "0.0";
 
   const stats = [
     { icon: Trophy, label: "Win Rate", value: `${winRate}%`, color: "text-primary" },
     { icon: Target, label: "Sinais Ganhos", value: wonSignals.toString(), color: "text-success" },
     { icon: XCircle, label: "Sinais Perdidos", value: lostSignals.toString(), color: "text-destructive" },
-    { icon: DollarSign, label: "ROI Médio/Mês", value: "+29.7%", color: "text-primary" },
+    { icon: DollarSign, label: "ROI Médio/Mês", value: `${avgMonthlyROI}%`, color: "text-primary" },
     { icon: BarChart3, label: "Total Sinais", value: (allSignals?.length ?? 0).toString(), color: "text-accent" },
-    { icon: Calendar, label: "Meses Ativos", value: "6", color: "text-warning" },
+    { icon: Calendar, label: "Meses Ativos", value: monthlyData.length.toString(), color: "text-warning" },
   ];
 
   return (
@@ -57,7 +123,7 @@ export default function Resultados() {
               Performance <span className="gradient-text">Comprovada</span>
             </h1>
             <p className="text-muted-foreground text-lg">
-              Transparência total. Todos os sinais são registados e verificáveis.
+              Transparência total. Todos os dados vêm diretamente do banco de dados.
             </p>
           </motion.div>
         </div>
@@ -93,7 +159,7 @@ export default function Resultados() {
         </div>
       </section>
 
-      {/* Monthly ROI */}
+      {/* Monthly ROI - Real Data */}
       <section className="pb-8">
         <div className="container mx-auto px-4">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="glass-card p-6">
@@ -103,34 +169,43 @@ export default function Resultados() {
               </div>
               <div>
                 <h3 className="font-display font-bold">ROI Mensal</h3>
-                <p className="text-xs text-muted-foreground">Performance mês a mês</p>
+                <p className="text-xs text-muted-foreground">Performance real mês a mês • Dados do banco</p>
               </div>
             </div>
             <div className="h-64">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={monthlyPerformance}>
-                  <XAxis dataKey="month" tick={{ fill: 'hsl(220 15% 55%)', fontSize: 11 }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fill: 'hsl(220 15% 55%)', fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={(v) => `${v}%`} />
-                  <Tooltip
-                    contentStyle={{ backgroundColor: 'hsl(230 25% 8%)', border: '1px solid hsl(230 20% 15%)', borderRadius: '12px', fontSize: '12px', color: 'hsl(210 40% 98%)' }}
-                    formatter={(value: number, name: string) => {
-                      if (name === 'roi') return [`${value}%`, 'ROI'];
-                      return [value, name];
-                    }}
-                  />
-                  <Bar dataKey="roi" radius={[6, 6, 0, 0]}>
-                    {monthlyPerformance.map((entry, i) => (
-                      <Cell key={i} fill={entry.roi >= 30 ? 'hsl(160 84% 39%)' : 'hsl(263 70% 55%)'} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
+              {isLoading ? (
+                <Skeleton className="h-full w-full" />
+              ) : monthlyData.length === 0 ? (
+                <div className="h-full flex items-center justify-center text-muted-foreground text-sm">
+                  Nenhum trade fechado ainda. Os dados aparecerão aqui automaticamente.
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={monthlyData}>
+                    <XAxis dataKey="month" tick={{ fill: 'hsl(220 15% 55%)', fontSize: 11 }} axisLine={false} tickLine={false} />
+                    <YAxis tick={{ fill: 'hsl(220 15% 55%)', fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={(v) => `${v}%`} />
+                    <Tooltip
+                      contentStyle={{ backgroundColor: 'hsl(230 25% 8%)', border: '1px solid hsl(230 20% 15%)', borderRadius: '12px', fontSize: '12px', color: 'hsl(210 40% 98%)' }}
+                      formatter={(value: number, name: string) => {
+                        if (name === 'roi') return [`${value}%`, 'ROI'];
+                        if (name === 'winrate') return [`${value}%`, 'Win Rate'];
+                        return [value, name];
+                      }}
+                    />
+                    <Bar dataKey="roi" radius={[6, 6, 0, 0]}>
+                      {monthlyData.map((entry, i) => (
+                        <Cell key={i} fill={entry.roi >= 0 ? 'hsl(160 84% 39%)' : 'hsl(0 72% 51%)'} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
             </div>
           </motion.div>
         </div>
       </section>
 
-      {/* Bank Simulation */}
+      {/* Bank Simulation - Real Data */}
       <section className="pb-8">
         <div className="container mx-auto px-4">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="glass-card p-6">
@@ -141,32 +216,48 @@ export default function Resultados() {
                 </div>
                 <div>
                   <h3 className="font-display font-bold">Simulação de Banca</h3>
-                  <p className="text-xs text-muted-foreground">Começando com $1.000 • Risco 2% por trade</p>
+                  <p className="text-xs text-muted-foreground">Começando com $1.000 • Risco 2% por trade • Dados reais</p>
                 </div>
               </div>
               <div className="text-right">
-                <p className="font-display text-2xl font-bold gradient-text-gold">+369.6%</p>
-                <p className="text-xs text-muted-foreground">em 6 meses</p>
+                {isLoading ? (
+                  <Skeleton className="h-8 w-20" />
+                ) : (
+                  <>
+                    <p className={`font-display text-2xl font-bold ${Number(totalGrowth) >= 0 ? "gradient-text-gold" : "text-destructive"}`}>
+                      {Number(totalGrowth) >= 0 ? "+" : ""}{totalGrowth}%
+                    </p>
+                    <p className="text-xs text-muted-foreground">crescimento total</p>
+                  </>
+                )}
               </div>
             </div>
             <div className="h-64">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={bankSimulation}>
-                  <defs>
-                    <linearGradient id="goldGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="hsl(45 100% 60%)" stopOpacity={0.3} />
-                      <stop offset="100%" stopColor="hsl(45 100% 60%)" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <XAxis dataKey="month" tick={{ fill: 'hsl(220 15% 55%)', fontSize: 11 }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fill: 'hsl(220 15% 55%)', fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={(v) => `$${(v/1000).toFixed(1)}k`} />
-                  <Tooltip
-                    contentStyle={{ backgroundColor: 'hsl(230 25% 8%)', border: '1px solid hsl(230 20% 15%)', borderRadius: '12px', fontSize: '12px', color: 'hsl(210 40% 98%)' }}
-                    formatter={(value: number) => [`$${value.toLocaleString()}`, 'Banca']}
-                  />
-                  <Area type="monotone" dataKey="value" stroke="hsl(45 100% 60%)" strokeWidth={2} fill="url(#goldGrad)" />
-                </AreaChart>
-              </ResponsiveContainer>
+              {isLoading ? (
+                <Skeleton className="h-full w-full" />
+              ) : bankData.length <= 1 ? (
+                <div className="h-full flex items-center justify-center text-muted-foreground text-sm">
+                  Nenhum trade fechado ainda. A simulação será calculada automaticamente.
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={bankData}>
+                    <defs>
+                      <linearGradient id="goldGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="hsl(45 100% 60%)" stopOpacity={0.3} />
+                        <stop offset="100%" stopColor="hsl(45 100% 60%)" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <XAxis dataKey="label" tick={{ fill: 'hsl(220 15% 55%)', fontSize: 11 }} axisLine={false} tickLine={false} />
+                    <YAxis tick={{ fill: 'hsl(220 15% 55%)', fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={(v) => `$${(v / 1000).toFixed(1)}k`} />
+                    <Tooltip
+                      contentStyle={{ backgroundColor: 'hsl(230 25% 8%)', border: '1px solid hsl(230 20% 15%)', borderRadius: '12px', fontSize: '12px', color: 'hsl(210 40% 98%)' }}
+                      formatter={(value: number) => [`$${value.toLocaleString()}`, 'Banca']}
+                    />
+                    <Area type="monotone" dataKey="value" stroke="hsl(45 100% 60%)" strokeWidth={2} fill="url(#goldGrad)" />
+                  </AreaChart>
+                </ResponsiveContainer>
+              )}
             </div>
           </motion.div>
         </div>
@@ -193,7 +284,7 @@ export default function Resultados() {
                   </tr>
                 </thead>
                 <tbody>
-                  {isLoading ? (
+                  {signalsLoading ? (
                     <tr><td colSpan={6} className="p-8 text-center text-muted-foreground">A carregar...</td></tr>
                   ) : (
                     allSignals?.filter(s => s.status === "tp" || s.status === "sl").slice(0, 20).map((signal, i) => (
