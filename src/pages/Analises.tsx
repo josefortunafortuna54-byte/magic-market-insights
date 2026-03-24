@@ -1,20 +1,33 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Filter, Search } from "lucide-react";
+import { Filter, Search, TrendingUp, TrendingDown, Minus, Radio } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
 import { SignalCard } from "@/components/signals/SignalCard";
 import { TradingViewChart } from "@/components/signals/TradingViewChart";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { mockSignals } from "@/data/mockSignals";
 
-const timeframes = ["Todos", "M5", "M15", "H1"];
+const timeframes = ["Todos", "M5", "M15", "H1", "H4", "D1"];
 const signalTypes = ["Todos", "BUY", "SELL", "AGUARDAR"];
+
+const pairPrices: Record<string, { price: string; change: number }> = {
+  "EUR/USD": { price: "1.15550", change: 0.02 },
+  "GBP/USD": { price: "1.27100", change: -0.08 },
+  "USD/JPY": { price: "148.500", change: 0.12 },
+  "AUD/USD": { price: "0.63420", change: -0.03 },
+  "EUR/GBP": { price: "0.85890", change: 0.01 },
+  "USD/CHF": { price: "0.89750", change: -0.05 },
+};
 
 export default function Analises() {
   const [selectedTimeframe, setSelectedTimeframe] = useState("Todos");
   const [selectedType, setSelectedType] = useState("Todos");
   const [selectedPair, setSelectedPair] = useState("EUR/USD");
+  const [currentPrice, setCurrentPrice] = useState(pairPrices["EUR/USD"]);
+
+  useEffect(() => {
+    setCurrentPrice(pairPrices[selectedPair] ?? { price: "—", change: 0 });
+  }, [selectedPair]);
 
   const filteredSignals = mockSignals.filter((signal) => {
     if (selectedTimeframe !== "Todos" && signal.timeframe !== selectedTimeframe) return false;
@@ -25,103 +38,179 @@ export default function Analises() {
   const activeSignals = filteredSignals.filter((s) => s.status === "active" || !s.status);
   const pairs = [...new Set(mockSignals.map((s) => s.pair))];
 
+  const isUp = currentPrice.change > 0;
+  const isFlat = currentPrice.change === 0;
+
   return (
     <Layout>
-      {/* Header */}
-      <section className="pt-24 pb-12">
+      {/* Header compacto */}
+      <section className="pt-20 pb-4">
         <div className="container mx-auto px-4">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
+            className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
           >
-            <h1 className="font-display text-3xl sm:text-4xl font-bold mb-4">
-              Análises em Tempo Real
-            </h1>
-            <p className="text-muted-foreground max-w-2xl">
-              Sinais educacionais baseados em análise técnica avançada e IA. 
-              Cada sinal inclui pontos de entrada, stop loss e take profit.
-            </p>
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-success" />
+                </span>
+                <span className="text-xs text-success font-medium uppercase tracking-wider">Ao Vivo</span>
+              </div>
+              <h1 className="font-display text-2xl sm:text-3xl font-bold">
+                Painel de Sinais
+              </h1>
+            </div>
+
+            {/* Preço atual do par selecionado */}
+            <motion.div
+              key={selectedPair}
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="flex items-center gap-3 glass-card px-4 py-3"
+            >
+              <div>
+                <p className="text-xs text-muted-foreground mb-0.5">{selectedPair}</p>
+                <p className="font-display text-2xl font-bold font-trading">
+                  {currentPrice.price}
+                </p>
+              </div>
+              <div className={`flex items-center gap-1 px-2 py-1 rounded-lg text-sm font-semibold ${
+                isFlat
+                  ? "bg-muted/50 text-muted-foreground"
+                  : isUp
+                  ? "bg-success/10 text-success"
+                  : "bg-destructive/10 text-destructive"
+              }`}>
+                {isFlat ? (
+                  <Minus className="h-3.5 w-3.5" />
+                ) : isUp ? (
+                  <TrendingUp className="h-3.5 w-3.5" />
+                ) : (
+                  <TrendingDown className="h-3.5 w-3.5" />
+                )}
+                {isUp ? "+" : ""}{currentPrice.change.toFixed(2)}%
+              </div>
+            </motion.div>
           </motion.div>
         </div>
       </section>
 
-      {/* Chart Section */}
-      <section className="pb-12">
+      {/* Seletor de pares melhorado */}
+      <section className="pb-4">
         <div className="container mx-auto px-4">
-          <div className="mb-6">
-            <h2 className="font-display text-xl font-semibold mb-4">Gráfico</h2>
-            <div className="flex flex-wrap gap-2 mb-4">
-              {pairs.map((pair) => (
-                <Button
+          <div className="flex flex-wrap gap-2">
+            {pairs.map((pair) => {
+              const isActive = selectedPair === pair;
+              const pairData = pairPrices[pair];
+              const pairUp = pairData && pairData.change > 0;
+              const pairDown = pairData && pairData.change < 0;
+              return (
+                <motion.button
                   key={pair}
-                  variant={selectedPair === pair ? "default" : "outline"}
-                  size="sm"
+                  whileTap={{ scale: 0.97 }}
                   onClick={() => setSelectedPair(pair)}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 border ${
+                    isActive
+                      ? "bg-primary text-white border-primary shadow-lg"
+                      : "bg-card/60 border-border/60 text-muted-foreground hover:border-primary/30 hover:text-foreground"
+                  }`}
                 >
                   {pair}
-                </Button>
-              ))}
-            </div>
+                  {pairData && (
+                    <span className={`text-xs font-normal ${
+                      isActive
+                        ? "text-white/80"
+                        : pairUp
+                        ? "text-success"
+                        : pairDown
+                        ? "text-destructive"
+                        : "text-muted-foreground"
+                    }`}>
+                      {pairUp ? "+" : ""}{pairData.change.toFixed(2)}%
+                    </span>
+                  )}
+                </motion.button>
+              );
+            })}
           </div>
+        </div>
+      </section>
+
+      {/* Gráfico */}
+      <section className="pb-6">
+        <div className="container mx-auto px-4">
           <TradingViewChart symbol={selectedPair} />
         </div>
       </section>
 
-      {/* Filters */}
-      <section className="pb-8">
+      {/* Filtros */}
+      <section className="pb-6">
         <div className="container mx-auto px-4">
           <div className="glass-card p-4">
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 shrink-0">
                 <Filter className="h-4 w-4 text-muted-foreground" />
                 <span className="text-sm font-medium">Filtros:</span>
               </div>
-              
-              <div className="flex flex-wrap gap-4">
-                {/* Timeframe Filter */}
+
+              <div className="flex flex-wrap gap-4 flex-1">
+                {/* Timeframe */}
                 <div className="flex items-center gap-2">
-                  <span className="text-xs text-muted-foreground">Timeframe:</span>
+                  <span className="text-xs text-muted-foreground">TF:</span>
                   <div className="flex gap-1">
                     {timeframes.map((tf) => (
-                      <Badge
+                      <button
                         key={tf}
-                        variant={selectedTimeframe === tf ? "default" : "outline"}
-                        className="cursor-pointer"
                         onClick={() => setSelectedTimeframe(tf)}
+                        className={`px-3 py-1 rounded-lg text-xs font-medium transition-all ${
+                          selectedTimeframe === tf
+                            ? "bg-primary text-white"
+                            : "bg-secondary/60 text-muted-foreground hover:text-foreground"
+                        }`}
                       >
                         {tf}
-                      </Badge>
+                      </button>
                     ))}
                   </div>
                 </div>
 
-                {/* Type Filter */}
+                {/* Tipo */}
                 <div className="flex items-center gap-2">
                   <span className="text-xs text-muted-foreground">Tipo:</span>
                   <div className="flex gap-1">
                     {signalTypes.map((type) => (
-                      <Badge
+                      <button
                         key={type}
-                        variant={selectedType === type ? "default" : "outline"}
-                        className="cursor-pointer"
                         onClick={() => setSelectedType(type)}
+                        className={`px-3 py-1 rounded-lg text-xs font-medium transition-all ${
+                          selectedType === type
+                            ? type === "BUY"
+                              ? "bg-success text-white"
+                              : type === "SELL"
+                              ? "bg-destructive text-white"
+                              : "bg-primary text-white"
+                            : "bg-secondary/60 text-muted-foreground hover:text-foreground"
+                        }`}
                       >
                         {type}
-                      </Badge>
+                      </button>
                     ))}
                   </div>
                 </div>
               </div>
 
-              <div className="ml-auto text-sm text-muted-foreground">
-                {activeSignals.length} sinais ativos
+              <div className="text-sm text-muted-foreground shrink-0">
+                <span className="text-foreground font-semibold">{activeSignals.length}</span> ativos
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Signals Grid */}
+      {/* Grid de sinais */}
       <section className="pb-24">
         <div className="container mx-auto px-4">
           {activeSignals.length === 0 ? (
@@ -131,7 +220,7 @@ export default function Analises() {
                 Nenhum sinal encontrado
               </h3>
               <p className="text-sm text-muted-foreground">
-                Tente ajustar os filtros para ver mais sinais.
+                Ajusta os filtros para ver mais sinais.
               </p>
             </div>
           ) : (
