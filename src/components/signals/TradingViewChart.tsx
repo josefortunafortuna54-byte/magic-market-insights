@@ -45,10 +45,11 @@ export function TradingViewChart({ symbol, interval = "60" }: TradingViewChartPr
   }, [symbol, interval]);
 
   return (
-    <div className="glass-card overflow-hidden">
-      <div className="tradingview-widget-container" ref={containerRef} style={{ height: "500px" }}>
-        <div className="tradingview-widget-container__widget" style={{ height: "100%", width: "100%" }} />
-      </div>
+    <div style={{ height: "560px", width: "100%", borderRadius: "12px", overflow: "hidden", border: "1px solid rgba(255,255,255,0.08)" }}>
+      <div
+        ref={containerRef}
+        style={{ height: "100%", width: "100%" }}
+      />
     </div>
   );
 }
