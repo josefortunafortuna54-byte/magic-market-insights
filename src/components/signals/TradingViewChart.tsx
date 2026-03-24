@@ -10,14 +10,13 @@ export function TradingViewChart({ symbol, interval = "60" }: TradingViewChartPr
 
   useEffect(() => {
     if (!containerRef.current) return;
-
     const script = document.createElement("script");
     script.src = "https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js";
     script.type = "text/javascript";
     script.async = true;
     script.innerHTML = JSON.stringify({
       autosize: true,
-      symbol: `FX:${symbol.replace("/", "")}`,
+      symbol: "FX:" + symbol.replace("/", ""),
       interval: interval,
       timezone: "Etc/UTC",
       theme: "dark",
@@ -27,29 +26,25 @@ export function TradingViewChart({ symbol, interval = "60" }: TradingViewChartPr
       backgroundColor: "rgba(2, 6, 23, 1)",
       gridColor: "rgba(42, 46, 57, 0.3)",
       hide_top_toolbar: false,
+      hide_side_toolbar: false,
       hide_legend: false,
-      save_image: false,
+      allow_symbol_change: true,
+      withdateranges: true,
+      save_image: true,
       calendar: false,
       studies: ["RSI@tv-basicstudies", "MASimple@tv-basicstudies"],
       support_host: "https://www.tradingview.com",
     });
-
     containerRef.current.innerHTML = "";
     containerRef.current.appendChild(script);
-
     return () => {
-      if (containerRef.current) {
-        containerRef.current.innerHTML = "";
-      }
+      if (containerRef.current) containerRef.current.innerHTML = "";
     };
   }, [symbol, interval]);
 
   return (
     <div style={{ height: "560px", width: "100%", borderRadius: "12px", overflow: "hidden", border: "1px solid rgba(255,255,255,0.08)" }}>
-      <div
-        ref={containerRef}
-        style={{ height: "100%", width: "100%" }}
-      />
+      <div ref={containerRef} style={{ height: "100%", width: "100%" }} />
     </div>
   );
 }
