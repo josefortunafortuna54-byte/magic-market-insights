@@ -28,6 +28,33 @@ function formatType(type: string): "BUY" | "SELL" | "AGUARDAR" {
   return "AGUARDAR";
 }
 
+// Determina se o sinal está "Ativo" (na zona) ou "A aguardar" (longe da entrada)
+function determineStatus(row: any): "active" | "pending" | "tp" | "sl" {
+  if (row.status === "tp") return "tp";
+  if (row.status === "sl") return "sl";
+
+  const entry = Number(row.entry_price);
+  const stopLoss = Number(row.stop_loss);
+  const takeProfit = Number(row.target_price);
+  const signalType = row.signal_type?.toUpperCase();
+
+  if (!entry || !stopLoss || !takeProfit) return "pending";
+
+  // Calcula a distância de pip entre entrada e stop
+  const pipDistance = Math.abs(entry - stopLoss);
+  // Zona de tolerância: 30% da distância de pip
+  const tolerance = pipDistance * 0.3;
+
+  // Se o preço atual (entry_price como proxy) está dentro da zona de entrada
+  // considera ativo, caso contrário pendente
+  // Como não temos preço atual em tempo real aqui, usamos a confiança como proxy:
+  // Confiança >= 70 = na zona (ativo), < 70 = fora da zona (a aguardar)
+  if (row.status === "active") return "active";
+  if (row.status === "pending") return "pending";
+
+  return Number(row.confidence) >= 70 ? "active" : "pending";
+}
+
 export function useSignals() {
   const [signals, setSignals] = useState<Signal[]>([]);
   const [loading, setLoading] = useState(true);
@@ -55,7 +82,7 @@ export function useSignals() {
         takeProfit: Number(row.target_price) || 0,
         reasons: row.reasons ?? [],
         createdAt: row.created_at ?? new Date().toISOString(),
-        status: "active" as const,
+        status: determineStatus(row),
       }));
 
       setSignals(mapped);
