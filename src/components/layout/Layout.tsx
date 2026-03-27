@@ -4,14 +4,15 @@ import { Footer } from "./Footer";
 
 interface LayoutProps {
   children: ReactNode;
+  noFooter?: boolean;
 }
 
-export function Layout({ children }: LayoutProps) {
+export function Layout({ children, noFooter = false }: LayoutProps) {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
-      <main className="flex-1 pt-16">{children}</main>
-      <Footer />
+      <main className="flex-1 mt-16">{children}</main>
+      {!noFooter && <Footer />}
     </div>
   );
 }
