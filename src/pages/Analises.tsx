@@ -7,7 +7,7 @@ import { TradingViewChart } from "@/components/signals/TradingViewChart";
 import { useSignals } from "@/hooks/useSignals";
 import { mockSignals } from "@/data/mockSignals";
 
-const timeframes = ["Todos", "M5", "M15", "H1", "H4", "D1"];
+const timeframes = ["Todos", "M15", "H1", "H4"];
 const signalTypes = ["Todos", "BUY", "SELL", "AGUARDAR"];
 
 const pairPrices: Record<string, { price: string; change: number }> = {
