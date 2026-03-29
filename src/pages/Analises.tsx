@@ -1,14 +1,19 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Filter, Search, TrendingUp, TrendingDown, Minus, ExternalLink, RefreshCw } from "lucide-react";
+import { Filter, Search, TrendingUp, TrendingDown, Minus, ExternalLink, RefreshCw, Lock, Crown } from "lucide-react";
+import { Link } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
 import { SignalCard } from "@/components/signals/SignalCard";
 import { TradingViewChart } from "@/components/signals/TradingViewChart";
 import { useSignals } from "@/hooks/useSignals";
+import { useSubscription } from "@/hooks/useSubscription";
 import { mockSignals } from "@/data/mockSignals";
 
 const timeframes = ["Todos", "M15", "H1", "H4"];
 const signalTypes = ["Todos", "BUY", "SELL", "AGUARDAR"];
+
+const FREE_PAIRS = ["EUR/USD", "GBP/USD", "USD/JPY"];
+const FREE_TIMEFRAMES = ["M15"];
 
 const pairPrices: Record<string, { price: string; change: number }> = {
   "EUR/USD": { price: "1.15550", change: 0.02 },
@@ -17,40 +22,93 @@ const pairPrices: Record<string, { price: string; change: number }> = {
   "AUD/USD": { price: "0.63420", change: -0.03 },
   "EUR/GBP": { price: "0.85890", change: 0.01 },
   "USD/CHF": { price: "0.89750", change: -0.05 },
+  "NZD/USD": { price: "0.57800", change: -0.05 },
+  "USD/CAD": { price: "1.38700", change: 0.03 },
 };
 
 const tvIntervals: Record<string, string> = {
-  "M5": "5", "M15": "15", "H1": "60", "H4": "240", "D1": "D",
+  "M15": "15", "H1": "60", "H4": "240",
 };
 
+function PremiumLock({ timeframe }: { timeframe: string }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="glass-card p-8 text-center border-accent/20 relative overflow-hidden"
+    >
+      <div className="absolute inset-0 bg-gradient-to-br from-accent/5 to-transparent pointer-events-none" />
+      <div className="w-14 h-14 rounded-full bg-accent/10 flex items-center justify-center mx-auto mb-4">
+        <Lock className="h-7 w-7 text-accent" />
+      </div>
+      <h3 className="font-display text-lg font-bold mb-2">
+        Sinais {timeframe} — Exclusivo Premium
+      </h3>
+      <p className="text-sm text-muted-foreground mb-6 max-w-sm mx-auto">
+        Acede a sinais em todos os timeframes com análise técnica completa.
+        RSI, EMA, MACD, Bollinger e Estocástico.
+      </p>
+      <Link to="/planos">
+        <button className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm text-white transition-all hover:opacity-90"
+          style={{ background: "var(--gradient-gold)", boxShadow: "var(--shadow-glow-gold)" }}>
+          <Crown className="h-4 w-4" />
+          Ver Planos Premium
+        </button>
+      </Link>
+    </motion.div>
+  );
+}
+
 export default function Analises() {
-  const [selectedTimeframe, setSelectedTimeframe] = useState("H1");
+  const [selectedTimeframe, setSelectedTimeframe] = useState("M15");
   const [selectedType, setSelectedType] = useState("Todos");
   const [selectedPair, setSelectedPair] = useState("EUR/USD");
   const [currentPrice, setCurrentPrice] = useState(pairPrices["EUR/USD"]);
 
   const { signals: supabaseSignals, loading, error, refetch } = useSignals();
+  const { user, isPremium, loading: subLoading } = useSubscription();
 
-  // Usa dados do Supabase se disponíveis, senão usa mockSignals como fallback
   const allSignals = supabaseSignals.length > 0 ? supabaseSignals : mockSignals;
+
+  // Filtrar sinais por plano
+  const visibleSignals = allSignals.filter(s => {
+    if (isPremium) return true;
+    return FREE_PAIRS.includes(s.pair) && FREE_TIMEFRAMES.includes(s.timeframe);
+  });
+
+  // Pares visíveis por plano
+  const visiblePairs = isPremium
+    ? [...new Set(allSignals.map(s => s.pair))]
+    : FREE_PAIRS.filter(p => allSignals.some(s => s.pair === p));
+
+  // Timeframes disponíveis por plano
+  const availableTimeframes = isPremium ? timeframes : ["Todos", "M15"];
 
   useEffect(() => {
     setCurrentPrice(pairPrices[selectedPair] ?? { price: "—", change: 0 });
   }, [selectedPair]);
 
-  const filteredSignals = allSignals.filter((signal) => {
+  // Se timeframe selecionado não está disponível, resetar para M15
+  useEffect(() => {
+    if (!isPremium && !["Todos", "M15"].includes(selectedTimeframe)) {
+      setSelectedTimeframe("M15");
+    }
+  }, [isPremium, selectedTimeframe]);
+
+  const filteredSignals = visibleSignals.filter((signal) => {
     if (selectedTimeframe !== "Todos" && signal.timeframe !== selectedTimeframe) return false;
     if (selectedType !== "Todos" && signal.type !== selectedType) return false;
     return true;
   });
 
   const activeSignals = filteredSignals.filter((s) => s.status === "active" || !s.status);
-  const pairs = [...new Set(allSignals.map((s) => s.pair))];
   const isUp = currentPrice.change > 0;
   const isFlat = currentPrice.change === 0;
   const tvSymbol = selectedPair.replace("/", "");
   const tvInterval = selectedTimeframe !== "Todos" ? (tvIntervals[selectedTimeframe] ?? "60") : "60";
   const tvUrl = `https://www.tradingview.com/chart/?symbol=FX:${tvSymbol}&interval=${tvInterval}`;
+
+  const isPremiumTimeframe = !isPremium && ["H1", "H4"].includes(selectedTimeframe);
 
   return (
     <Layout>
@@ -58,8 +116,6 @@ export default function Analises() {
         {/* Barra de controlo */}
         <div className="container mx-auto px-4 pt-3 pb-3">
           <div className="flex flex-wrap items-center justify-between gap-3">
-
-            {/* Título + live */}
             <div className="flex items-center gap-3">
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75" />
@@ -67,10 +123,8 @@ export default function Analises() {
               </span>
               <h1 className="font-display text-xl font-bold">Painel de Sinais</h1>
               {loading && <RefreshCw className="h-4 w-4 text-muted-foreground animate-spin" />}
-              {error && <span className="text-xs text-warning">(mock)</span>}
             </div>
 
-            {/* Preço + botão TV */}
             <motion.div key={selectedPair} initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-3">
               <div className="text-right">
                 <p className="text-xs text-muted-foreground">{selectedPair}</p>
@@ -90,7 +144,8 @@ export default function Analises() {
 
           {/* Seletor de pares */}
           <div className="flex flex-wrap gap-2 mt-3">
-            {pairs.map((pair) => {
+            {/* Pares disponíveis */}
+            {visiblePairs.map((pair) => {
               const isActive = selectedPair === pair;
               const pairData = pairPrices[pair];
               const pairUp = pairData && pairData.change > 0;
@@ -107,24 +162,35 @@ export default function Analises() {
                 </motion.button>
               );
             })}
+
+            {/* Pares bloqueados para free */}
+            {!isPremium && !subLoading && (
+              <Link to="/planos">
+                <motion.button whileTap={{ scale: 0.97 }}
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-sm font-medium border border-accent/30 bg-accent/5 text-accent/70 hover:bg-accent/10 transition-all">
+                  <Lock className="h-3 w-3" />
+                  +5 pares Premium
+                </motion.button>
+              </Link>
+            )}
           </div>
         </div>
 
-        {/* Gráfico — ocupa o máximo do ecrã */}
+        {/* Gráfico */}
         <div className="px-4">
-          <div style={{ height: "calc(100vh - 210px)", minHeight: "480px", width: "100%", borderRadius: "12px", overflow: "hidden", border: "1px solid rgba(255,255,255,0.08)" }}>
+          <div style={{ height: "calc(100vh - 230px)", minHeight: "480px", width: "100%", borderRadius: "12px", overflow: "hidden", border: "1px solid rgba(255,255,255,0.08)" }}>
             <TradingViewChart symbol={selectedPair} interval={tvInterval} />
           </div>
         </div>
 
-        {/* Nota + filtros */}
         <div className="container mx-auto px-4 py-2">
           <p className="text-xs text-muted-foreground">
-            Desenhos não são guardados no widget. Para guardar,
-            <a href={tvUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline ml-1">abre o TradingView completo</a>.
+            Para guardar desenhos permanentemente, abre o
+            <a href={tvUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline ml-1">TradingView completo</a>.
           </p>
         </div>
 
+        {/* Filtros */}
         <div className="container mx-auto px-4 pb-6">
           <div className="glass-card p-4">
             <div className="flex flex-wrap items-center gap-4">
@@ -135,12 +201,22 @@ export default function Analises() {
               <div className="flex items-center gap-2">
                 <span className="text-xs text-muted-foreground">TF:</span>
                 <div className="flex gap-1 flex-wrap">
-                  {timeframes.map((tf) => (
-                    <button key={tf} onClick={() => setSelectedTimeframe(tf)}
-                      className={`px-3 py-1 rounded-lg text-xs font-medium transition-all ${selectedTimeframe === tf ? "bg-primary text-white" : "bg-secondary/60 text-muted-foreground hover:text-foreground"}`}>
-                      {tf}
-                    </button>
-                  ))}
+                  {timeframes.map((tf) => {
+                    const isLocked = !isPremium && ["H1", "H4"].includes(tf);
+                    const isSelected = selectedTimeframe === tf;
+                    return (
+                      <button key={tf}
+                        onClick={() => !isLocked && setSelectedTimeframe(tf)}
+                        className={`px-3 py-1 rounded-lg text-xs font-medium transition-all flex items-center gap-1 ${
+                          isSelected ? "bg-primary text-white"
+                          : isLocked ? "bg-secondary/30 text-muted-foreground/40 cursor-not-allowed"
+                          : "bg-secondary/60 text-muted-foreground hover:text-foreground"
+                        }`}>
+                        {isLocked && <Lock className="h-2.5 w-2.5" />}
+                        {tf}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
               <div className="flex items-center gap-2">
@@ -168,13 +244,14 @@ export default function Analises() {
 
         {/* Grid de sinais */}
         <div className="container mx-auto px-4 pb-24">
-          {loading ? (
+          {isPremiumTimeframe ? (
+            <PremiumLock timeframe={selectedTimeframe} />
+          ) : loading ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[1,2,3].map((i) => (
                 <div key={i} className="glass-card p-6 h-64 animate-pulse">
                   <div className="h-4 bg-muted/50 rounded mb-4 w-1/2" />
                   <div className="h-3 bg-muted/30 rounded mb-2 w-3/4" />
-                  <div className="h-3 bg-muted/30 rounded w-1/2" />
                 </div>
               ))}
             </div>
@@ -185,11 +262,61 @@ export default function Analises() {
               <p className="text-sm text-muted-foreground">Ajusta os filtros ou aguarda novos sinais.</p>
             </div>
           ) : (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {activeSignals.map((signal, i) => (
-                <SignalCard key={signal.id} signal={signal} index={i} />
-              ))}
-            </div>
+            <>
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {activeSignals.map((signal, i) => (
+                  <SignalCard key={signal.id} signal={signal} index={i} />
+                ))}
+              </div>
+
+              {/* Banner premium para utilizadores free */}
+              {!isPremium && !subLoading && user && (
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
+                  className="mt-8 glass-card p-6 border-accent/20 flex flex-col sm:flex-row items-center justify-between gap-4"
+                  style={{ background: "linear-gradient(135deg, rgba(250,198,117,0.05) 0%, transparent 100%)" }}>
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center shrink-0">
+                      <Crown className="h-6 w-6 text-accent" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-sm">Estás a ver apenas sinais M15 de 3 pares</p>
+                      <p className="text-xs text-muted-foreground">Premium desbloqueia H1, H4 e todos os 8 pares Forex</p>
+                    </div>
+                  </div>
+                  <Link to="/planos">
+                    <button className="shrink-0 flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm text-white whitespace-nowrap"
+                      style={{ background: "var(--gradient-gold)" }}>
+                      <Crown className="h-4 w-4" />
+                      Ver Planos
+                    </button>
+                  </Link>
+                </motion.div>
+              )}
+
+              {/* Banner para não logados */}
+              {!user && !subLoading && (
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
+                  className="mt-8 glass-card p-6 border-primary/20 flex flex-col sm:flex-row items-center justify-between gap-4">
+                  <div>
+                    <p className="font-semibold text-sm">Cria uma conta para aceder a mais sinais</p>
+                    <p className="text-xs text-muted-foreground">Regista-te gratuitamente e acede a sinais M15</p>
+                  </div>
+                  <div className="flex gap-3 shrink-0">
+                    <Link to="/login">
+                      <button className="px-4 py-2 rounded-xl text-sm font-medium border border-border/60 hover:bg-secondary/60 transition-all">
+                        Entrar
+                      </button>
+                    </Link>
+                    <Link to="/registro">
+                      <button className="px-4 py-2 rounded-xl text-sm font-medium text-white"
+                        style={{ background: "var(--gradient-primary)" }}>
+                        Criar Conta
+                      </button>
+                    </Link>
+                  </div>
+                </motion.div>
+              )}
+            </>
           )}
         </div>
       </div>
