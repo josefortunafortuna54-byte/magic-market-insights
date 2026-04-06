@@ -41,17 +41,24 @@ export function useSubscription() {
   const checkout = async (priceId: string, currency: string) => {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) { window.location.href = "/login"; return; }
-    const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/stripe-checkout`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${session.access_token}`,
-      },
-      body: JSON.stringify({ priceId, currency }),
-    });
-    const { url, error } = await res.json();
-    if (error) { alert("Erro: " + error); return; }
-    window.location.href = url;
+
+    try {
+      const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/stripe-checkout`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ priceId, currency }),
+      });
+
+      const data = await res.json();
+      if (data.error) { alert("Erro: " + data.error); return; }
+      if (!data.url) { alert("Erro: URL de pagamento não recebida."); return; }
+      window.location.href = data.url;
+    } catch (err) {
+      alert("Erro de ligação. Tenta novamente.");
+    }
   };
 
   return { user, subscription, isPremium, loading, checkout };
