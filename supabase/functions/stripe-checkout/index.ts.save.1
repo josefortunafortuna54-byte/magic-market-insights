@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -11,37 +12,21 @@ serve(async (req) => {
   }
   try {
     const STRIPE_SECRET_KEY = Deno.env.get("STRIPE_SECRET_KEY")!;
-    const PROJECT_URL = Deno.env.get("PROJECT_URL")!;
-    const ANON_KEY = Deno.env.get("ANON_KEY")!;
+    const PROJECT_URL = Deno.env.get("SUPABASE_URL")!;
+    const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const SITE_URL = Deno.env.get("SITE_URL") || "https://magic-market-insights.vercel.app";
 
-    console.log("PROJECT_URL:", PROJECT_URL);
+    const supabase = createClient(PROJECT_URL, SERVICE_ROLE_KEY);
 
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) return new Response(JSON.stringify({ error: "Nao autenticado" }), { status: 401, headers: corsHeaders });
 
     const token = authHeader.replace("Bearer ", "");
-
-    const userRes = await fetch(`${PROJECT_URL}/auth/v1/user`, {
-      headers: {
-        "Authorization": "Bearer " + token,
-        "apikey": ANON_KEY,
-      }
-    });
-
-    if (!userRes.ok) {
-      const errText = await userRes.text();
-      console.error("Auth error:", errText);
-      return new Response(JSON.stringify({ error: "Auth failed: " + errText }), { status: 401, headers: corsHeaders });
-    }
-
-    const user = await userRes.json();
-    console.log("User ID:", user.id);
+    const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+    if (userError || !user) return new Response(JSON.stringify({ error: "Utilizador invalido" }), { status: 401, headers: corsHeaders });
 
     const { priceId, currency } = await req.json();
     if (!priceId) return new Response(JSON.stringify({ error: "priceId em falta" }), { status: 400, headers: corsHeaders });
-
-    console.log("Calling Stripe with priceId:", priceId);
 
     const params = new URLSearchParams();
     params.append("mode", "subscription");
@@ -63,10 +48,9 @@ serve(async (req) => {
     });
 
     const session = await stripeRes.json();
-    console.log("Stripe response:", JSON.stringify(session));
-
-    if (!session.url) {
-      return new Response(JSON.stringify({ error: session.error?.message || JSON.stringify(session) }), { status: 400, headers: corsHeaders });
+     
+   if (!session.url) {
+      return new Response(JSON.stringify({ error: session.error?.message || "Sem URL" }), { status: 400, headers: corsHeaders });
     }
 
     return new Response(JSON.stringify({ url: session.url }), {
@@ -74,7 +58,6 @@ serve(async (req) => {
     });
 
   } catch (err: any) {
-    console.error("Global error:", err.message);
     return new Response(JSON.stringify({ error: err.message }), { status: 500, headers: corsHeaders });
   }
 });
