@@ -10,6 +10,9 @@ import Planos from "./pages/Planos";
 import Login from "./pages/Login";
 import Registro from "./pages/Registro";
 import NotFound from "./pages/NotFound";
+import Admin from "./pages/Admin";
+// na rota:
+<Route path="/admin" element={<Admin />} />
 
 const queryClient = new QueryClient();
 
