@@ -223,11 +223,12 @@ function analyzeMarket(entry: number, symbol: string): TechnicalAnalysis {
     takeProfit = entry + atr * 2;
   }
 
-  // Garantir RR mínimo de 1:2
-  const rr = Math.abs(takeProfit - entry) / Math.abs(stopLoss - entry);
-  if (rr < 2 && signalType !== "AGUARDAR") {
-    if (signalType === "BUY") takeProfit = entry + Math.abs(stopLoss - entry) * 2.5;
-    else takeProfit = entry - Math.abs(stopLoss - entry) * 2.5;
+  // Garantir RR baseado na confiança: 80%+ = 1:3, 70%+ = 1:2.5, resto = 1:2
+  const rrMultiplier = confidence >= 80 ? 3 : confidence >= 70 ? 2.5 : 2;
+  if (signalType !== "AGUARDAR") {
+    const slDistance = Math.abs(stopLoss - entry);
+    if (signalType === "BUY") takeProfit = entry + slDistance * rrMultiplier;
+    else takeProfit = entry - slDistance * rrMultiplier;
   }
 
   return { signalType, confidence, reasons, stopLoss, takeProfit, rsi, ema21, ema50, ema200, atr, macd, bb };

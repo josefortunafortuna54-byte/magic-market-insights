@@ -179,6 +179,15 @@ export default function Admin() {
           </div>
 
           {/* Botões de ação */}
+          <button onClick={async () => {
+            if (!confirm("Apagar todos os sinais ativos e regenerar?")) return;
+            await supabase.from("signals").delete().eq("status", "active");
+            await generateSignals();
+          }}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-destructive/20 text-destructive border border-destructive/30 text-sm font-medium hover:opacity-90">
+            <RefreshCw className="h-4 w-4" />
+            Limpar e Regenerar
+          </button>
           <div className="flex gap-3 mb-8 flex-wrap">
             <button onClick={generateSignals} disabled={generating}
               className="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-white text-sm font-medium hover:opacity-90 disabled:opacity-50">
