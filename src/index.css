@@ -4,49 +4,51 @@
 @tailwind utilities;
 @layer base {
   :root {
-    --background: 220 30% 4%;
+    --background: 240 20% 4%;
     --foreground: 210 40% 96%;
-    --card: 220 28% 7%;
+    --card: 240 18% 7%;
     --card-foreground: 210 40% 96%;
-    --popover: 220 28% 7%;
+    --popover: 240 18% 7%;
     --popover-foreground: 210 40% 96%;
-    --primary: 210 100% 52%;
+    --primary: 262 80% 58%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 220 28% 12%;
+    --secondary: 240 18% 12%;
     --secondary-foreground: 210 40% 96%;
-    --muted: 220 28% 16%;
+    --muted: 240 18% 16%;
     --muted-foreground: 215 20% 58%;
     --accent: 43 96% 52%;
     --accent-foreground: 220 30% 4%;
     --destructive: 4 86% 58%;
     --destructive-foreground: 0 0% 100%;
-    --success: 152 68% 42%;
+    --success: 142 70% 42%;
     --success-foreground: 0 0% 100%;
     --warning: 43 96% 52%;
     --warning-foreground: 220 30% 4%;
-    --border: 220 28% 14%;
-    --input: 220 28% 14%;
-    --ring: 210 100% 52%;
+    --border: 240 18% 14%;
+    --input: 240 18% 14%;
+    --ring: 262 80% 58%;
     --radius: 0.75rem;
-    --gradient-primary: linear-gradient(135deg, hsl(210 100% 52%) 0%, hsl(225 100% 60%) 100%);
+    --gradient-primary: linear-gradient(135deg, hsl(262 80% 58%) 0%, hsl(280 80% 65%) 100%);
     --gradient-gold: linear-gradient(135deg, hsl(43 96% 52%) 0%, hsl(36 100% 48%) 100%);
-    --shadow-glow-primary: 0 0 40px hsl(210 100% 52% / 0.25);
-    --shadow-glow-success: 0 0 30px hsl(152 68% 42% / 0.25);
+    --shadow-glow-primary: 0 0 40px hsl(262 80% 58% / 0.3);
+    --shadow-glow-success: 0 0 30px hsl(142 70% 42% / 0.25);
     --shadow-glow-danger: 0 0 30px hsl(4 86% 58% / 0.25);
     --shadow-card: 0 4px 24px hsl(0 0% 0% / 0.5);
-    --sidebar-background: 220 30% 5%;
+    --sidebar-background: 240 20% 5%;
     --sidebar-foreground: 210 40% 96%;
-    --sidebar-primary: 210 100% 52%;
+    --sidebar-primary: 262 80% 58%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 28% 12%;
+    --sidebar-accent: 240 18% 12%;
     --sidebar-accent-foreground: 210 40% 96%;
-    --sidebar-border: 220 28% 12%;
-    --sidebar-ring: 210 100% 52%;
+    --sidebar-border: 240 18% 12%;
+    --sidebar-ring: 262 80% 58%;
   }
   .dark {
-    --background: 220 30% 4%;
+    --background: 240 20% 4%;
     --foreground: 210 40% 96%;
   }
+   
+ 
 }
 @layer base {
   * { @apply border-border; }
