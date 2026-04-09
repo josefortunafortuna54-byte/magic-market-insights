@@ -74,8 +74,12 @@ export function Navbar() {
         <div className="flex h-16 items-center justify-between">
 
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2">
-            <img src="/logo.png" alt="The Magic Trader" className="h-10 w-10 object-contain" />
+          <Link to="/" className="flex items-center gap-1">
+            <img 
+              src="/logo.png" 
+              alt="The Magic Trader" 
+              className="h-14 w-14 object-contain rounded-xl"
+            />
             <span className="font-display text-xl font-bold tracking-tight">
               The Magic <span style={{ color: "#22c55e" }}>Trader</span>
             </span>
