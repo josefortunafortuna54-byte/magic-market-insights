@@ -65,6 +65,11 @@ serve(async (req) => {
       // Fechar sinais com mais de 48h (expirados)
       const createdAt = new Date(signal.created_at);
       const hoursOld = (Date.now() - createdAt.getTime()) / (1000 * 60 * 60);
+
+      // Só fechar sinais com mais de 2 horas (evitar fechar logo após geração)
+      if (hoursOld < 2) continue;
+
+      // Fechar sinais com mais de 48h (expirados)
       if (hoursOld > 48 && !newStatus) newStatus = "sl";
 
       if (newStatus) {

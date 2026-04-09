@@ -75,12 +75,9 @@ export function Navbar() {
 
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2">
-            <div className="relative">
-              <Sparkles className="h-8 w-8 text-primary" />
-              <div className="absolute inset-0 blur-lg bg-primary/30" />
-            </div>
+            <img src="/logo.png" alt="The Magic Trader" className="h-10 w-10 object-contain" />
             <span className="font-display text-xl font-bold tracking-tight">
-              The Magic <span className="gradient-text">Trader</span>
+              The Magic <span style={{ color: "#22c55e" }}>Trader</span>
             </span>
           </Link>
 
