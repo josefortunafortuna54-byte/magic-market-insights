@@ -11,7 +11,7 @@ export function Layout({ children, noFooter = false }: LayoutProps) {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
-      <main className="flex-1 mt-16">{children}</main>
+      <main className="flex-1 mt-20">{children}</main>
       {!noFooter && <Footer />}
     </div>
   );
