@@ -4,17 +4,17 @@
 @tailwind utilities;
 @layer base {
   :root {
-    --background: 240 20% 4%;
+    --background: 230 35% 5%;
     --foreground: 210 40% 96%;
-    --card: 240 18% 7%;
+    --card: 230 30% 8%;
     --card-foreground: 210 40% 96%;
     --popover: 240 18% 7%;
     --popover-foreground: 210 40% 96%;
-    --primary: 262 80% 58%;
+    --primary: 142 70% 42%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 240 18% 12%;
+    --secondary: 230 28% 12%;
     --secondary-foreground: 210 40% 96%;
-    --muted: 240 18% 16%;
+    --muted: 230 28% 16%;
     --muted-foreground: 215 20% 58%;
     --accent: 43 96% 52%;
     --accent-foreground: 220 30% 4%;
@@ -24,13 +24,13 @@
     --success-foreground: 0 0% 100%;
     --warning: 43 96% 52%;
     --warning-foreground: 220 30% 4%;
-    --border: 240 18% 14%;
-    --input: 240 18% 14%;
-    --ring: 262 80% 58%;
+    --border: 230 28% 14%;
+    --input: 230 28% 14%;
+    --ring: 142 70% 42%;
     --radius: 0.75rem;
-    --gradient-primary: linear-gradient(135deg, hsl(262 80% 58%) 0%, hsl(280 80% 65%) 100%);
+    --gradient-primary: linear-gradient(135deg, hsl(142 70% 38%) 0%, hsl(160 70% 45%) 100%);
     --gradient-gold: linear-gradient(135deg, hsl(43 96% 52%) 0%, hsl(36 100% 48%) 100%);
-    --shadow-glow-primary: 0 0 40px hsl(262 80% 58% / 0.3);
+    --shadow-glow-primary: 0 0 40px hsl(142 70% 42% / 0.3);
     --shadow-glow-success: 0 0 30px hsl(142 70% 42% / 0.25);
     --shadow-glow-danger: 0 0 30px hsl(4 86% 58% / 0.25);
     --shadow-card: 0 4px 24px hsl(0 0% 0% / 0.5);
