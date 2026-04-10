@@ -12,6 +12,7 @@
     <stop offset="0%" style="stop-color:#00ff88;stop-opacity:0.6"/>
     <stop offset="100%" style="stop-color:#00ff88;stop-opacity:0"/>
   </radialGradient>
+    
   <style>
     @keyframes blink { 0%,90%,100%{opacity:1} 95%{opacity:0.1} }
     @keyframes pulse { 0%,100%{opacity:0.5;r:16} 50%{opacity:1;r:20} }
@@ -41,6 +42,12 @@
     .magic-star3 { animation: float 3.5s 2s ease-in-out infinite; }
     .orbit { animation: rotate 20s linear infinite; transform-origin: 400px 400px; }
     .orbit2 { animation: rotate 25s linear infinite reverse; transform-origin: 1040px 400px; }
+    @keyframes shoot1 { 0%{transform:translate(0,0);opacity:0} 5%{opacity:1} 20%{transform:translate(300px,150px);opacity:0} 100%{transform:translate(300px,150px);opacity:0} }
+    @keyframes shoot2 { 0%{transform:translate(0,0);opacity:0} 5%{opacity:1} 20%{transform:translate(-280px,140px);opacity:0} 100%{transform:translate(-280px,140px);opacity:0} }
+    @keyframes shoot3 { 0%{transform:translate(0,0);opacity:0} 5%{opacity:1} 20%{transform:translate(250px,120px);opacity:0} 100%{transform:translate(250px,120px);opacity:0} }
+    .shoot1 { animation: shoot1 8s 2s ease-in infinite; }
+    .shoot2 { animation: shoot2 11s 5s ease-in infinite; }
+    .shoot3 { animation: shoot3 14s 9s ease-in infinite; }
   </style>
 </defs>
 
@@ -131,4 +138,21 @@
 <circle class="star3" cx="660" cy="50" r="2" fill="#ffffff" opacity="0.7"/>
 <circle class="star4" cx="1250" cy="400" r="1" fill="#fbbf24" opacity="0.4"/>
 <circle class="star5" cx="180" cy="400" r="1" fill="#fbbf24" opacity="0.3"/>
+<g class="shoot1">
+  <line x1="200" y1="80" x2="240" y2="80" stroke="#ffffff" stroke-width="2" opacity="0.9" stroke-linecap="round"/>
+  <line x1="200" y1="80" x2="180" y2="80" stroke="#ffffff" stroke-width="1" opacity="0.4" stroke-linecap="round"/>
+  <circle cx="240" cy="80" r="2.5" fill="#ffffff" opacity="0.9"/>
+</g>
+
+<g class="shoot2">
+  <line x1="1100" y1="60" x2="1060" y2="60" stroke="#00ff88" stroke-width="2" opacity="0.9" stroke-linecap="round"/>
+  <line x1="1100" y1="60" x2="1120" y2="60" stroke="#00ff88" stroke-width="1" opacity="0.4" stroke-linecap="round"/>
+  <circle cx="1060" cy="60" r="2.5" fill="#00ff88" opacity="0.9"/>
+</g>
+
+<g class="shoot3">
+  <line x1="600" y1="40" x2="640" y2="40" stroke="#fbbf24" stroke-width="2" opacity="0.9" stroke-linecap="round"/>
+  <line x1="600" y1="40" x2="580" y2="40" stroke="#fbbf24" stroke-width="1" opacity="0.4" stroke-linecap="round"/>
+  <circle cx="640" cy="40" r="2.5" fill="#fbbf24" opacity="0.9"/>
+</g>
 </svg>
