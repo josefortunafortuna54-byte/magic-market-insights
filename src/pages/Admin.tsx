@@ -4,6 +4,7 @@ import { supabase } from "@/lib/supabaseClient";
 import { Layout } from "@/components/layout/Layout";
 import { motion } from "framer-motion";
 import { Shield, Plus, RefreshCw, TrendingUp, TrendingDown, Users, BarChart3, CheckCircle, XCircle, Trash2 } from "lucide-react";
+import { Shield, Plus, RefreshCw, TrendingUp, TrendingDown, Users, BarChart3, CheckCircle, XCircle, Trash2, Zap } from "lucide-react";
 
 const ADMIN_EMAIL = "josefortunafortuna54@gmail.com";
 
@@ -21,6 +22,10 @@ export default function Admin() {
   const [closing, setClosing] = useState(false);
   const [tab, setTab] = useState<"signals" | "users" | "add">("signals");
 
+  const [boomHours, setBoomHours] = useState<any[]>([]);
+  const [boomForm, setBoomForm] = useState({
+  title: "", time_gmt: "", time_wat: "", pairs: "", description: "", volatility: "4", badge: "",
+});
   // Formulário novo sinal
   const [form, setForm] = useState({
     symbol: "EURUSD", timeframe: "H1", signal_type: "BUY",
@@ -50,6 +55,8 @@ export default function Admin() {
       .order("created_at", { ascending: false })
       .limit(100);
     setSignals(signalsData || []);
+    const { data: boomData } = await supabase.from("boom_hours").select("*").order("created_at", { ascending: true });
+setBoomHours(boomData || []);
 
     // Subscrições
     const { data: subsData } = await supabase
@@ -212,6 +219,7 @@ export default function Admin() {
               { key: "signals", label: "Sinais" },
               { key: "add", label: "+ Adicionar Sinal" },
               { key: "users", label: "Utilizadores" },
+              { key: "boom", label: "⚡ Hora do Boom" },
             ].map(t => (
               <button key={t.key} onClick={() => setTab(t.key as any)}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${tab === t.key ? "bg-primary text-white" : "bg-secondary text-muted-foreground"}`}>
@@ -344,6 +352,114 @@ export default function Admin() {
             </div>
           )}
 
+          {tab === "boom" && (
+  <div className="space-y-6">
+    <div className="glass-card p-6 max-w-lg">
+      <h2 className="font-display text-lg font-bold mb-6 flex items-center gap-2">
+        <Zap className="h-5 w-5 text-primary" /> Adicionar Hora do Boom
+      </h2>
+      <div className="space-y-4">
+        <div>
+          <label className="text-xs text-muted-foreground mb-1 block">Título *</label>
+          <input value={boomForm.title} onChange={e => setBoomForm({...boomForm, title: e.target.value})}
+            className="w-full bg-secondary border border-border rounded-lg px-3 py-2 text-sm"
+            placeholder="Ex: Londres + Nova Iorque" />
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="text-xs text-muted-foreground mb-1 block">Hora GMT *</label>
+            <input value={boomForm.time_gmt} onChange={e => setBoomForm({...boomForm, time_gmt: e.target.value})}
+              className="w-full bg-secondary border border-border rounded-lg px-3 py-2 text-sm"
+              placeholder="13:00 – 17:00" />
+          </div>
+          <div>
+            <label className="text-xs text-muted-foreground mb-1 block">Hora WAT *</label>
+            <input value={boomForm.time_wat} onChange={e => setBoomForm({...boomForm, time_wat: e.target.value})}
+              className="w-full bg-secondary border border-border rounded-lg px-3 py-2 text-sm"
+              placeholder="14:00 – 18:00" />
+          </div>
+        </div>
+        <div>
+          <label className="text-xs text-muted-foreground mb-1 block">Pares (separados por vírgula)</label>
+          <input value={boomForm.pairs} onChange={e => setBoomForm({...boomForm, pairs: e.target.value})}
+            className="w-full bg-secondary border border-border rounded-lg px-3 py-2 text-sm"
+            placeholder="EUR/USD, GBP/USD, USD/JPY" />
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="text-xs text-muted-foreground mb-1 block">Volatilidade (1-5)</label>
+            <input type="number" min="1" max="5" value={boomForm.volatility}
+              onChange={e => setBoomForm({...boomForm, volatility: e.target.value})}
+              className="w-full bg-secondary border border-border rounded-lg px-3 py-2 text-sm" />
+          </div>
+          <div>
+            <label className="text-xs text-muted-foreground mb-1 block">Badge (opcional)</label>
+            <input value={boomForm.badge} onChange={e => setBoomForm({...boomForm, badge: e.target.value})}
+              className="w-full bg-secondary border border-border rounded-lg px-3 py-2 text-sm"
+              placeholder="🔥 Melhor Período" />
+          </div>
+        </div>
+        <div>
+          <label className="text-xs text-muted-foreground mb-1 block">Descrição</label>
+          <textarea value={boomForm.description} onChange={e => setBoomForm({...boomForm, description: e.target.value})}
+            className="w-full bg-secondary border border-border rounded-lg px-3 py-2 text-sm h-20 resize-none"
+            placeholder="Descreve este período de Hora do Boom..." />
+        </div>
+        <button onClick={async () => {
+          if (!boomForm.title || !boomForm.time_gmt || !boomForm.time_wat) { alert("Preenche os campos obrigatórios!"); return; }
+          const pairs = boomForm.pairs.split(",").map(p => p.trim()).filter(Boolean);
+          const { error } = await supabase.from("boom_hours").insert([{
+            title: boomForm.title, time_gmt: boomForm.time_gmt, time_wat: boomForm.time_wat,
+            pairs, description: boomForm.description, volatility: Number(boomForm.volatility),
+            badge: boomForm.badge, is_active: true,
+          }]);
+          if (error) { alert("Erro: " + error.message); return; }
+          alert("✅ Hora do Boom adicionada!");
+          setBoomForm({ title: "", time_gmt: "", time_wat: "", pairs: "", description: "", volatility: "4", badge: "" });
+          await loadData();
+        }}
+          className="w-full py-3 rounded-xl bg-primary text-white font-semibold text-sm hover:opacity-90">
+          ✅ Publicar Hora do Boom
+        </button>
+      </div>
+    </div>
+
+    {/* Lista */}
+    <div className="glass-card overflow-hidden">
+      <table className="w-full text-sm">
+        <thead>
+          <tr className="border-b border-border/50">
+            <th className="text-left p-3 text-xs text-muted-foreground">Título</th>
+            <th className="text-left p-3 text-xs text-muted-foreground">GMT</th>
+            <th className="text-left p-3 text-xs text-muted-foreground">WAT</th>
+            <th className="text-left p-3 text-xs text-muted-foreground">Pares</th>
+            <th className="text-left p-3 text-xs text-muted-foreground">Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          {boomHours.map(b => (
+            <tr key={b.id} className="border-b border-border/30 hover:bg-secondary/20">
+              <td className="p-3 font-semibold">{b.title}</td>
+              <td className="p-3 font-mono text-xs">{b.time_gmt}</td>
+              <td className="p-3 font-mono text-xs">{b.time_wat}</td>
+              <td className="p-3 text-xs text-muted-foreground">{b.pairs?.join(", ")}</td>
+              <td className="p-3">
+                <button onClick={async () => {
+                  if (!confirm("Apagar?")) return;
+                  await supabase.from("boom_hours").delete().eq("id", b.id);
+                  await loadData();
+                }} className="text-destructive hover:opacity-70">
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </div>
+)}
+    
           {/* Tab: Utilizadores */}
           {tab === "users" && (
             <div className="glass-card p-6 text-center text-muted-foreground">
