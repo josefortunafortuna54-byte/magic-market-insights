@@ -76,15 +76,12 @@ export function Navbar() {
         <div className="flex h-20 items-center justify-between">
 
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-1">
+          <Link to="/" className="flex items-center">
             <img 
               src="/logo.png" 
               alt="The Magic Trader" 
-              className="h-16 w-16 object-contain rounded-xl"
+              className="h-16 w-16 object-contain"
             />
-            <span className="font-display text-xl font-bold tracking-tight">
-              The Magic <span style={{ color: "#22c55e" }}>Trader</span>
-            </span>
           </Link>
 
           {/* Desktop Navigation */}

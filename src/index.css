@@ -4,17 +4,17 @@
 @tailwind utilities;
 @layer base {
   :root {
-    --background: 230 35% 5%;
+    --background: 240 25% 4%;
     --foreground: 210 40% 96%;
-    --card: 230 30% 8%;
+    --card: 250 20% 7%;
     --card-foreground: 210 40% 96%;
-    --popover: 240 18% 7%;
+    --popover: 250 20% 7%;
     --popover-foreground: 210 40% 96%;
-    --primary: 142 70% 42%;
+    --primary: 142 70% 45%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 230 28% 12%;
+    --secondary: 250 20% 12%;
     --secondary-foreground: 210 40% 96%;
-    --muted: 230 28% 16%;
+    --muted: 250 20% 16%;
     --muted-foreground: 215 20% 58%;
     --accent: 43 96% 52%;
     --accent-foreground: 220 30% 4%;
@@ -24,27 +24,29 @@
     --success-foreground: 0 0% 100%;
     --warning: 43 96% 52%;
     --warning-foreground: 220 30% 4%;
-    --border: 230 28% 14%;
-    --input: 230 28% 14%;
-    --ring: 142 70% 42%;
+    --border: 260 30% 18%;
+    --input: 260 30% 14%;
+    --ring: 142 70% 45%;
     --radius: 0.75rem;
-    --gradient-primary: linear-gradient(135deg, hsl(142 70% 38%) 0%, hsl(160 70% 45%) 100%);
+    --gradient-primary: linear-gradient(135deg, hsl(142 70% 40%) 0%, hsl(160 70% 50%) 100%);
+    --gradient-magic: linear-gradient(135deg, hsl(270 80% 40%) 0%, hsl(142 70% 40%) 50%, hsl(43 96% 52%) 100%);
     --gradient-gold: linear-gradient(135deg, hsl(43 96% 52%) 0%, hsl(36 100% 48%) 100%);
-    --shadow-glow-primary: 0 0 40px hsl(142 70% 42% / 0.3);
+    --shadow-glow-primary: 0 0 40px hsl(142 70% 45% / 0.3);
+    --shadow-glow-magic: 0 0 60px hsl(270 80% 50% / 0.2), 0 0 30px hsl(142 70% 45% / 0.2);
     --shadow-glow-success: 0 0 30px hsl(142 70% 42% / 0.25);
     --shadow-glow-danger: 0 0 30px hsl(4 86% 58% / 0.25);
     --shadow-card: 0 4px 24px hsl(0 0% 0% / 0.5);
-    --sidebar-background: 240 20% 5%;
+    --sidebar-background: 240 25% 5%;
     --sidebar-foreground: 210 40% 96%;
-    --sidebar-primary: 262 80% 58%;
+    --sidebar-primary: 142 70% 45%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 18% 12%;
+    --sidebar-accent: 250 20% 12%;
     --sidebar-accent-foreground: 210 40% 96%;
-    --sidebar-border: 240 18% 12%;
-    --sidebar-ring: 262 80% 58%;
+    --sidebar-border: 260 30% 14%;
+    --sidebar-ring: 142 70% 45%;
   }
   .dark {
-    --background: 240 20% 4%;
+    --background: 240 25% 4%;
     --foreground: 210 40% 96%;
   }
    
@@ -98,6 +100,35 @@
   .font-trading {
     font-variant-numeric: tabular-nums;
     letter-spacing: -0.02em;
+  }
+   .magic-glow {
+    box-shadow: var(--shadow-glow-magic);
+  }
+  .gradient-magic {
+    @apply bg-clip-text text-transparent;
+    background-image: var(--gradient-magic);
+  }
+  .magic-border {
+    border: 1px solid transparent;
+    background-clip: padding-box;
+    position: relative;
+  }
+  .magic-border::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    background: var(--gradient-magic);
+    z-index: -1;
+    opacity: 0.3;
+  }
+  .stars-bg {
+    background-image: 
+      radial-gradient(1px 1px at 20% 30%, hsl(142 70% 70% / 0.4) 0%, transparent 100%),
+      radial-gradient(1px 1px at 80% 10%, hsl(270 80% 70% / 0.3) 0%, transparent 100%),
+      radial-gradient(1px 1px at 50% 80%, hsl(43 96% 70% / 0.3) 0%, transparent 100%),
+      radial-gradient(1px 1px at 10% 60%, hsl(142 70% 70% / 0.2) 0%, transparent 100%),
+      radial-gradient(1px 1px at 90% 50%, hsl(270 80% 70% / 0.2) 0%, transparent 100%);
   }
 }
 @layer utilities {
