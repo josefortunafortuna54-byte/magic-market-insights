@@ -117,7 +117,7 @@ export default function Horarios() {
               <h1 className="font-display text-2xl sm:text-3xl font-bold">⚡ Hora do Boom</h1>
             </div>
             <p className="text-muted-foreground text-sm mb-8">
-   The Magic Trader analisa o mercado e identifica os melhores momentos para entrar — os períodos de maior volatilidade que chamamos de <span className="text-primary font-semibold">Hora do Boom</span>. Hora de Angola (WAT = GMT+1)
+   The Magic Trader analisa o mercado e identifica os melhores momentos para entrar — os períodos de maior volatilidade <span className="text-primary font-semibold">Hora do Boom</span>. Hora de Angola (WAT = GMT+1)
 </p>
           </motion.div>
 
