@@ -12,37 +12,81 @@
     <stop offset="0%" style="stop-color:#00ff88;stop-opacity:0.6"/>
     <stop offset="100%" style="stop-color:#00ff88;stop-opacity:0"/>
   </radialGradient>
+  <style>
+    @keyframes blink { 0%,90%,100%{opacity:1} 95%{opacity:0.1} }
+    @keyframes pulse { 0%,100%{opacity:0.5;r:16} 50%{opacity:1;r:20} }
+    @keyframes twinkle1 { 0%,100%{opacity:0.9} 50%{opacity:0.1} }
+    @keyframes twinkle2 { 0%,100%{opacity:0.6} 30%{opacity:1} 60%{opacity:0.2} }
+    @keyframes twinkle3 { 0%,100%{opacity:0.4} 40%{opacity:0.9} 70%{opacity:0.1} }
+    @keyframes moveEye1 { 0%{transform:translate(0,0)} 25%{transform:translate(8px,-5px)} 50%{transform:translate(-6px,4px)} 75%{transform:translate(4px,6px)} 100%{transform:translate(0,0)} }
+    @keyframes moveEye2 { 0%{transform:translate(0,0)} 25%{transform:translate(-8px,-4px)} 50%{transform:translate(6px,5px)} 75%{transform:translate(-4px,-6px)} 100%{transform:translate(0,0)} }
+    @keyframes glowPulse { 0%,100%{opacity:0.5} 50%{opacity:0.8} }
+    @keyframes rotate { from{transform:rotate(0deg) translateX(0)} to{transform:rotate(360deg) translateX(0)} }
+    @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
+    .eye-blink { animation: blink 6s infinite; }
+    .eye-blink2 { animation: blink 8s 2s infinite; }
+    .pupil1 { animation: moveEye1 8s ease-in-out infinite; transform-origin: 400px 520px; }
+    .pupil2 { animation: moveEye2 9s ease-in-out infinite; transform-origin: 1040px 520px; }
+    .glow1 { animation: glowPulse 3s ease-in-out infinite; }
+    .glow2 { animation: glowPulse 4s 1s ease-in-out infinite; }
+    .star1 { animation: twinkle1 2s ease-in-out infinite; }
+    .star2 { animation: twinkle2 3s ease-in-out infinite; }
+    .star3 { animation: twinkle3 2.5s ease-in-out infinite; }
+    .star4 { animation: twinkle1 1.8s 0.5s ease-in-out infinite; }
+    .star5 { animation: twinkle2 2.2s 1s ease-in-out infinite; }
+    .star6 { animation: twinkle3 3s 0.8s ease-in-out infinite; }
+    .star7 { animation: twinkle1 2.8s 1.5s ease-in-out infinite; }
+    .magic-star { animation: float 4s ease-in-out infinite; }
+    .magic-star2 { animation: float 5s 1s ease-in-out infinite; }
+    .magic-star3 { animation: float 3.5s 2s ease-in-out infinite; }
+    .orbit { animation: rotate 20s linear infinite; transform-origin: 400px 400px; }
+    .orbit2 { animation: rotate 25s linear infinite reverse; transform-origin: 1040px 400px; }
+  </style>
 </defs>
 
 <rect width="1440" height="900" fill="url(#bg)"/>
-<ellipse cx="400" cy="520" rx="250" ry="120" fill="url(#eyeGlow1)" opacity="0.5"/>
-<ellipse cx="1040" cy="520" rx="250" ry="120" fill="url(#eyeGlow2)" opacity="0.5"/>
+
+<ellipse class="glow1" cx="400" cy="520" rx="250" ry="120" fill="url(#eyeGlow1)" opacity="0.5"/>
+<ellipse class="glow2" cx="1040" cy="520" rx="250" ry="120" fill="url(#eyeGlow2)" opacity="0.5"/>
 <ellipse cx="720" cy="450" rx="450" ry="220" fill="#7c3aed" opacity="0.05"/>
 
-<ellipse cx="400" cy="520" rx="130" ry="65" fill="#003318"/>
-<ellipse cx="400" cy="520" rx="130" ry="65" fill="none" stroke="#00ff88" stroke-width="2" opacity="0.8"/>
-<ellipse cx="400" cy="520" rx="100" ry="48" fill="#004d22"/>
-<ellipse cx="400" cy="520" rx="100" ry="48" fill="none" stroke="#00ff88" stroke-width="1.5" opacity="0.6"/>
-<ellipse cx="400" cy="520" rx="48" ry="48" fill="#001a0d"/>
-<ellipse cx="400" cy="520" rx="48" ry="48" fill="none" stroke="#00ff88" stroke-width="1" opacity="0.9"/>
-<circle cx="400" cy="520" r="16" fill="#00ff88" opacity="0.9"/>
-<circle cx="400" cy="520" r="8" fill="#00ff88"/>
-<circle cx="382" cy="505" r="5" fill="#ffffff" opacity="0.8"/>
+<g class="eye-blink">
+  <ellipse cx="400" cy="520" rx="130" ry="65" fill="#003318"/>
+  <ellipse cx="400" cy="520" rx="130" ry="65" fill="none" stroke="#00ff88" stroke-width="2" opacity="0.8"/>
+  <ellipse cx="400" cy="520" rx="100" ry="48" fill="#004d22"/>
+  <ellipse cx="400" cy="520" rx="100" ry="48" fill="none" stroke="#00ff88" stroke-width="1.5" opacity="0.6"/>
+  <ellipse cx="400" cy="520" rx="48" ry="48" fill="#001a0d"/>
+  <ellipse cx="400" cy="520" rx="48" ry="48" fill="none" stroke="#00ff88" stroke-width="1" opacity="0.9"/>
+  <g class="pupil1">
+    <circle cx="400" cy="520" r="16" fill="#00ff88" opacity="0.9"/>
+    <circle cx="400" cy="520" r="8" fill="#00ff88"/>
+    <circle cx="382" cy="505" r="5" fill="#ffffff" opacity="0.8"/>
+    <circle cx="410" cy="512" r="2" fill="#ffffff" opacity="0.4"/>
+  </g>
+</g>
 
-<ellipse cx="1040" cy="520" rx="130" ry="65" fill="#003318"/>
-<ellipse cx="1040" cy="520" rx="130" ry="65" fill="none" stroke="#00ff88" stroke-width="2" opacity="0.8"/>
-<ellipse cx="1040" cy="520" rx="100" ry="48" fill="#004d22"/>
-<ellipse cx="1040" cy="520" rx="100" ry="48" fill="none" stroke="#00ff88" stroke-width="1.5" opacity="0.6"/>
-<ellipse cx="1040" cy="520" rx="48" ry="48" fill="#001a0d"/>
-<ellipse cx="1040" cy="520" rx="48" ry="48" fill="none" stroke="#00ff88" stroke-width="1" opacity="0.9"/>
-<circle cx="1040" cy="520" r="16" fill="#00ff88" opacity="0.9"/>
-<circle cx="1040" cy="520" r="8" fill="#00ff88"/>
-<circle cx="1022" cy="505" r="5" fill="#ffffff" opacity="0.8"/>
+<g class="eye-blink2">
+  <ellipse cx="1040" cy="520" rx="130" ry="65" fill="#003318"/>
+  <ellipse cx="1040" cy="520" rx="130" ry="65" fill="none" stroke="#00ff88" stroke-width="2" opacity="0.8"/>
+  <ellipse cx="1040" cy="520" rx="100" ry="48" fill="#004d22"/>
+  <ellipse cx="1040" cy="520" rx="100" ry="48" fill="none" stroke="#00ff88" stroke-width="1.5" opacity="0.6"/>
+  <ellipse cx="1040" cy="520" rx="48" ry="48" fill="#001a0d"/>
+  <ellipse cx="1040" cy="520" rx="48" ry="48" fill="none" stroke="#00ff88" stroke-width="1" opacity="0.9"/>
+  <g class="pupil2">
+    <circle cx="1040" cy="520" r="16" fill="#00ff88" opacity="0.9"/>
+    <circle cx="1040" cy="520" r="8" fill="#00ff88"/>
+    <circle cx="1022" cy="505" r="5" fill="#ffffff" opacity="0.8"/>
+    <circle cx="1050" cy="512" r="2" fill="#ffffff" opacity="0.4"/>
+  </g>
+</g>
 
 <path d="M270 520 Q335 480 400 515 Q465 550 530 520" fill="none" stroke="#00ff88" stroke-width="1.5" opacity="0.5"/>
 <path d="M270 520 Q335 560 400 525 Q465 490 530 520" fill="none" stroke="#00ff88" stroke-width="1.5" opacity="0.5"/>
 <path d="M910 520 Q975 480 1040 515 Q1105 550 1170 520" fill="none" stroke="#00ff88" stroke-width="1.5" opacity="0.5"/>
 <path d="M910 520 Q975 560 1040 525 Q1105 490 1170 520" fill="none" stroke="#00ff88" stroke-width="1.5" opacity="0.5"/>
+
+<circle class="orbit" cx="400" cy="400" r="130" fill="none" stroke="#00ff88" stroke-width="0.5" opacity="0.1" stroke-dasharray="6 6"/>
+<circle class="orbit2" cx="1040" cy="400" r="130" fill="none" stroke="#00ff88" stroke-width="0.5" opacity="0.1" stroke-dasharray="6 6"/>
 
 <line x1="400" y1="600" x2="400" y2="650" stroke="#00ff88" stroke-width="1" opacity="0.3"/>
 <line x1="388" y1="638" x2="400" y2="655" stroke="#00ff88" stroke-width="1" opacity="0.2"/>
@@ -51,28 +95,40 @@
 <line x1="1028" y1="638" x2="1040" y2="655" stroke="#00ff88" stroke-width="1" opacity="0.2"/>
 <line x1="1052" y1="638" x2="1040" y2="655" stroke="#00ff88" stroke-width="1" opacity="0.2"/>
 
-<circle cx="400" cy="400" r="70" fill="none" stroke="#00ff88" stroke-width="0.5" opacity="0.15" stroke-dasharray="6 6"/>
-<circle cx="1040" cy="400" r="70" fill="none" stroke="#00ff88" stroke-width="0.5" opacity="0.15" stroke-dasharray="6 6"/>
+<g class="magic-star">
+  <circle class="star1" cx="720" cy="180" r="3" fill="#00ff88" opacity="0.9"/>
+  <path d="M717 175 L720 165 L723 175 L733 178 L723 184 L720 194 L717 184 L707 178 Z" fill="#00ff88" opacity="0.7"/>
+</g>
+<g class="magic-star2">
+  <circle class="star2" cx="150" cy="120" r="2" fill="#ffffff" opacity="0.8"/>
+  <path d="M147 115 L150 108 L153 115 L160 118 L153 122 L150 129 L147 122 L140 118 Z" fill="#ffffff" opacity="0.4"/>
+</g>
+<g class="magic-star3">
+  <circle class="star3" cx="1200" cy="100" r="2.5" fill="#fbbf24" opacity="0.7"/>
+  <path d="M1197 95 L1200 88 L1203 95 L1210 98 L1203 103 L1200 110 L1197 103 L1190 98 Z" fill="#fbbf24" opacity="0.5"/>
+</g>
+<g class="magic-star">
+  <circle class="star4" cx="600" cy="100" r="2" fill="#fbbf24" opacity="0.7"/>
+  <path d="M597 95 L600 88 L603 95 L610 98 L603 103 L600 110 L597 103 L590 98 Z" fill="#fbbf24" opacity="0.4"/>
+</g>
 
-<circle cx="720" cy="180" r="3" fill="#00ff88" opacity="0.9"/>
-<path d="M717 175 L720 165 L723 175 L733 178 L723 184 L720 194 L717 184 L707 178 Z" fill="#00ff88" opacity="0.7"/>
-<circle cx="150" cy="120" r="2" fill="#ffffff" opacity="0.8"/>
-<circle cx="280" cy="80" r="1.5" fill="#00ff88" opacity="0.6"/>
-<circle cx="1200" cy="100" r="2.5" fill="#ffffff" opacity="0.7"/>
-<circle cx="1350" cy="200" r="1.5" fill="#00ff88" opacity="0.5"/>
-<circle cx="80" cy="300" r="2" fill="#7c3aed" opacity="0.7"/>
-<circle cx="1380" cy="350" r="1.5" fill="#ffffff" opacity="0.6"/>
-<circle cx="600" cy="100" r="2" fill="#fbbf24" opacity="0.7"/>
-<circle cx="900" cy="80" r="1.5" fill="#fbbf24" opacity="0.6"/>
-<circle cx="200" cy="700" r="1.5" fill="#7c3aed" opacity="0.4"/>
-<circle cx="1300" cy="680" r="2" fill="#00ff88" opacity="0.4"/>
-<circle cx="100" cy="500" r="1" fill="#ffffff" opacity="0.5"/>
-<circle cx="1400" cy="450" r="1" fill="#ffffff" opacity="0.5"/>
-<circle cx="500" cy="200" r="1.5" fill="#ffffff" opacity="0.6"/>
-<circle cx="960" cy="150" r="1.5" fill="#ffffff" opacity="0.5"/>
-<circle cx="350" cy="300" r="1" fill="#00ff88" opacity="0.4"/>
-<circle cx="1100" cy="280" r="1" fill="#00ff88" opacity="0.4"/>
-<path d="M145 115 L150 105 L155 115 L165 118 L155 124 L150 134 L145 124 L135 118 Z" fill="#ffffff" opacity="0.4"/>
-<path d="M1195 95 L1200 85 L1205 95 L1215 98 L1205 104 L1200 114 L1195 104 L1185 98 Z" fill="#fbbf24" opacity="0.5"/>
-<path d="M595 95 L600 85 L605 95 L615 98 L605 104 L600 114 L595 104 L585 98 Z" fill="#fbbf24" opacity="0.4"/>
+<circle class="star1" cx="280" cy="80" r="1.5" fill="#00ff88" opacity="0.6"/>
+<circle class="star2" cx="1350" cy="200" r="1.5" fill="#00ff88" opacity="0.5"/>
+<circle class="star3" cx="80" cy="300" r="2" fill="#7c3aed" opacity="0.7"/>
+<circle class="star4" cx="1380" cy="350" r="1.5" fill="#ffffff" opacity="0.6"/>
+<circle class="star5" cx="900" cy="80" r="1.5" fill="#fbbf24" opacity="0.6"/>
+<circle class="star6" cx="200" cy="700" r="1.5" fill="#7c3aed" opacity="0.4"/>
+<circle class="star7" cx="1300" cy="680" r="2" fill="#00ff88" opacity="0.4"/>
+<circle class="star1" cx="100" cy="500" r="1" fill="#ffffff" opacity="0.5"/>
+<circle class="star2" cx="1400" cy="450" r="1" fill="#ffffff" opacity="0.5"/>
+<circle class="star3" cx="500" cy="200" r="1.5" fill="#ffffff" opacity="0.6"/>
+<circle class="star4" cx="960" cy="150" r="1.5" fill="#ffffff" opacity="0.5"/>
+<circle class="star5" cx="350" cy="300" r="1" fill="#00ff88" opacity="0.4"/>
+<circle class="star6" cx="1100" cy="280" r="1" fill="#00ff88" opacity="0.4"/>
+<circle class="star7" cx="810" cy="60" r="1.5" fill="#ffffff" opacity="0.6"/>
+<circle class="star1" cx="450" cy="150" r="1" fill="#7c3aed" opacity="0.5"/>
+<circle class="star2" cx="990" cy="220" r="1" fill="#7c3aed" opacity="0.4"/>
+<circle class="star3" cx="660" cy="50" r="2" fill="#ffffff" opacity="0.7"/>
+<circle class="star4" cx="1250" cy="400" r="1" fill="#fbbf24" opacity="0.4"/>
+<circle class="star5" cx="180" cy="400" r="1" fill="#fbbf24" opacity="0.3"/>
 </svg>
