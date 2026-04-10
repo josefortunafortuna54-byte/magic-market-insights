@@ -1,15 +1,17 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Sparkles, BarChart3, History, Crown, LogIn, LogOut, User, Settings } from "lucide-react";
+import { Menu, X, Sparkles, BarChart3, History, Crown, LogIn, LogOut, User, Settings, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { supabase } from "@/lib/supabaseClient";
+import { supabase } from "@/lib/supabaseClient"
+import { Menu, X, Sparkles, BarChart3, History, Crown, LogIn, LogOut, User, Settings, Clock } from "lucide-react";
 
 const navLinks = [
   { href: "/", label: "Home", icon: Sparkles },
   { href: "/analises", label: "Análises", icon: BarChart3 },
   { href: "/historico", label: "Histórico", icon: History },
   { href: "/planos", label: "Planos", icon: Crown },
+  { href: "/horarios", label: "Horários", icon: Clock },
 ];
 
 export function Navbar() {
