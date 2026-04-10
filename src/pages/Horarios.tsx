@@ -114,11 +114,11 @@ export default function Horarios() {
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
             <div className="flex items-center gap-3 mb-2">
               <Clock className="h-6 w-6 text-primary" />
-              <h1 className="font-display text-2xl sm:text-3xl font-bold">Horários de Grandes Movimentos</h1>
+              <h1 className="font-display text-2xl sm:text-3xl font-bold">⚡ Hora do Boom</h1>
             </div>
             <p className="text-muted-foreground text-sm mb-8">
-              Sessões de mercado e períodos de maior volatilidade no Forex — hora de Angola (WAT = GMT+1)
-            </p>
+   The Magic Trader analisa o mercado e identifica os melhores momentos para entrar — os períodos de maior volatilidade que chamamos de <span className="text-primary font-semibold">Hora do Boom</span>. Hora de Angola (WAT = GMT+1)
+</p>
           </motion.div>
 
           {/* Hora atual */}
@@ -183,7 +183,7 @@ export default function Horarios() {
           </div>
 
           {/* Sobreposições */}
-          <h2 className="font-display text-lg font-bold mb-4">⚡ Períodos de Sobreposição</h2>
+          <h2 className="font-display text-lg font-bold mb-4">⚡ Hora do Boom — Períodos de Maior Oportunidade</h2>
           <div className="grid md:grid-cols-2 gap-4 mb-10">
             {overlap.map((o, i) => (
               <motion.div key={i} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
@@ -260,7 +260,7 @@ export default function Horarios() {
             <div className="flex gap-3">
               <Info className="h-5 w-5 text-primary shrink-0 mt-0.5" />
               <div>
-                <p className="font-semibold text-sm mb-1">Dica para traders angolanos</p>
+                <p className="font-semibold text-sm mb-1">💥 Hora do Boom — Dica da equipa The Magic Trader</p>
                 <p className="text-sm text-muted-foreground">
                   O melhor horário para trading em Angola (WAT) é entre as <strong>14:00 e 18:00</strong> — 
                   sobreposição das sessões de Londres e Nova Iorque. É quando o mercado tem mais liquidez 
