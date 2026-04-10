@@ -36,8 +36,13 @@ export default function Index() {
     <Layout>
       {/* Hero */}
       <section className="relative min-h-[90vh] flex items-center overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-purple-900/30 via-background to-background" />
-        <div className="absolute inset-0 stars-bg" />
+        <div className="absolute inset-0" style={{
+  backgroundImage: "url('/magic-bg.svg')",
+  backgroundSize: "cover",
+  backgroundPosition: "center",
+  opacity: 0.6
+}} />
+<div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/50 to-background" />
         <motion.div animate={{ y: [0, -20, 0] }} transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
           className="absolute top-1/4 right-1/4 w-64 h-64 bg-primary/10 rounded-full blur-3xl" />
         <motion.div animate={{ y: [0, 20, 0] }} transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
