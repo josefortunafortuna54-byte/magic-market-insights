@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Clock, Info, Zap } from "lucide-react";
+import { Zap, Info, Bell } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
 import { supabase } from "@/lib/supabaseClient";
 
@@ -14,17 +14,16 @@ interface BoomHour {
   volatility: number;
   is_active: boolean;
   badge: string;
+  days: string;
+  enabled: boolean;
 }
 
-function VolatilityBar({ level }: { level: number }) {
+function VolatilityDots({ level }: { level: number }) {
   return (
-    <div className="flex gap-1 items-center">
-      {[1, 2, 3, 4, 5].map(i => (
-        <div key={i} className={`h-3 w-5 rounded-sm ${i <= level ? "bg-primary" : "bg-secondary"}`} />
+    <div className="flex gap-1">
+      {[1,2,3,4,5].map(i => (
+        <div key={i} className={`w-2 h-2 rounded-full ${i <= level ? "bg-primary" : "bg-secondary"}`} />
       ))}
-      <span className="text-xs text-muted-foreground ml-1">
-        {level === 5 ? "Muito Alta" : level === 4 ? "Alta" : level === 3 ? "Média" : level === 2 ? "Baixa" : "Muito Baixa"}
-      </span>
     </div>
   );
 }
@@ -32,6 +31,7 @@ function VolatilityBar({ level }: { level: number }) {
 export default function Horarios() {
   const [boomHours, setBoomHours] = useState<BoomHour[]>([]);
   const [loading, setLoading] = useState(true);
+  const now = new Date();
 
   useEffect(() => {
     const fetch = async () => {
@@ -39,50 +39,48 @@ export default function Horarios() {
         .from("boom_hours")
         .select("*")
         .eq("is_active", true)
-        .order("created_at", { ascending: true });
+        .order("time_wat", { ascending: true });
       setBoomHours(data || []);
       setLoading(false);
     };
     fetch();
   }, []);
 
-  const now = new Date();
-  const currentGMT = now.getUTCHours() + now.getUTCMinutes() / 60;
-
   return (
     <Layout>
       <section className="pt-8 pb-24">
-        <div className="container mx-auto px-4">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-            <div className="flex items-center gap-3 mb-2">
-              <Zap className="h-6 w-6 text-primary" />
-              <h1 className="font-display text-2xl sm:text-3xl font-bold">⚡ Hora do Boom</h1>
+        <div className="container mx-auto px-4 max-w-lg">
+          
+          {/* Header estilo app de alarme */}
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
+            <div className="flex items-center gap-3 mb-1">
+              <Bell className="h-6 w-6 text-primary" />
+              <h1 className="font-display text-2xl font-bold">⚡ Hora do Boom</h1>
             </div>
-            <p className="text-muted-foreground text-sm mb-8 max-w-2xl">
-              A equipa <span className="text-primary font-semibold">The Magic Trader</span> analisa o mercado 
-              e identifica os melhores momentos para entrar — os períodos de maior volatilidade que chamamos de{" "}
-              <span className="text-primary font-semibold">Hora do Boom</span>. Hora de Angola (WAT = GMT+1)
+            <p className="text-muted-foreground text-sm">
+              Horários de grandes movimentos selecionados pela equipa{" "}
+              <span className="text-primary font-semibold">The Magic Trader</span>
             </p>
           </motion.div>
 
           {/* Hora atual */}
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }}
-            className="glass-card p-4 mb-8 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-              <Clock className="h-5 w-5 text-primary" />
-            </div>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+            className="glass-card p-4 mb-6 flex items-center justify-between">
             <div>
-              <p className="text-xs text-muted-foreground">Hora atual</p>
-              <p className="font-display text-lg font-bold">
-                {String(now.getUTCHours()).padStart(2, "0")}:{String(now.getUTCMinutes()).padStart(2, "0")} GMT
-                <span className="text-sm text-muted-foreground ml-2">
-                  ({String((now.getUTCHours() + 1) % 24).padStart(2, "0")}:{String(now.getUTCMinutes()).padStart(2, "0")} WAT)
-                </span>
+              <p className="text-xs text-muted-foreground">Hora atual (Angola)</p>
+              <p className="font-display text-2xl font-bold text-primary">
+                {String((now.getUTCHours() + 1) % 24).padStart(2, "0")}:{String(now.getUTCMinutes()).padStart(2, "0")} WAT
+              </p>
+            </div>
+            <div className="text-right">
+              <p className="text-xs text-muted-foreground">GMT</p>
+              <p className="font-mono text-sm text-muted-foreground">
+                {String(now.getUTCHours()).padStart(2, "0")}:{String(now.getUTCMinutes()).padStart(2, "0")}
               </p>
             </div>
           </motion.div>
 
-          {/* Boom Hours */}
+          {/* Lista de alarmes estilo relógio */}
           {loading ? (
             <div className="glass-card p-12 text-center">
               <div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full mx-auto mb-4" />
@@ -92,65 +90,84 @@ export default function Horarios() {
             <div className="glass-card p-12 text-center">
               <Zap className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-40" />
               <h3 className="font-display text-lg font-semibold mb-2">Sem horários publicados</h3>
-              <p className="text-sm text-muted-foreground">
-                A equipa The Magic Trader ainda não publicou horários de Hora do Boom.
-              </p>
+              <p className="text-sm text-muted-foreground">A equipa ainda não publicou horários de Hora do Boom.</p>
             </div>
           ) : (
-            <div className="grid md:grid-cols-2 gap-4 mb-10">
-              {boomHours.map((item, i) => (
-                <motion.div key={item.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.1 }}
-                  className="glass-card p-5 border border-primary/20 bg-primary/5">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-2">
-                      <Zap className="h-4 w-4 text-primary" />
-                      <h3 className="font-display font-semibold">{item.title}</h3>
+            <div className="space-y-0">
+              {boomHours.map((item, i) => {
+                const [startWAT] = item.time_wat.split(" – ");
+                const [h, m] = startWAT.split(":").map(Number);
+                const currentWAT = (now.getUTCHours() + 1) % 24 + now.getUTCMinutes() / 60;
+                const itemTime = h + (m || 0) / 60;
+                const isNow = Math.abs(currentWAT - itemTime) < 0.5;
+
+                return (
+                  <motion.div
+                    key={item.id}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: i * 0.08 }}
+                    className={`border-b border-border/40 py-5 flex items-center justify-between ${isNow ? "bg-primary/5 px-3 rounded-xl" : ""}`}
+                  >
+                    {/* Lado esquerdo — hora grande */}
+                    <div className="flex-1">
+                      <div className="flex items-baseline gap-3 mb-1">
+                        <span className={`font-display text-5xl font-light tracking-tight ${item.enabled ? "text-foreground" : "text-muted-foreground/50"}`}>
+                          {startWAT}
+                        </span>
+                        {isNow && (
+                          <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full font-semibold animate-pulse">
+                            ● Agora
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        {item.pairs.map(pair => (
+                          <span key={pair} className={`font-mono text-sm font-semibold ${item.enabled ? "text-primary" : "text-muted-foreground/40"}`}>
+                            {pair}
+                          </span>
+                        ))}
+                        {item.badge && (
+                          <span className="text-sm">{item.badge}</span>
+                        )}
+                      </div>
+                      <p className={`text-xs mt-1 ${item.enabled ? "text-muted-foreground" : "text-muted-foreground/40"}`}>
+                        {item.days || "Todos os dias"} · GMT {item.time_gmt}
+                      </p>
+                      {item.description && (
+                        <p className={`text-xs mt-1 ${item.enabled ? "text-muted-foreground/70" : "text-muted-foreground/30"}`}>
+                          {item.description}
+                        </p>
+                      )}
+                      <div className="mt-2">
+                        <VolatilityDots level={item.volatility} />
+                      </div>
                     </div>
-                    {item.badge && (
-                      <span className="text-xs bg-primary/20 text-primary px-2 py-1 rounded-full font-semibold">
-                        {item.badge}
-                      </span>
-                    )}
-                  </div>
-                  <div className="space-y-2 mb-3">
-                    <p className="text-sm text-muted-foreground">
-                      🕐 GMT: <span className="text-foreground font-mono font-semibold">{item.time_gmt}</span>
-                      <span className="mx-2">·</span>
-                      WAT: <span className="text-foreground font-mono font-semibold">{item.time_wat}</span>
-                    </p>
-                    <VolatilityBar level={item.volatility} />
-                  </div>
-                  {item.description && (
-                    <p className="text-xs text-muted-foreground mb-3">{item.description}</p>
-                  )}
-                  {item.pairs.length > 0 && (
-                    <div className="flex flex-wrap gap-1">
-                      {item.pairs.map(pair => (
-                        <span key={pair} className="text-xs bg-secondary/80 px-2 py-0.5 rounded-lg font-mono">{pair}</span>
-                      ))}
+
+                    {/* Toggle */}
+                    <div className="ml-4">
+                      <div className={`w-14 h-7 rounded-full relative transition-all ${item.enabled ? "bg-primary" : "bg-secondary"}`}>
+                        <div className={`absolute top-0.5 w-6 h-6 rounded-full bg-white shadow transition-all ${item.enabled ? "right-0.5" : "left-0.5"}`} />
+                      </div>
                     </div>
-                  )}
-                </motion.div>
-              ))}
+                  </motion.div>
+                );
+              })}
             </div>
           )}
 
           {/* Dica */}
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}
-            className="glass-card p-5 border border-primary/20 bg-primary/5">
+            className="glass-card p-5 border border-primary/20 bg-primary/5 mt-8">
             <div className="flex gap-3">
               <Info className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-              <div>
-                <p className="font-semibold text-sm mb-1">💥 Hora do Boom — Dica da equipa The Magic Trader</p>
-                <p className="text-sm text-muted-foreground">
-                  Os horários publicados aqui são analisados e selecionados pela equipa The Magic Trader 
-                  com base nos melhores momentos de volatilidade do mercado Forex. 
-                  Combina estes horários com os nossos sinais para maximizar os teus resultados.
-                </p>
-              </div>
+              <p className="text-sm text-muted-foreground">
+                <span className="text-primary font-semibold">💥 Dica The Magic Trader:</span>{" "}
+                Combina estes horários com os nossos sinais para maximizar os teus resultados no mercado Forex.
+              </p>
             </div>
           </motion.div>
+
         </div>
       </section>
     </Layout>
