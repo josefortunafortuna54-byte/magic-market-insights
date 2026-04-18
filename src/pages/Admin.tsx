@@ -26,6 +26,13 @@ export default function Admin() {
   const [postAudio, setPostAudio] = useState<File | null>(null);
   const [posts, setPosts] = useState<any[]>([]);
 
+  const [boomTimes, setBoomTimes] = useState<any[]>([]);
+  const [boomTimeForm, setBoomTimeForm] = useState({
+  pair: "", boom_time: "", confidence: "75", result: ""
+});
+  const [boomImage, setBoomImage] = useState<File | null>(null);
+  const [boomAudio, setBoomAudio] = useState<File | null>(null);
+
   const [boomHours, setBoomHours] = useState<any[]>([]);
   const [boomForm, setBoomForm] = useState({
   title: "", time_gmt: "", time_wat: "", pairs: "", description: "", volatility: "4", badge: "",
@@ -64,6 +71,9 @@ export default function Admin() {
 setBoomHours(boomData || []); 
     const { data: postsData } = await supabase.from("posts").select("*").order("created_at", { ascending: false }).limit(20);
 setPosts(postsData || []);
+
+   const { data: boomTimesData } = await supabase.from("boom_times").select("*").order("boom_time", { ascending: false }).limit(20);
+setBoomTimes(boomTimesData || []);
 
     // Subscrições
     const { data: subsData } = await supabase
@@ -227,7 +237,8 @@ setPosts(postsData || []);
               { key: "add", label: "+ Adicionar Sinal" },
               { key: "users", label: "Utilizadores" },
               { key: "boom", label: "⚡ Hora do Boom" },
-              { key: "comunidade", label: "💬 Comunidade" }, 
+              { key: "comunidade", label: "💬 Comunidade" },
+              { key: "boom_times", label: "⚡ Boom Times" }, 
             ].map(t => (
               <button key={t.key} onClick={() => setTab(t.key as any)}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${tab === t.key ? "bg-primary text-white" : "bg-secondary text-muted-foreground"}`}>
@@ -580,7 +591,135 @@ setPosts(postsData || []);
       </table>
     </div>
   </div>
-)} 
+)}
+         {tab === "boom_times" && (
+  <div className="space-y-6">
+    <div className="glass-card p-6 max-w-lg">
+      <h2 className="font-display text-lg font-bold mb-6">⚡ Novo Boom</h2>
+      <div className="space-y-4">
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="text-xs text-muted-foreground mb-1 block">Par *</label>
+            <input value={boomTimeForm.pair} onChange={e => setBoomTimeForm({...boomTimeForm, pair: e.target.value})}
+              className="w-full bg-secondary border border-border rounded-lg px-3 py-2 text-sm" placeholder="XAUUSD" />
+          </div>
+          <div>
+            <label className="text-xs text-muted-foreground mb-1 block">Confiança (%)</label>
+            <input type="number" value={boomTimeForm.confidence} onChange={e => setBoomTimeForm({...boomTimeForm, confidence: e.target.value})}
+              className="w-full bg-secondary border border-border rounded-lg px-3 py-2 text-sm" min="0" max="100" />
+          </div>
+        </div>
+        <div>
+          <label className="text-xs text-muted-foreground mb-1 block">Data e Hora do Boom *</label>
+          <input type="datetime-local" value={boomTimeForm.boom_time} onChange={e => setBoomTimeForm({...boomTimeForm, boom_time: e.target.value})}
+            className="w-full bg-secondary border border-border rounded-lg px-3 py-2 text-sm" />
+        </div>
+        <div>
+          <label className="text-xs text-muted-foreground mb-1 block">Resultado (após o boom)</label>
+          <select value={boomTimeForm.result} onChange={e => setBoomTimeForm({...boomTimeForm, result: e.target.value})}
+            className="w-full bg-secondary border border-border rounded-lg px-3 py-2 text-sm">
+            <option value="">Sem resultado ainda</option>
+            <option value="BUY">✅ BUY</option>
+            <option value="SELL">❌ SELL</option>
+          </select>
+        </div>
+        <div>
+          <label className="text-xs text-muted-foreground mb-1 block">Imagem da análise</label>
+          <input type="file" accept="image/*" onChange={e => setBoomImage(e.target.files?.[0] || null)}
+            className="w-full bg-secondary border border-border rounded-lg px-3 py-2 text-sm" />
+        </div>
+        <div>
+          <label className="text-xs text-muted-foreground mb-1 block">Áudio da equipa</label>
+          <input type="file" accept="audio/*" onChange={e => setBoomAudio(e.target.files?.[0] || null)}
+            className="w-full bg-secondary border border-border rounded-lg px-3 py-2 text-sm" />
+        </div>
+        <button onClick={async () => {
+          if (!boomTimeForm.pair || !boomTimeForm.boom_time) { alert("Par e hora obrigatórios!"); return; }
+          let image_url = "";
+          let audio_url = "";
+          if (boomImage) {
+            const clean = boomImage.name.replace(/[^a-zA-Z0-9.\-_]/g, "_");
+            const filename = `boom/${Date.now()}-${clean}`;
+            await supabase.storage.from("posts").upload(filename, boomImage);
+            const { data } = supabase.storage.from("posts").getPublicUrl(filename);
+            image_url = data.publicUrl;
+          }
+          if (boomAudio) {
+            const clean = boomAudio.name.replace(/[^a-zA-Z0-9.\-_]/g, "_");
+            const filename = `boom-audio/${Date.now()}-${clean}`;
+            await supabase.storage.from("posts").upload(filename, boomAudio);
+            const { data } = supabase.storage.from("posts").getPublicUrl(filename);
+            audio_url = data.publicUrl;
+          }
+          const { error } = await supabase.from("boom_times").insert([{
+            pair: boomTimeForm.pair,
+            boom_time: new Date(boomTimeForm.boom_time).toISOString(),
+            confidence: Number(boomTimeForm.confidence),
+            result: boomTimeForm.result || null,
+            image_url, audio_url, is_active: true,
+          }]);
+          if (error) { alert("Erro: " + error.message); return; }
+          alert("✅ Boom publicado!");
+          setBoomTimeForm({ pair: "", boom_time: "", confidence: "75", result: "" });
+          setBoomImage(null); setBoomAudio(null);
+          await loadData();
+        }}
+          className="w-full py-3 rounded-xl bg-primary text-white font-semibold text-sm hover:opacity-90">
+          ⚡ Publicar Boom
+        </button>
+      </div>
+    </div>
+    <div className="glass-card overflow-hidden">
+      <table className="w-full text-sm">
+        <thead>
+          <tr className="border-b border-border/50">
+            <th className="text-left p-3 text-xs text-muted-foreground">Par</th>
+            <th className="text-left p-3 text-xs text-muted-foreground">Hora</th>
+            <th className="text-left p-3 text-xs text-muted-foreground">Confiança</th>
+            <th className="text-left p-3 text-xs text-muted-foreground">Resultado</th>
+            <th className="text-left p-3 text-xs text-muted-foreground">Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          {boomTimes.map(b => (
+            <tr key={b.id} className="border-b border-border/30 hover:bg-secondary/20">
+              <td className="p-3 font-bold text-primary">{b.pair}</td>
+              <td className="p-3 font-mono text-xs">{new Date(b.boom_time).toLocaleString("pt-PT")}</td>
+              <td className="p-3">{b.confidence}%</td>
+              <td className="p-3">
+                {b.result ? (
+                  <span className={`text-xs px-2 py-1 rounded-lg font-semibold ${b.result === "BUY" ? "bg-success/20 text-success" : "bg-destructive/20 text-destructive"}`}>
+                    {b.result}
+                  </span>
+                ) : <span className="text-xs text-muted-foreground">—</span>}
+              </td>
+              <td className="p-3 flex gap-2">
+                <select onChange={async e => {
+                  await supabase.from("boom_times").update({ result: e.target.value || null }).eq("id", b.id);
+                  await loadData();
+                }} defaultValue={b.result || ""}
+                  className="text-xs bg-secondary border border-border rounded px-1 py-1">
+                  <option value="">Sem resultado</option>
+                  <option value="BUY">BUY</option>
+                  <option value="SELL">SELL</option>
+                </select>
+                <button onClick={async () => {
+                  if (!confirm("Apagar boom?")) return;
+                  await supabase.from("boom_times").delete().eq("id", b.id);
+                  await loadData();
+                }} className="text-destructive hover:opacity-70">
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </div>
+)}
+          
+               
           {/* Tab: Utilizadores */}
           {tab === "users" && (
             <div className="glass-card p-6 text-center text-muted-foreground">
