@@ -28,6 +28,8 @@ interface Comment {
   text: string;
   audio_url: string;
   created_at: string;
+  user_name: string;
+  user_avatar: string;
 }
 
 function formatTime(dateStr: string) {
@@ -137,7 +139,16 @@ function PostCard({ post, user }: { post: Post; user: any }) {
         audio_url = urlData.publicUrl;
       }
     }
-    await supabase.from("post_comments").insert([{ post_id: post.id, user_id: user.id, text: commentText, audio_url }]);
+    const userName = user?.user_metadata?.full_name || user?.email?.split("@")[0] || "Utilizador";
+    const userAvatar = user?.user_metadata?.avatar_url || "";
+    await supabase.from("post_comments").insert([{
+      post_id: post.id,
+      user_id: user.id,
+      text: commentText,
+      audio_url,
+      user_name: userName,
+      user_avatar: userAvatar,
+    }]);
     setCommentText("");
     setAudioBlob(null);
     setSubmitting(false);
@@ -223,12 +234,22 @@ function PostCard({ post, user }: { post: Post; user: any }) {
               exit={{ opacity: 0, height: 0 }} className="mt-4 space-y-3">
 
               {comments.map(c => (
-                <div key={c.id} className="bg-secondary/40 rounded-xl p-3">
-                  <p className="text-xs text-muted-foreground mb-1">{formatTime(c.created_at)}</p>
-                  {c.text && <p className="text-sm">{c.text}</p>}
-                  {c.audio_url && <div className="mt-2"><AudioPlayer url={c.audio_url} /></div>}
-                </div>
-              ))}
+  <div key={c.id} className="bg-secondary/40 rounded-xl p-3">
+    <div className="flex items-center gap-2 mb-2">
+      {c.user_avatar ? (
+        <img src={c.user_avatar} className="w-6 h-6 rounded-full object-cover" />
+      ) : (
+        <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center text-xs font-bold text-primary">
+          {(c.user_name || "U")[0].toUpperCase()}
+        </div>
+      )}
+      <span className="text-xs font-semibold">{c.user_name || "Utilizador"}</span>
+      <span className="text-xs text-muted-foreground ml-auto">{formatTime(c.created_at)}</span>
+    </div>
+    {c.text && <p className="text-sm">{c.text}</p>}
+    {c.audio_url && <div className="mt-2"><AudioPlayer url={c.audio_url} /></div>}
+  </div>
+))}
 
               {/* Input comentário */}
               {user ? (
