@@ -12,6 +12,7 @@ import Registro from "./pages/Registro";
 import NotFound from "./pages/NotFound";
 import Admin from "./pages/Admin";
 import Horarios from "./pages/Horarios";
+import Comunidade from "./pages/Comunidade";
 
 const queryClient = new QueryClient();
 
@@ -32,6 +33,7 @@ const App = () => (
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
           <Route path="/horarios" element={<Horarios />} />
+          <Route path="/comunidade" element={<Comunidade />} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>

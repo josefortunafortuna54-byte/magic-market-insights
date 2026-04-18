@@ -5,6 +5,7 @@ import { Menu, X, Sparkles, BarChart3, History, Crown, LogIn, LogOut, User, Sett
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabaseClient"
 import { Menu, X, Sparkles, BarChart3, History, Crown, LogIn, LogOut, User, Settings, Clock } from "lucide-react";
+import { Menu, X, Sparkles, BarChart3, History, Crown, LogIn, LogOut, User, Settings, Clock, MessageCircle } from "lucide-react";
 
 const navLinks = [
   { href: "/", label: "Home", icon: Sparkles },
@@ -12,6 +13,7 @@ const navLinks = [
   { href: "/historico", label: "Histórico", icon: History },
   { href: "/planos", label: "Planos", icon: Crown },
   { href: "/horarios", label: "Horários", icon: Clock },
+  { href: "/comunidade", label: "Comunidade", icon: MessageCircle },
 ];
 
 export function Navbar() {

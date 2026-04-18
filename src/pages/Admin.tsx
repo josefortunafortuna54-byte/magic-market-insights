@@ -21,10 +21,15 @@ export default function Admin() {
   const [generating, setGenerating] = useState(false);
   const [closing, setClosing] = useState(false);
   const [tab, setTab] = useState<"signals" | "users" | "add">("signals");
+  const [postForm, setPostForm] = useState({ title: "", content: "", pair: "", signal_type: "NEUTRO" });
+  const [postImage, setPostImage] = useState<File | null>(null);
+  const [postAudio, setPostAudio] = useState<File | null>(null);
+  const [posts, setPosts] = useState<any[]>([]);
 
   const [boomHours, setBoomHours] = useState<any[]>([]);
   const [boomForm, setBoomForm] = useState({
   title: "", time_gmt: "", time_wat: "", pairs: "", description: "", volatility: "4", badge: "",
+  
 });
   // Formulário novo sinal
   const [form, setForm] = useState({
@@ -56,7 +61,9 @@ export default function Admin() {
       .limit(100);
     setSignals(signalsData || []);
     const { data: boomData } = await supabase.from("boom_hours").select("*").order("created_at", { ascending: true });
-setBoomHours(boomData || []);
+setBoomHours(boomData || []); 
+    const { data: postsData } = await supabase.from("posts").select("*").order("created_at", { ascending: false }).limit(20);
+setPosts(postsData || []);
 
     // Subscrições
     const { data: subsData } = await supabase
@@ -220,6 +227,7 @@ setBoomHours(boomData || []);
               { key: "add", label: "+ Adicionar Sinal" },
               { key: "users", label: "Utilizadores" },
               { key: "boom", label: "⚡ Hora do Boom" },
+              { key: "comunidade", label: "💬 Comunidade" }, 
             ].map(t => (
               <button key={t.key} onClick={() => setTab(t.key as any)}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${tab === t.key ? "bg-primary text-white" : "bg-secondary text-muted-foreground"}`}>
@@ -459,7 +467,119 @@ setBoomHours(boomData || []);
     </div>
   </div>
 )}
-    
+
+          {tab === "comunidade" && (
+  <div className="space-y-6">
+    <div className="glass-card p-6 max-w-lg">
+      <h2 className="font-display text-lg font-bold mb-6">📝 Novo Post</h2>
+      <div className="space-y-4">
+        <div>
+          <label className="text-xs text-muted-foreground mb-1 block">Título *</label>
+          <input value={postForm.title} onChange={e => setPostForm({...postForm, title: e.target.value})}
+            className="w-full bg-secondary border border-border rounded-lg px-3 py-2 text-sm"
+            placeholder="Ex: EUR/USD — Oportunidade de compra" />
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="text-xs text-muted-foreground mb-1 block">Par</label>
+            <input value={postForm.pair} onChange={e => setPostForm({...postForm, pair: e.target.value})}
+              className="w-full bg-secondary border border-border rounded-lg px-3 py-2 text-sm"
+              placeholder="EUR/USD" />
+          </div>
+          <div>
+            <label className="text-xs text-muted-foreground mb-1 block">Sinal</label>
+            <select value={postForm.signal_type} onChange={e => setPostForm({...postForm, signal_type: e.target.value})}
+              className="w-full bg-secondary border border-border rounded-lg px-3 py-2 text-sm">
+              <option value="NEUTRO">Neutro</option>
+              <option value="BUY">BUY</option>
+              <option value="SELL">SELL</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label className="text-xs text-muted-foreground mb-1 block">Conteúdo</label>
+          <textarea value={postForm.content} onChange={e => setPostForm({...postForm, content: e.target.value})}
+            className="w-full bg-secondary border border-border rounded-lg px-3 py-2 text-sm h-24 resize-none"
+            placeholder="Análise detalhada..." />
+        </div>
+        <div>
+          <label className="text-xs text-muted-foreground mb-1 block">Imagem</label>
+          <input type="file" accept="image/*" onChange={e => setPostImage(e.target.files?.[0] || null)}
+            className="w-full bg-secondary border border-border rounded-lg px-3 py-2 text-sm" />
+        </div>
+        <div>
+          <label className="text-xs text-muted-foreground mb-1 block">Áudio</label>
+          <input type="file" accept="audio/*" onChange={e => setPostAudio(e.target.files?.[0] || null)}
+            className="w-full bg-secondary border border-border rounded-lg px-3 py-2 text-sm" />
+        </div>
+        <button onClick={async () => {
+          if (!postForm.title) { alert("Título obrigatório!"); return; }
+          let image_url = "";
+          let audio_url = "";
+          if (postImage) {
+            const filename = `posts/${Date.now()}-${postImage.name}`;
+            await supabase.storage.from("posts").upload(filename, postImage);
+            const { data } = supabase.storage.from("posts").getPublicUrl(filename);
+            image_url = data.publicUrl;
+          }
+          if (postAudio) {
+            const filename = `audio/${Date.now()}-${postAudio.name}`;
+            await supabase.storage.from("posts").upload(filename, postAudio);
+            const { data } = supabase.storage.from("posts").getPublicUrl(filename);
+            audio_url = data.publicUrl;
+          }
+          const { error } = await supabase.from("posts").insert([{
+            ...postForm, image_url, audio_url, is_active: true
+          }]);
+          if (error) { alert("Erro: " + error.message); return; }
+          alert("✅ Post publicado!");
+          setPostForm({ title: "", content: "", pair: "", signal_type: "NEUTRO" });
+          setPostImage(null);
+          setPostAudio(null);
+          await loadData();
+        }}
+          className="w-full py-3 rounded-xl bg-primary text-white font-semibold text-sm hover:opacity-90">
+          ✅ Publicar Post
+        </button>
+      </div>
+    </div>
+
+    <div className="glass-card overflow-hidden">
+      <table className="w-full text-sm">
+        <thead>
+          <tr className="border-b border-border/50">
+            <th className="text-left p-3 text-xs text-muted-foreground">Título</th>
+            <th className="text-left p-3 text-xs text-muted-foreground">Par</th>
+            <th className="text-left p-3 text-xs text-muted-foreground">Sinal</th>
+            <th className="text-left p-3 text-xs text-muted-foreground">Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          {posts.map(p => (
+            <tr key={p.id} className="border-b border-border/30 hover:bg-secondary/20">
+              <td className="p-3 font-semibold truncate max-w-xs">{p.title}</td>
+              <td className="p-3 font-mono text-xs">{p.pair}</td>
+              <td className="p-3">
+                <span className={`text-xs px-2 py-1 rounded-lg font-semibold ${p.signal_type === "BUY" ? "bg-success/20 text-success" : p.signal_type === "SELL" ? "bg-destructive/20 text-destructive" : "bg-secondary text-muted-foreground"}`}>
+                  {p.signal_type}
+                </span>
+              </td>
+              <td className="p-3">
+                <button onClick={async () => {
+                  if (!confirm("Apagar post?")) return;
+                  await supabase.from("posts").delete().eq("id", p.id);
+                  await loadData();
+                }} className="text-destructive hover:opacity-70">
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </div>
+)} 
           {/* Tab: Utilizadores */}
           {tab === "users" && (
             <div className="glass-card p-6 text-center text-muted-foreground">
