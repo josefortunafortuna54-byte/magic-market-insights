@@ -517,13 +517,14 @@ setPosts(postsData || []);
           let image_url = "";
           let audio_url = "";
           if (postImage) {
-            const filename = `posts/${Date.now()}-${postImage.name}`;
+            const cleanName = postImage.name.replace(/[^a-zA-Z0-9.\-_]/g, "_");
+            const filename = `posts/${Date.now()}-${cleanName}`;
             await supabase.storage.from("posts").upload(filename, postImage);
             const { data } = supabase.storage.from("posts").getPublicUrl(filename);
             image_url = data.publicUrl;
           }
           if (postAudio) {
-            const filename = `audio/${Date.now()}-${postAudio.name}`;
+            const cleanAudioName = postAudio.name.replace(/[^a-zA-Z0-9.\-_]/g, "_");
             await supabase.storage.from("posts").upload(filename, postAudio);
             const { data } = supabase.storage.from("posts").getPublicUrl(filename);
             audio_url = data.publicUrl;
