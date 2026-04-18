@@ -170,7 +170,6 @@ function BoomCard({ boom, user, isPremium }: { boom: BoomTime; user: any; isPrem
   };
 
   const startRecording = async () => {
-    if (!isPremium) { alert("Gravação de áudio disponível apenas para utilizadores Premium! 👑"); return; }
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const mr = new MediaRecorder(stream);
@@ -478,10 +477,14 @@ export default function Comunidade() {
     return () => { supabase.removeChannel(channel); };
   }, []);
 
-  const checkPremium = async (userId: string) => {
-    const { data } = await supabase.from("subscriptions").select("status").eq("user_id", userId).single();
-    setIsPremium(data?.status === "active");
-  };
+  <button onClick={recording ? stopRecording : startRecording}
+  className={`p-2.5 rounded-xl border transition-all ${
+    recording
+      ? "bg-destructive/20 border-destructive text-destructive animate-pulse"
+      : "border-border text-muted-foreground hover:border-primary hover:text-primary"
+  }`}>
+  {recording ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+</button>
 
   const loadBooms = async () => {
     const { data } = await supabase.from("boom_times").select("*")
