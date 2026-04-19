@@ -423,17 +423,13 @@ function BoomCard({ boom, user, isPremium }: { boom: BoomTime; user: any; isPrem
                   <div className="flex gap-2 ml-11">
                     <button onClick={recording ? stopRecording : startRecording}
                       className={`p-2.5 rounded-xl border transition-all ${
-                        recording ? "bg-destructive/20 border-destructive text-destructive animate-pulse" :
-                        isPremium ? "border-border text-muted-foreground hover:border-primary hover:text-primary" :
-                        "border-border/40 text-muted-foreground/40 cursor-not-allowed"
+                        recording
+                          ? "bg-destructive/20 border-destructive text-destructive animate-pulse"
+                          : "border-border text-muted-foreground hover:border-primary hover:text-primary"
                       }`}>
                       {recording ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
                     </button>
-                    {!isPremium && (
-                      <span className="flex items-center gap-1 text-xs text-muted-foreground px-2">
-                        <Crown className="h-3 w-3 text-accent" /> Premium
-                      </span>
-                    )}
+
                     <button onClick={sendComment} disabled={submitting || (!commentText && !audioBlob)}
                       className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-primary text-white text-sm font-bold hover:opacity-90 disabled:opacity-50 transition-all">
                       <Send className="h-4 w-4" />
