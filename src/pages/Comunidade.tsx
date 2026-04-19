@@ -458,14 +458,17 @@ export default function Comunidade() {
   const [filter, setFilter] = useState<"all" | "upcoming" | "live" | "expired">("all");
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      setUser(user);
-      if (user) checkPremium(user.id);
-    });
-    supabase.auth.onAuthStateChange((_, session) => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user || null);
       if (session?.user) checkPremium(session.user.id);
     });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
+      setUser(session?.user || null);
+      if (session?.user) checkPremium(session.user.id);
+      else setIsPremium(false);
+    });
+    return () => subscription.unsubscribe();
+
     loadBooms();
     const channel = supabase.channel("booms-realtime")
       .on("postgres_changes", { event: "*", schema: "public", table: "boom_times" }, loadBooms)
