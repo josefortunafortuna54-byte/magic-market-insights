@@ -67,18 +67,39 @@ export default function Admin() {
       .order("created_at", { ascending: false })
       .limit(100);
     setSignals(signalsData || []);
-    const { data: boomData } = await supabase.from("boom_hours").select("*").order("created_at", { ascending: true });
-setBoomHours(boomData || []); 
-    const { data: postsData } = await supabase.from("posts").select("*").order("created_at", { ascending: false }).limit(20);
-setPosts(postsData || []);
-
-   const { data: boomTimesData } = await supabase.from("boom_times").select("*").order("boom_time", { ascending: false }).limit(20);
-setBoomTimes(boomTimesData || []);
 
     // Subscrições
     const { data: subsData } = await supabase
       .from("subscriptions")
       .select("*");
+
+    // Utilizadores — contar via auth
+    const { count: usersCount } = await supabase
+      .from("subscriptions")
+      .select("*", { count: "exact", head: true });
+
+    // Boom Hours
+    const { data: boomData } = await supabase
+      .from("boom_hours")
+      .select("*")
+      .order("created_at", { ascending: true });
+    setBoomHours(boomData || []);
+
+    // Posts
+    const { data: postsData } = await supabase
+      .from("posts")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(20);
+    setPosts(postsData || []);
+
+    // Boom Times
+    const { data: boomTimesData } = await supabase
+      .from("boom_times")
+      .select("*")
+      .order("boom_time", { ascending: false })
+      .limit(20);
+    setBoomTimes(boomTimesData || []);
 
     const s = signalsData || [];
     setStats({
@@ -86,7 +107,7 @@ setBoomTimes(boomTimesData || []);
       active: s.filter((x: any) => x.status === "active").length,
       tp: s.filter((x: any) => x.status === "tp").length,
       sl: s.filter((x: any) => x.status === "sl").length,
-      users: subsData?.length || 0,
+      users: usersCount || 0,
       premium: subsData?.filter((x: any) => x.status === "active").length || 0,
     });
   };
