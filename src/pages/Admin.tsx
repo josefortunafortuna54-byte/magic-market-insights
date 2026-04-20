@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 import { Shield, Plus, RefreshCw, TrendingUp, TrendingDown, Users, BarChart3, CheckCircle, XCircle, Trash2 } from "lucide-react";
 import { Shield, Plus, RefreshCw, TrendingUp, TrendingDown, Users, BarChart3, CheckCircle, XCircle, Trash2, Zap } from "lucide-react";
 
-const ADMIN_EMAIL = "josefortunafortuna54@gmail.com";
+const ADMIN_EMAILS = ["josefortunafortuna54@gmail.com", "jeronimo.samaina239898@gmail.com"];
 
 const SYMBOLS = ["EURUSD", "GBPUSD", "USDJPY", "AUDUSD", "EURGBP", "USDCHF", "NZDUSD", "USDCAD"];
 const TIMEFRAMES = ["M15", "H1", "H4"];
@@ -50,7 +50,7 @@ export default function Admin() {
 
   const checkAdmin = async () => {
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user || user.email !== ADMIN_EMAIL) {
+    if (!user || !ADMIN_EMAILS.includes(user.email)) {
       navigate("/");
       return;
     }
