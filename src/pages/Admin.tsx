@@ -25,7 +25,9 @@ export default function Admin() {
   const [postImage, setPostImage] = useState<File | null>(null);
   const [postAudio, setPostAudio] = useState<File | null>(null);
   const [posts, setPosts] = useState<any[]>([]);
+  const [usersList, setUsersList] = useState<any[]>([]);
 
+  const [subsData, setSubsData] = useState<any[]>([]);
   const [boomTimes, setBoomTimes] = useState<any[]>([]);
   const [boomTimeForm, setBoomTimeForm] = useState({
   pair: "", boom_time: "", confidence: "75", result: ""
@@ -67,11 +69,12 @@ export default function Admin() {
       .order("created_at", { ascending: false })
       .limit(100);
     setSignals(signalsData || []);
+    const { data: usersData } = await supabase.rpc("get_all_users");
+setUsersList(usersData || []);
 
     // Subscrições
-    const { data: subsData } = await supabase
-      .from("subscriptions")
-      .select("*");
+    const { data: subsResult } = await supabase.from("subscriptions").select("*");
+    setSubsData(subsResult || []);
 
     // Utilizadores — contar via auth
     const { data: usersCountData } = await supabase.rpc("get_users_count");
@@ -742,11 +745,60 @@ const usersCount = usersCountData || 0;
                
           {/* Tab: Utilizadores */}
           {tab === "users" && (
-            <div className="glass-card p-6 text-center text-muted-foreground">
-              <Users className="h-12 w-12 mx-auto mb-4 opacity-40" />
-              <p>Gestão de utilizadores em breve</p>
-            </div>
-          )}
+  <div className="glass-card overflow-hidden">
+    <div className="p-4 border-b border-border/50">
+      <h2 className="font-display text-lg font-bold">👥 Utilizadores ({usersList.length})</h2>
+    </div>
+    <div className="overflow-x-auto">
+      <table className="w-full text-sm">
+        <thead>
+          <tr className="border-b border-border/50">
+            <th className="text-left p-3 text-xs text-muted-foreground">Utilizador</th>
+            <th className="text-left p-3 text-xs text-muted-foreground">Email</th>
+            <th className="text-left p-3 text-xs text-muted-foreground">Registado</th>
+            <th className="text-left p-3 text-xs text-muted-foreground">Último acesso</th>
+            <th className="text-left p-3 text-xs text-muted-foreground">Premium</th>
+          </tr>
+        </thead>
+        <tbody>
+          {usersList.map(u => {
+            const isPrem = subsData?.find((s: any) => s.user_id === u.id && s.status === "active");
+            return (
+              <tr key={u.id} className="border-b border-border/30 hover:bg-secondary/20">
+                <td className="p-3">
+                  <div className="flex items-center gap-2">
+                    {u.avatar_url ? (
+                      <img src={u.avatar_url} className="w-8 h-8 rounded-full object-cover" />
+                    ) : (
+                      <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-xs font-bold text-primary">
+                        {(u.full_name || u.email || "U")[0].toUpperCase()}
+                      </div>
+                    )}
+                    <span className="font-medium">{u.full_name || "—"}</span>
+                  </div>
+                </td>
+                <td className="p-3 text-muted-foreground text-xs">{u.email}</td>
+                <td className="p-3 text-xs text-muted-foreground">
+                  {new Date(u.created_at).toLocaleDateString("pt-PT")}
+                </td>
+                <td className="p-3 text-xs text-muted-foreground">
+                  {u.last_sign_in ? new Date(u.last_sign_in).toLocaleDateString("pt-PT") : "—"}
+                </td>
+                <td className="p-3">
+                  {isPrem ? (
+                    <span className="text-xs bg-success/20 text-success px-2 py-1 rounded-lg font-semibold">✓ Premium</span>
+                  ) : (
+                    <span className="text-xs bg-secondary text-muted-foreground px-2 py-1 rounded-lg">Free</span>
+                  )}
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  </div>
+)}
         </div>
       </section>
     </Layout>
