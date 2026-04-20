@@ -74,9 +74,8 @@ export default function Admin() {
       .select("*");
 
     // Utilizadores — contar via auth
-    const { count: usersCount } = await supabase
-      .from("subscriptions")
-      .select("*", { count: "exact", head: true });
+    const { data: usersCountData } = await supabase.rpc("get_users_count");
+const usersCount = usersCountData || 0;
 
     // Boom Hours
     const { data: boomData } = await supabase
