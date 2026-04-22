@@ -4,32 +4,15 @@
     <stop offset="0%" style="stop-color:#0a0a1a"/>
     <stop offset="100%" style="stop-color:#020208"/>
   </radialGradient>
-  <radialGradient id="eyeGlow1" cx="50%" cy="50%" r="50%">
-    <stop offset="0%" style="stop-color:#00ff88;stop-opacity:0.6"/>
-    <stop offset="100%" style="stop-color:#00ff88;stop-opacity:0"/>
-  </radialGradient>
-  <radialGradient id="eyeGlow2" cx="50%" cy="50%" r="50%">
-    <stop offset="0%" style="stop-color:#00ff88;stop-opacity:0.6"/>
-    <stop offset="100%" style="stop-color:#00ff88;stop-opacity:0"/>
-  </radialGradient>
-    
   <style>
-    @keyframes blink { 0%,90%,100%{opacity:1} 95%{opacity:0.1} }
-    @keyframes pulse { 0%,100%{opacity:0.5;r:16} 50%{opacity:1;r:20} }
     @keyframes twinkle1 { 0%,100%{opacity:0.9} 50%{opacity:0.1} }
     @keyframes twinkle2 { 0%,100%{opacity:0.6} 30%{opacity:1} 60%{opacity:0.2} }
     @keyframes twinkle3 { 0%,100%{opacity:0.4} 40%{opacity:0.9} 70%{opacity:0.1} }
-    @keyframes moveEye1 { 0%{transform:translate(0,0)} 25%{transform:translate(8px,-5px)} 50%{transform:translate(-6px,4px)} 75%{transform:translate(4px,6px)} 100%{transform:translate(0,0)} }
-    @keyframes moveEye2 { 0%{transform:translate(0,0)} 25%{transform:translate(-8px,-4px)} 50%{transform:translate(6px,5px)} 75%{transform:translate(-4px,-6px)} 100%{transform:translate(0,0)} }
-    @keyframes glowPulse { 0%,100%{opacity:0.5} 50%{opacity:0.8} }
-    @keyframes rotate { from{transform:rotate(0deg) translateX(0)} to{transform:rotate(360deg) translateX(0)} }
     @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
-    .eye-blink { animation: blink 6s infinite; }
-    .eye-blink2 { animation: blink 8s 2s infinite; }
-    .pupil1 { animation: moveEye1 8s ease-in-out infinite; transform-origin: 400px 520px; }
-    .pupil2 { animation: moveEye2 9s ease-in-out infinite; transform-origin: 1040px 520px; }
-    .glow1 { animation: glowPulse 3s ease-in-out infinite; }
-    .glow2 { animation: glowPulse 4s 1s ease-in-out infinite; }
+    @keyframes shoot1 { 0%{transform:translate(0,0);opacity:0} 5%{opacity:1} 20%{transform:translate(300px,150px);opacity:0} 100%{transform:translate(300px,150px);opacity:0} }
+    @keyframes shoot2 { 0%{transform:translate(0,0);opacity:0} 5%{opacity:1} 20%{transform:translate(-280px,140px);opacity:0} 100%{transform:translate(-280px,140px);opacity:0} }
+    @keyframes shoot3 { 0%{transform:translate(0,0);opacity:0} 5%{opacity:1} 20%{transform:translate(250px,120px);opacity:0} 100%{transform:translate(250px,120px);opacity:0} }
+    @keyframes glowPulse { 0%,100%{opacity:0.3} 50%{opacity:0.6} }
     .star1 { animation: twinkle1 2s ease-in-out infinite; }
     .star2 { animation: twinkle2 3s ease-in-out infinite; }
     .star3 { animation: twinkle3 2.5s ease-in-out infinite; }
@@ -40,68 +23,21 @@
     .magic-star { animation: float 4s ease-in-out infinite; }
     .magic-star2 { animation: float 5s 1s ease-in-out infinite; }
     .magic-star3 { animation: float 3.5s 2s ease-in-out infinite; }
-    .orbit { animation: rotate 20s linear infinite; transform-origin: 400px 400px; }
-    .orbit2 { animation: rotate 25s linear infinite reverse; transform-origin: 1040px 400px; }
-    @keyframes shoot1 { 0%{transform:translate(0,0);opacity:0} 5%{opacity:1} 20%{transform:translate(300px,150px);opacity:0} 100%{transform:translate(300px,150px);opacity:0} }
-    @keyframes shoot2 { 0%{transform:translate(0,0);opacity:0} 5%{opacity:1} 20%{transform:translate(-280px,140px);opacity:0} 100%{transform:translate(-280px,140px);opacity:0} }
-    @keyframes shoot3 { 0%{transform:translate(0,0);opacity:0} 5%{opacity:1} 20%{transform:translate(250px,120px);opacity:0} 100%{transform:translate(250px,120px);opacity:0} }
     .shoot1 { animation: shoot1 8s 2s ease-in infinite; }
     .shoot2 { animation: shoot2 11s 5s ease-in infinite; }
     .shoot3 { animation: shoot3 14s 9s ease-in infinite; }
+    .glow { animation: glowPulse 4s ease-in-out infinite; }
   </style>
 </defs>
 
 <rect width="1440" height="900" fill="url(#bg)"/>
 
-<ellipse class="glow1" cx="400" cy="520" rx="250" ry="120" fill="url(#eyeGlow1)" opacity="0.5"/>
-<ellipse class="glow2" cx="1040" cy="520" rx="250" ry="120" fill="url(#eyeGlow2)" opacity="0.5"/>
-<ellipse cx="720" cy="450" rx="450" ry="220" fill="#7c3aed" opacity="0.05"/>
+<!-- Glow suave no centro -->
+<ellipse class="glow" cx="720" cy="450" rx="500" ry="250" fill="#7c3aed" opacity="0.04"/>
+<ellipse class="glow" cx="360" cy="600" rx="300" ry="150" fill="#00ff88" opacity="0.03"/>
+<ellipse class="glow" cx="1080" cy="300" rx="300" ry="150" fill="#00ff88" opacity="0.03"/>
 
-<g class="eye-blink">
-  <ellipse cx="400" cy="520" rx="130" ry="65" fill="#003318"/>
-  <ellipse cx="400" cy="520" rx="130" ry="65" fill="none" stroke="#00ff88" stroke-width="2" opacity="0.8"/>
-  <ellipse cx="400" cy="520" rx="100" ry="48" fill="#004d22"/>
-  <ellipse cx="400" cy="520" rx="100" ry="48" fill="none" stroke="#00ff88" stroke-width="1.5" opacity="0.6"/>
-  <ellipse cx="400" cy="520" rx="48" ry="48" fill="#001a0d"/>
-  <ellipse cx="400" cy="520" rx="48" ry="48" fill="none" stroke="#00ff88" stroke-width="1" opacity="0.9"/>
-  <g class="pupil1">
-    <circle cx="400" cy="520" r="16" fill="#00ff88" opacity="0.9"/>
-    <circle cx="400" cy="520" r="8" fill="#00ff88"/>
-    <circle cx="382" cy="505" r="5" fill="#ffffff" opacity="0.8"/>
-    <circle cx="410" cy="512" r="2" fill="#ffffff" opacity="0.4"/>
-  </g>
-</g>
-
-<g class="eye-blink2">
-  <ellipse cx="1040" cy="520" rx="130" ry="65" fill="#003318"/>
-  <ellipse cx="1040" cy="520" rx="130" ry="65" fill="none" stroke="#00ff88" stroke-width="2" opacity="0.8"/>
-  <ellipse cx="1040" cy="520" rx="100" ry="48" fill="#004d22"/>
-  <ellipse cx="1040" cy="520" rx="100" ry="48" fill="none" stroke="#00ff88" stroke-width="1.5" opacity="0.6"/>
-  <ellipse cx="1040" cy="520" rx="48" ry="48" fill="#001a0d"/>
-  <ellipse cx="1040" cy="520" rx="48" ry="48" fill="none" stroke="#00ff88" stroke-width="1" opacity="0.9"/>
-  <g class="pupil2">
-    <circle cx="1040" cy="520" r="16" fill="#00ff88" opacity="0.9"/>
-    <circle cx="1040" cy="520" r="8" fill="#00ff88"/>
-    <circle cx="1022" cy="505" r="5" fill="#ffffff" opacity="0.8"/>
-    <circle cx="1050" cy="512" r="2" fill="#ffffff" opacity="0.4"/>
-  </g>
-</g>
-
-<path d="M270 520 Q335 480 400 515 Q465 550 530 520" fill="none" stroke="#00ff88" stroke-width="1.5" opacity="0.5"/>
-<path d="M270 520 Q335 560 400 525 Q465 490 530 520" fill="none" stroke="#00ff88" stroke-width="1.5" opacity="0.5"/>
-<path d="M910 520 Q975 480 1040 515 Q1105 550 1170 520" fill="none" stroke="#00ff88" stroke-width="1.5" opacity="0.5"/>
-<path d="M910 520 Q975 560 1040 525 Q1105 490 1170 520" fill="none" stroke="#00ff88" stroke-width="1.5" opacity="0.5"/>
-
-<circle class="orbit" cx="400" cy="400" r="130" fill="none" stroke="#00ff88" stroke-width="0.5" opacity="0.1" stroke-dasharray="6 6"/>
-<circle class="orbit2" cx="1040" cy="400" r="130" fill="none" stroke="#00ff88" stroke-width="0.5" opacity="0.1" stroke-dasharray="6 6"/>
-
-<line x1="400" y1="600" x2="400" y2="650" stroke="#00ff88" stroke-width="1" opacity="0.3"/>
-<line x1="388" y1="638" x2="400" y2="655" stroke="#00ff88" stroke-width="1" opacity="0.2"/>
-<line x1="412" y1="638" x2="400" y2="655" stroke="#00ff88" stroke-width="1" opacity="0.2"/>
-<line x1="1040" y1="600" x2="1040" y2="650" stroke="#00ff88" stroke-width="1" opacity="0.3"/>
-<line x1="1028" y1="638" x2="1040" y2="655" stroke="#00ff88" stroke-width="1" opacity="0.2"/>
-<line x1="1052" y1="638" x2="1040" y2="655" stroke="#00ff88" stroke-width="1" opacity="0.2"/>
-
+<!-- Estrelas grandes animadas -->
 <g class="magic-star">
   <circle class="star1" cx="720" cy="180" r="3" fill="#00ff88" opacity="0.9"/>
   <path d="M717 175 L720 165 L723 175 L733 178 L723 184 L720 194 L717 184 L707 178 Z" fill="#00ff88" opacity="0.7"/>
@@ -118,7 +54,16 @@
   <circle class="star4" cx="600" cy="100" r="2" fill="#fbbf24" opacity="0.7"/>
   <path d="M597 95 L600 88 L603 95 L610 98 L603 103 L600 110 L597 103 L590 98 Z" fill="#fbbf24" opacity="0.4"/>
 </g>
+<g class="magic-star2">
+  <circle class="star1" cx="300" cy="700" r="2" fill="#00ff88" opacity="0.5"/>
+  <path d="M297 695 L300 688 L303 695 L310 698 L303 703 L300 710 L297 703 L290 698 Z" fill="#00ff88" opacity="0.3"/>
+</g>
+<g class="magic-star3">
+  <circle class="star2" cx="1100" cy="750" r="2" fill="#fbbf24" opacity="0.5"/>
+  <path d="M1097 745 L1100 738 L1103 745 L1110 748 L1103 753 L1100 760 L1097 753 L1090 748 Z" fill="#fbbf24" opacity="0.3"/>
+</g>
 
+<!-- Estrelas pequenas -->
 <circle class="star1" cx="280" cy="80" r="1.5" fill="#00ff88" opacity="0.6"/>
 <circle class="star2" cx="1350" cy="200" r="1.5" fill="#00ff88" opacity="0.5"/>
 <circle class="star3" cx="80" cy="300" r="2" fill="#7c3aed" opacity="0.7"/>
@@ -138,18 +83,23 @@
 <circle class="star3" cx="660" cy="50" r="2" fill="#ffffff" opacity="0.7"/>
 <circle class="star4" cx="1250" cy="400" r="1" fill="#fbbf24" opacity="0.4"/>
 <circle class="star5" cx="180" cy="400" r="1" fill="#fbbf24" opacity="0.3"/>
+<circle class="star6" cx="720" cy="800" r="1.5" fill="#00ff88" opacity="0.3"/>
+<circle class="star7" cx="540" cy="750" r="1" fill="#ffffff" opacity="0.4"/>
+<circle class="star1" cx="1150" cy="600" r="1" fill="#7c3aed" opacity="0.4"/>
+<circle class="star2" cx="400" cy="500" r="1" fill="#ffffff" opacity="0.3"/>
+<circle class="star3" cx="1050" cy="500" r="1" fill="#ffffff" opacity="0.3"/>
+
+<!-- Estrelas cadentes -->
 <g class="shoot1">
   <line x1="200" y1="80" x2="240" y2="80" stroke="#ffffff" stroke-width="2" opacity="0.9" stroke-linecap="round"/>
   <line x1="200" y1="80" x2="180" y2="80" stroke="#ffffff" stroke-width="1" opacity="0.4" stroke-linecap="round"/>
   <circle cx="240" cy="80" r="2.5" fill="#ffffff" opacity="0.9"/>
 </g>
-
 <g class="shoot2">
   <line x1="1100" y1="60" x2="1060" y2="60" stroke="#00ff88" stroke-width="2" opacity="0.9" stroke-linecap="round"/>
   <line x1="1100" y1="60" x2="1120" y2="60" stroke="#00ff88" stroke-width="1" opacity="0.4" stroke-linecap="round"/>
   <circle cx="1060" cy="60" r="2.5" fill="#00ff88" opacity="0.9"/>
 </g>
-
 <g class="shoot3">
   <line x1="600" y1="40" x2="640" y2="40" stroke="#fbbf24" stroke-width="2" opacity="0.9" stroke-linecap="round"/>
   <line x1="600" y1="40" x2="580" y2="40" stroke="#fbbf24" stroke-width="1" opacity="0.4" stroke-linecap="round"/>
