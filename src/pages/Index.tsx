@@ -75,10 +75,19 @@ export default function Index() {
               <span className="text-sm font-medium">Sinais ao Vivo — Análise Inteligente de Forex</span>
             </motion.div>
 
-            <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
+              className="flex justify-center mb-8">
+              <img 
+                src="/logo.png" 
+                alt="The Magic Trader" 
+                className="h-24 w-24 object-contain logo-glow"
+              />
+            </motion.div>
+
+            <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}
               className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-6">
               Análise inteligente.{" "}
-              <span className="gradient-magic">Entradas estratégicas.</span>
+              <span className="gradient-shield">Entradas estratégicas.</span>
             </motion.h1>
 
             <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}

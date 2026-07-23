@@ -136,6 +136,7 @@ export default {
         "grid-pattern":     "linear-gradient(to right, hsl(var(--border)) 1px, transparent 1px), linear-gradient(to bottom, hsl(var(--border)) 1px, transparent 1px)",
         "gradient-primary": "var(--gradient-primary)",
         "gradient-gold":    "var(--gradient-gold)",
+        "gradient-shield":  "var(--gradient-shield)",
         "gradient-card":    "var(--gradient-card)",
       },
     },

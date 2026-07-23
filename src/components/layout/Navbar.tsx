@@ -71,17 +71,20 @@ export function Navbar() {
   const userName = user?.user_metadata?.full_name || user?.email?.split("@")[0] || "Utilizador";
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-xl">
+    <nav className="fixed top-0 left-0 right-0 z-50 border-b navbar-border bg-background/80 backdrop-blur-xl">
       <div className="container mx-auto px-4">
         <div className="flex h-20 items-center justify-between">
 
           {/* Logo */}
-          <Link to="/" className="flex items-center">
+          <Link to="/" className="flex items-center gap-3">
             <img 
               src="/logo.png" 
               alt="The Magic Trader" 
-              className="h-16 w-16 object-contain"
+              className="h-14 w-14 object-contain logo-glow"
             />
+            <span className="hidden sm:block font-display text-lg font-bold gradient-shield">
+              The Magic Trader
+            </span>
           </Link>
 
           {/* Desktop Navigation */}

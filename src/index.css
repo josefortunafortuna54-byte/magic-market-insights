@@ -31,6 +31,7 @@
     --gradient-primary: linear-gradient(135deg, hsl(142 70% 40%) 0%, hsl(160 70% 50%) 100%);
     --gradient-magic: linear-gradient(135deg, hsl(270 80% 40%) 0%, hsl(142 70% 40%) 50%, hsl(43 96% 52%) 100%);
     --gradient-gold: linear-gradient(135deg, hsl(43 96% 52%) 0%, hsl(36 100% 48%) 100%);
+    --gradient-shield: linear-gradient(135deg, hsl(142 70% 45%) 0%, hsl(142 70% 40%) 40%, hsl(43 96% 52%) 100%);
     --shadow-glow-primary: 0 0 40px hsl(142 70% 45% / 0.3);
     --shadow-glow-magic: 0 0 60px hsl(270 80% 50% / 0.2), 0 0 30px hsl(142 70% 45% / 0.2);
     --shadow-glow-success: 0 0 30px hsl(142 70% 42% / 0.25);
@@ -70,10 +71,11 @@
   .glass-card {
     @apply bg-card/60 backdrop-blur-xl border border-border/60 rounded-xl;
     box-shadow: var(--shadow-card);
-    transition: border-color 0.2s ease;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
   }
   .glass-card:hover {
-    border-color: hsl(var(--primary) / 0.25);
+    border-color: hsl(var(--primary) / 0.3);
+    box-shadow: var(--shadow-card), 0 0 20px hsl(var(--primary) / 0.08), 0 0 40px hsl(43 96% 52% / 0.05);
   }
   .gradient-text {
     @apply bg-clip-text text-transparent;
@@ -129,6 +131,19 @@
       radial-gradient(1px 1px at 50% 80%, hsl(43 96% 70% / 0.3) 0%, transparent 100%),
       radial-gradient(1px 1px at 10% 60%, hsl(142 70% 70% / 0.2) 0%, transparent 100%),
       radial-gradient(1px 1px at 90% 50%, hsl(270 80% 70% / 0.2) 0%, transparent 100%);
+  }
+  .logo-glow {
+    filter: drop-shadow(0 0 12px hsl(142 70% 45% / 0.5)) drop-shadow(0 0 24px hsl(43 96% 52% / 0.2));
+  }
+  .shield-glow {
+    box-shadow: 0 0 30px hsl(142 70% 45% / 0.2), 0 0 60px hsl(43 96% 52% / 0.1);
+  }
+  .gradient-shield {
+    @apply bg-clip-text text-transparent;
+    background-image: var(--gradient-shield);
+  }
+  .navbar-border {
+    border-image: linear-gradient(90deg, transparent 0%, hsl(142 70% 45% / 0.4) 30%, hsl(43 96% 52% / 0.4) 70%, transparent 100%) 1;
   }
 }
 @layer utilities {

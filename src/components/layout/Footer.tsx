@@ -1,9 +1,9 @@
 import { Link } from "react-router-dom";
-import { Sparkles, AlertTriangle } from "lucide-react";
+import { AlertTriangle } from "lucide-react";
 
 export function Footer() {
   return (
-    <footer className="border-t border-border/50 bg-card/30">
+    <footer className="border-t navbar-border bg-card/30">
       {/* Risk Disclaimer */}
       <div className="border-b border-border/30 bg-destructive/5">
         <div className="container mx-auto px-4 py-4">
@@ -22,9 +22,9 @@ export function Footer() {
         <div className="grid gap-8 md:grid-cols-4">
           {/* Brand */}
           <div className="md:col-span-2">
-            <Link to="/" className="flex items-center gap-2 mb-4">
-              <Sparkles className="h-6 w-6 text-primary" />
-              <span className="font-display text-lg font-bold">
+            <Link to="/" className="flex items-center gap-3 mb-4">
+              <img src="/logo.png" alt="The Magic Trader" className="h-10 w-10 object-contain logo-glow" />
+              <span className="font-display text-lg font-bold gradient-shield">
                 The Magic Trader
               </span>
             </Link>
