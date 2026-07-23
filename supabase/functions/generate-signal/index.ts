@@ -70,52 +70,38 @@ function calcBollingerBands(prices: number[], period = 20, mult = 2) {
   return { upper: mean + mult * std, middle: mean, lower: mean - mult * std };
 }
 
-// ADX: Average Directional Index — mede a FORÇA da tendência (0-100)
 function calcADX(highs: number[], lows: number[], closes: number[], period = 14): number {
   if (highs.length < period + 1) return 25;
-
   const plusDM: number[] = [];
   const minusDM: number[] = [];
   const trList: number[] = [];
-
   for (let i = 1; i < highs.length; i++) {
     const upMove = highs[i] - highs[i - 1];
     const downMove = lows[i - 1] - lows[i];
     plusDM.push(upMove > downMove && upMove > 0 ? upMove : 0);
     minusDM.push(downMove > upMove && downMove > 0 ? downMove : 0);
-    trList.push(Math.max(
-      highs[i] - lows[i],
-      Math.abs(highs[i] - closes[i - 1]),
-      Math.abs(lows[i] - closes[i - 1])
-    ));
+    trList.push(Math.max(highs[i] - lows[i], Math.abs(highs[i] - closes[i - 1]), Math.abs(lows[i] - closes[i - 1])));
   }
-
   let atr = trList.slice(0, period).reduce((a, b) => a + b, 0) / period;
   let plusDI = plusDM.slice(0, period).reduce((a, b) => a + b, 0) / period;
   let minusDI = minusDM.slice(0, period).reduce((a, b) => a + b, 0) / period;
-
   const dxValues: number[] = [];
-
   for (let i = period; i < trList.length; i++) {
     atr = (atr * (period - 1) + trList[i]) / period;
     plusDI = (plusDI * (period - 1) + plusDM[i]) / period;
     minusDI = (minusDI * (period - 1) + minusDM[i]) / period;
-
     if (atr === 0) { dxValues.push(0); continue; }
     const pDI = (plusDI / atr) * 100;
     const mDI = (minusDI / atr) * 100;
     const diSum = pDI + mDI;
     dxValues.push(diSum === 0 ? 0 : Math.abs(pDI - mDI) / diSum * 100);
   }
-
   if (dxValues.length === 0) return 25;
   return dxValues.slice(-period).reduce((a, b) => a + b, 0) / Math.min(period, dxValues.length);
 }
 
-// Estocástico: %K e %D
 function calcStochastic(highs: number[], lows: number[], closes: number[], kPeriod = 14, dPeriod = 3): { k: number; d: number } {
   if (closes.length < kPeriod) return { k: 50, d: 50 };
-
   const kValues: number[] = [];
   for (let i = kPeriod - 1; i < closes.length; i++) {
     const periodHighs = highs.slice(i - kPeriod + 1, i + 1);
@@ -125,15 +111,12 @@ function calcStochastic(highs: number[], lows: number[], closes: number[], kPeri
     if (high === low) { kValues.push(50); continue; }
     kValues.push(((closes[i] - low) / (high - low)) * 100);
   }
-
   const k = kValues[kValues.length - 1] ?? 50;
   const dSlice = kValues.slice(-dPeriod);
   const d = dSlice.reduce((a, b) => a + b, 0) / dSlice.length;
-
   return { k, d };
 }
 
-// Suporte/Resistência via pivots
 function findSupportResistance(closes: number[]): { support: number; resistance: number } {
   if (closes.length < 20) return { support: closes[0] * 0.995, resistance: closes[0] * 1.005 };
   const recent = closes.slice(-50);
@@ -142,14 +125,46 @@ function findSupportResistance(closes: number[]): { support: number; resistance:
   return { support, resistance };
 }
 
+// ─── Ichimoku Cloud ─────────────────────────────────────────────────────────
+function calcIchimoku(highs: number[], lows: number[], closes: number[]): {
+  tenkanSen: number; kijunSen: number; senkouSpanA: number; senkouSpanB: number;
+} {
+  const period9 = 9;
+  const period26 = 52;
+  const high9 = Math.max(...highs.slice(-period9));
+  const low9 = Math.min(...lows.slice(-period9));
+  const tenkanSen = (high9 + low9) / 2;
+  const high26 = Math.max(...highs.slice(-period26));
+  const low26 = Math.min(...lows.slice(-period26));
+  const kijunSen = (high26 + low26) / 2;
+  const senkouSpanA = (tenkanSen + kijunSen) / 2;
+  const high52 = Math.max(...highs.slice(-period26));
+  const low52 = Math.min(...lows.slice(-period26));
+  const senkouSpanB = (high52 + low52) / 2;
+  return { tenkanSen, kijunSen, senkouSpanA, senkouSpanB };
+}
+
+// ─── Fibonacci Retracement ──────────────────────────────────────────────────
+function calcFibonacci(highs: number[], lows: number[]): { level_236: number; level_382: number; level_500: number; level_618: number } {
+  const high = Math.max(...highs.slice(-50));
+  const low = Math.min(...lows.slice(-50));
+  const range = high - low;
+  return {
+    level_236: high - range * 0.236,
+    level_382: high - range * 0.382,
+    level_500: high - range * 0.500,
+    level_618: high - range * 0.618,
+  };
+}
+
 // ─── Busca de preços históricos reais ──────────────────────────────────────
 
 interface AssetConfig {
   symbol: string;
   type: "forex" | "gold" | "crypto";
-  volatility: number;    // volatilidade base para normalização
-  pipSize: number;       // tamanho do pip (0.0001 para forex, 0.01 para JPY, 1 para gold, 1 para BTC)
-  priceDigits: number;   // casas decimais
+  volatility: number;
+  pipSize: number;
+  priceDigits: number;
 }
 
 const ASSET_CONFIGS: Record<string, AssetConfig> = {
@@ -169,41 +184,31 @@ async function fetchHistoricalPrices(symbol: string): Promise<number[]> {
   const config = ASSET_CONFIGS[symbol];
 
   if (config?.type === "crypto") {
-    // BTC: CoinGecko API — 90 dias diários
     try {
-      const res = await fetch(
-        `https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=90&interval=daily`
-      );
+      const res = await fetch(`https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=90&interval=daily`);
       const json = await res.json();
-      if (json?.prices?.length > 0) {
-        return json.prices.map((p: [number, number]) => p[1]);
-      }
-    } catch { /* fallback abaixo */ }
-    // Fallback: preços aproximados
+      if (json?.prices?.length > 0) return json.prices.map((p: [number, number]) => p[1]);
+    } catch { }
     return generateRealisticPrices(110000, 90, 0.025);
   }
 
   if (config?.type === "gold") {
-    // XAU/USD: frankfurter.app suporta XAU como base
     try {
       const end = new Date();
       const start = new Date();
       start.setDate(start.getDate() - 90);
       const startStr = start.toISOString().split("T")[0];
       const endStr = end.toISOString().split("T")[0];
-      const res = await fetch(
-        `https://api.frankfurter.app/${startStr}..${endStr}?from=XAU&to=USD`
-      );
+      const res = await fetch(`https://api.frankfurter.app/${startStr}..${endStr}?from=XAU&to=USD`);
       const json = await res.json();
       if (json?.rates) {
         const prices = Object.values(json.rates).map((r: any) => Number(r.USD)).filter(Boolean);
         if (prices.length > 10) return prices;
       }
-    } catch { /* fallback abaixo */ }
+    } catch { }
     return generateRealisticPrices(3300, 90, 0.006);
   }
 
-  // Forex: frankfurter.app
   const base = symbol.slice(0, 3);
   const quote = symbol.slice(3, 6);
   try {
@@ -212,17 +217,14 @@ async function fetchHistoricalPrices(symbol: string): Promise<number[]> {
     start.setDate(start.getDate() - 90);
     const startStr = start.toISOString().split("T")[0];
     const endStr = end.toISOString().split("T")[0];
-    const res = await fetch(
-      `https://api.frankfurter.app/${startStr}..${endStr}?from=${base}&to=${quote}`
-    );
+    const res = await fetch(`https://api.frankfurter.app/${startStr}..${endStr}?from=${base}&to=${quote}`);
     const json = await res.json();
     if (json?.rates) {
       const prices = Object.values(json.rates).map((r: any) => Number(r[quote])).filter(Boolean);
       if (prices.length > 10) return prices;
     }
-  } catch { /* fallback abaixo */ }
+  } catch { }
 
-  // Fallback
   const fallbacks: Record<string, number> = {
     EURUSD: 1.085, GBPUSD: 1.271, USDJPY: 148.5,
     AUDUSD: 0.634, EURGBP: 0.859, USDCHF: 0.897,
@@ -231,7 +233,6 @@ async function fetchHistoricalPrices(symbol: string): Promise<number[]> {
   return generateRealisticPrices(fallbacks[symbol] || 1.0, 90, config?.volatility || 0.001);
 }
 
-// Gera preços realistas quando a API não disponível
 function generateRealisticPrices(currentPrice: number, count: number, volatility: number): number[] {
   const prices: number[] = [];
   let price = currentPrice * (1 - volatility * 30);
@@ -245,7 +246,6 @@ function generateRealisticPrices(currentPrice: number, count: number, volatility
   return prices;
 }
 
-// Gera highs/lows sintéticos a partir dos closes (para ATR/ADX/Stoch)
 function generateHighLows(closes: number[], volatility: number): { highs: number[]; lows: number[] } {
   const highs = closes.map(c => c * (1 + Math.abs((Math.random() - 0.5) * volatility * 0.3)));
   const lows = closes.map(c => c * (1 - Math.abs((Math.random() - 0.5) * volatility * 0.3)));
@@ -272,7 +272,7 @@ interface TechnicalAnalysis {
 }
 
 function analyzeMarket(closes: number[], symbol: string): TechnicalAnalysis {
-  const config = ASSET_CONFIGS[symbol] || { volatility: 0.001, pipSize: 0.0001 };
+  const config = ASSET_CONFIGS[symbol] || { volatility: 0.001, pipSize: 0.0001, priceDigits: 5 };
   const entry = closes[closes.length - 1];
   const { highs, lows } = generateHighLows(closes, config.volatility);
 
@@ -286,15 +286,16 @@ function analyzeMarket(closes: number[], symbol: string): TechnicalAnalysis {
   const macd = calcMACD(closes);
   const bb = calcBollingerBands(closes, 20, 2);
   const { support, resistance } = findSupportResistance(closes);
+  const ichimoku = calcIchimoku(highs, lows, closes);
+  const fibonacci = calcFibonacci(highs, lows);
 
   const bullishSignals: string[] = [];
   const bearishSignals: string[] = [];
-  let bullScore = 0;
-  let bearScore = 0;
+  const bullScore = { raw: 0, weighted: 0 };
+  const bearScore = { raw: 0, weighted: 0 };
 
   // ═══════════════════════════════════════════════════════════════════════════
   // FILTRO 1: ADX — só operar em mercados com tendência (ADX > 20)
-  // Se ADX < 20, mercado lateral → AGUARDAR
   // ═══════════════════════════════════════════════════════════════════════════
   const trending = adx >= 20;
   const strongTrend = adx >= 30;
@@ -316,107 +317,154 @@ function analyzeMarket(closes: number[], symbol: string): TechnicalAnalysis {
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // INDICADOR 1: RSI — momentum
+  // INDICADOR 1: RSI (peso: 3) — momentum
   // ═══════════════════════════════════════════════════════════════════════════
   if (rsi < 30) {
-    bullScore += 3;
-    bullishSignals.push(`RSI em sobrevenda (${rsi.toFixed(0)}) — reversão bullish`);
+    bullScore.raw += 1; bullScore.weighted += 3;
+    bullishSignals.push(`RSI em sobrevenda (${rsi.toFixed(0)}) — zona de reversão bullish`);
   } else if (rsi < 40) {
-    bullScore += 1;
-    bullishSignals.push(`RSI em zona de suporte (${rsi.toFixed(0)})`);
+    bullScore.raw += 1; bullScore.weighted += 1.5;
+    bullishSignals.push(`RSI em zona de suporte (${rsi.toFixed(0)}) — momentum a recuperar`);
   } else if (rsi > 70) {
-    bearScore += 3;
-    bearishSignals.push(`RSI em sobrecompra (${rsi.toFixed(0)}) — reversão bearish`);
+    bearScore.raw += 1; bearScore.weighted += 3;
+    bearishSignals.push(`RSI em sobrecompra (${rsi.toFixed(0)}) — zona de reversão bearish`);
   } else if (rsi > 60) {
-    bearScore += 1;
-    bearishSignals.push(`RSI em zona de resistência (${rsi.toFixed(0)})`);
+    bearScore.raw += 1; bearScore.weighted += 1.5;
+    bearishSignals.push(`RSI em zona de resistência (${rsi.toFixed(0)}) — momentum a esgotar`);
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // INDICADOR 2: EMAs — tendência
+  // INDICADOR 2: EMAs (peso: 3) — tendência
   // ═══════════════════════════════════════════════════════════════════════════
+  const ema21Dist = ((entry - ema21) / ema21) * 100;
   if (entry > ema21 && ema21 > ema50) {
-    bullScore += 2;
-    bullishSignals.push(`Preço acima das EMAs 21 e 50 — tendência bullish`);
+    bullScore.raw += 1; bullScore.weighted += 3;
+    bullishSignals.push(`Preço acima das EMAs 21/50 (${ema21Dist > 0 ? "+" : ""}${ema21Dist.toFixed(2)}%) — tendência bullish alinhada`);
   } else if (entry < ema21 && ema21 < ema50) {
-    bearScore += 2;
-    bearishSignals.push(`Preço abaixo das EMAs 21 e 50 — tendência bearish`);
+    bearScore.raw += 1; bearScore.weighted += 3;
+    bearishSignals.push(`Preço abaixo das EMAs 21/50 (${ema21Dist.toFixed(2)}%) — tendência bearish alinhada`);
+  } else if (entry > ema21 && ema21 < ema50) {
+    bullScore.raw += 1; bullScore.weighted += 1;
+    bullishSignals.push(`Preço acima da EMA 21 mas abaixo da EMA 50 — momentum curto bullish, médio em transição`);
+  } else if (entry < ema21 && ema21 > ema50) {
+    bearScore.raw += 1; bearScore.weighted += 1;
+    bearishSignals.push(`Preço abaixo da EMA 21 mas acima da EMA 50 — momentum curto bearish, médio em transição`);
   }
 
   if (entry > ema200) {
-    bullScore += 1;
+    bullScore.raw += 1; bullScore.weighted += 2;
     bullishSignals.push(`Preço acima da EMA 200 — tendência de longo prazo bullish`);
   } else {
-    bearScore += 1;
+    bearScore.raw += 1; bearScore.weighted += 2;
     bearishSignals.push(`Preço abaixo da EMA 200 — tendência de longo prazo bearish`);
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // INDICADOR 3: MACD — momentum
+  // INDICADOR 3: MACD (peso: 2.5) — momentum
   // ═══════════════════════════════════════════════════════════════════════════
-  if (macd.histogram > 0 && macd.macd > macd.signal) {
-    bullScore += 2;
-    bullishSignals.push(`MACD cruzamento bullish — momentum positivo`);
-  } else if (macd.histogram < 0 && macd.macd < macd.signal) {
-    bearScore += 2;
-    bearishSignals.push(`MACD cruzamento bearish — momentum negativo`);
+  const macdCrossUp = macd.histogram > 0 && macd.macd > macd.signal;
+  const macdCrossDown = macd.histogram < 0 && macd.macd < macd.signal;
+  if (macdCrossUp) {
+    bullScore.raw += 1; bullScore.weighted += 2.5;
+    bullishSignals.push(`MACD cruzamento bullish — histograma positivo e a crescer`);
+  } else if (macdCrossDown) {
+    bearScore.raw += 1; bearScore.weighted += 2.5;
+    bearishSignals.push(`MACD cruzamento bearish — histograma negativo e a decrescer`);
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // INDICADOR 4: Bollinger Bands — reversão
+  // INDICADOR 4: Bollinger Bands (peso: 2) — reversão
   // ═══════════════════════════════════════════════════════════════════════════
+  const bbWidth = bb.upper - bb.lower;
+  const bbPosition = (entry - bb.lower) / bbWidth;
   if (entry <= bb.lower) {
-    bullScore += 2;
-    bullishSignals.push(`Preço na banda inferior de Bollinger — reversão bullish`);
+    bullScore.raw += 1; bullScore.weighted += 2;
+    bullishSignals.push(`Preço na banda inferior de Bollinger (posição ${(bbPosition * 100).toFixed(0)}%) — reversão potencial`);
   } else if (entry >= bb.upper) {
-    bearScore += 2;
-    bearishSignals.push(`Preço na banda superior de Bollinger — reversão bearish`);
+    bearScore.raw += 1; bearScore.weighted += 2;
+    bearishSignals.push(`Preço na banda superior de Bollinger (posição ${(bbPosition * 100).toFixed(0)}%) — reversão potencial`);
+  } else if (bbPosition < 0.3) {
+    bullScore.raw += 1; bullScore.weighted += 1;
+    bullishSignals.push(`Preço na zona inferior de Bollinger (${(bbPosition * 100).toFixed(0)}%) — suporte próximo`);
+  } else if (bbPosition > 0.7) {
+    bearScore.raw += 1; bearScore.weighted += 1;
+    bearishSignals.push(`Preço na zona superior de Bollinger (${(bbPosition * 100).toFixed(0)}%) — resistência próxima`);
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // INDICADOR 5: Estocástico — sobrecompra/sobrevenda
+  // INDICADOR 5: Estocástico (peso: 2) — sobrecompra/sobrevenda
   // ═══════════════════════════════════════════════════════════════════════════
   if (stochastic.k < 20 && stochastic.d < 20) {
-    bullScore += 2;
-    bullishSignals.push(`Estocástico em sobrevenda (%K=${stochastic.k.toFixed(0)}) — reversão bullish`);
+    bullScore.raw += 1; bullScore.weighted += 2;
+    bullishSignals.push(`Estocástico em sobrevenda (%K=${stochastic.k.toFixed(0)}, %D=${stochastic.d.toFixed(0)}) — reversão`);
   } else if (stochastic.k > 80 && stochastic.d > 80) {
-    bearScore += 2;
-    bearishSignals.push(`Estocástico em sobrecompra (%K=${stochastic.k.toFixed(0)}) — reversão bearish`);
+    bearScore.raw += 1; bearScore.weighted += 2;
+    bearishSignals.push(`Estocástico em sobrecompra (%K=${stochastic.k.toFixed(0)}, %D=${stochastic.d.toFixed(0)}) — reversão`);
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // INDICADOR 6: Suporte/Resistência
+  // INDICADOR 6: Suporte/Resistência (peso: 2)
   // ═══════════════════════════════════════════════════════════════════════════
   const distSupport = Math.abs(entry - support) / entry;
   const distResistance = Math.abs(entry - resistance) / entry;
-
   if (distSupport < 0.003) {
-    bullScore += 2;
-    bullishSignals.push(`Preço no suporte (${support.toFixed(config.priceDigits)})`);
+    bullScore.raw += 1; bullScore.weighted += 2;
+    bullishSignals.push(`Preço no suporte (${support.toFixed(config.priceDigits)}) — zona de compra`);
   }
   if (distResistance < 0.003) {
-    bearScore += 2;
-    bearishSignals.push(`Preço na resistência (${resistance.toFixed(config.priceDigits)})`);
+    bearScore.raw += 1; bearScore.weighted += 2;
+    bearishSignals.push(`Preço na resistência (${resistance.toFixed(config.priceDigits)}) — zona de venda`);
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // BONUS: Força da tendência (ADX > 30 = bónus)
+  // INDICADOR 7: Ichimoku Cloud (peso: 2.5) — tendência
+  // ═══════════════════════════════════════════════════════════════════════════
+  const cloudTop = Math.max(ichimoku.senkouSpanA, ichimoku.senkouSpanB);
+  const cloudBottom = Math.min(ichimoku.senkouSpanA, ichimoku.senkouSpanB);
+  const aboveCloud = entry > cloudTop;
+  const belowCloud = entry < cloudBottom;
+  const tenkanAboveKijun = ichimoku.tenkanSen > ichimoku.kijunSen;
+
+  if (aboveCloud && tenkanAboveKijun) {
+    bullScore.raw += 1; bullScore.weighted += 2.5;
+    bullishSignals.push(`Ichimoku: preço acima da nuvem e Tenkan > Kijun — confirmação de tendência bullish`);
+  } else if (belowCloud && !tenkanAboveKijun) {
+    bearScore.raw += 1; bearScore.weighted += 2.5;
+    bearishSignals.push(`Ichimoku: preço abaixo da nuvem e Tenkan < Kijun — confirmação de tendência bearish`);
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // INDICADOR 8: Fibonacci Retracement (peso: 1.5)
+  // ═══════════════════════════════════════════════════════════════════════════
+  const distFib382 = Math.abs(entry - fibonacci.level_382) / entry;
+  const distFib618 = Math.abs(entry - fibonacci.level_618) / entry;
+  if (distFib382 < 0.002) {
+    bullScore.raw += 1; bullScore.weighted += 1.5;
+    bullishSignals.push(`Preço no Fibonacci 38.2% (${fibonacci.level_382.toFixed(config.priceDigits)}) — retracemento`);
+  }
+  if (distFib618 < 0.002) {
+    bullScore.raw += 1; bullScore.weighted += 1.5;
+    bullishSignals.push(`Preço no Fibonacci 61.8% (${fibonacci.level_618.toFixed(config.priceDigits)}) — nível de ouro`);
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // BONUS: Força da tendência (ADX > 30)
   // ═══════════════════════════════════════════════════════════════════════════
   if (strongTrend) {
-    if (bullScore > bearScore) {
-      bullScore += 2;
-      bullishSignals.push(`ADX forte (${adx.toFixed(0)}) — tendência confirmada`);
-    } else if (bearScore > bullScore) {
-      bearScore += 2;
-      bearishSignals.push(`ADX forte (${adx.toFixed(0)}) — tendência confirmada`);
+    if (bullScore.weighted > bearScore.weighted) {
+      bullScore.raw += 1; bullScore.weighted += 2;
+      bullishSignals.push(`ADX forte (${adx.toFixed(0)}) — tendência confirmada e com força`);
+    } else if (bearScore.weighted > bullScore.weighted) {
+      bearScore.raw += 1; bearScore.weighted += 2;
+      bearishSignals.push(`ADX forte (${adx.toFixed(0)}) — tendência confirmada e com força`);
     }
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // DECISÃO FINAL — Threshold mais alto para reduzir falsos sinais
+  // DECISÃO FINAL — threshold adaptativo baseado em indicadores
   // ═══════════════════════════════════════════════════════════════════════════
-  const totalScore = bullScore + bearScore;
-  const minScore = 7; // Mais exigente: precisa de pelo menos 3 indicadores concordando
+  const minIndicators = 3;
+  const minWeightedScore = 6;
 
   let signalType: "BUY" | "SELL" | "AGUARDAR";
   let reasons: string[];
@@ -424,25 +472,28 @@ function analyzeMarket(closes: number[], symbol: string): TechnicalAnalysis {
   let stopLoss: number;
   let takeProfit: number;
 
-  if (bullScore > bearScore && bullScore >= minScore) {
+  if (bullScore.raw >= minIndicators && bullScore.weighted >= minWeightedScore && bullScore.weighted > bearScore.weighted) {
     signalType = "BUY";
-    reasons = bullishSignals.slice(0, 4);
-    confidence = Math.min(92, Math.round(55 + (bullScore / (totalScore || 1)) * 40));
+    reasons = bullishSignals.slice(0, 5);
+    // Confiança ponderada: mais indicadores = mais confiança
+    const ratio = bullScore.weighted / (bullScore.weighted + bearScore.weighted);
+    confidence = Math.min(92, Math.round(55 + ratio * 37));
     stopLoss = entry - atr * 1.8;
     takeProfit = entry + atr * 3;
-  } else if (bearScore > bullScore && bearScore >= minScore) {
+  } else if (bearScore.raw >= minIndicators && bearScore.weighted >= minWeightedScore && bearScore.weighted > bullScore.weighted) {
     signalType = "SELL";
-    reasons = bearishSignals.slice(0, 4);
-    confidence = Math.min(92, Math.round(55 + (bearScore / (totalScore || 1)) * 40));
+    reasons = bearishSignals.slice(0, 5);
+    const ratio = bearScore.weighted / (bullScore.weighted + bearScore.weighted);
+    confidence = Math.min(92, Math.round(55 + ratio * 37));
     stopLoss = entry + atr * 1.8;
     takeProfit = entry - atr * 3;
   } else {
     signalType = "AGUARDAR";
     reasons = [
-      `Sem consenso técnico — bullScore=${bullScore}, bearScore=${bearScore}`,
-      `ADX ${adx.toFixed(0)}${strongTrend ? " (forte)" : ""} | RSI ${rsi.toFixed(0)} | Estocástico ${stochastic.k.toFixed(0)}`,
+      `Sem consenso — bullish: ${bullScore.raw} indicadores (${bullScore.weighted.toFixed(1)}pts) | bearish: ${bearScore.raw} (${bearScore.weighted.toFixed(1)}pts)`,
+      `ADX ${adx.toFixed(0)}${strongTrend ? " (forte)" : ""} | RSI ${rsi.toFixed(0)} | MACD ${macd.histogram > 0 ? "+" : ""}${macd.histogram.toFixed(4)}`,
       `Preço entre suporte (${support.toFixed(config.priceDigits)}) e resistência (${resistance.toFixed(config.priceDigits)})`,
-      `Aguardar mais confirmação antes de entrar`,
+      `Aguardar mais confirmação antes de entrar — mínimo ${minIndicators} indicadores e ${minWeightedScore} pontos`,
     ];
     confidence = 25;
     stopLoss = entry - atr * 1.5;
@@ -461,8 +512,6 @@ function analyzeMarket(closes: number[], symbol: string): TechnicalAnalysis {
 }
 
 // ─── Servidor ────────────────────────────────────────────────────────────────
-
-const ALL_SYMBOLS = ["EURUSD", "GBPUSD", "USDJPY", "AUDUSD", "EURGBP", "USDCHF", "NZDUSD", "USDCAD", "XAUUSD", "BTCUSD"];
 
 serve(async (req) => {
   const corsHeaders = {
@@ -498,7 +547,6 @@ serve(async (req) => {
         continue;
       }
 
-      // Buscar preços históricos REAIS
       let closes: number[];
       try {
         closes = await fetchHistoricalPrices(symbol);
@@ -509,19 +557,15 @@ serve(async (req) => {
       }
 
       const entry = closes[closes.length - 1];
-
-      // Análise técnica com dados REAIS
       const analysis = analyzeMarket(closes, symbol);
       const config = ASSET_CONFIGS[symbol];
 
-      // Apagar sinais antigos do mesmo par
       await supabase
         .from("signals")
         .delete()
         .eq("symbol", symbol)
         .lt("created_at", new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString());
 
-      // Inserir novo sinal
       const { data, error } = await supabase.from("signals").insert([{
         symbol,
         timeframe,

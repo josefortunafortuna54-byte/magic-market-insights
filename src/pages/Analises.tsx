@@ -181,15 +181,15 @@ export default function Analises() {
 
         {/* Gráfico */}
         <div className="px-4">
-          <div style={{ height: "calc(100vh - 230px)", minHeight: "480px", width: "100%", borderRadius: "12px", overflow: "hidden", border: "1px solid rgba(255,255,255,0.08)" }}>
-            <TradingViewChart symbol={selectedPair} interval={tvInterval} />
+          <div style={{ height: "calc(100vh - 230px)", minHeight: "480px", width: "100%" }}>
+            <TradingViewChart symbol={selectedPair} interval={tvInterval} height="100%" />
           </div>
         </div>
 
         <div className="container mx-auto px-4 py-2">
           <p className="text-xs text-muted-foreground">
-            Para guardar desenhos permanentemente, abre o
-            <a href={tvUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline ml-1">TradingView completo</a>.
+            Gráfico TradingView · Indicadores incluídos: EMA, RSI, MACD, Bollinger, Estocástico
+            {selectedTimeframe !== "Todos" && <> · Timeframe: {selectedTimeframe}</>}
           </p>
         </div>
 

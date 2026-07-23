@@ -10,6 +10,13 @@ function formatDate(dateStr: string): string {
   });
 }
 
+function pipMultiplier(pair: string): number {
+  if (pair.includes("JPY")) return 100;
+  if (pair.includes("XAU")) return 100;
+  if (pair.includes("BTC")) return 1;
+  return 10000;
+}
+
 export default function Historico() {
   const { signals, stats, loading } = useHistory();
 
@@ -18,21 +25,24 @@ export default function Historico() {
     ? signals
     : mockSignals
         .filter(s => s.status === "tp" || s.status === "sl")
-        .map(s => ({
-          id: s.id,
-          pair: s.pair,
-          timeframe: s.timeframe,
-          type: s.type,
-          confidence: s.confidence,
-          entry: s.entry,
-          stopLoss: s.stopLoss,
-          takeProfit: s.takeProfit,
-          result: s.status as "tp" | "sl",
-          date: s.createdAt,
-          profitPips: s.status === "tp"
-            ? Math.round(Math.abs(s.takeProfit - s.entry) * 10000)
-            : -Math.round(Math.abs(s.entry - s.stopLoss) * 10000),
-        }));
+        .map(s => {
+          const pp = pipMultiplier(s.pair);
+          return {
+            id: s.id,
+            pair: s.pair,
+            timeframe: s.timeframe,
+            type: s.type,
+            confidence: s.confidence,
+            entry: s.entry,
+            stopLoss: s.stopLoss,
+            takeProfit: s.takeProfit,
+            result: s.status as "tp" | "sl",
+            date: s.createdAt,
+            profitPips: s.status === "tp"
+              ? Math.round(Math.abs(s.takeProfit - s.entry) * pp)
+              : -Math.round(Math.abs(s.entry - s.stopLoss) * pp),
+          };
+        });
 
   const displayStats = signals.length > 0 ? stats : {
     total: historicalSignals.length,
