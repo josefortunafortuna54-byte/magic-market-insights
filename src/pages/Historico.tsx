@@ -2,7 +2,6 @@ import { motion } from "framer-motion";
 import { TrendingUp, TrendingDown, Clock, Target, Shield, BarChart3, Trophy, AlertTriangle, Coins } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
 import { useHistory } from "@/hooks/useHistory";
-import { mockSignals } from "@/data/mockSignals";
 
 function formatDate(dateStr: string): string {
   return new Date(dateStr).toLocaleDateString("pt-PT", {
@@ -10,49 +9,12 @@ function formatDate(dateStr: string): string {
   });
 }
 
-function pipMultiplier(pair: string): number {
-  if (pair.includes("JPY")) return 100;
-  if (pair.includes("XAU")) return 100;
-  if (pair.includes("BTC")) return 1;
-  return 10000;
-}
-
 export default function Historico() {
   const { signals, stats, loading } = useHistory();
 
-  // Fallback para mock se não houver dados reais
-  const historicalSignals = signals.length > 0
-    ? signals
-    : mockSignals
-        .filter(s => s.status === "tp" || s.status === "sl")
-        .map(s => {
-          const pp = pipMultiplier(s.pair);
-          return {
-            id: s.id,
-            pair: s.pair,
-            timeframe: s.timeframe,
-            type: s.type,
-            confidence: s.confidence,
-            entry: s.entry,
-            stopLoss: s.stopLoss,
-            takeProfit: s.takeProfit,
-            result: s.status as "tp" | "sl",
-            date: s.createdAt,
-            profitPips: s.status === "tp"
-              ? Math.round(Math.abs(s.takeProfit - s.entry) * pp)
-              : -Math.round(Math.abs(s.entry - s.stopLoss) * pp),
-          };
-        });
+  const historicalSignals = signals;
 
-  const displayStats = signals.length > 0 ? stats : {
-    total: historicalSignals.length,
-    tp: historicalSignals.filter(s => s.result === "tp").length,
-    sl: historicalSignals.filter(s => s.result === "sl").length,
-    winRate: historicalSignals.length > 0
-      ? Math.round((historicalSignals.filter(s => s.result === "tp").length / historicalSignals.length) * 100)
-      : 0,
-    totalPips: historicalSignals.reduce((sum, s) => sum + s.profitPips, 0),
-  };
+  const displayStats = stats;
 
   return (
     <Layout>

@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Sparkles, TrendingUp, Brain, Shield, Crown, ChevronRight, BarChart3, Zap, Target } from "lucide-react";
@@ -22,12 +23,27 @@ export default function Index() {
     .filter(s => s.status === "active" && s.type !== "AGUARDAR")
     .slice(0, 3);
 
-  const winRate = stats.total > 0 ? `${stats.winRate}%` : "85%+";
-  const totalPairs = signals.length > 0 ? `${new Set(signals.map(s => s.pair)).size}+` : "15+";
+  const winRate = stats.total > 0 ? `${stats.winRate}%` : "—";
+  const totalPairs = signals.length > 0 ? `${new Set(signals.map(s => s.pair)).size}+` : "—";
+
+  const avgRR = useMemo(() => {
+    const valid = signals.filter(s =>
+      s.type !== "AGUARDAR" && s.entry > 0 && s.stopLoss > 0 && s.takeProfit > 0
+    );
+    if (valid.length === 0) return null;
+    const ratios = valid.map(s => {
+      const risk = Math.abs(s.entry - s.stopLoss);
+      const reward = Math.abs(s.takeProfit - s.entry);
+      return risk > 0 ? reward / risk : 0;
+    }).filter(r => r > 0);
+    if (ratios.length === 0) return null;
+    const avg = ratios.reduce((a, b) => a + b, 0) / ratios.length;
+    return `1:${avg.toFixed(1)}`;
+  }, [signals]);
 
   const displayStats = [
     { value: winRate, label: "Taxa de Acerto" },
-    { value: "1:2.5", label: "RR Médio" },
+    { value: avgRR ?? "—", label: "RR Médio" },
     { value: "24/7", label: "Monitoramento" },
     { value: totalPairs, label: "Pares Forex" },
   ];

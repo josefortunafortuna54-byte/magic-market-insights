@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
 import { Filter, Search, TrendingUp, TrendingDown, Minus, ExternalLink, RefreshCw, Lock, Crown } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -7,7 +7,8 @@ import { SignalCard } from "@/components/signals/SignalCard";
 import { TradingViewChart } from "@/components/signals/TradingViewChart";
 import { useSignals } from "@/hooks/useSignals";
 import { useSubscription } from "@/hooks/useSubscription";
-import { mockSignals } from "@/data/mockSignals";
+import { useLivePrices } from "@/hooks/useLivePrices";
+
 
 const timeframes = ["Todos", "M15", "H1", "H4"];
 const signalTypes = ["Todos", "BUY", "SELL", "AGUARDAR"];
@@ -15,18 +16,7 @@ const signalTypes = ["Todos", "BUY", "SELL", "AGUARDAR"];
 const FREE_PAIRS = ["EUR/USD", "GBP/USD", "USD/JPY"];
 const FREE_TIMEFRAMES = ["M15"];
 
-const pairPrices: Record<string, { price: string; change: number }> = {
-  "EUR/USD": { price: "1.15550", change: 0.02 },
-  "GBP/USD": { price: "1.27100", change: -0.08 },
-  "USD/JPY": { price: "148.500", change: 0.12 },
-  "AUD/USD": { price: "0.63420", change: -0.03 },
-  "EUR/GBP": { price: "0.85890", change: 0.01 },
-  "USD/CHF": { price: "0.89750", change: -0.05 },
-  "NZD/USD": { price: "0.57800", change: -0.05 },
-  "USD/CAD": { price: "1.38700", change: 0.03 },
-  "XAU/USD": { price: "3350.00", change: 0.45 },
-  "BTC/USD": { price: "111500.00", change: 1.22 },
-};
+const ALL_PAIRS = ["EUR/USD", "GBP/USD", "USD/JPY", "AUD/USD", "EUR/GBP", "USD/CHF", "NZD/USD", "USD/CAD", "XAU/USD", "BTC/USD"];
 
 const tvIntervals: Record<string, string> = {
   "M15": "15", "H1": "60", "H4": "240",
@@ -65,32 +55,25 @@ export default function Analises() {
   const [selectedTimeframe, setSelectedTimeframe] = useState("M15");
   const [selectedType, setSelectedType] = useState("Todos");
   const [selectedPair, setSelectedPair] = useState("EUR/USD");
-  const [currentPrice, setCurrentPrice] = useState(pairPrices["EUR/USD"]);
 
   const { signals: supabaseSignals, loading, error, refetch } = useSignals();
   const { user, isPremium, loading: subLoading } = useSubscription();
 
-  const allSignals = supabaseSignals.length > 0 ? supabaseSignals : mockSignals;
+  const { prices, loading: pricesLoading, refetch: refetchPrices } = useLivePrices(ALL_PAIRS);
 
-  // Filtrar sinais por plano
+  const allSignals = supabaseSignals;
+
   const visibleSignals = allSignals.filter(s => {
     if (isPremium) return true;
     return FREE_PAIRS.includes(s.pair) && FREE_TIMEFRAMES.includes(s.timeframe);
   });
 
-  // Pares visíveis por plano
   const visiblePairs = isPremium
     ? [...new Set(allSignals.map(s => s.pair))]
     : FREE_PAIRS.filter(p => allSignals.some(s => s.pair === p));
 
-  // Timeframes disponíveis por plano
   const availableTimeframes = isPremium ? timeframes : ["Todos", "M15"];
 
-  useEffect(() => {
-    setCurrentPrice(pairPrices[selectedPair] ?? { price: "—", change: 0 });
-  }, [selectedPair]);
-
-  // Se timeframe selecionado não está disponível, resetar para M15
   useEffect(() => {
     if (!isPremium && !["Todos", "M15"].includes(selectedTimeframe)) {
       setSelectedTimeframe("M15");
@@ -104,6 +87,8 @@ export default function Analises() {
   });
 
   const activeSignals = filteredSignals.filter((s) => s.status === "active" || !s.status);
+
+  const currentPrice = prices[selectedPair] ?? { price: "—", change: 0 };
   const isUp = currentPrice.change > 0;
   const isFlat = currentPrice.change === 0;
   const tvSymbol = selectedPair.replace("/", "");
@@ -125,7 +110,7 @@ export default function Analises() {
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-success" />
               </span>
               <h1 className="font-display text-xl font-bold">Painel de Sinais</h1>
-              {loading && <RefreshCw className="h-4 w-4 text-muted-foreground animate-spin" />}
+              {(loading || pricesLoading) && <RefreshCw className="h-4 w-4 text-muted-foreground animate-spin" />}
             </div>
 
             <motion.div key={selectedPair} initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-3">
@@ -147,17 +132,16 @@ export default function Analises() {
 
           {/* Seletor de pares */}
           <div className="flex flex-wrap gap-2 mt-3">
-            {/* Pares disponíveis */}
             {visiblePairs.map((pair) => {
               const isActive = selectedPair === pair;
-              const pairData = pairPrices[pair];
+              const pairData = prices[pair];
               const pairUp = pairData && pairData.change > 0;
               const pairDown = pairData && pairData.change < 0;
               return (
                 <motion.button key={pair} whileTap={{ scale: 0.97 }} onClick={() => setSelectedPair(pair)}
                   className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-sm font-medium transition-all duration-200 border ${isActive ? "bg-primary text-white border-primary shadow-lg shadow-primary/20" : "bg-card/60 border-border/60 text-muted-foreground hover:border-primary/30 hover:text-foreground"}`}>
                   {pair}
-                  {pairData && (
+                  {pairData && pairData.price !== "—" && (
                     <span className={`text-xs ${isActive ? "text-white/80" : pairUp ? "text-success" : pairDown ? "text-destructive" : "text-muted-foreground"}`}>
                       {pairUp ? "+" : ""}{pairData.change.toFixed(2)}%
                     </span>
@@ -166,7 +150,6 @@ export default function Analises() {
               );
             })}
 
-            {/* Pares bloqueados para free */}
             {!isPremium && !subLoading && (
               <Link to="/planos">
                 <motion.button whileTap={{ scale: 0.97 }}
@@ -237,7 +220,7 @@ export default function Analises() {
                 <span className="text-xs text-muted-foreground">
                   <span className="text-foreground font-semibold">{activeSignals.length}</span> sinais ativos
                 </span>
-                <button onClick={refetch} className="p-1.5 rounded-lg hover:bg-secondary/60 transition-colors">
+                <button onClick={() => { refetch(); refetchPrices(); }} className="p-1.5 rounded-lg hover:bg-secondary/60 transition-colors">
                   <RefreshCw className="h-3.5 w-3.5 text-muted-foreground" />
                 </button>
               </div>
@@ -272,7 +255,6 @@ export default function Analises() {
                 ))}
               </div>
 
-              {/* Banner premium para utilizadores free */}
               {!isPremium && !subLoading && user && (
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
                   className="mt-8 glass-card p-6 border-accent/20 flex flex-col sm:flex-row items-center justify-between gap-4"
@@ -296,7 +278,6 @@ export default function Analises() {
                 </motion.div>
               )}
 
-              {/* Banner para não logados */}
               {!user && !subLoading && (
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
                   className="mt-8 glass-card p-6 border-primary/20 flex flex-col sm:flex-row items-center justify-between gap-4">
