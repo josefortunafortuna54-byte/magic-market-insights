@@ -7,85 +7,236 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instantiate createClient with right options
-  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
-  __InternalSupabase: {
-    PostgrestVersion: "14.1"
-  }
   public: {
     Tables: {
       signals: {
         Row: {
-          confidence: number
-          created_at: string
-          entry_price: number
           id: string
-          pair: string
-          reasons: string[]
-          signal_type: string
-          status: string | null
-          stop_loss: number
-          take_profit: number
+          symbol: string
           timeframe: string
+          signal_type: string
+          entry_price: number
+          stop_loss: number
+          target_price: number
+          confidence: number
+          reasons: string[]
+          status: string | null
+          created_at: string
         }
         Insert: {
-          confidence: number
-          created_at?: string
-          entry_price: number
           id?: string
-          pair: string
-          reasons: string[]
-          signal_type: string
-          status?: string | null
-          stop_loss: number
-          take_profit: number
+          symbol: string
           timeframe: string
+          signal_type: string
+          entry_price: number
+          stop_loss: number
+          target_price: number
+          confidence: number
+          reasons: string[]
+          status?: string | null
+          created_at?: string
         }
         Update: {
-          confidence?: number
-          created_at?: string
-          entry_price?: number
           id?: string
-          pair?: string
-          reasons?: string[]
-          signal_type?: string
-          status?: string | null
-          stop_loss?: number
-          take_profit?: number
+          symbol?: string
           timeframe?: string
+          signal_type?: string
+          entry_price?: number
+          stop_loss?: number
+          target_price?: number
+          confidence?: number
+          reasons?: string[]
+          status?: string | null
+          created_at?: string
         }
         Relationships: []
       }
-      whatsapp_subscriptions: {
+      subscriptions: {
         Row: {
-          created_at: string
           id: string
-          is_active: boolean
-          min_confidence: number | null
-          pairs: string[] | null
-          phone_number: string
-          timeframes: string[] | null
-          updated_at: string
+          user_id: string
+          status: string
+          plan: string
+          currency: string
+          stripe_price_id: string
+          stripe_subscription_id: string | null
+          current_period_end: string | null
+          created_at: string
         }
         Insert: {
-          created_at?: string
           id?: string
-          is_active?: boolean
-          min_confidence?: number | null
-          pairs?: string[] | null
-          phone_number: string
-          timeframes?: string[] | null
-          updated_at?: string
+          user_id: string
+          status: string
+          plan: string
+          currency?: string
+          stripe_price_id?: string
+          stripe_subscription_id?: string | null
+          current_period_end?: string | null
+          created_at?: string
         }
         Update: {
-          created_at?: string
           id?: string
-          is_active?: boolean
-          min_confidence?: number | null
-          pairs?: string[] | null
-          phone_number?: string
-          timeframes?: string[] | null
-          updated_at?: string
+          user_id?: string
+          status?: string
+          plan?: string
+          currency?: string
+          stripe_price_id?: string
+          stripe_subscription_id?: string | null
+          current_period_end?: string | null
+          created_at?: string
+        }
+        Relationships: []
+      }
+      boom_hours: {
+        Row: {
+          id: string
+          title: string
+          time_gmt: string
+          time_wat: string
+          pairs: string[]
+          days: string
+          description: string
+          volatility: number
+          badge: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          title: string
+          time_gmt: string
+          time_wat: string
+          pairs?: string[]
+          days?: string
+          description?: string
+          volatility?: number
+          badge?: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          title?: string
+          time_gmt?: string
+          time_wat?: string
+          pairs?: string[]
+          days?: string
+          description?: string
+          volatility?: number
+          badge?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
+      posts: {
+        Row: {
+          id: string
+          title: string
+          content: string
+          pair: string
+          signal_type: string
+          image_url: string | null
+          audio_url: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          title: string
+          content?: string
+          pair?: string
+          signal_type?: string
+          image_url?: string | null
+          audio_url?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          title?: string
+          content?: string
+          pair?: string
+          signal_type?: string
+          image_url?: string | null
+          audio_url?: string | null
+          created_at?: string
+        }
+        Relationships: []
+      }
+      boom_times: {
+        Row: {
+          id: string
+          pair: string
+          boom_time: string
+          confidence: number
+          result: string
+          image_url: string | null
+          audio_url: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          pair: string
+          boom_time: string
+          confidence?: number
+          result?: string
+          image_url?: string | null
+          audio_url?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          pair?: string
+          boom_time?: string
+          confidence?: number
+          result?: string
+          image_url?: string | null
+          audio_url?: string | null
+          created_at?: string
+        }
+        Relationships: []
+      }
+      boom_votes: {
+        Row: {
+          id: string
+          user_id: string
+          boom_time_id: string
+          vote_type: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          boom_time_id: string
+          vote_type: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          boom_time_id?: string
+          vote_type?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
+      boom_comments: {
+        Row: {
+          id: string
+          user_id: string
+          boom_time_id: string
+          content: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          boom_time_id: string
+          content: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          boom_time_id?: string
+          content?: string
+          created_at?: string
         }
         Relationships: []
       }
@@ -94,7 +245,21 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_all_users: {
+        Args: Record<string, never>
+        Returns: {
+          id: string
+          email: string
+          full_name: string | null
+          avatar_url: string | null
+          created_at: string
+          last_sign_in: string | null
+        }[]
+      }
+      get_users_count: {
+        Args: Record<string, never>
+        Returns: number
+      }
     }
     Enums: {
       [_ in never]: never
@@ -104,126 +269,3 @@ export type Database = {
     }
   }
 }
-
-type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
-
-type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
-
-export type Tables<
-  DefaultSchemaTableNameOrOptions extends
-    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
-    | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
-  }
-    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never = never,
-> = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
-  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
-      Row: infer R
-    }
-    ? R
-    : never
-  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])
-    ? (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
-        Row: infer R
-      }
-      ? R
-      : never
-    : never
-
-export type TablesInsert<
-  DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema["Tables"]
-    | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
-  }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
-> = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
-  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Insert: infer I
-    }
-    ? I
-    : never
-  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-        Insert: infer I
-      }
-      ? I
-      : never
-    : never
-
-export type TablesUpdate<
-  DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema["Tables"]
-    | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
-  }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
-> = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
-  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Update: infer U
-    }
-    ? U
-    : never
-  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-        Update: infer U
-      }
-      ? U
-      : never
-    : never
-
-export type Enums<
-  DefaultSchemaEnumNameOrOptions extends
-    | keyof DefaultSchema["Enums"]
-    | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends DefaultSchemaEnumNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
-  }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
-> = DefaultSchemaEnumNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
-  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
-  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
-    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
-    : never
-
-export type CompositeTypes<
-  PublicCompositeTypeNameOrOptions extends
-    | keyof DefaultSchema["CompositeTypes"]
-    | { schema: keyof DatabaseWithoutInternals },
-  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
-  }
-    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
-> = PublicCompositeTypeNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
-  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
-  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
-    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
-    : never
-
-export const Constants = {
-  public: {
-    Enums: {},
-  },
-} as const

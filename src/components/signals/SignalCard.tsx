@@ -15,7 +15,7 @@ export interface Signal {
   takeProfit: number;
   reasons: string[];
   createdAt: string;
-  status?: "active" | "tp" | "sl";
+  status?: "active" | "pending" | "tp" | "sl";
 }
 
 interface SignalCardProps {
