@@ -24,6 +24,8 @@ const pairPrices: Record<string, { price: string; change: number }> = {
   "USD/CHF": { price: "0.89750", change: -0.05 },
   "NZD/USD": { price: "0.57800", change: -0.05 },
   "USD/CAD": { price: "1.38700", change: 0.03 },
+  "XAU/USD": { price: "3350.00", change: 0.45 },
+  "BTC/USD": { price: "111500.00", change: 1.22 },
 };
 
 const tvIntervals: Record<string, string> = {
@@ -106,7 +108,8 @@ export default function Analises() {
   const isFlat = currentPrice.change === 0;
   const tvSymbol = selectedPair.replace("/", "");
   const tvInterval = selectedTimeframe !== "Todos" ? (tvIntervals[selectedTimeframe] ?? "60") : "60";
-  const tvUrl = `https://www.tradingview.com/chart/?symbol=FX:${tvSymbol}&interval=${tvInterval}`;
+  const tvPrefix = tvSymbol === "BTCUSD" ? "COINBASE" : "FX";
+  const tvUrl = `https://www.tradingview.com/chart/?symbol=${tvPrefix}:${tvSymbol}&interval=${tvInterval}`;
 
   const isPremiumTimeframe = !isPremium && ["H1", "H4"].includes(selectedTimeframe);
 
@@ -280,7 +283,7 @@ export default function Analises() {
                     </div>
                     <div>
                       <p className="font-semibold text-sm">Estás a ver apenas sinais M15 de 3 pares</p>
-                      <p className="text-xs text-muted-foreground">Premium desbloqueia H1, H4 e todos os 8 pares Forex</p>
+                      <p className="text-xs text-muted-foreground">Premium desbloqueia H1, H4, XAU/USD, BTC e mais 5 pares Forex</p>
                     </div>
                   </div>
                   <Link to="/planos">

@@ -457,6 +457,15 @@ export default function Comunidade() {
   const [isPremium, setIsPremium] = useState(false);
   const [filter, setFilter] = useState<"all" | "upcoming" | "live" | "expired">("all");
 
+  const checkPremium = async (userId: string) => {
+    const { data } = await supabase
+      .from("subscriptions")
+      .select("status")
+      .eq("user_id", userId)
+      .single();
+    setIsPremium(data?.status === "active");
+  };
+
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user || null);

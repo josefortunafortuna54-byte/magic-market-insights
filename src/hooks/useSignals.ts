@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabaseClient";
 import { Signal } from "@/components/signals/SignalCard";
 
@@ -28,83 +29,57 @@ function formatType(type: string): "BUY" | "SELL" | "AGUARDAR" {
   return "AGUARDAR";
 }
 
-// Determina se o sinal está "Ativo" (na zona) ou "A aguardar" (longe da entrada)
 function determineStatus(row: any): "active" | "pending" | "tp" | "sl" {
   if (row.status === "tp") return "tp";
   if (row.status === "sl") return "sl";
-
-  const entry = Number(row.entry_price);
-  const stopLoss = Number(row.stop_loss);
-  const takeProfit = Number(row.target_price);
-  const signalType = row.signal_type?.toUpperCase();
-
-  if (!entry || !stopLoss || !takeProfit) return "pending";
-
-  // Calcula a distância de pip entre entrada e stop
-  const pipDistance = Math.abs(entry - stopLoss);
-  // Zona de tolerância: 30% da distância de pip
-  const tolerance = pipDistance * 0.3;
-
-  // Se o preço atual (entry_price como proxy) está dentro da zona de entrada
-  // considera ativo, caso contrário pendente
-  // Como não temos preço atual em tempo real aqui, usamos a confiança como proxy:
-  // Confiança >= 70 = na zona (ativo), < 70 = fora da zona (a aguardar)
   if (row.status === "active") return "active";
   if (row.status === "pending") return "pending";
-
   return Number(row.confidence) >= 70 ? "active" : "pending";
 }
 
+async function fetchSignals(): Promise<Signal[]> {
+  const { data, error } = await supabase
+    .from("signals")
+    .select("*")
+    .order("created_at", { ascending: false })
+    .limit(50);
+
+  if (error) throw error;
+
+  return (data || []).map((row: any) => ({
+    id: String(row.id),
+    pair: formatSymbol(row.symbol),
+    timeframe: formatTimeframe(row.timeframe),
+    type: formatType(row.signal_type),
+    confidence: Number(row.confidence) || 50,
+    entry: Number(row.entry_price) || 0,
+    stopLoss: Number(row.stop_loss) || 0,
+    takeProfit: Number(row.target_price) || 0,
+    reasons: row.reasons ?? [],
+    createdAt: row.created_at ?? new Date().toISOString(),
+    status: determineStatus(row),
+  }));
+}
+
 export function useSignals() {
-  const [signals, setSignals] = useState<Signal[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
-  const fetchSignals = async () => {
-    try {
-      setLoading(true);
-      const { data, error } = await supabase
-        .from("signals")
-        .select("*")
-        .order("created_at", { ascending: false })
-        .limit(50);
-
-      if (error) throw error;
-
-      const mapped: Signal[] = (data || []).map((row: any) => ({
-        id: String(row.id),
-        pair: formatSymbol(row.symbol),
-        timeframe: formatTimeframe(row.timeframe),
-        type: formatType(row.signal_type),
-        confidence: Number(row.confidence) || 50,
-        entry: Number(row.entry_price) || 0,
-        stopLoss: Number(row.stop_loss) || 0,
-        takeProfit: Number(row.target_price) || 0,
-        reasons: row.reasons ?? [],
-        createdAt: row.created_at ?? new Date().toISOString(),
-        status: determineStatus(row),
-      }));
-
-      setSignals(mapped);
-      setError(null);
-    } catch (err: any) {
-      setError(err.message);
-      console.error("Erro Supabase:", err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { data: signals = [], isLoading: loading, error: queryError, refetch } = useQuery<Signal[], Error>({
+    queryKey: ["signals"],
+    queryFn: fetchSignals,
+    staleTime: 30_000,
+    refetchInterval: false,
+  });
 
   useEffect(() => {
-    fetchSignals();
     const channel = supabase
       .channel("signals-realtime")
       .on("postgres_changes", { event: "*", schema: "public", table: "signals" }, () => {
-        fetchSignals();
+        queryClient.invalidateQueries({ queryKey: ["signals"] });
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
-  }, []);
+  }, [queryClient]);
 
-  return { signals, loading, error, refetch: fetchSignals };
+  return { signals, loading, error: queryError?.message || null, refetch };
 }

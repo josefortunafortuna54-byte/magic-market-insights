@@ -5,8 +5,8 @@ import { useSubscription } from "@/hooks/useSubscription";
 import { useSearchParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 
-const PRICE_USD = "price_1TFxrTFhhUIUNgIiq63DRgfR";
-const PRICE_AOA = "price_1TFy43FhhUIUNgIipGNzaA8J";
+const PRICE_USD = import.meta.env.VITE_STRIPE_PRICE_USD;
+const PRICE_AOA = import.meta.env.VITE_STRIPE_PRICE_AOA;
 
 const freeFeatures = [
   { text: "3 pares Forex (EUR/USD, GBP/USD, USD/JPY)", included: true },
@@ -40,6 +40,11 @@ export default function Planos() {
   const handleCheckout = async () => {
     setCheckingOut(true);
     const priceId = currency === "usd" ? PRICE_USD : PRICE_AOA;
+    if (!priceId) {
+      alert("Configuração de pagamento em falta. Contacta o suporte.");
+      setCheckingOut(false);
+      return;
+    }
     await checkout(priceId, currency);
     setCheckingOut(false);
   };

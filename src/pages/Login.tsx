@@ -16,6 +16,7 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState("");
+  const [rememberMe, setRememberMe] = useState(() => localStorage.getItem("rememberMe") === "true");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,6 +25,7 @@ export default function Login() {
     try {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
+      localStorage.setItem("rememberMe", String(rememberMe));
       navigate("/analises");
     } catch (err: any) {
       setError(err.message === "Invalid login credentials"
@@ -132,7 +134,7 @@ export default function Login() {
 
                 <div className="flex items-center justify-between text-sm">
                   <label className="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" className="rounded border-border" />
+                    <input type="checkbox" checked={rememberMe} onChange={e => setRememberMe(e.target.checked)} className="rounded border-border" />
                     <span className="text-muted-foreground">Lembrar-me</span>
                   </label>
                   <Link to="/recuperar-senha" className="text-primary hover:underline">
