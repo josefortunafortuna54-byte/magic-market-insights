@@ -1,8 +1,22 @@
 import { Users } from "lucide-react";
 
+interface AdminUser {
+  id: string;
+  email: string;
+  full_name?: string;
+  avatar_url?: string;
+  created_at: string;
+  last_sign_in?: string;
+}
+
+interface SubscriptionRow {
+  user_id: string;
+  status: string;
+}
+
 interface Props {
-  usersList: any[];
-  subsData: any[];
+  usersList: AdminUser[];
+  subsData: SubscriptionRow[];
 }
 
 export function AdminUsersTab({ usersList, subsData }: Props) {
@@ -24,7 +38,7 @@ export function AdminUsersTab({ usersList, subsData }: Props) {
           </thead>
           <tbody>
             {usersList.map(u => {
-              const isPrem = subsData?.find((s: any) => s.user_id === u.id && s.status === "active");
+              const isPrem = subsData?.find((s: SubscriptionRow) => s.user_id === u.id && s.status === "active");
               return (
                 <tr key={u.id} className="border-b border-border/30 hover:bg-secondary/20">
                   <td className="p-3">

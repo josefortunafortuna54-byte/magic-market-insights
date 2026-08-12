@@ -1,9 +1,19 @@
 import { useState } from "react";
 import { Zap, Trash2 } from "lucide-react";
 import * as adminApi from "@/lib/adminApi";
+import { getErrorMessage } from "@/lib/utils";
+
+interface BoomHourRow {
+  id: string;
+  title: string;
+  time_gmt: string;
+  time_wat: string;
+  days: string;
+  pairs: string[];
+}
 
 interface Props {
-  boomHours: any[];
+  boomHours: BoomHourRow[];
   onRefresh: () => Promise<void>;
 }
 
@@ -24,7 +34,7 @@ export function AdminBoomHoursTab({ boomHours, onRefresh }: Props) {
       alert("✅ Hora do Boom adicionada!");
       setForm({ title: "", time_gmt: "", time_wat: "", pairs: "", days: "", description: "", volatility: "4", badge: "" });
       await onRefresh();
-    } catch (e: any) { alert("Erro: " + e.message); }
+    } catch (e: unknown) { alert("Erro: " + getErrorMessage(e)); }
   };
 
   return (
@@ -107,7 +117,7 @@ export function AdminBoomHoursTab({ boomHours, onRefresh }: Props) {
                 <td className="p-3">
                   <button onClick={async () => {
                     if (!confirm("Apagar?")) return;
-                    try { await adminApi.deleteBoomHour(b.id); } catch (e: any) { alert("Erro: " + e.message); }
+                    try { await adminApi.deleteBoomHour(b.id); } catch (e: unknown) { alert("Erro: " + getErrorMessage(e)); }
                     await onRefresh();
                   }} className="text-destructive hover:opacity-70">
                     <Trash2 className="h-4 w-4" />

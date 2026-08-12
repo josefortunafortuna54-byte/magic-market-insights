@@ -1,9 +1,17 @@
 import { useState } from "react";
 import { Megaphone, Trash2 } from "lucide-react";
 import * as adminApi from "@/lib/adminApi";
+import { getErrorMessage } from "@/lib/utils";
+
+interface PostRow {
+  id: string;
+  title: string;
+  pair: string;
+  signal_type: string;
+}
 
 interface Props {
-  posts: any[];
+  posts: PostRow[];
   onRefresh: () => Promise<void>;
 }
 
@@ -31,7 +39,7 @@ export function AdminComunidadeTab({ posts, onRefresh }: Props) {
       setImageFile(null);
       setAudioFile(null);
       await onRefresh();
-    } catch (e: any) { alert("Erro: " + e.message); }
+    } catch (e: unknown) { alert("Erro: " + getErrorMessage(e)); }
   };
 
   return (
@@ -106,7 +114,7 @@ export function AdminComunidadeTab({ posts, onRefresh }: Props) {
                 <td className="p-3">
                   <button onClick={async () => {
                     if (!confirm("Apagar post?")) return;
-                    try { await adminApi.deletePost(p.id); } catch (e: any) { alert("Erro: " + e.message); }
+                    try { await adminApi.deletePost(p.id); } catch (e: unknown) { alert("Erro: " + getErrorMessage(e)); }
                     await onRefresh();
                   }} className="text-destructive hover:opacity-70">
                     <Trash2 className="h-4 w-4" />

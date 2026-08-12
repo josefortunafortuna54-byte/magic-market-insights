@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Layout } from "@/components/layout/Layout";
 import { supabase } from "@/lib/supabaseClient";
+import { getErrorMessage } from "@/lib/utils";
 
 export default function Registro() {
   const navigate = useNavigate();
@@ -30,10 +31,11 @@ export default function Registro() {
       });
       if (error) throw error;
       setSuccess(true);
-    } catch (err: any) {
-      setError(err.message === "User already registered"
+    } catch (err: unknown) {
+      const message = getErrorMessage(err);
+      setError(message === "User already registered"
         ? "Este email já está registado. Tenta fazer login."
-        : err.message);
+        : message);
     } finally {
       setLoading(false);
     }
@@ -48,8 +50,8 @@ export default function Registro() {
         options: { redirectTo: `${window.location.origin}/analises` },
       });
       if (error) throw error;
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(getErrorMessage(err));
       setGoogleLoading(false);
     }
   };

@@ -47,6 +47,19 @@ function calcPips(entry: number, tp: number, sl: number, status: string, symbol:
     : -Math.abs(entry - sl) * pipMultiplier;
 }
 
+interface SignalHistoryRow {
+  id: string;
+  symbol: string;
+  timeframe: string;
+  signal_type: string;
+  confidence: number;
+  entry_price: number;
+  stop_loss: number;
+  target_price: number;
+  status: string;
+  created_at: string;
+}
+
 interface HistoryResult {
   signals: HistorySignal[];
   stats: HistoryStats;
@@ -62,7 +75,7 @@ async function fetchHistory(): Promise<HistoryResult> {
 
   if (error) throw error;
 
-  const mapped: HistorySignal[] = (data || []).map((row: any) => {
+  const mapped: HistorySignal[] = (data || []).map((row: SignalHistoryRow) => {
     const entry = Number(row.entry_price) || 0;
     const tp = Number(row.target_price) || 0;
     const sl = Number(row.stop_loss) || 0;
@@ -115,8 +128,8 @@ export function useHistory() {
         "postgres_changes",
         { event: "*", schema: "public", table: "signals" },
         (payload) => {
-          const newStatus = payload.new?.status;
-          const oldStatus = payload.old?.status;
+          const newStatus = (payload.new as { status?: string } | null)?.status;
+          const oldStatus = (payload.old as { status?: string } | null)?.status;
           if (newStatus === "tp" || newStatus === "sl" || oldStatus === "tp" || oldStatus === "sl") {
             queryClient.invalidateQueries({ queryKey: ["history"] });
           }

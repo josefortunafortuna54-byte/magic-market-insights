@@ -2,12 +2,25 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { TrendingUp, TrendingDown, Trash2, Plus } from "lucide-react";
 import * as adminApi from "@/lib/adminApi";
+import { getErrorMessage } from "@/lib/utils";
 
 const SYMBOLS = ["EURUSD", "GBPUSD", "USDJPY", "AUDUSD", "EURGBP", "USDCHF", "NZDUSD", "USDCAD", "XAUUSD", "BTCUSD"];
 const TIMEFRAMES = ["M15", "H1", "H4"];
 
+interface AdminSignal {
+  id: string;
+  symbol: string;
+  timeframe: string;
+  signal_type: string;
+  entry_price: number;
+  stop_loss: number;
+  target_price: number;
+  confidence: number;
+  status: string;
+}
+
 interface Props {
-  signals: any[];
+  signals: AdminSignal[];
   onRefresh: () => Promise<void>;
 }
 
@@ -20,12 +33,12 @@ export function AdminSignalsTab({ signals, onRefresh }: Props) {
 
   const deleteSignal = async (id: string) => {
     if (!confirm("Apagar este sinal?")) return;
-    try { await adminApi.deleteSignal(id); } catch (e: any) { alert("Erro: " + e.message); }
+    try { await adminApi.deleteSignal(id); } catch (e: unknown) { alert("Erro: " + getErrorMessage(e)); }
     await onRefresh();
   };
 
   const updateStatus = async (id: string, status: string) => {
-    try { await adminApi.updateSignalStatus(id, status); } catch (e: any) { alert("Erro: " + e.message); }
+    try { await adminApi.updateSignalStatus(id, status); } catch (e: unknown) { alert("Erro: " + getErrorMessage(e)); }
     await onRefresh();
   };
 
@@ -45,7 +58,7 @@ export function AdminSignalsTab({ signals, onRefresh }: Props) {
       setForm({ symbol: "EURUSD", timeframe: "H1", signal_type: "BUY", entry_price: "", stop_loss: "", target_price: "", confidence: "75", reasons: "" });
       setShowAdd(false);
       await onRefresh();
-    } catch (e: any) { alert("Erro: " + e.message); }
+    } catch (e: unknown) { alert("Erro: " + getErrorMessage(e)); }
   };
 
   return (

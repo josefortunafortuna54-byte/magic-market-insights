@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+import { verifyAdminRequest } from "../_shared/admin.ts";
 
 const ASSET_PIP: Record<string, { pipSize: number; digits: number }> = {
   EURUSD: { pipSize: 0.0001, digits: 5 }, GBPUSD: { pipSize: 0.0001, digits: 5 },
@@ -18,10 +19,9 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   try {
-    const authHeader = req.headers.get("Authorization");
-    const apiKey = req.headers.get("apikey");
-    if (!authHeader || !apiKey) {
-      return new Response(JSON.stringify({ error: "Autenticação necessária" }), { status: 401, headers: corsHeaders });
+    const auth = await verifyAdminRequest(req);
+    if (!auth.ok) {
+      return new Response(JSON.stringify({ error: auth.error }), { status: 403, headers: corsHeaders });
     }
 
     const PROJECT_URL = Deno.env.get("PROJECT_URL") || Deno.env.get("SUPABASE_URL");
@@ -104,7 +104,8 @@ serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
 
-  } catch (err: any) {
-    return new Response(JSON.stringify({ error: err.message }), { status: 500, headers: corsHeaders });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Erro desconhecido";
+    return new Response(JSON.stringify({ error: message }), { status: 500, headers: corsHeaders });
   }
 });

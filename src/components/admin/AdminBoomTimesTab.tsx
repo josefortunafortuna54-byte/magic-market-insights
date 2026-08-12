@@ -1,9 +1,18 @@
 import { useState } from "react";
 import { Clock, Trash2 } from "lucide-react";
 import * as adminApi from "@/lib/adminApi";
+import { getErrorMessage } from "@/lib/utils";
+
+interface BoomTimeRow {
+  id: string;
+  pair: string;
+  boom_time: string;
+  confidence: number;
+  result: string;
+}
 
 interface Props {
-  boomTimes: any[];
+  boomTimes: BoomTimeRow[];
   onRefresh: () => Promise<void>;
 }
 
@@ -33,11 +42,11 @@ export function AdminBoomTimesTab({ boomTimes, onRefresh }: Props) {
       setForm({ pair: "", boom_time: "", confidence: "75", result: "" });
       setImageFile(null); setAudioFile(null);
       await onRefresh();
-    } catch (e: any) { alert("Erro: " + e.message); }
+    } catch (e: unknown) { alert("Erro: " + getErrorMessage(e)); }
   };
 
   const updateResult = async (id: string, result: string) => {
-    try { await adminApi.updateBoomResult(id, result); } catch (e: any) { alert("Erro: " + e.message); }
+    try { await adminApi.updateBoomResult(id, result); } catch (e: unknown) { alert("Erro: " + getErrorMessage(e)); }
     await onRefresh();
   };
 
@@ -118,7 +127,7 @@ export function AdminBoomTimesTab({ boomTimes, onRefresh }: Props) {
                   </select>
                   <button onClick={async () => {
                     if (!confirm("Apagar boom?")) return;
-                    try { await adminApi.deleteBoomTime(b.id); } catch (e: any) { alert("Erro: " + e.message); }
+                    try { await adminApi.deleteBoomTime(b.id); } catch (e: unknown) { alert("Erro: " + getErrorMessage(e)); }
                     await onRefresh();
                   }} className="text-destructive hover:opacity-70">
                     <Trash2 className="h-4 w-4" />

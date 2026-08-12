@@ -1,36 +1,11 @@
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+import { verifyAdminRequest } from "../_shared/admin.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
-
-const ADMIN_EMAILS = (Deno.env.get("ADMIN_EMAILS") || "")
-  .split(",")
-  .map((e: string) => e.trim())
-  .filter(Boolean);
-
-async function verifyAdmin(req: Request): Promise<{ ok: boolean; error?: string }> {
-  const authHeader = req.headers.get("Authorization");
-  if (!authHeader) return { ok: false, error: "Não autenticado" };
-
-  const PROJECT_URL = Deno.env.get("PROJECT_URL") || Deno.env.get("SUPABASE_URL");
-  const ANON_KEY = Deno.env.get("ANON_KEY") || Deno.env.get("SUPABASE_ANON_KEY");
-  if (!PROJECT_URL || !ANON_KEY) return { ok: false, error: "Missing env" };
-
-  const token = authHeader.replace("Bearer ", "");
-  const userRes = await fetch(`${PROJECT_URL}/auth/v1/user`, {
-    headers: { Authorization: `Bearer ${token}`, apikey: ANON_KEY },
-  });
-  if (!userRes.ok) return { ok: false, error: "Auth failed" };
-
-  const user = await userRes.json();
-  if (!ADMIN_EMAILS.includes(user.email)) {
-    return { ok: false, error: "Não autorizado" };
-  }
-  return { ok: true };
-}
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -38,7 +13,7 @@ serve(async (req) => {
   }
 
   try {
-    const auth = await verifyAdmin(req);
+    const auth = await verifyAdminRequest(req);
     if (!auth.ok) {
       return new Response(JSON.stringify({ error: auth.error }), {
         status: 403,
@@ -180,7 +155,8 @@ serve(async (req) => {
 
     return new Response(JSON.stringify({ error: "Ação desconhecida" }), { status: 400, headers: corsHeaders });
 
-  } catch (err: any) {
-    return new Response(JSON.stringify({ error: err.message }), { status: 500, headers: corsHeaders });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Erro desconhecido";
+    return new Response(JSON.stringify({ error: message }), { status: 500, headers: corsHeaders });
   }
 });

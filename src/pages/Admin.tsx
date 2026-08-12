@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/lib/supabaseClient";
-import { isAdminEmail } from "@/lib/admin";
+import { isCurrentUserAdmin } from "@/lib/admin";
+import { getErrorMessage } from "@/lib/utils";
 import * as adminApi from "@/lib/adminApi";
 import { Layout } from "@/components/layout/Layout";
 import { Shield, RefreshCw, BarChart3, CheckCircle } from "lucide-react";
@@ -13,16 +14,36 @@ import { AdminBoomTimesTab } from "@/components/admin/AdminBoomTimesTab";
 import { AdminUsersTab } from "@/components/admin/AdminUsersTab";
 
 const SYMBOLS = ["EURUSD", "GBPUSD", "USDJPY", "AUDUSD", "EURGBP", "USDCHF", "NZDUSD", "USDCAD", "XAUUSD", "BTCUSD"];
+const FREE_SYMBOLS = ["EURUSD", "GBPUSD", "USDJPY"];
+
+interface AdminSignalRow {
+  id: string; symbol: string; timeframe: string; signal_type: string;
+  entry_price: number; stop_loss: number; target_price: number;
+  confidence: number; status: string; created_at: string;
+}
+interface AdminSubscriptionRow { user_id: string; status: string; }
+interface AdminBoomHourRow {
+  id: string; title: string; time_gmt: string; time_wat: string;
+  days: string; pairs: string[]; created_at: string;
+}
+interface AdminBoomTimeRow {
+  id: string; pair: string; boom_time: string; confidence: number; result: string;
+}
+interface AdminPostRow { id: string; title: string; pair: string; signal_type: string; created_at: string; }
+interface AdminUserRow {
+  id: string; email: string; full_name?: string; avatar_url?: string;
+  created_at: string; last_sign_in?: string;
+}
 
 export default function Admin() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
-  const [signals, setSignals] = useState<any[]>([]);
-  const [posts, setPosts] = useState<any[]>([]);
-  const [subsData, setSubsData] = useState<any[]>([]);
-  const [boomTimes, setBoomTimes] = useState<any[]>([]);
-  const [boomHours, setBoomHours] = useState<any[]>([]);
-  const [usersList, setUsersList] = useState<any[]>([]);
+  const [signals, setSignals] = useState<AdminSignalRow[]>([]);
+  const [posts, setPosts] = useState<AdminPostRow[]>([]);
+  const [subsData, setSubsData] = useState<AdminSubscriptionRow[]>([]);
+  const [boomTimes, setBoomTimes] = useState<AdminBoomTimeRow[]>([]);
+  const [boomHours, setBoomHours] = useState<AdminBoomHourRow[]>([]);
+  const [usersList, setUsersList] = useState<AdminUserRow[]>([]);
   const [stats, setStats] = useState({ total: 0, active: 0, tp: 0, sl: 0, users: 0, premium: 0 });
   const [generating, setGenerating] = useState(false);
   const [closing, setClosing] = useState(false);
@@ -30,8 +51,7 @@ export default function Admin() {
 
   useEffect(() => {
     (async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user || !isAdminEmail(user.email)) { navigate("/"); return; }
+      if (!(await isCurrentUserAdmin())) { navigate("/"); return; }
       await loadData();
       setLoading(false);
     })();
@@ -42,7 +62,7 @@ export default function Admin() {
     setSignals(signalsData || []);
     const { data: usersData } = await supabase.rpc("get_all_users");
     setUsersList(usersData || []);
-    const { data: subsResult } = await supabase.from("subscriptions").select("*");
+    const { data: subsResult } = await supabase.rpc("get_all_subscriptions");
     setSubsData(subsResult || []);
     const { data: usersCountData } = await supabase.rpc("get_users_count");
     const usersCount = usersCountData || 0;
@@ -55,18 +75,18 @@ export default function Admin() {
     const s = signalsData || [];
     setStats({
       total: s.length,
-      active: s.filter((x: any) => x.status === "active").length,
-      tp: s.filter((x: any) => x.status === "tp").length,
-      sl: s.filter((x: any) => x.status === "sl").length,
+      active: s.filter((x: AdminSignalRow) => x.status === "active").length,
+      tp: s.filter((x: AdminSignalRow) => x.status === "tp").length,
+      sl: s.filter((x: AdminSignalRow) => x.status === "sl").length,
       users: usersCount || 0,
-      premium: subsData?.filter((x: any) => x.status === "active").length || 0,
+      premium: (subsResult || []).filter((x: AdminSubscriptionRow) => x.status === "active").length,
     });
   };
 
   const generateSignals = async () => {
     setGenerating(true);
     try {
-      const body = SYMBOLS.map(s => ({ symbol: s, timeframe: "1h" }));
+      const body = SYMBOLS.map(s => ({ symbol: s, timeframe: FREE_SYMBOLS.includes(s) ? "m15" : "h1" }));
       const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-signal`, {
         method: "POST",
         headers: {
@@ -79,7 +99,7 @@ export default function Admin() {
       const data = await res.json();
       alert(`✅ ${data.results?.length || 0} sinais gerados!`);
       await loadData();
-    } catch (err: any) { alert("Erro: " + err.message); }
+    } catch (err: unknown) { alert("Erro: " + getErrorMessage(err)); }
     setGenerating(false);
   };
 
@@ -98,7 +118,7 @@ export default function Admin() {
       const data = await res.json();
       alert(`✅ ${data.closed || 0} sinais fechados!`);
       await loadData();
-    } catch (err: any) { alert("Erro: " + err.message); }
+    } catch (err: unknown) { alert("Erro: " + getErrorMessage(err)); }
     setClosing(false);
   };
 
@@ -140,7 +160,7 @@ export default function Admin() {
           <div className="flex gap-3 mb-8 flex-wrap">
             <button onClick={async () => {
               if (!confirm("Apagar todos os sinais ativos e regenerar?")) return;
-              try { await adminApi.deleteAllActiveSignals(); } catch (e: any) { alert("Erro: " + e.message); }
+              try { await adminApi.deleteAllActiveSignals(); } catch (e: unknown) { alert("Erro: " + getErrorMessage(e)); }
               await generateSignals();
             }}
               className="flex items-center gap-2 px-4 py-2 rounded-xl bg-destructive/20 text-destructive border border-destructive/30 text-sm font-medium hover:opacity-90">

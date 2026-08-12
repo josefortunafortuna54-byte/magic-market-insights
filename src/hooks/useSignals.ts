@@ -29,7 +29,21 @@ function formatType(type: string): "BUY" | "SELL" | "AGUARDAR" {
   return "AGUARDAR";
 }
 
-function determineStatus(row: any): "active" | "pending" | "tp" | "sl" {
+interface SignalRow {
+  id: string;
+  symbol: string;
+  timeframe: string;
+  signal_type: string;
+  confidence: number;
+  entry_price: number;
+  stop_loss: number;
+  target_price: number;
+  reasons: string[];
+  status: string;
+  created_at: string;
+}
+
+function determineStatus(row: SignalRow): "active" | "pending" | "tp" | "sl" {
   if (row.status === "tp") return "tp";
   if (row.status === "sl") return "sl";
   if (row.status === "active") return "active";
@@ -46,7 +60,7 @@ async function fetchSignals(): Promise<Signal[]> {
 
   if (error) throw error;
 
-  return (data || []).map((row: any) => ({
+  return (data || []).map((row: SignalRow) => ({
     id: String(row.id),
     pair: formatSymbol(row.symbol),
     timeframe: formatTimeframe(row.timeframe),

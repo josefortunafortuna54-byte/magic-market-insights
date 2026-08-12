@@ -2,7 +2,7 @@ import { supabase } from "./supabaseClient";
 
 const FUNCTIONS_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-manage`;
 
-async function callAdminFn(action: string, payload: Record<string, unknown> = {}): Promise<any> {
+async function callAdminFn<T = Record<string, unknown>>(action: string, payload: Record<string, unknown> = {}): Promise<T> {
   const { data: { session } } = await supabase.auth.getSession();
   if (!session) throw new Error("Não autenticado");
 
@@ -85,7 +85,7 @@ export async function uploadFile(bucket: string, path: string, file: File): Prom
     reader.onload = async () => {
       try {
         const base64 = (reader.result as string).split(",")[1];
-        const data = await callAdminFn("upload_file", {
+        const data = await callAdminFn<{ url: string }>("upload_file", {
           bucket, path, file_base64: base64, content_type: file.type,
         });
         resolve(data.url);

@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Layout } from "@/components/layout/Layout";
 import { supabase } from "@/lib/supabaseClient";
+import { getErrorMessage } from "@/lib/utils";
 
 export default function RecuperarSenha() {
   const [email, setEmail] = useState("");
@@ -24,8 +25,8 @@ export default function RecuperarSenha() {
       });
       if (error) throw error;
       setSent(true);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(getErrorMessage(err));
     } finally {
       setLoading(false);
     }

@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
 import { supabase } from "@/lib/supabaseClient";
+import type { User } from "@supabase/supabase-js";
 
 interface BoomTime {
   id: string;
@@ -112,7 +113,7 @@ function AudioPlayer({ url }: { url: string }) {
   );
 }
 
-function BoomCard({ boom, user, isPremium }: { boom: BoomTime; user: any; isPremium: boolean }) {
+function BoomCard({ boom, user, isPremium }: { boom: BoomTime; user: User | null; isPremium: boolean }) {
   const [votes, setVotes] = useState<BoomVote[]>([]);
   const [comments, setComments] = useState<BoomComment[]>([]);
   const [showComments, setShowComments] = useState(false);
@@ -453,7 +454,7 @@ function BoomCard({ boom, user, isPremium }: { boom: BoomTime; user: any; isPrem
 export default function Comunidade() {
   const [booms, setBooms] = useState<BoomTime[]>([]);
   const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [isPremium, setIsPremium] = useState(false);
   const [filter, setFilter] = useState<"all" | "upcoming" | "live" | "expired">("all");
 
@@ -538,7 +539,7 @@ export default function Comunidade() {
               { key: "upcoming", label: "⏳ Próximos" },
               { key: "expired", label: "✓ Histórico" },
             ].map(f => (
-              <button key={f.key} onClick={() => setFilter(f.key as any)}
+              <button key={f.key} onClick={() => setFilter(f.key as typeof filter)}
                 className={`px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all ${
                   filter === f.key ? "bg-primary text-white" : "bg-secondary text-muted-foreground hover:text-foreground"
                 }`}>
