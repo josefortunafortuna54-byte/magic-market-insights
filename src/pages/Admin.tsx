@@ -12,6 +12,8 @@ import { AdminBoomHoursTab } from "@/components/admin/AdminBoomHoursTab";
 import { AdminComunidadeTab } from "@/components/admin/AdminComunidadeTab";
 import { AdminBoomTimesTab } from "@/components/admin/AdminBoomTimesTab";
 import { AdminUsersTab } from "@/components/admin/AdminUsersTab";
+import { AdminPaymentsTab } from "@/components/admin/AdminPaymentsTab";
+import type { AdminPaymentRow } from "@/components/admin/AdminPaymentsTab";
 
 const SYMBOLS = ["EURUSD", "GBPUSD", "USDJPY", "AUDUSD", "EURGBP", "USDCHF", "NZDUSD", "USDCAD", "XAUUSD", "BTCUSD"];
 const FREE_SYMBOLS = ["EURUSD", "GBPUSD", "USDJPY"];
@@ -34,7 +36,6 @@ interface AdminUserRow {
   id: string; email: string; full_name?: string; avatar_url?: string;
   created_at: string; last_sign_in?: string;
 }
-
 export default function Admin() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
@@ -44,10 +45,11 @@ export default function Admin() {
   const [boomTimes, setBoomTimes] = useState<AdminBoomTimeRow[]>([]);
   const [boomHours, setBoomHours] = useState<AdminBoomHourRow[]>([]);
   const [usersList, setUsersList] = useState<AdminUserRow[]>([]);
+  const [payments, setPayments] = useState<AdminPaymentRow[]>([]);
   const [stats, setStats] = useState({ total: 0, active: 0, tp: 0, sl: 0, users: 0, premium: 0 });
   const [generating, setGenerating] = useState(false);
   const [closing, setClosing] = useState(false);
-  const [tab, setTab] = useState<"signals" | "users" | "boom" | "comunidade" | "boom_times">("signals");
+  const [tab, setTab] = useState<"signals" | "users" | "boom" | "comunidade" | "boom_times" | "payments">("signals");
 
   useEffect(() => {
     (async () => {
@@ -66,6 +68,8 @@ export default function Admin() {
     setSubsData(subsResult || []);
     const { data: usersCountData } = await supabase.rpc("get_users_count");
     const usersCount = usersCountData || 0;
+    const { data: paymentsData } = await supabase.rpc("get_all_payment_requests");
+    setPayments(paymentsData || []);
     const { data: boomData } = await supabase.from("boom_hours").select("*").order("created_at", { ascending: true });
     setBoomHours(boomData || []);
     const { data: postsData } = await supabase.from("posts").select("*").order("created_at", { ascending: false }).limit(20);
@@ -190,6 +194,7 @@ export default function Admin() {
               { key: "boom", label: "⚡ Hora do Boom" },
               { key: "comunidade", label: "💬 Comunidade" },
               { key: "boom_times", label: "⚡ Boom Times" },
+              { key: "payments", label: "💳 Pagamentos" },
             ].map(t => (
               <button key={t.key} onClick={() => setTab(t.key as typeof tab)}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${tab === t.key ? "bg-primary text-white" : "bg-secondary text-muted-foreground"}`}>
@@ -204,6 +209,7 @@ export default function Admin() {
           {tab === "comunidade" && <AdminComunidadeTab posts={posts} onRefresh={loadData} />}
           {tab === "boom_times" && <AdminBoomTimesTab boomTimes={boomTimes} onRefresh={loadData} />}
           {tab === "users" && <AdminUsersTab usersList={usersList} subsData={subsData} />}
+          {tab === "payments" && <AdminPaymentsTab payments={payments} onRefresh={loadData} />}
         </div>
       </section>
     </Layout>
