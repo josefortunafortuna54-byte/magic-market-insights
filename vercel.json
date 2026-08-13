@@ -4,9 +4,6 @@
   "buildCommand": "npm run build",
   "devCommand": "npm run dev",
   "outputDirectory": "dist",
-  "crons": [
-    { "path": "/api/cron/close-signals", "schedule": "*/30 * * * *" }
-  ],
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
   ]
