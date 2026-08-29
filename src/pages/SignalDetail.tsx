@@ -5,7 +5,7 @@ import { ArrowLeft, TrendingUp, TrendingDown, Clock, Target, Shield, Percent, Re
 import { Layout } from "@/components/layout/Layout";
 import { TradingViewChart } from "@/components/signals/TradingViewChart";
 import { supabase } from "@/lib/supabaseClient";
-import { Signal } from "@/components/signals/SignalCard";
+import type { Signal } from "@/lib/types";
 
 function formatSymbol(symbol: string): string {
   if (!symbol) return "N/A";
@@ -64,6 +64,7 @@ export default function SignalDetail() {
             reasons: data.reasons ?? [],
             createdAt: data.created_at ?? new Date().toISOString(),
             status: data.status as "active" | "tp" | "sl",
+            tier: "free",
           });
         }
       } catch (err: any) {

@@ -1,4 +1,4 @@
-import { Signal } from "@/components/signals/SignalCard";
+import type { Signal } from "@/lib/types";
 
 export const mockSignals: Signal[] = [
   {
@@ -18,6 +18,7 @@ export const mockSignals: Signal[] = [
     ],
     createdAt: "2024-01-15T10:30:00Z",
     status: "active",
+    tier: "free",
   },
   {
     id: "2",
@@ -36,6 +37,7 @@ export const mockSignals: Signal[] = [
     ],
     createdAt: "2024-01-15T09:45:00Z",
     status: "active",
+    tier: "free",
   },
   {
     id: "3",
@@ -52,6 +54,8 @@ export const mockSignals: Signal[] = [
       "Aguardar rompimento com volume",
     ],
     createdAt: "2024-01-15T08:00:00Z",
+    status: "pending",
+    tier: "free",
   },
   {
     id: "4",
@@ -69,6 +73,7 @@ export const mockSignals: Signal[] = [
     ],
     createdAt: "2024-01-15T11:15:00Z",
     status: "active",
+    tier: "free",
   },
   {
     id: "5",
@@ -87,6 +92,7 @@ export const mockSignals: Signal[] = [
     ],
     createdAt: "2024-01-15T07:30:00Z",
     status: "tp",
+    tier: "free",
   },
   {
     id: "6",
@@ -104,6 +110,7 @@ export const mockSignals: Signal[] = [
     ],
     createdAt: "2024-01-14T16:00:00Z",
     status: "sl",
+    tier: "free",
   },
 ];
 
@@ -121,6 +128,7 @@ export const historicalSignals: Signal[] = [
     reasons: ["Suporte testado 3x", "Divergência bullish RSI"],
     createdAt: "2024-01-13T14:00:00Z",
     status: "tp",
+    tier: "free",
   },
   {
     id: "8",
@@ -134,6 +142,7 @@ export const historicalSignals: Signal[] = [
     reasons: ["Resistência em 161.60", "RSI sobrecompra"],
     createdAt: "2024-01-13T10:30:00Z",
     status: "tp",
+    tier: "free",
   },
   {
     id: "9",
@@ -147,6 +156,7 @@ export const historicalSignals: Signal[] = [
     reasons: ["Suporte de canal", "EMA 50 como suporte"],
     createdAt: "2024-01-12T09:00:00Z",
     status: "sl",
+    tier: "free",
   },
   {
     id: "10",
@@ -160,5 +170,6 @@ export const historicalSignals: Signal[] = [
     reasons: ["Topo triplo", "Momentum fraco"],
     createdAt: "2024-01-12T15:45:00Z",
     status: "tp",
+    tier: "free",
   },
 ];
