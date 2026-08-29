@@ -400,3 +400,29 @@ Port from `mobile/src/lib/plans.ts`: `Currency`, `PlanId`, `PaymentMethod`, `WA_
 - **No repo-root git:** commit/rollback strategy must be user-defined; recommend `git init` at root before Phase 1 execution.
 - **Backend already has everything:** no schema/Edge Function edits expected. If a RPC/column is missing on the web-connected project, flag it (do not silently adapt).
 - **Mobile untouched:** never edit `mobile/**`.
+
+---
+
+## Phase 1 verification results
+
+Completed sequentially (T1.1 → T1.13) by implementer subagents; T1.14 run on Sat 2026-08-29.
+
+**Commits (15, base `4040d01` → `fbb9f03`):** `5960c11` (T1.1 types) · `7b4346f` (T1.2 gating/pips/format) · `a80c103` (T1.3 AuthContext/useAuth) · `e751030` (T1.4 useSubscription multi-tier) · `85ae00c` (T1.5 useSignals SMC) · `3c52553` (T1.6 SignalCard) · `7952d75` (T1.7+1.8 plans/PremiumLock/PlanUpsellModal) · `00117b0` (T1.9 Planos) · `48ce882` (T1.10 Analises) · `3805c1a` (T1.11 SignalDetail+Historico) · `7738a08` (T1.11b signal-tier badge) · `a689824` (T1.12 Perfil/rotas/Navbar auth global) · `a2b18db` (T1.13 Index cards + useBoomHours) · `fbb9f03` (T1.14 fix useHistory typing).
+
+**Static gates:**
+- `npx tsc --noEmit` (root, no-op solution) AND `npx tsc --noEmit -p tsconfig.app.json` → **0 errors** (real app type-check; the 2 pre-existing `useHistory` realtime-payload errors were fixed in `fbb9f03`).
+- `npm run build` → **PASS** (only pre-existing >500 kB chunk warning).
+- `npx eslint` over all 24 Phase 1 touched files → **0 errors** (1 benign `react-refresh` warning in `AuthContext.tsx`, matches the plan's reference provider). Repo-wide baseline errors (`supabase/generated`, `tailwind.config.ts`, ~189) are pre-existing and untouched.
+
+**Smoke test (dev server :8080, Playwright, no session — free tier):**
+- `/` → hero + "Próximo Boom" e "Performance" cards render. PASS
+- `/planos` → 4 planos (Basic/Pro/Premium + Gratuito), preço `$`, CTA `Subscrever` → `/depositos?plan=<id>&currency=usd`, badges "MAIS POPULAR"/"TOP". PASS
+- `/perfil` (anon) → guard "Inicia sessão" com CTAs Entrar/Criar Conta. PASS
+- `/analises` → chips SMC (Todos/BOS/CHoCH/OB/FVG/COMBO), signals listados com reasons e links para detalhe; gating free → pares/TF bloqueados abrem upsell. PASS
+- `/historico` → filtro por par (Todos/EUR-USD/GBP-USD/USD-JPY) + stats. PASS
+- `/banca` → placeholder PagePlaceholder "Disponível em breve." + Voltar. PASS
+- `/analises/:id` → ficha de sinal; análise técnica com `analysis` e tier free mostra PremiumLock ("Análise Premium" → /planos). PASS
+
+**Console errors observed:** apenas recursos externos sem rede no ambiente (Google Fonts, frankfurter.app CORS, coingecko, tradingview widgets) — nenhum erro da app. Auth com sessão real (login, tier badges, logout) fica pendente de credenciais; a lógica de sessão usa o `AuthProvider` global, exceto `Login`/`Registro` que chamam `supabase.auth` diretamente (comportamento intencional).
+
+**Notas / decisões registadas:** `checkout` Stripe removido (subsidiado por `checkout` shim → `/planos` até o `useSubscription` ser limpado na Fase 2); Navbar migrada de `supabase.auth.getUser()` ad-hoc para `useAuth()`+`useSubscription()`; `isWeekendUtc` portado para `lib/gating.ts`; badge de tier no SignalDetail mostra o **tier do sinal** (paridade com SignalCard/mobile).
