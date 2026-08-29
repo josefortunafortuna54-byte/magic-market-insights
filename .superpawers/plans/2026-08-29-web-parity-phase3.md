@@ -102,11 +102,28 @@
 
 ## Task 3.10: Phase 3 verification
 
-- [ ] **Step 1:** `npx tsc --noEmit -p tsconfig.app.json` → 0; `npx tsc --noEmit` → 0.
-- [ ] **Step 2:** `npm run build` → PASS.
-- [ ] **Step 3:** eslint over all Phase 3 touched files → 0 errors.
-- [ ] **Step 4:** dev server + Playwright smoke: `/comunidade` (anon) → workspace empty states + login hint; authenticated default channel list (data-limited without creds: rely on seed `channels` rows — else empty states); `/comunidade/canais/:id` and `/comunidade/dm/:id` render MessageList + Composer without console errors; `/comunidade/pesquisa` renders search UI; `/comunidade/loja` renders seeded products (8 from migration); `/comunidade/novo-canal` (anon) → gated; `/comunidade/user/:userId` renders profile skeleton; feed toggle still shows the Feed.
-- [ ] **Step 5:** Record results in this file under `Phase 3 verification results`.
+- [x] **Step 1:** `npx tsc --noEmit -p tsconfig.app.json` → 0; `npx tsc --noEmit` → 0.
+- [x] **Step 2:** `npm run build` → PASS.
+- [x] **Step 3:** eslint over all Phase 3 touched files → 0 errors.
+- [x] **Step 4:** dev server + Playwright smoke: `/comunidade` (anon) → workspace empty states + login hint; authenticated default channel list (data-limited without creds: rely on seed `channels` rows — else empty states); `/comunidade/canais/:id` and `/comunidade/dm/:id` render MessageList + Composer without console errors; `/comunidade/pesquisa` renders search UI; `/comunidade/loja` renders seeded products (8 from migration); `/comunidade/novo-canal` (anon) → gated; `/comunidade/user/:userId` renders profile skeleton; feed toggle still shows the Feed.
+- [x] **Step 5:** Record results in this file under `Phase 3 verification results`.
+
+## Phase 3 verification results
+
+- **tsc:** `npx tsc --noEmit -p tsconfig.app.json` → 0 errors; `npx tsc --noEmit` (full) → 0 errors.
+- **build:** `npm run build` → PASS (chunk-size warning only, pre-existing).
+- **eslint:** all Phase 3 files (lib, hooks, 14 community components, 9 pages, App.tsx) → **0 errors, 2 warnings** (known `exhaustive-deps` in `CommunityFeed.tsx`).
+- **Smoke (anon, Playwright, dev server):** all routes render without console errors —
+  - `/comunidade` → header (search "Pesquisar mensagens…", camera, loja), Workspace|Feed toggle, hero "Comunidade ao vivo", Canais/Salas de Pares/Mensagens Diretas empty states (0/0 + login-agnostic copy), Feed tab → "Nenhum boom encontrado".
+  - `/comunidade/pesquisa` → auto-focused search box + "Sem resultados." empty state.
+  - `/comunidade/novo-canal` → PremiumLock gate ("Cria canais da comunidade com um plano Premium.") + Ver Planos → `/planos`.
+  - `/comunidade/novo-dm` → "Nova mensagem" + "Sem utilizadores disponíveis." (anon RLS).
+  - `/comunidade/canais/:id` (fake UUID) → header, MessageList empty ("Sem mensagens ainda. Começa a conversa!"), Composer, no crash (RLS handled).
+  - `/comunidade/dm/:id` (fake UUID) → peer header avatar, empty state, Composer, no crash.
+  - `/comunidade/user/:id` → "Utilizador não encontrado".
+  - `/comunidade/loja` → hero stats (8 Produtos / 4 Grátis / 4.5 Avaliação), 2 Destaques carousel, 4 chips with counts, 8 product cards (PRO/Grátis badges, price/rating/users); locked sheet (bots included list) CTA "Tornar-se Premium" → `/planos`; free sheet (ebooks list) CTA "Pedir agora" → `/suporte-ia`; Escape/X/backdrop close.
+- **Commits (Phase 3):** T3.1 `8c89282`, T3.2 `161bc0c`, T3.3 `08bd8ea`, T3.4 `64be675`, T3.5 `cdc1827`, T3.6 `9943fa0`, T3.7 `acfda74`, T3.8 `0b39ac9`, T3.9 `8e6cf07`.
+- **Deferred (documented):** authenticated flows (channel list, DM send, quick-share upload, premium purchase) not exercised without credentials — data-limited per plan note.
 
 ---
 
