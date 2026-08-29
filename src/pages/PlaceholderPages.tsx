@@ -1,9 +1,5 @@
 import { PagePlaceholder } from "@/components/layout/PagePlaceholder";
 
-export function BancaPage() {
-  return <PagePlaceholder title="Banca" />;
-}
-
 export function NotificacoesPage() {
   return <PagePlaceholder title="Notificações" />;
 }

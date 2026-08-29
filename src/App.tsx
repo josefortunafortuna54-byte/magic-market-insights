@@ -7,8 +7,8 @@ import { AdminGuard } from "@/components/auth/AdminGuard";
 import { AuthProvider } from "@/contexts/AuthContext";
 import Perfil from "./pages/Perfil";
 import Depositos from "./pages/Depositos";
+import Banca from "./pages/Banca";
 import {
-  BancaPage,
   NotificacoesPage,
   DiarioTraderPage,
   SuporteIaPage,
@@ -48,7 +48,7 @@ const App = () => (
             <Route path="/historico" element={<Historico />} />
             <Route path="/planos" element={<Planos />} />
             <Route path="/perfil" element={<Perfil />} />
-            <Route path="/banca" element={<BancaPage />} />
+            <Route path="/banca" element={<Banca />} />
             <Route path="/depositos" element={<Depositos />} />
             <Route path="/notificacoes" element={<NotificacoesPage />} />
             <Route path="/diario-trader" element={<DiarioTraderPage />} />
