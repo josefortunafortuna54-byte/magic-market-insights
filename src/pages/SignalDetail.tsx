@@ -112,7 +112,7 @@ export default function SignalDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const { tier, hasAnalysis, loading: subLoading } = useSubscription();
+  const { hasAnalysis, loading: subLoading } = useSubscription();
   const { user } = useAuth();
 
   useEffect(() => {
@@ -226,12 +226,12 @@ export default function SignalDetail() {
                           {smcLabel}
                         </Badge>
                       )}
-                      {tier !== "free" && (
+                      {signal.tier !== "free" && (
                         <Badge
                           variant="secondary"
-                          className={`text-xs ${tier === "premium" ? "gradient-text-gold font-bold" : ""}`}
+                          className={`text-xs ${signal.tier === "premium" ? "gradient-text-gold font-bold" : ""}`}
                         >
-                          {formatTierLabel(tier)}
+                          {formatTierLabel(signal.tier)}
                         </Badge>
                       )}
                       <span className={`text-xs font-semibold px-2 py-1 rounded-lg ${signal.status === "tp" ? "bg-success/20 text-success" : signal.status === "sl" ? "bg-destructive/20 text-destructive" : "bg-warning/20 text-warning"}`}>
