@@ -26,6 +26,13 @@ import NotFound from "./pages/NotFound";
 import Admin from "./pages/Admin";
 import Horarios from "./pages/Horarios";
 import Comunidade from "./pages/Comunidade";
+import ComunidadeCanal from "./pages/ComunidadeCanal";
+import ComunidadeDm from "./pages/ComunidadeDm";
+import ComunidadePesquisa from "./pages/ComunidadePesquisa";
+import ComunidadeNovoCanal from "./pages/ComunidadeNovoCanal";
+import ComunidadeNovoDm from "./pages/ComunidadeNovoDm";
+import PerfilPublico from "./pages/PerfilPublico";
+import Loja from "./pages/Loja";
 import RecuperarSenha from "./pages/RecuperarSenha";
 import Termos from "./pages/Termos";
 import Privacidade from "./pages/Privacidade";
@@ -62,6 +69,13 @@ const App = () => (
             <Route path="/admin" element={<AdminGuard><Admin /></AdminGuard>} />
             <Route path="/horarios" element={<Horarios />} />
             <Route path="/comunidade" element={<Comunidade />} />
+            <Route path="/comunidade/canais/:channelId" element={<ComunidadeCanal />} />
+            <Route path="/comunidade/dm/:conversationId" element={<ComunidadeDm />} />
+            <Route path="/comunidade/pesquisa" element={<ComunidadePesquisa />} />
+            <Route path="/comunidade/novo-canal" element={<ComunidadeNovoCanal />} />
+            <Route path="/comunidade/novo-dm" element={<ComunidadeNovoDm />} />
+            <Route path="/comunidade/user/:userId" element={<PerfilPublico />} />
+            <Route path="/comunidade/loja" element={<Loja />} />
             <Route path="/termos" element={<Termos />} />
             <Route path="/privacidade" element={<Privacidade />} />
             <Route path="/aviso-risco" element={<AvisoRisco />} />

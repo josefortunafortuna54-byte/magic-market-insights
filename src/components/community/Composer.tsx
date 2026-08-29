@@ -13,18 +13,22 @@ export function Composer({
   placeholder,
   profiles,
   currentUserId,
+  initialImage,
 }: {
   onSend: (text: string, imageUrl?: string | null, mentionIds?: string[]) => Promise<void>;
   disabled?: boolean;
   placeholder?: string;
   profiles: Record<string, UserProfile>;
   currentUserId: string | null;
+  initialImage?: { file: File; url: string } | null;
 }) {
   const { user } = useAuth();
   const [text, setText] = useState("");
   const [selectionStart, setSelectionStart] = useState(0);
   const [mentionIds, setMentionIds] = useState<string[]>([]);
-  const [image, setImage] = useState<{ file: File; url: string } | null>(null);
+  const [image, setImage] = useState<{ file: File; url: string } | null>(() =>
+    initialImage ? { file: initialImage.file, url: initialImage.url } : null,
+  );
   const [sending, setSending] = useState(false);
   const [uploading, setUploading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
