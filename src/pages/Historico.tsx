@@ -1,7 +1,9 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
-import { TrendingUp, TrendingDown, Clock, Target, Shield, BarChart3, Trophy, AlertTriangle, Coins } from "lucide-react";
+import { TrendingUp, TrendingDown, Clock, Target, BarChart3, Trophy, AlertTriangle, Coins } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
 import { useHistory } from "@/hooks/useHistory";
+import { ALL_PAIRS } from "@/lib/gating";
 
 function formatDate(dateStr: string): string {
   return new Date(dateStr).toLocaleDateString("pt-PT", {
@@ -11,8 +13,9 @@ function formatDate(dateStr: string): string {
 
 export default function Historico() {
   const { signals, stats, loading } = useHistory();
+  const [pair, setPair] = useState("Todos");
 
-  const historicalSignals = signals;
+  const historicalSignals = signals.filter((s) => pair === "Todos" || s.pair === pair);
 
   const displayStats = stats;
 
@@ -76,6 +79,39 @@ export default function Historico() {
               </div>
             </motion.div>
           )}
+        </div>
+      </section>
+
+      {/* Filtro por par */}
+      <section className="pb-6">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => setPair("Todos")}
+              className={`px-3 py-1.5 rounded-full text-sm font-semibold transition-colors ${
+                pair === "Todos"
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-secondary text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Todos
+            </button>
+            {ALL_PAIRS.map((p) => (
+              <button
+                key={p}
+                type="button"
+                onClick={() => setPair(p)}
+                className={`px-3 py-1.5 rounded-full text-sm font-semibold transition-colors ${
+                  pair === p
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-secondary text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {p}
+              </button>
+            ))}
+          </div>
         </div>
       </section>
 
