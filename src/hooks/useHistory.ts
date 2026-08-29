@@ -52,6 +52,19 @@ interface HistoryResult {
   stats: HistoryStats;
 }
 
+interface HistoryRow {
+  id: string;
+  entry_price?: number | null;
+  target_price?: number | null;
+  stop_loss?: number | null;
+  symbol?: string | null;
+  status?: string | null;
+  timeframe?: string | null;
+  signal_type?: string | null;
+  confidence?: number | null;
+  created_at?: string | null;
+}
+
 async function fetchHistory(): Promise<HistoryResult> {
   const { data, error } = await supabase
     .from("signals")
@@ -62,7 +75,7 @@ async function fetchHistory(): Promise<HistoryResult> {
 
   if (error) throw error;
 
-  const mapped: HistorySignal[] = (data || []).map((row: any) => {
+  const mapped: HistorySignal[] = (data || []).map((row: HistoryRow) => {
     const entry = Number(row.entry_price) || 0;
     const tp = Number(row.target_price) || 0;
     const sl = Number(row.stop_loss) || 0;
@@ -115,8 +128,8 @@ export function useHistory() {
         "postgres_changes",
         { event: "*", schema: "public", table: "signals" },
         (payload) => {
-          const newStatus = payload.new?.status;
-          const oldStatus = payload.old?.status;
+          const newStatus = (payload.new as { status?: string } | null)?.status;
+          const oldStatus = (payload.old as { status?: string } | null)?.status;
           if (newStatus === "tp" || newStatus === "sl" || oldStatus === "tp" || oldStatus === "sl") {
             queryClient.invalidateQueries({ queryKey: ["history"] });
           }
