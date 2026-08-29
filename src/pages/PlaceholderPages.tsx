@@ -4,10 +4,6 @@ export function BancaPage() {
   return <PagePlaceholder title="Banca" />;
 }
 
-export function DepositosPage() {
-  return <PagePlaceholder title="Depósitos e Saques" />;
-}
-
 export function NotificacoesPage() {
   return <PagePlaceholder title="Notificações" />;
 }

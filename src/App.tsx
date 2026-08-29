@@ -6,9 +6,9 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AdminGuard } from "@/components/auth/AdminGuard";
 import { AuthProvider } from "@/contexts/AuthContext";
 import Perfil from "./pages/Perfil";
+import Depositos from "./pages/Depositos";
 import {
   BancaPage,
-  DepositosPage,
   NotificacoesPage,
   DiarioTraderPage,
   SuporteIaPage,
@@ -49,7 +49,7 @@ const App = () => (
             <Route path="/planos" element={<Planos />} />
             <Route path="/perfil" element={<Perfil />} />
             <Route path="/banca" element={<BancaPage />} />
-            <Route path="/depositos" element={<DepositosPage />} />
+            <Route path="/depositos" element={<Depositos />} />
             <Route path="/notificacoes" element={<NotificacoesPage />} />
             <Route path="/diario-trader" element={<DiarioTraderPage />} />
             <Route path="/suporte-ia" element={<SuporteIaPage />} />
