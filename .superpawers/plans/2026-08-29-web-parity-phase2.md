@@ -117,11 +117,11 @@ Digest §7 (panels) + §2 (actions). Web model: existing `src/components/admin/A
 
 ### Task 2.8: Phase 2 verification
 
-- [ ] **Step 1:** `npx tsc --noEmit -p tsconfig.app.json` → 0 errors; `npx tsc --noEmit` → 0.
-- [ ] **Step 2:** `npm run build` → PASS.
-- [ ] **Step 3:** eslint over all Phase 2 touched files → 0 errors.
-- [ ] **Step 4:** dev server + Playwright smoke: `/planos` CTA → `/depositos?plan=premium&currency=usd` lands on Depositos with plan preselected; capital `amount` param → capital-lock mode; withdraw tab renders with methods per currency; `/banca` free user → PremiumLock; anonymous user → login prompt; admin email → `/admin` shows receipts+withdrawals tabs (data-limited smoke if no admin credentials).
-- [ ] **Step 5:** Record results in this file under `Phase 2 verification results`.
+- [x] **Step 1:** `npx tsc --noEmit -p tsconfig.app.json` → 0 errors; `npx tsc --noEmit` → 0.
+- [x] **Step 2:** `npm run build` → PASS.
+- [x] **Step 3:** eslint over all Phase 2 touched files → 0 errors.
+- [x] **Step 4:** dev server + Playwright smoke: `/planos` CTA → `/depositos?plan=premium&currency=usd` lands on Depositos with plan preselected; capital `amount` param → capital-lock mode; withdraw tab renders with methods per currency; `/banca` free user → PremiumLock; anonymous user → login prompt; admin email → `/admin` shows receipts+withdrawals tabs (data-limited smoke if no admin credentials).
+- [x] **Step 5:** Record results in this file under `Phase 2 verification results`.
 
 ---
 
@@ -131,3 +131,23 @@ Digest §7 (panels) + §2 (actions). Web model: existing `src/components/admin/A
 - **Duplicate pending receipts:** DB partial unique index enforces one pending per user; mirror the UI check to avoid 23505.
 - **`saveReceipt`/`submitWithdrawalRequest`/`wallet_movements` are direct client inserts** — replicate exactly; RLS allows own-row insert.
 - Keep Phase 1 consumers compiling at every task boundary.
+
+---
+
+## Phase 2 verification results
+
+Recorded 2026-08-29 after T2.7 commit `463ab84` (T2.5 `6c00bfd`, T2.6 `c136e96`).
+
+- [x] **T2.8 Step 1:** `npx tsc --noEmit -p tsconfig.app.json` → 0 errors; `npx tsc --noEmit` → 0 errors.
+- [x] **T2.8 Step 2:** `npm run build` → PASS (26.36s–31.26s across runs).
+- [x] **T2.8 Step 3:** eslint over all Phase 2 touched files → 0 errors (pre-existing `any` in `src/pages/Admin.tsx` typed to `Record<string, unknown>`; 1 pre-existing `exhaustive-deps` warning kept).
+- [x] **T2.8 Step 4 (Playwright smoke on `npm run dev` :5173):**
+  - `/planos`-style CTA flow: `/depositos?plan=premium&currency=usd` renders with Premium $49.99 preselected + secure-note + Histórico (empty state) → PASS.
+  - Capital-lock: `/depositos?amount=500&currency=usd` renders "Depósito de capital — Gestão de Banca" card $500.00, no plan chips → PASS.
+  - Withdraw tab: methods Binance Pay / Rodotpay for USD; "Valor a levantar (USD)" + "Dados de pagamento (UID/número)" → PASS.
+  - `/banca` as anonymous → PremiumLock "Gerenciamento de Capital Premium" + link to `/planos` → PASS.
+  - Anonymous deposit confirm → toast "Erro de ligação" (matches mobile `Alert.alert(t('planos.connectionError'))`) → PASS.
+  - `/admin` as anonymous → redirect to `/` → PASS.
+  - Admin receipts/withdrawals tabs: data-limited (no admin credentials); verified via tsc/build/lint + import wiring in `Admin.tsx`.
+  - Console: 0 errors throughout, only benign dev warnings.
+- [x] **T2.8 Step 5:** results recorded in this section.

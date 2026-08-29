@@ -16,15 +16,17 @@ import { AdminWithdrawalsTab } from "@/components/admin/AdminWithdrawalsTab";
 
 const SYMBOLS = ["EURUSD", "GBPUSD", "USDJPY", "AUDUSD", "EURGBP", "USDCHF", "NZDUSD", "USDCAD", "XAUUSD", "BTCUSD"];
 
+type AdminRow = Record<string, unknown>;
+
 export default function Admin() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
-  const [signals, setSignals] = useState<any[]>([]);
-  const [posts, setPosts] = useState<any[]>([]);
-  const [subsData, setSubsData] = useState<any[]>([]);
-  const [boomTimes, setBoomTimes] = useState<any[]>([]);
-  const [boomHours, setBoomHours] = useState<any[]>([]);
-  const [usersList, setUsersList] = useState<any[]>([]);
+  const [signals, setSignals] = useState<AdminRow[]>([]);
+  const [posts, setPosts] = useState<AdminRow[]>([]);
+  const [subsData, setSubsData] = useState<AdminRow[]>([]);
+  const [boomTimes, setBoomTimes] = useState<AdminRow[]>([]);
+  const [boomHours, setBoomHours] = useState<AdminRow[]>([]);
+  const [usersList, setUsersList] = useState<AdminRow[]>([]);
   const [stats, setStats] = useState({ total: 0, active: 0, tp: 0, sl: 0, users: 0, premium: 0 });
   const [generating, setGenerating] = useState(false);
   const [closing, setClosing] = useState(false);
@@ -57,11 +59,11 @@ export default function Admin() {
     const s = signalsData || [];
     setStats({
       total: s.length,
-      active: s.filter((x: any) => x.status === "active").length,
-      tp: s.filter((x: any) => x.status === "tp").length,
-      sl: s.filter((x: any) => x.status === "sl").length,
+      active: s.filter((x) => x.status === "active").length,
+      tp: s.filter((x) => x.status === "tp").length,
+      sl: s.filter((x) => x.status === "sl").length,
       users: usersCount || 0,
-      premium: subsData?.filter((x: any) => x.status === "active").length || 0,
+      premium: subsData?.filter((x) => x.status === "active").length || 0,
     });
   };
 
@@ -81,7 +83,7 @@ export default function Admin() {
       const data = await res.json();
       alert(`✅ ${data.results?.length || 0} sinais gerados!`);
       await loadData();
-    } catch (err: any) { alert("Erro: " + err.message); }
+    } catch (err: unknown) { alert("Erro: " + (err instanceof Error ? err.message : String(err))); }
     setGenerating(false);
   };
 
@@ -100,7 +102,7 @@ export default function Admin() {
       const data = await res.json();
       alert(`✅ ${data.closed || 0} sinais fechados!`);
       await loadData();
-    } catch (err: any) { alert("Erro: " + err.message); }
+    } catch (err: unknown) { alert("Erro: " + (err instanceof Error ? err.message : String(err))); }
     setClosing(false);
   };
 
@@ -142,7 +144,7 @@ export default function Admin() {
           <div className="flex gap-3 mb-8 flex-wrap">
             <button onClick={async () => {
               if (!confirm("Apagar todos os sinais ativos e regenerar?")) return;
-              try { await adminApi.deleteAllActiveSignals(); } catch (e: any) { alert("Erro: " + e.message); }
+              try { await adminApi.deleteAllActiveSignals(); } catch (e: unknown) { alert("Erro: " + (e instanceof Error ? e.message : String(e))); }
               await generateSignals();
             }}
               className="flex items-center gap-2 px-4 py-2 rounded-xl bg-destructive/20 text-destructive border border-destructive/30 text-sm font-medium hover:opacity-90">
