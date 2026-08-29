@@ -60,6 +60,11 @@ export function formatMoney(n: number): string {
   return n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
+export function formatBancaMoney(n: number, currency: 'usd' | 'aoa' = 'usd'): string {
+  if (currency === 'aoa') return `${Math.round(n).toLocaleString('pt-PT')} Kz`;
+  return `$${formatMoney(n)}`;
+}
+
 /**
  * Número de casas decimais usadas para apresentar o preço de um par.
  */

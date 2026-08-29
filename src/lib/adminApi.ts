@@ -2,7 +2,9 @@ import { supabase } from "./supabaseClient";
 
 const FUNCTIONS_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-manage`;
 
-async function callAdminFn(action: string, payload: Record<string, unknown> = {}): Promise<any> {
+type AdminFnResult = Record<string, unknown>;
+
+async function callAdminFn(action: string, payload: Record<string, unknown> = {}): Promise<AdminFnResult> {
   const { data: { session } } = await supabase.auth.getSession();
   if (!session) throw new Error("Não autenticado");
 
@@ -16,8 +18,8 @@ async function callAdminFn(action: string, payload: Record<string, unknown> = {}
     body: JSON.stringify({ action, ...payload }),
   });
 
-  const data = await res.json();
-  if (!res.ok || data.error) throw new Error(data.error || "Erro desconhecido");
+  const data = (await res.json()) as AdminFnResult;
+  if (!res.ok || data.error) throw new Error(String(data.error || "Erro desconhecido"));
   return data;
 }
 
@@ -88,10 +90,190 @@ export async function uploadFile(bucket: string, path: string, file: File): Prom
         const data = await callAdminFn("upload_file", {
           bucket, path, file_base64: base64, content_type: file.type,
         });
-        resolve(data.url);
+        resolve(data.url as string);
       } catch (err) { reject(err); }
     };
     reader.onerror = () => reject(new Error("Erro ao ler ficheiro"));
     reader.readAsDataURL(file);
   });
+}
+
+// ── Payment Receipts ───────────────────────────────────────────────────
+
+export interface PaymentReceipt {
+  id: string;
+  user_id: string;
+  user_email: string;
+  proof_url: string;
+  plan: string;
+  method: string;
+  amount: number;
+  currency: string;
+  status: "pending" | "approved" | "rejected";
+  reviewed_by: string | null;
+  reviewed_at: string | null;
+  duplicate_of?: string | null;
+  created_at: string;
+}
+
+export function getReferralCode(): string | null {
+  try {
+    return localStorage.getItem("ref_code");
+  } catch {
+    return null;
+  }
+}
+
+export async function listReceipts(status?: string, limit = 50, offset = 0): Promise<PaymentReceipt[]> {
+  const data = await callAdminFn("list_receipts", { status, limit, offset });
+  return (data.receipts as PaymentReceipt[]) ?? [];
+}
+
+export async function approveReceipt(id: string): Promise<void> {
+  await callAdminFn("approve_receipt", { id });
+}
+
+export async function rejectReceipt(id: string): Promise<void> {
+  await callAdminFn("reject_receipt", { id });
+}
+
+export async function deleteReceipt(id: string): Promise<void> {
+  await callAdminFn("delete_receipt", { id });
+}
+
+export async function saveReceipt(receipt: {
+  user_id?: string;
+  user_email?: string;
+  proof_url: string;
+  plan: string;
+  method: string;
+  amount: number;
+  currency: string;
+}): Promise<void> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Não autenticado");
+  // Código de afiliado capturado no primeiro arranque via deep link (?ref=).
+  // Inserção direta (RLS permite apenas a própria linha) — não passa pela
+  // função admin, que rejeitaria utilizadores normais.
+  const { error } = await supabase.from("payment_receipts").insert({
+    user_id: user.id,
+    user_email: user.email ?? receipt.user_email ?? null,
+    proof_url: receipt.proof_url,
+    plan: receipt.plan,
+    method: receipt.method,
+    amount: receipt.amount,
+    currency: receipt.currency,
+    referral_code: getReferralCode(),
+  });
+  if (error) throw error;
+}
+
+export interface AdminCapitalAccount {
+  user_id: string;
+  email: string;
+  currency: "usd" | "aoa";
+  capital: number;
+  achieved: number;
+  total_withdrawn: number;
+  status: string;
+  updated_at?: string;
+}
+
+export async function listCapitalAccounts(): Promise<AdminCapitalAccount[]> {
+  const data = await callAdminFn("list_capital_accounts", {});
+  return (data.accounts as AdminCapitalAccount[]) ?? [];
+}
+
+export async function upsertCapitalAccount(data: {
+  user_id: string;
+  capital?: number;
+  achieved?: number;
+  total_withdrawn?: number;
+  currency?: "usd" | "aoa";
+}): Promise<void> {
+  await callAdminFn("upsert_capital_account", data);
+}
+
+export async function postCapitalReport(data: {
+  user_id: string;
+  period_start: string;
+  period_end: string;
+  starting_balance: number;
+  ending_balance: number;
+  note?: string | null;
+  currency?: "usd" | "aoa";
+}): Promise<void> {
+  await callAdminFn("post_capital_report", data);
+}
+
+export interface AdminCapitalReport {
+  id: string;
+  period_start: string;
+  period_end: string;
+  starting_balance: number;
+  ending_balance: number;
+  profit: number;
+  profit_pct: number;
+  note: string | null;
+  created_at: string;
+}
+
+export async function listCapitalReports(userId: string): Promise<AdminCapitalReport[]> {
+  const data = await callAdminFn("list_capital_reports", { user_id: userId });
+  return (data.reports as AdminCapitalReport[]) ?? [];
+}
+
+// ── Withdrawal Requests ──────────────────────────────────────────────
+
+export interface WithdrawalRequest {
+  id: string;
+  user_id: string;
+  method: string;
+  amount: number;
+  currency: string;
+  details: string | null;
+  status: "pending" | "approved" | "rejected" | "paid";
+  reviewed_by: string | null;
+  reviewed_at: string | null;
+  notes: string | null;
+  created_at: string;
+}
+
+export async function submitWithdrawalRequest(req: {
+  method: string;
+  amount: number;
+  currency: string;
+  details?: string;
+}): Promise<void> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Não autenticado");
+  const { error } = await supabase.from("withdrawal_requests").insert({
+    user_id: user.id,
+    method: req.method,
+    amount: req.amount,
+    currency: req.currency,
+    details: req.details ?? null,
+  });
+  if (error) throw error;
+}
+
+export async function listWithdrawals(status?: string, limit = 50, offset = 0): Promise<WithdrawalRequest[]> {
+  const data = await callAdminFn("list_withdrawals", { status, limit, offset });
+  return (data.withdrawals as WithdrawalRequest[]) ?? [];
+}
+
+export async function approveWithdrawal(id: string): Promise<void> {
+  await callAdminFn("approve_withdrawal", { id });
+}
+
+export async function rejectWithdrawal(id: string): Promise<void> {
+  await callAdminFn("reject_withdrawal", { id });
+}
+
+export async function rejectWithdrawalWithNotes(id: string, notes?: string): Promise<void> {
+  await callAdminFn("reject_withdrawal", { id, notes });
+}
+
+export async function markWithdrawalPaid(id: string): Promise<void> {
+  await callAdminFn("mark_withdrawal_paid", { id });
 }
