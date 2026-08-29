@@ -1,9 +1,11 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Sparkles, BarChart3, History, Crown, LogIn, LogOut, User, Settings, Clock, MessageCircle } from "lucide-react";
+import { Menu, X, Sparkles, BarChart3, History, Crown, LogIn, LogOut, User, Clock, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { supabase } from "@/lib/supabaseClient";
+import { useAuth } from "@/contexts/AuthContext";
+import { useSubscription } from "@/hooks/useSubscription";
+import { planLabel, type PlanId } from "@/lib/plans";
 
 const navLinks = [
   { href: "/", label: "Home", icon: Sparkles },
@@ -12,42 +14,24 @@ const navLinks = [
   { href: "/planos", label: "Planos", icon: Crown },
   { href: "/horarios", label: "Horários", icon: Clock },
   { href: "/comunidade", label: "Comunidade", icon: MessageCircle },
+  { href: "/perfil", label: "Perfil", icon: User },
 ];
+
+const PLAN_BADGE_LABEL: Record<string, string> = {
+  basic: "BASIC",
+  pro: "PRO",
+  premium: "PREMIUM",
+};
 
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
-  const [user, setUser] = useState<any>(null);
-  const [isPremium, setIsPremium] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const userMenuRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const getUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
-      if (user) checkPremium(user.id);
-    };
-    getUser();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
-      setUser(session?.user || null);
-      if (session?.user) checkPremium(session.user.id);
-      else setIsPremium(false);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  const checkPremium = async (userId: string) => {
-    const { data } = await supabase
-      .from("subscriptions")
-      .select("status")
-      .eq("user_id", userId)
-      .single();
-    setIsPremium(data?.status === "active");
-  };
+  const { user, signOut } = useAuth();
+  const { tier } = useSubscription();
+  const isPremium = tier !== "free";
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -60,9 +44,7 @@ export function Navbar() {
   }, []);
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
-    setUser(null);
-    setIsPremium(false);
+    await signOut();
     setShowUserMenu(false);
     navigate("/");
   };
@@ -119,9 +101,15 @@ export function Navbar() {
                   </div>
                   <span className="text-sm font-medium max-w-24 truncate">{userName}</span>
                   {isPremium && (
-                    <span className="badge-premium text-xs py-0.5">
-                      <Crown className="h-2.5 w-2.5" />
-                      PRO
+                    <span
+                      className={
+                        tier === "premium"
+                          ? "badge-premium text-xs py-0.5"
+                          : "inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-xs font-semibold bg-primary/10 text-primary border border-primary/20"
+                      }
+                    >
+                      {tier === "premium" && <Crown className="h-2.5 w-2.5" />}
+                      {PLAN_BADGE_LABEL[tier as string] ?? planLabel(tier as Exclude<PlanId, "free">).toUpperCase()}
                     </span>
                   )}
                 </button>
@@ -141,7 +129,7 @@ export function Navbar() {
                         <p className="text-xs text-muted-foreground truncate">{user.email}</p>
                         {isPremium && (
                           <span className="inline-flex items-center gap-1 text-xs text-accent mt-1">
-                            <Crown className="h-3 w-3" /> Premium ativo
+                            <Crown className="h-3 w-3" /> {planLabel(tier as Exclude<PlanId, "free">)}
                           </span>
                         )}
                       </div>
@@ -217,7 +205,11 @@ export function Navbar() {
                       </div>
                       <div>
                         <p className="text-sm font-medium">{userName}</p>
-                        {isPremium && <p className="text-xs text-accent">Premium</p>}
+                        {isPremium && (
+                          <p className="text-xs text-accent">
+                            {PLAN_BADGE_LABEL[tier as string] ?? planLabel(tier as Exclude<PlanId, "free">)}
+                          </p>
+                        )}
                       </div>
                     </div>
                     <button onClick={handleLogout} className="w-full flex items-center gap-2 px-4 py-3 rounded-lg text-destructive hover:bg-destructive/10 transition-colors">
