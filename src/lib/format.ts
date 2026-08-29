@@ -55,6 +55,20 @@ export function formatShortDate(dateStr: string): string {
   return `${dd}/${mm}/${d.getFullYear()}`;
 }
 
+export function formatChatDate(dateStr: string): string {
+  const d = new Date(dateStr);
+  const today = new Date();
+  const yesterday = new Date();
+  yesterday.setDate(today.getDate() - 1);
+  const sameDay = (a: Date, b: Date) =>
+    a.getFullYear() === b.getFullYear() &&
+    a.getMonth() === b.getMonth() &&
+    a.getDate() === b.getDate();
+  if (sameDay(d, today)) return 'Hoje';
+  if (sameDay(d, yesterday)) return 'Ontem';
+  return formatLongDate(dateStr);
+}
+
 export function formatMoney(n: number): string {
   if (!isFinite(n)) return '—';
   return n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });

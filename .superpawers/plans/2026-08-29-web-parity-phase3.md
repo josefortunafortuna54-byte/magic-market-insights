@@ -58,11 +58,13 @@
 
 ## Task 3.5: Message components (Channel/DM rooms)
 
-- [ ] **Step 1:** `MessageBubble.tsx` — web port of `mobile/src/components/community/MessageBubble.tsx` (305 lines): author avatar, display name, `timeAgo`, text (rich links), image, edit indicator, failed/pending states with retry, reaction chips (`REACTION_EMOJIS`) toggle, action row (reply/edit/delete when mine, emoji react). Use `Sonner` toasts where mobile `Alert`s.
-- [ ] **Step 2:** `MessageList.tsx` — web port (254 lines): day separators, grouping by author/time, auto-scroll to bottom, load-more on top, typing indicator, `BoomMessage` for `user_id === BOT_USER_ID`.
-- [ ] **Step 3:** `Composer.tsx` — web port (244 lines): textarea (+Enter to send, shift+enter newline), image attach (file input → upload), reply preview chip, disabled states, `useIsMobile`-friendly.
-- [ ] **Step 4:** `BoomMessage.tsx` — bot card (20 lines).
-- [ ] **Step 5:** Verification: tsc/build/eslint → clean.
+- [x] **Step 1:** `MessageBubble.tsx` — web port of `mobile/src/components/community/MessageBubble.tsx` (305 lines): author avatar, display name, `timeAgo`, text (rich links), image, edit indicator, failed/pending states with retry, reaction chips (`REACTION_EMOJIS`) toggle, action row (reply/edit/delete when mine, emoji react). Use `Sonner` toasts where mobile `Alert`s.
+- [x] **Step 2:** `MessageList.tsx` — web port (254 lines): day separators, grouping by author/time, auto-scroll to bottom, load-more on top, typing indicator, `BoomMessage` for `user_id === BOT_USER_ID`.
+- [x] **Step 3:** `Composer.tsx` — web port (244 lines): textarea (+Enter to send, shift+enter newline), image attach (file input → upload), reply preview chip, disabled states, `useIsMobile`-friendly.
+- [x] **Step 4:** `BoomMessage.tsx` — bot card (20 lines).
+- [x] **Step 5:** Verification: tsc/build/eslint → clean.
+
+> **T3.5 notes:** Bucket confirmed = `community` (per `mobile/src/lib/community.ts` `uploadCommunityImage`) → the message-image bucket risk is resolved; `uploadCommunityImage` web signature is `(userId, File)` (uploads directly, no fetch). Added to `src/lib/community.ts`: `findOrCreateConversation`, `shareSignalToFeed`, `findSinaisChannelId`, `uploadCommunityImage`, `reportMessage`. Added `formatChatDate` ("Hoje"/"Ontem"/long date) to `src/lib/format.ts`. Web adaptations: DropdownMenu ("···") replaces long-press Alert for Editar/Apagar (own) and Reportar→Spam/Assédio/Inadequado/Outro; reaction picker is an inline chip row (no alert); `reportMessage` → sonner toast. Web `Button` has no `loading` prop → inline `Loader2` spinner. `BoomMessage` is self-contained (fetches `boom_times` by id, compact inline card + audio player); the full feed `BoomCard` stays in `Comunidade.tsx` until T3.6 extracts `CommunityFeed.tsx`.
 
 ## Task 3.6: /comunidade index upgrade + route wiring
 
@@ -104,7 +106,7 @@
 
 - **Camera quick-share:** mobile uses device camera (`useQuickCamera`). Web implementation is file-input upload + channel picker — document as degraded parity, do not fake a camera.
 - **Realtime volume:** `useChannels`/`useProfiles` fetch all rows; fine at current scale, matches mobile. Keep realtime listeners cleaned up on unmount (return unsubscribe).
-- **Message image upload bucket/column:** confirm the exact bucket name used by `mobile/src/hooks/useMessages.ts`/`Composer` (`message-images`?); if web's Supabase project lacks it, flag (do not silently adapt) — per master-plan risk rule.
+- **Message image upload bucket:** confirmed `community` (from `mobile/src/lib/community.ts` `uploadCommunityImage`) at T3.5 — web uses the same bucket. No flag needed.
 - **`search_messages` RPC** must exist in the shared project (mobile migration ran). If missing → flag, do not fallback.
 - **Premium channel gating** (`channel.is_premium && !isPremium`) must mirror mobile on every entry point (index list, picker, direct URL).
 - Keep Phases 1–2 consumers compiling at every task boundary.
