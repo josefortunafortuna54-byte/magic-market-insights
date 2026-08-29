@@ -8,8 +8,13 @@ import type { Subscription } from "@/lib/types";
 const VALID_TIERS: PlanTier[] = ["free", "basic", "pro", "premium"];
 
 async function fetchSubscription(userId: string): Promise<Subscription | null> {
-  const { data } = await supabase.from("subscriptions").select("*").eq("user_id", userId).single();
-  return data ?? null;
+  const { data } = await supabase
+    .from("subscriptions")
+    .select("*")
+    .eq("user_id", userId)
+    .order("updated_at", { ascending: false, nullsFirst: false })
+    .limit(1);
+  return data?.[0] ?? null;
 }
 
 export function useSubscription() {
@@ -37,6 +42,7 @@ export function useSubscription() {
       currency,
       loading: isLoading,
       isPremium,
+      canAccessBanca: tier === "premium",
       hasAnalysis: limits.hasAnalysis,
       limits,
       canAccessPair: (pair: string) => canAccessPair(pair, tier),
