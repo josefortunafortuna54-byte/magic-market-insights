@@ -1,11 +1,12 @@
 import { useMemo } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { Sparkles, TrendingUp, Brain, Shield, Crown, ChevronRight, BarChart3, Zap, Target } from "lucide-react";
+import { Sparkles, TrendingUp, Brain, Shield, Crown, ChevronRight, BarChart3, Zap, Target, Flame, Activity } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Layout } from "@/components/layout/Layout";
 import { SignalCard } from "@/components/signals/SignalCard";
 import { useSignals } from "@/hooks/useSignals";
+import { useBoomHours } from "@/hooks/useBoomHours";
 import { useHistory } from "@/hooks/useHistory";
 
 const features = [
@@ -17,6 +18,7 @@ const features = [
 
 export default function Index() {
   const { signals, loading } = useSignals();
+  const { nextBoom, loading: boomLoading } = useBoomHours();
   const { stats } = useHistory();
 
   const featuredSignals = signals
@@ -120,6 +122,63 @@ export default function Index() {
                 </div>
               ))}
             </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* Painel — NextBoom + Performance */}
+      <section className="py-12">
+        <div className="container mx-auto px-4">
+          <div className="grid md:grid-cols-2 gap-6">
+            <div className="glass-card p-6 group hover:border-accent/40 transition-all duration-300">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center">
+                  <Flame className="h-5 w-5 text-accent" />
+                </div>
+                <div>
+                  <h3 className="font-display text-lg font-bold">Próximo Boom</h3>
+                  <p className="text-xs text-muted-foreground">Sessão com maior volatilidade</p>
+                </div>
+              </div>
+              {boomLoading ? (
+                <div className="h-5 bg-muted/40 rounded animate-pulse w-2/3" />
+              ) : nextBoom ? (
+                <div>
+                  <div className="flex flex-wrap items-center gap-2 mb-2">
+                    <span className="text-xl font-display font-bold">{nextBoom.time_wat}</span>
+                    <span className="badge-premium text-xs">{nextBoom.badge}</span>
+                  </div>
+                  <p className="font-semibold text-accent">{nextBoom.title}</p>
+                  {nextBoom.pairs.length > 0 && (
+                    <p className="text-sm text-muted-foreground mt-1">{nextBoom.pairs.join(" · ")}</p>
+                  )}
+                  <p className="text-xs text-muted-foreground mt-1">{nextBoom.description}</p>
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">Sem booms agendados.</p>
+              )}
+            </div>
+
+            <div className="glass-card p-6 group hover:border-primary/40 transition-all duration-300">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <Activity className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-display text-lg font-bold">Performance</h3>
+                  <p className="text-xs text-muted-foreground">Histórico de sinais</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-4">
+                <p className={`font-display text-3xl font-bold ${stats.total > 0 ? (stats.winRate >= 60 ? "text-success" : stats.winRate >= 40 ? "text-warning" : "text-muted-foreground") : "text-muted-foreground"}`}>
+                  {stats.total > 0 ? `${stats.winRate}%` : "—"}
+                </p>
+                <div className="text-xs text-muted-foreground space-y-0.5">
+                  <p>Taxa de acerto</p>
+                  <p>{stats.total} sinais analisados</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
