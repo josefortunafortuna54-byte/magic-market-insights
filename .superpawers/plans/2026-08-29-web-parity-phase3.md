@@ -77,9 +77,11 @@
 
 ## Task 3.7: Channel room + DM room screens
 
-- [ ] **Step 1:** `src/pages/ComunidadeCanal.tsx` — port `mobile/src/app/(tabs)/comunidade/canais/[channelId].tsx` (101 lines): load channel (`getChannelPayload`-style), header (back → `/comunidade`, name, `is_premium` lock when non-premium), `useMessages(channelId,'channel')` + `MessageList` + `Composer`; realtime.
-- [ ] **Step 2:** `src/pages/ComunidadeDm.tsx` — port `dm/[conversationId].tsx` (73 lines): ensure `conversation_members` membership (else redirect), header with peer name via profiles, `useMessages(conversationId,'dm')` + `MessageList` + `Composer`.
-- [ ] **Step 3:** Verification: tsc/build/eslint → clean; smoke both routes render (anon → login guard message, no crash).
+- [x] **Step 1:** `src/pages/ComunidadeCanal.tsx` — port `mobile/src/app/(tabs)/comunidade/canais/[channelId].tsx` (101 lines): load channel (`getChannelPayload`-style), header (back → `/comunidade`, name, `is_premium` lock when non-premium), `useMessages(channelId,'channel')` + `MessageList` + `Composer`; realtime.
+- [x] **Step 2:** `src/pages/ComunidadeDm.tsx` — port `dm/[conversationId].tsx` (73 lines): ensure `conversation_members` membership (else redirect), header with peer name via profiles, `useMessages(conversationId,'dm')` + `MessageList` + `Composer`.
+- [x] **Step 3:** Verification: tsc/build/eslint → clean; smoke both routes render (anon → login guard message, no crash).
+
+> **T3.7 notes:** Web `useMessages` already matches the mobile object-signature (`useMessages({ channelId } | { conversationId })`) — device screens call it directly. Channel room consumes the T3.6 quick-share via `consumePendingQuickShare()` once on mount. Premium gate reuses web `PremiumLock` (`title`/`description`; web has no `label` prop). Room layout = `<Layout noFooter>` + `h-[calc(100vh-5rem)]` flex column, header (back `ChevronLeft` → `/comunidade`), `MessageList` fills and scrolls, sticky `Composer`. DM header = peer avatar (`UserAvatar`, `size` is `number`) + name, tap → profile. Followed mobile's no-redirect-on-non-member (parity): missing state renders `workspace.emptyDms`/`emptyChannels` note. Smoke (anon): both routes render header/composer + error-with-retry (expected RLS 400 on `messages` for anon — same as mobile), no crash, 0 lint/tsc errors, build PASS.
 
 ## Task 3.8: Search, new channel, new DM, public profile
 
