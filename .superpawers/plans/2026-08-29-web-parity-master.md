@@ -331,7 +331,9 @@ Port from `mobile/src/lib/plans.ts`: `Currency`, `PlanId`, `PaymentMethod`, `WA_
 
 ---
 
-# PHASE 3 — Comunidade workspace completa (Slack-like) + loja
+# PHASE 3 — Comunidade workspace completa (Slack-like) + loja — ✅ COMPLETE
+
+**Status: DONE.** See sub-plan `2026-08-29-web-parity-phase3.md` (tasks 3.1–3.10, all `[x]`) for full task details. Result: tsc (app + full) 0 errors, `npm run build` PASS, eslint 0 errors across all Phase 3 files (2 known warnings), Playwright smoke of every Phase 3 route green. Commits: `8c89282` `161bc0c` `08bd8ea` `64be675` `cdc1827` `9943fa0` `acfda74` `0b39ac9` `8e6cf07` `b8602f4`.
 
 **Goal:** `/comunidade` becomes the full workspace: feed|workspace toggle, canais, DMs 1:1, salas de pares, pesquisa de mensagens, perfis públicos, loja.
 
