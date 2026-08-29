@@ -90,3 +90,17 @@ export function canAccessTimeframe(tf: string, tier: PlanTier): boolean {
   const order: PlanTier[] = ['free', 'basic', 'pro', 'premium'];
   return order.indexOf(tier) >= order.indexOf(required);
 }
+
+/**
+ * Mercado forex fechado: sexta 23:00 WAT até domingo 23:00 WAT
+ * (22:00 UTC). Fora dessa janela o mercado está aberto.
+ */
+export function isWeekendUtc(now: Date = new Date()): boolean {
+  const wat = new Date(now.getTime() + 60 * 60 * 1000);
+  const day = wat.getUTCDay();
+  const hour = wat.getUTCHours();
+  if (day === 6) return true;
+  if (day === 5 && hour >= 23) return true;
+  if (day === 0 && hour < 23) return true;
+  return false;
+}

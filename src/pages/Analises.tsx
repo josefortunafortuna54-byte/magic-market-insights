@@ -1,102 +1,106 @@
 import { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
-import { Filter, Search, TrendingUp, TrendingDown, Minus, ExternalLink, RefreshCw, Lock, Crown } from "lucide-react";
+import { Filter, Search, TrendingUp, TrendingDown, Minus, ExternalLink, RefreshCw, Lock, Crown, Clock } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
 import { SignalCard } from "@/components/signals/SignalCard";
 import { TradingViewChart } from "@/components/signals/TradingViewChart";
+import { PremiumLock } from "@/components/signals/PremiumLock";
+import { PlanUpsellModal } from "@/components/signals/PlanUpsellModal";
 import { useSignals } from "@/hooks/useSignals";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useLivePrices } from "@/hooks/useLivePrices";
+import {
+  ALL_PAIRS,
+  TIMEFRAMES,
+  SIGNAL_TYPES,
+  TV_INTERVALS,
+  PLAN_LIMITS,
+  isWeekendUtc,
+} from "@/lib/gating";
+import { decimalsFor } from "@/lib/format";
 
+const SMC_SETUPS = ["Todos", "BOS", "CHoCH", "OB", "FVG", "COMBO"];
 
-const timeframes = ["Todos", "M15", "H1", "H4"];
-const signalTypes = ["Todos", "BUY", "SELL", "AGUARDAR"];
-
-const FREE_PAIRS = ["EUR/USD", "GBP/USD", "USD/JPY"];
-const FREE_TIMEFRAMES = ["M15"];
-
-const ALL_PAIRS = ["EUR/USD", "GBP/USD", "USD/JPY", "AUD/USD", "EUR/GBP", "USD/CHF", "NZD/USD", "USD/CAD", "XAU/USD", "BTC/USD"];
-
-const tvIntervals: Record<string, string> = {
-  "M15": "15", "H1": "60", "H4": "240",
-};
-
-function PremiumLock({ timeframe }: { timeframe: string }) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="glass-card p-8 text-center border-accent/20 relative overflow-hidden"
-    >
-      <div className="absolute inset-0 bg-gradient-to-br from-accent/5 to-transparent pointer-events-none" />
-      <div className="w-14 h-14 rounded-full bg-accent/10 flex items-center justify-center mx-auto mb-4">
-        <Lock className="h-7 w-7 text-accent" />
-      </div>
-      <h3 className="font-display text-lg font-bold mb-2">
-        Sinais {timeframe} — Exclusivo Premium
-      </h3>
-      <p className="text-sm text-muted-foreground mb-6 max-w-sm mx-auto">
-        Acede a sinais em todos os timeframes com análise técnica completa.
-        RSI, EMA, MACD, Bollinger e Estocástico.
-      </p>
-      <Link to="/planos">
-        <button className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm text-white transition-all hover:opacity-90"
-          style={{ background: "var(--gradient-gold)", boxShadow: "var(--shadow-glow-gold)" }}>
-          <Crown className="h-4 w-4" />
-          Ver Planos Premium
-        </button>
-      </Link>
-    </motion.div>
-  );
+function formatPrice(pair: string, price: string): string {
+  if (price === "" || price === "—") return "—";
+  const n = Number(price);
+  if (!isFinite(n)) return price;
+  return n.toFixed(decimalsFor(pair));
 }
 
 export default function Analises() {
   const [selectedTimeframe, setSelectedTimeframe] = useState("M15");
   const [selectedType, setSelectedType] = useState("Todos");
   const [selectedPair, setSelectedPair] = useState("EUR/USD");
+  const [smcFilter, setSmcFilter] = useState("Todos");
+  const [upsellOpen, setUpsellOpen] = useState(false);
 
-  const { signals: supabaseSignals, loading, error, refetch } = useSignals();
-  const { user, isPremium, loading: subLoading } = useSubscription();
+  const { signals: supabaseSignals, loading, refetch } = useSignals();
+  const { user, loading: subLoading, canAccessPair, canAccessTimeframe } = useSubscription();
 
   const { prices, loading: pricesLoading, refetch: refetchPrices } = useLivePrices(ALL_PAIRS);
 
   const allSignals = supabaseSignals;
+  // Enquanto o plano não está confirmado NADA é bloqueado — um cliente
+  // premium nunca deve ver restrições, nem sequer durante o arranque.
+  const gatingOn = !subLoading;
+  const weekend = isWeekendUtc();
 
-  const visibleSignals = allSignals.filter(s => {
-    if (isPremium) return true;
-    return FREE_PAIRS.includes(s.pair) && FREE_TIMEFRAMES.includes(s.timeframe);
-  });
+  const freePairs = PLAN_LIMITS.free.pairs;
+  const freeTimeframes = PLAN_LIMITS.free.timeframes;
 
-  const visiblePairs = isPremium
-    ? [...new Set(allSignals.map(s => s.pair))]
-    : FREE_PAIRS.filter(p => allSignals.some(s => s.pair === p));
+  // Filtro de pares: ALL_PAIRS + quaisquer pares presentes nos sinais
+  // (inclui cripto como ETH/USDT gerada ao fim de semana).
+  const pairOptions = useMemo(() => {
+    const set = new Set<string>(ALL_PAIRS);
+    allSignals.forEach((s) => {
+      if (s.pair) set.add(s.pair);
+    });
+    return Array.from(set);
+  }, [allSignals]);
 
-  const availableTimeframes = isPremium ? timeframes : ["Todos", "M15"];
-
-  useEffect(() => {
-    if (!isPremium && !["Todos", "M15"].includes(selectedTimeframe)) {
-      setSelectedTimeframe("M15");
-    }
-  }, [isPremium, selectedTimeframe]);
+  // Sinais visíveis por plano: o tier dá acesso a mais pares/timeframes.
+  const visibleSignals = allSignals.filter(
+    (s) => !gatingOn || (canAccessPair(s.pair) && canAccessTimeframe(s.timeframe))
+  );
 
   const filteredSignals = visibleSignals.filter((signal) => {
     if (selectedTimeframe !== "Todos" && signal.timeframe !== selectedTimeframe) return false;
     if (selectedType !== "Todos" && signal.type !== selectedType) return false;
+    if (smcFilter !== "Todos" && signal.smcSetup !== smcFilter) return false;
     return true;
   });
 
-  const activeSignals = filteredSignals.filter((s) => s.status === "active" || !s.status);
+  const activeSignals = filteredSignals.filter(
+    (s) => s.status === "active" || s.status === "pending" || !s.status
+  );
+
+  // Se o plano mudou enquanto um par/timeframe bloqueado estava selecionado,
+  // repõe valores sempre acessíveis.
+  useEffect(() => {
+    if (!gatingOn) return;
+    if (selectedTimeframe !== "Todos" && !canAccessTimeframe(selectedTimeframe)) {
+      setSelectedTimeframe("M15");
+    }
+    if (!canAccessPair(selectedPair)) {
+      setSelectedPair("EUR/USD");
+    }
+  }, [gatingOn, selectedTimeframe, selectedPair, canAccessPair, canAccessTimeframe]);
 
   const currentPrice = prices[selectedPair] ?? { price: "—", change: 0 };
   const isUp = currentPrice.change > 0;
   const isFlat = currentPrice.change === 0;
   const tvSymbol = selectedPair.replace("/", "");
-  const tvInterval = selectedTimeframe !== "Todos" ? (tvIntervals[selectedTimeframe] ?? "60") : "60";
+  const tvInterval = selectedTimeframe !== "Todos" ? (TV_INTERVALS[selectedTimeframe] ?? "60") : "60";
   const tvPrefix = tvSymbol === "BTCUSD" ? "COINBASE" : "FX";
   const tvUrl = `https://www.tradingview.com/chart/?symbol=${tvPrefix}:${tvSymbol}&interval=${tvInterval}`;
 
-  const isPremiumTimeframe = !isPremium && ["H1", "H4"].includes(selectedTimeframe);
+  const lockedTimeframe = gatingOn && selectedTimeframe !== "Todos" && !canAccessTimeframe(selectedTimeframe);
+  const lockedPairsCount = ALL_PAIRS.filter((p) => !canAccessPair(p)).length;
+  const lockedTimeframesCount = TIMEFRAMES.filter((tf) => tf !== "Todos" && !canAccessTimeframe(tf)).length;
+  const showUpsellChip = gatingOn && (lockedPairsCount > 0 || lockedTimeframesCount > 0);
+  const showPremiumBanner = user && !subLoading && !canAccessPair("BTC/USD");
 
   return (
     <Layout>
@@ -116,7 +120,7 @@ export default function Analises() {
             <motion.div key={selectedPair} initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-3">
               <div className="text-right">
                 <p className="text-xs text-muted-foreground">{selectedPair}</p>
-                <p className="font-display text-xl font-bold font-trading leading-none">{currentPrice.price}</p>
+                <p className="font-display text-xl font-bold font-trading leading-none">{formatPrice(selectedPair, currentPrice.price)}</p>
               </div>
               <div className={`flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold ${isFlat ? "bg-muted/50 text-muted-foreground" : isUp ? "bg-success/10 text-success" : "bg-destructive/10 text-destructive"}`}>
                 {isFlat ? <Minus className="h-3 w-3" /> : isUp ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
@@ -132,16 +136,32 @@ export default function Analises() {
 
           {/* Seletor de pares */}
           <div className="flex flex-wrap gap-2 mt-3">
-            {visiblePairs.map((pair) => {
+            {pairOptions.map((pair) => {
+              const locked = gatingOn && !canAccessPair(pair);
               const isActive = selectedPair === pair;
               const pairData = prices[pair];
               const pairUp = pairData && pairData.change > 0;
               const pairDown = pairData && pairData.change < 0;
               return (
-                <motion.button key={pair} whileTap={{ scale: 0.97 }} onClick={() => setSelectedPair(pair)}
-                  className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-sm font-medium transition-all duration-200 border ${isActive ? "bg-primary text-white border-primary shadow-lg shadow-primary/20" : "bg-card/60 border-border/60 text-muted-foreground hover:border-primary/30 hover:text-foreground"}`}>
+                <motion.button key={pair} whileTap={{ scale: 0.97 }}
+                  onClick={() => {
+                    if (locked) {
+                      setUpsellOpen(true);
+                      return;
+                    }
+                    setSelectedPair(pair);
+                  }}
+                  aria-label={locked ? `Desbloquear ${pair}` : undefined}
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-sm font-medium transition-all duration-200 border ${
+                    locked
+                      ? "border-accent/30 bg-accent/5 text-accent hover:bg-accent/10"
+                      : isActive
+                        ? "bg-primary text-white border-primary shadow-lg shadow-primary/20"
+                        : "bg-card/60 border-border/60 text-muted-foreground hover:border-primary/30 hover:text-foreground"
+                  }`}>
+                  {locked && <Lock className="h-3 w-3" />}
                   {pair}
-                  {pairData && pairData.price !== "—" && (
+                  {!locked && pairData && pairData.price !== "—" && (
                     <span className={`text-xs ${isActive ? "text-white/80" : pairUp ? "text-success" : pairDown ? "text-destructive" : "text-muted-foreground"}`}>
                       {pairUp ? "+" : ""}{pairData.change.toFixed(2)}%
                     </span>
@@ -150,17 +170,29 @@ export default function Analises() {
               );
             })}
 
-            {!isPremium && !subLoading && (
-              <Link to="/planos">
-                <motion.button whileTap={{ scale: 0.97 }}
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-sm font-medium border border-accent/30 bg-accent/5 text-accent/70 hover:bg-accent/10 transition-all">
-                  <Lock className="h-3 w-3" />
-                  +5 pares Premium
-                </motion.button>
-              </Link>
+            {showUpsellChip && (
+              <motion.button whileTap={{ scale: 0.97 }} onClick={() => setUpsellOpen(true)}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-sm font-medium border border-accent/30 bg-accent/5 text-accent/70 hover:bg-accent/10 transition-all">
+                <Lock className="h-3 w-3" />
+                {lockedPairsCount > 0 ? `+${lockedPairsCount} pares Premium` : `+${lockedTimeframesCount} timeframe Premium`}
+              </motion.button>
             )}
           </div>
         </div>
+
+        {/* Aviso de fim de semana */}
+        {weekend && (
+          <div className="container mx-auto px-4 pb-2">
+            <div className="flex items-start gap-3 rounded-xl border border-primary/30 bg-primary/5 p-4">
+              <Clock className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+              <div className="space-y-1">
+                <p className="text-sm font-semibold text-primary">Mercado fechado (fim de semana)</p>
+                <p className="text-xs text-muted-foreground">Sinais forex regressam segunda-feira.</p>
+                <p className="text-xs text-muted-foreground">Ao fim de semana a IA do TMT gera sinais de BTC e ETH para todos os planos.</p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Gráfico */}
         <div className="px-4">
@@ -187,18 +219,27 @@ export default function Analises() {
               <div className="flex items-center gap-2">
                 <span className="text-xs text-muted-foreground">TF:</span>
                 <div className="flex gap-1 flex-wrap">
-                  {timeframes.map((tf) => {
-                    const isLocked = !isPremium && ["H1", "H4"].includes(tf);
+                  {TIMEFRAMES.map((tf) => {
+                    const locked = gatingOn && tf !== "Todos" && !canAccessTimeframe(tf);
                     const isSelected = selectedTimeframe === tf;
                     return (
                       <button key={tf}
-                        onClick={() => !isLocked && setSelectedTimeframe(tf)}
+                        onClick={() => {
+                          if (locked) {
+                            setUpsellOpen(true);
+                            return;
+                          }
+                          setSelectedTimeframe(tf);
+                        }}
+                        aria-label={locked ? `Desbloquear ${tf}` : undefined}
                         className={`px-3 py-1 rounded-lg text-xs font-medium transition-all flex items-center gap-1 ${
-                          isSelected ? "bg-primary text-white"
-                          : isLocked ? "bg-secondary/30 text-muted-foreground/40 cursor-not-allowed"
-                          : "bg-secondary/60 text-muted-foreground hover:text-foreground"
+                          locked
+                            ? "bg-accent/5 text-accent border border-accent/30"
+                            : isSelected
+                              ? "bg-primary text-white"
+                              : "bg-secondary/60 text-muted-foreground hover:text-foreground"
                         }`}>
-                        {isLocked && <Lock className="h-2.5 w-2.5" />}
+                        {locked && <Lock className="h-2.5 w-2.5" />}
                         {tf}
                       </button>
                     );
@@ -208,10 +249,21 @@ export default function Analises() {
               <div className="flex items-center gap-2">
                 <span className="text-xs text-muted-foreground">Tipo:</span>
                 <div className="flex gap-1">
-                  {signalTypes.map((type) => (
+                  {SIGNAL_TYPES.map((type) => (
                     <button key={type} onClick={() => setSelectedType(type)}
                       className={`px-3 py-1 rounded-lg text-xs font-medium transition-all ${selectedType === type ? type === "BUY" ? "bg-success text-white" : type === "SELL" ? "bg-destructive text-white" : "bg-primary text-white" : "bg-secondary/60 text-muted-foreground hover:text-foreground"}`}>
                       {type}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-muted-foreground">SMC:</span>
+                <div className="flex gap-1 flex-wrap">
+                  {SMC_SETUPS.map((s) => (
+                    <button key={s} onClick={() => setSmcFilter(s)}
+                      className={`px-3 py-1 rounded-lg text-xs font-medium transition-all ${smcFilter === s ? "bg-primary text-white" : "bg-secondary/60 text-muted-foreground hover:text-foreground"}`}>
+                      {s}
                     </button>
                   ))}
                 </div>
@@ -230,8 +282,11 @@ export default function Analises() {
 
         {/* Grid de sinais */}
         <div className="container mx-auto px-4 pb-24">
-          {isPremiumTimeframe ? (
-            <PremiumLock timeframe={selectedTimeframe} />
+          {lockedTimeframe ? (
+            <PremiumLock
+              title={`Sinais ${selectedTimeframe} — Exclusivo Premium`}
+              description="Acede a sinais em todos os timeframes com análise técnica completa. RSI, EMA, MACD, Bollinger e Estocástico."
+            />
           ) : loading ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[1,2,3].map((i) => (
@@ -255,7 +310,7 @@ export default function Analises() {
                 ))}
               </div>
 
-              {!isPremium && !subLoading && user && (
+              {showPremiumBanner && (
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
                   className="mt-8 glass-card p-6 border-accent/20 flex flex-col sm:flex-row items-center justify-between gap-4"
                   style={{ background: "linear-gradient(135deg, rgba(250,198,117,0.05) 0%, transparent 100%)" }}>
@@ -264,8 +319,10 @@ export default function Analises() {
                       <Crown className="h-6 w-6 text-accent" />
                     </div>
                     <div>
-                      <p className="font-semibold text-sm">Estás a ver apenas sinais M15 de 3 pares</p>
-                      <p className="text-xs text-muted-foreground">Premium desbloqueia H1, H4, XAU/USD, BTC e mais 5 pares Forex</p>
+                      <p className="font-semibold text-sm">
+                        Estás a ver apenas sinais do plano gratuito ({freePairs.length} pares · {freeTimeframes.join(" + ")})
+                      </p>
+                      <p className="text-xs text-muted-foreground">Basic, Pro e Premium desbloqueiam mais pares e timeframes</p>
                     </div>
                   </div>
                   <Link to="/planos">
@@ -303,6 +360,8 @@ export default function Analises() {
             </>
           )}
         </div>
+
+        <PlanUpsellModal open={upsellOpen} onOpenChange={setUpsellOpen} />
       </div>
     </Layout>
   );
