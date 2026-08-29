@@ -87,7 +87,7 @@ export default function Comunidade() {
               className="flex flex-1 items-center gap-2 rounded-full border border-border bg-card px-4 py-2.5 text-sm text-muted-foreground transition-colors hover:border-primary/40"
             >
               <Search className="h-4 w-4" />
-              Pesquisar mensagens.
+              Pesquisar mensagens…
             </button>
             <input
               ref={camera.fileRef}

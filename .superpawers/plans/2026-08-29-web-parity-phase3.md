@@ -85,11 +85,13 @@
 
 ## Task 3.8: Search, new channel, new DM, public profile
 
-- [ ] **Step 1:** `ComunidadePesquisa.tsx` — port `pesquisa.tsx` (163 lines) using `useMessageSearch`; results grouped with channel name/peer label, tap → open channel/dm room; empty + loading states (pt.json `workspace.search*`).
-- [ ] **Step 2:** `ComunidadeNovoCanal.tsx` — port `novo-canal.tsx` (130 lines): name/description/type regular, premium gate; `useNavigate` back on success.
-- [ ] **Step 3:** `ComunidadeNovoDm.tsx` — port `novo-dm.tsx` (61 lines): user list (profiles), creates conversation + member rows (mobile logic), redirect to the DM room.
-- [ ] **Step 4:** `PerfilPublico.tsx` — port `user/[userId].tsx` (163 lines): profile card, role badge, online status, actions per mobile (DM → exists conversation or create), admin rules; route `/comunidade/user/:userId`.
-- [ ] **Step 5:** Verification: tsc/build/eslint → clean.
+- [x] **Step 1:** `ComunidadePesquisa.tsx` — port `pesquisa.tsx` (163 lines) using `useMessageSearch`; results grouped with channel name/peer label, tap → open channel/dm room; empty + loading states (pt.json `workspace.search*`).
+- [x] **Step 2:** `ComunidadeNovoCanal.tsx` — port `novo-canal.tsx` (130 lines): name/description/type regular, premium gate; `useNavigate` back on success.
+- [x] **Step 3:** `ComunidadeNovoDm.tsx` — port `novo-dm.tsx` (61 lines): user list (profiles), creates conversation + member rows (mobile logic), redirect to the DM room.
+- [x] **Step 4:** `PerfilPublico.tsx` — port `user/[userId].tsx` (163 lines): profile card, role badge, online status, actions per mobile (DM → exists conversation or create), admin rules; route `/comunidade/user/:userId`.
+- [x] **Step 5:** Verification: tsc/build/eslint → clean.
+
+> **T3.8 notes:** Full PT copies per pt.json (verified by reading pt.json directly — `grep` searched sibling locales; use `read`). Search page: debounced `useMessageSearch`, `timeAgo` rows, `-webkit-box` 2-line clamp (no `line-clamp` plugin), `X` clear, autoFocus input. New channel: slug = lowercase alnum+dash+underscore, 23505 → "Já existe um canal com este nome.", success → toast + replace to the new room (fallback back to `/comunidade`). New DM: candidates exclude self + admins, `findOrCreateConversation` → replace to DM room, `DmRow` with `{ conversationId: p.user_id, memberId: p.user_id }` sentinel. Profile: `supabase.rpc('is_premium', { uid })` per profile, `isUserOnline`, admin/premium/plan badges, `findOrCreateConversation` DM button (hidden for own/admin/BOT profiles). Aligned index search placeholder to `workspace.searchPlaceholder` "Pesquisar mensagens…". tsc + eslint clean, build PASS.
 
 ## Task 3.9: Loja
 
