@@ -49,10 +49,12 @@
 
 ## Task 3.4: Workspace list components (web re-skins)
 
-- [ ] **Step 1:** Create `src/components/community/` — shadcn versions of mobile: `UserAvatar` (initials/avatar, online dot via `isUserOnline` + `UserProfile`), `CommunityHero` (channels count + live rooms), `WorkspaceSection` (title + right slot + children group), `ChannelCard`/`ChannelRow` (icon/display_name/description, premium badge, open count), `PairRoomCard`/`PairRoomRow` (pair, `pairRoomState` live/closed badges, closes-in via `formatClosesIn`), `DmRow` (avatar via profiles map, display name, created order, `onOpenProfile`).
-- [ ] **Step 2:** Create `ChannelPickerModal` (list of regular channels to pick for the camera/quick-share flow; premium rows gated).
-- [ ] **Step 3:** Port PT strings from pt.json (`workspace.*`) for all static labels.
-- [ ] **Step 4:** Verification: tsc/build/eslint on the new components → clean.
+- [x] **Step 1:** Create `src/components/community/` — shadcn versions of mobile: `UserAvatar` (initials/avatar, online dot via `isUserOnline` + `UserProfile`), `CommunityHero` (channels count + live rooms), `WorkspaceSection` (title + right slot + children group), `ChannelCard`/`ChannelRow` (icon/display_name/description, premium badge, open count), `PairRoomCard`/`PairRoomRow` (pair, `pairRoomState` live/closed badges, closes-in via `formatClosesIn`), `DmRow` (avatar via profiles map, display name, created order, `onOpenProfile`).
+- [x] **Step 2:** Create `ChannelPickerModal` (list of regular channels to pick for the camera/quick-share flow; premium rows gated).
+- [x] **Step 3:** Port PT strings from pt.json (`workspace.*`) for all static labels.
+- [x] **Step 4:** Verification: tsc/build/eslint on the new components → clean.
+
+> **T3.4 notes:** Added `channel-meta.ts` (non-component module) holding `TILES`/`tileFor`/`ICON_MAP`/`channelIcon` — Ionicons→lucide icon map with letter-tile fallback (web has no Ionicons glyphMap). Hover uses `hover:bg-muted/60` (`bg-card-hover` does not exist). PT copy used: `AO VIVO`, "Comunidade ao vivo", "Salas, sinais e traders em tempo real.", "{{n}} canais"/"canais", "salas ativas", "Fecha em {{time}}", "Só leitura", "Sem descrição", "Entrar", "Ativo agora", "Ausente", "Trader", "Sem canais disponíveis.", "Enviar para.", "Cancelar".
 
 ## Task 3.5: Message components (Channel/DM rooms)
 
