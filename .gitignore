@@ -26,3 +26,5 @@ dist-ssr
 .vercel
 .env*.local
 vite.config.ts.timestamp-*
+
+mobile/
