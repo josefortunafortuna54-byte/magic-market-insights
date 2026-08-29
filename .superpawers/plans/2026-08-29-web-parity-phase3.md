@@ -95,8 +95,10 @@
 
 ## Task 3.9: Loja
 
-- [ ] **Step 1:** `src/pages/Loja.tsx` — port `mobile/src/app/(tabs)/comunidade/loja.tsx` (811 lines) with `useStoreProducts`: category chips (Bots/Mentorias/Ebooks), featured hero, product cards (icon, title, desc, price, rating, users_count, premium/grátis badges), purchase flow (web: depending on mobile behavior — pay → external/contact or planos redirect; keep parity where meaningful), currency formatting from product.currency.
-- [ ] **Step 2:** Verification: tsc/build/eslint → clean; smoke `/comunidade/loja` renders products from `store_products`.
+- [x] **Step 1:** `src/pages/Loja.tsx` — port `mobile/src/app/(tabs)/comunidade/loja.tsx` (811 lines) with `useStoreProducts`: category chips (Bots/Mentorias/Ebooks), featured hero, product cards (icon, title, desc, price, rating, users_count, premium/grátis badges), purchase flow (web: depending on mobile behavior — pay → external/contact or planos redirect; keep parity where meaningful), currency formatting from product.currency.
+- [x] **Step 2:** Verification: tsc/build/eslint → clean; smoke `/comunidade/loja` renders products from `store_products`.
+
+> **T3.9 notes:** Ported `useStoreProducts` data path only (products come from `store_products` seeded migration, falling back to `DEFAULT_STORE_PRODUCTS` + localStorage cache). Ionicons→lucide map in-page (`ICON_MAP` with `Package` fallback; catalog icon strings are Ionicons glyph names). Hero: gradient card with storefront, subtitle `store.subtitle`, 3 stats (Produtos/Grátis/Avaliação), refresh button (web stand-in for pull-to-refresh). Featured = horizontal snap scroll (`snap-x`, 300px cards, amber ribbon). Chips: horizontal scroll, amber active, counts; `AllProducts` header + "{{count}} itens". Grid `grid-cols-2 md:3 lg:4` (mobile always 2). Product card: icon tile (accent `{color}1F`), PRO/`Grátis` badge, diamond, lock dot for locked, rating/users, price (`item.isPremium || locked → item.price`, else "Grátis"). Bottom sheet: custom fixed overlay (Escape + backdrop + X close, body scroll lock), slide-up card, category chip + badges, meta row, "O que inclui" per `INCLUDED_KEYS` (store.inc*), CTA `Tornar-se Premium` (premium variant → `/planos`) / `Pedir agora` (default → `/suporte-ia`). Back → `/comunidade`. Smoke: anon renders stats 8/4/4.5, 2 featured, all 8 products; locked sheet (bots included list) CTA → `/planos`; free sheet (ebook list) CTA → `/suporte-ia`; 0 console errors. tsc + eslint clean, build PASS.
 
 ## Task 3.10: Phase 3 verification
 
