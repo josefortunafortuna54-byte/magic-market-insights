@@ -15,7 +15,7 @@
 |---|---|
 | Create | `src/lib/community.ts` (port `mobile/src/core/community.ts`: `BOT_USER_ID`, `REACTION_EMOJIS`, `ReactionEmoji`, `isUserOnline`, `isWeekendUtc`, `isForexSymbol`, `pairRoomState`, `pairRoomClosesInMs`, `formatClosesIn`, `mergeMessages`, `PRESENCE_ONLINE_WINDOW_MS`) |
 | Create | `src/lib/realtime.ts` (port `mobile/src/lib/realtime.ts` → uses `@/lib/supabaseClient`) |
-| Edit | `src/lib/types.ts` (add `StoreProduct`, `StoreCategory`; align message/notification extras if mobile has any new ones; verify `Message` has `pending?`/`failed?`) |
+| Edit | `src/lib/types.ts` (no additions — mobile keeps `StoreProduct` local to `useStoreProducts.ts`, so web does too; verify `Message` has `pending?`/`failed?` — it does) |
 | Create | `src/hooks/useChannels.ts`, `useConversations.ts`, `useProfiles.ts`, `useMessageSearch.ts` (ports; realtime via `lib/realtime`) |
 | Create | `src/hooks/useMessages.ts`, `src/hooks/useStoreProducts.ts` (ports; optimistic + retry for messages; catalog from `store_products`) |
 | Create | `src/components/community/CommunityHero.tsx`, `WorkspaceSection.tsx`, `ChannelCard.tsx`, `ChannelRow.tsx`, `PairRoomCard.tsx`, `PairRoomRow.tsx`, `DmRow.tsx`, `UserAvatar.tsx`, `ChannelPickerModal.tsx` |

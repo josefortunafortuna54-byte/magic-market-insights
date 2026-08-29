@@ -298,24 +298,3 @@ export interface UserWithSubscription {
   subscription_expires?: string;
   banned?: boolean;
 }
-
-export type StoreCategory = 'bots' | 'mentorias' | 'ebooks';
-
-export interface StoreProduct {
-  id: string;
-  slug: string;
-  title: string;
-  description: string;
-  category: StoreCategory;
-  price: string;
-  currency: string;
-  icon: string;
-  color: string;
-  is_premium: boolean;
-  featured: boolean;
-  rating: number | null;
-  users_count: number | null;
-  active: boolean;
-  sort_order: number;
-  created_at: string;
-}
