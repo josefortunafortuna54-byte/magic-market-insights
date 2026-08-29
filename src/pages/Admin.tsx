@@ -11,6 +11,8 @@ import { AdminBoomHoursTab } from "@/components/admin/AdminBoomHoursTab";
 import { AdminComunidadeTab } from "@/components/admin/AdminComunidadeTab";
 import { AdminBoomTimesTab } from "@/components/admin/AdminBoomTimesTab";
 import { AdminUsersTab } from "@/components/admin/AdminUsersTab";
+import { AdminReceiptsTab } from "@/components/admin/AdminReceiptsTab";
+import { AdminWithdrawalsTab } from "@/components/admin/AdminWithdrawalsTab";
 
 const SYMBOLS = ["EURUSD", "GBPUSD", "USDJPY", "AUDUSD", "EURGBP", "USDCHF", "NZDUSD", "USDCAD", "XAUUSD", "BTCUSD"];
 
@@ -26,7 +28,7 @@ export default function Admin() {
   const [stats, setStats] = useState({ total: 0, active: 0, tp: 0, sl: 0, users: 0, premium: 0 });
   const [generating, setGenerating] = useState(false);
   const [closing, setClosing] = useState(false);
-  const [tab, setTab] = useState<"signals" | "users" | "boom" | "comunidade" | "boom_times">("signals");
+  const [tab, setTab] = useState<"signals" | "users" | "boom" | "comunidade" | "boom_times" | "receipts" | "withdrawals">("signals");
 
   useEffect(() => {
     (async () => {
@@ -167,6 +169,8 @@ export default function Admin() {
             {[
               { key: "signals", label: "Sinais" },
               { key: "users", label: "Utilizadores" },
+              { key: "receipts", label: "Comprovativos" },
+              { key: "withdrawals", label: "Levantamentos" },
               { key: "boom", label: "⚡ Hora do Boom" },
               { key: "comunidade", label: "💬 Comunidade" },
               { key: "boom_times", label: "⚡ Boom Times" },
@@ -184,6 +188,8 @@ export default function Admin() {
           {tab === "comunidade" && <AdminComunidadeTab posts={posts} onRefresh={loadData} />}
           {tab === "boom_times" && <AdminBoomTimesTab boomTimes={boomTimes} onRefresh={loadData} />}
           {tab === "users" && <AdminUsersTab usersList={usersList} subsData={subsData} />}
+          {tab === "receipts" && <AdminReceiptsTab />}
+          {tab === "withdrawals" && <AdminWithdrawalsTab />}
         </div>
       </section>
     </Layout>
