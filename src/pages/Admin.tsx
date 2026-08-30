@@ -204,7 +204,7 @@ export default function Admin() {
           {tab === "boom" && <AdminBoomHoursTab boomHours={boomHours} onRefresh={loadData} />}
           {tab === "boom_times" && <AdminBoomTimesTab boomTimes={boomTimes} onRefresh={loadData} />}
           {tab === "posts" && <AdminComunidadeTab posts={posts} onRefresh={loadData} />}
-          {tab === "users" && <AdminUsersTab usersList={usersList} subsData={subsData} />}
+          {tab === "users" && <AdminUsersTab usersList={usersList} subsData={subsData} onRefresh={loadData} />}
           {tab === "withdrawals" && <AdminWithdrawalsTab />}
           {tab === "messaging" && <AdminMessagingTab />}
           {tab === "reports" && <AdminReportsTab />}
