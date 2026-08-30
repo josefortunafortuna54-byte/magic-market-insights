@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Users, Eye } from "lucide-react";
 import * as adminApi from "@/lib/adminApi";
 import type { UserWithSubscription } from "@/lib/adminApi";
@@ -30,13 +30,31 @@ interface Props {
 export function AdminUsersTab({ usersList, subsData, onRefresh }: Props) {
   const [selectedUser, setSelectedUser] = useState<UserWithSubscription | null>(null);
   const [open, setOpen] = useState(false);
+  const [bannedByEmail, setBannedByEmail] = useState<Record<string, boolean>>({});
   const subs = subsData as unknown as SubRow[];
+
+  const refreshBanned = useCallback(async () => {
+    try {
+      const users = await adminApi.listUsers();
+      const map: Record<string, boolean> = {};
+      for (const u of users) {
+        if (u.email && u.banned) map[u.email] = true;
+      }
+      setBannedByEmail(map);
+    } catch {
+      // keep the previous map on failure
+    }
+  }, []);
+
+  useEffect(() => {
+    void refreshBanned();
+  }, [refreshBanned]);
 
   // usersList comes from the `get_all_users` RPC (id, email, full_name,
   // avatar_url, created_at, last_sign_in). role / subscription_expires are
   // derived from the subscriptions lookup (subsData) the same way the tab
-  // already did for the "Premium" column. `banned` is not available from
-  // either source on the web, so it defaults to false (ban/unban still work).
+  // already did for the "Premium" column. `banned` is merged from
+  // adminApi.listUsers() (list_users edge fn, banned <= banned_until).
   const toModalUser = (u: UserRow): UserWithSubscription => {
     const sub = subs.find((s) => s.user_id === u.id && s.status === "active");
     return {
@@ -47,7 +65,7 @@ export function AdminUsersTab({ usersList, subsData, onRefresh }: Props) {
       role: sub ? "premium" : "free",
       subscription_status: sub?.status,
       subscription_expires: sub?.current_period_end ?? undefined,
-      banned: false,
+      banned: bannedByEmail[u.email] ?? false,
     };
   };
 
@@ -123,9 +141,9 @@ export function AdminUsersTab({ usersList, subsData, onRefresh }: Props) {
         user={selectedUser}
         open={open}
         onClose={() => { setOpen(false); setSelectedUser(null); }}
-        onBan={async (userId) => { await adminApi.banUser(userId); await onRefresh(); }}
-        onRoleChange={async (userId, role) => { await adminApi.updateUserRole(userId, role); await onRefresh(); }}
-        onExpiryChange={async (userId, expiresAt) => { await adminApi.updateSubscriptionExpiry(userId, expiresAt); await onRefresh(); }}
+        onBan={async (userId) => { await adminApi.banUser(userId); await onRefresh(); await refreshBanned(); }}
+        onRoleChange={async (userId, role) => { await adminApi.updateUserRole(userId, role); await onRefresh(); await refreshBanned(); }}
+        onExpiryChange={async (userId, expiresAt) => { await adminApi.updateSubscriptionExpiry(userId, expiresAt); await onRefresh(); await refreshBanned(); }}
       />
     </>
   );
