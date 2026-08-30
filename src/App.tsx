@@ -24,6 +24,7 @@ import Login from "./pages/Login";
 import Registro from "./pages/Registro";
 import NotFound from "./pages/NotFound";
 import Admin from "./pages/Admin";
+import AdminGate from "./pages/AdminGate";
 import Horarios from "./pages/Horarios";
 import Comunidade from "./pages/Comunidade";
 import ComunidadeCanal from "./pages/ComunidadeCanal";
@@ -67,6 +68,7 @@ const App = () => (
             <Route path="/registro" element={<Registro />} />
             <Route path="/recuperar-senha" element={<RecuperarSenha />} />
             <Route path="/admin" element={<AdminGuard><Admin /></AdminGuard>} />
+            <Route path="/admin-gate" element={<AdminGate />} />
             <Route path="/horarios" element={<Horarios />} />
             <Route path="/comunidade" element={<Comunidade />} />
             <Route path="/comunidade/canais/:channelId" element={<ComunidadeCanal />} />

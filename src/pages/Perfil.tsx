@@ -94,7 +94,7 @@ export default function Perfil() {
     { href: "/idioma", label: "Idioma", icon: Languages },
   ];
   if (isAdminEmail(user.email)) {
-    menuRows.push({ href: "/admin", label: "Admin", icon: Shield });
+    menuRows.push({ href: "/admin-gate", label: "Admin", icon: Shield });
   }
 
   const handleLogout = async () => {

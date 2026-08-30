@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/lib/supabaseClient";
 import { isAdminEmail } from "@/lib/admin";
+import { isAdminUnlocked } from "@/lib/adminGate";
 import * as adminApi from "@/lib/adminApi";
 import { Layout } from "@/components/layout/Layout";
 import { Shield, RefreshCw, BarChart3, CheckCircle } from "lucide-react";
@@ -36,6 +37,7 @@ export default function Admin() {
     (async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user || !isAdminEmail(user.email)) { navigate("/"); return; }
+      if (user && isAdminEmail(user.email) && !isAdminUnlocked()) { navigate("/admin-gate", { replace: true }); return; }
       await loadData();
       setLoading(false);
     })();
