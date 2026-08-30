@@ -7,7 +7,6 @@ import * as adminApi from "@/lib/adminApi";
 import { toast } from "sonner";
 import { Layout } from "@/components/layout/Layout";
 import { Flag, RefreshCw, Shield } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
 import { AdminDashboardTab, type AdminDashboardStats } from "@/components/admin/AdminDashboardTab";
@@ -18,6 +17,10 @@ import { AdminBoomTimesTab } from "@/components/admin/AdminBoomTimesTab";
 import { AdminUsersTab } from "@/components/admin/AdminUsersTab";
 import { AdminReceiptsTab } from "@/components/admin/AdminReceiptsTab";
 import { AdminWithdrawalsTab } from "@/components/admin/AdminWithdrawalsTab";
+import { AdminMessagingTab } from "@/components/admin/AdminMessagingTab";
+import { AdminReportsTab } from "@/components/admin/AdminReportsTab";
+import { AdminChannelsTab } from "@/components/admin/AdminChannelsTab";
+import { AdminAnnouncementsTab } from "@/components/admin/AdminAnnouncementsTab";
 import { NotificationBadge } from "@/components/admin/NotificationBadge";
 import { NotificationListModal } from "@/components/admin/NotificationListModal";
 import { SkeletonList } from "@/components/admin/SkeletonList";
@@ -38,9 +41,6 @@ const TABS: { key: Tab; label: string }[] = [
   { key: "channels", label: "Canais" },
   { key: "announcements", label: "Anúncios" },
 ];
-
-// Tabs whose real components arrive in T4.5–T4.8; show a graceful placeholder until then.
-const PENDING_TABS = new Set<Tab>(["messaging", "reports", "channels", "announcements"]);
 
 type AdminRow = Record<string, unknown>;
 
@@ -206,13 +206,10 @@ export default function Admin() {
           {tab === "posts" && <AdminComunidadeTab posts={posts} onRefresh={loadData} />}
           {tab === "users" && <AdminUsersTab usersList={usersList} subsData={subsData} />}
           {tab === "withdrawals" && <AdminWithdrawalsTab />}
-          {PENDING_TABS.has(tab) && (
-            <Card>
-              <CardContent className="flex items-center justify-center py-24">
-                <p className="text-sm text-muted-foreground">A configurar…</p>
-              </CardContent>
-            </Card>
-          )}
+          {tab === "messaging" && <AdminMessagingTab />}
+          {tab === "reports" && <AdminReportsTab />}
+          {tab === "channels" && <AdminChannelsTab />}
+          {tab === "announcements" && <AdminAnnouncementsTab />}
         </div>
       </section>
 
