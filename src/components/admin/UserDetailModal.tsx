@@ -354,7 +354,7 @@ function PlanCard({
       onClick={() => onSelect(option.value)}
       className={cn(
         "flex flex-col items-center gap-2 rounded-xl border-2 bg-card p-4 transition-colors",
-        active ? cn("border-current", iconColor, "bg-current/10") : "border-border opacity-60 hover:opacity-100",
+        active ? cn("border-current", iconColor, "bg-primary/15") : "border-border opacity-60 hover:opacity-100",
       )}
     >
       <Icon className="h-6 w-6" />
