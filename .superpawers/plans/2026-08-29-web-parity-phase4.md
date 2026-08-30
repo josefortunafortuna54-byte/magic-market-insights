@@ -197,3 +197,21 @@ VERDICT: PASS — roadmap is sound, complete, and dependency-correct; 5 minor co
 3. ✅ T4.9 Step 1 — `updateUserRole('free'|'premium')` (plan-role semantics), 'admin'/'member' removed.
 4. ✅ T4.4 Step 6 + T4.5/T4.6/T4.7/T4.8 Step 2 — per-task tsc/eslint/build verification added (T4.9/T4.10/T4.11 already had them).
 5. ✅ T4.5/T4.6/T4.7/T4.8 copy — non-existent `admin.*` keys removed; exact mobile hardcoded strings captured ("Sem reports", "Apagado", REASON_LABELS map, dialogs/toasts, placeholders).
+
+---
+
+## Phase 4 verification results
+
+**Date:** 2026-08-30 — Task 4.12 executed (controller, all 14 phase commits merged on `master`).
+
+- **Step 1 — tsc:** `npx tsc --noEmit -p tsconfig.app.json` → 0 errors; `npx tsc --noEmit` → 0 errors. ✅
+- **Step 2 — build:** `npm run build` → PASS (46s, only pre-existing >500 kB chunk warning). ✅
+- **Step 3 — eslint:** run over all 34 Phase 4 `src/` files → **0 errors** (1 warning: `src/contexts/AuthContext.tsx` react-refresh/only-export-components from the `lockAdmin` export — warnings accepted per gate). ✅
+- **Step 4 — Playwright smoke (dev server :8080, fresh/anonymous browser session):**
+  - `/admin-gate` → restricted state renders: "Acesso restrito" + "Esta área é exclusiva para administradores."; navbar shows only Entrar/Criar Conta, **no bell**; console 0 errors. ✅
+  - `/admin` → redirects to `/` (home) for non-admin; no admin UI rendered. ✅
+  - `/notificacoes` → page renders under Layout: heading "Notificações" + "Atualizar" button + empty state "Sem notificações" / "Os alarmes da Hora do Boom aparecem aqui quando os ativares." + "Ativar alarmes" button; console 0 errors (only benign react-router v6 future-flag warnings). ✅
+  - Authenticated admin flows not exercisable anon (edge functions need an admin session) — covered by tsc/eslint/build + per-tab review of all 12 tabs (T4.2/T4.3/T4.4 individually reviewed APPROVED; T4.5–T4.8 batch-reviewed APPROVED; T4.9 reviewed ISSUES_FOUND→fixed (`5c74abe` banned merge); T4.10 reviewed (all clean, non-capital restriction = approved-plan spec)). ✅
+- **Step 5 — results:** 🔽 this section.
+
+**Phase 4 COMPLETE.** Admin 12-tab panel (`/admin` behind `/admin-gate` code gate), admin API, shared components, users/bulk/export, and the user notifications inbox (`/notificacoes` + Navbar bell + plan-request entries) all implemented, gated-green, and smoke-verified.
