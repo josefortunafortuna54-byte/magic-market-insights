@@ -276,6 +276,56 @@ export async function closeSignals(): Promise<number> {
   return (data.closed as number) ?? 0;
 }
 
+// ── Signal Generation ─────────────────────────────────────────────────
+
+export interface GenerateSignalsResult {
+  ok: boolean;
+  count: number;
+  error?: string;
+  transient?: boolean;
+}
+
+// Mirror of mobile's generateSignalsNow(): edge function `generate-crypto-signals`.
+export async function generateCryptoSignals(): Promise<GenerateSignalsResult> {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) throw new Error("Não autenticado");
+
+  try {
+    const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-crypto-signals`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        apikey: import.meta.env.VITE_SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify({}),
+    });
+
+    const data = (await res.json().catch(() => ({}))) as Record<string, unknown>;
+    const count = Array.isArray(data?.signals) ? (data.signals as unknown[]).length : 0;
+    if (!res.ok || count === 0) {
+      const serverError = !res.ok
+        ? String(data?.error || data?.message || `HTTP ${res.status}`)
+        : data?.tech_rejected != null
+          ? `${data.tech_rejected} sinais rejeitados pelo validador técnico`
+          : "Nenhum sinal encontrado agora";
+      return { ok: false, count: 0, error: serverError };
+    }
+    return { ok: true, count };
+  } catch (e: unknown) {
+    const raw = e instanceof Error ? e.message : "Erro desconhecido";
+    const name = e instanceof Error ? e.name : "";
+    const transient =
+      name === "TimeoutError" || name === "AbortError" || /cancel|abort|network/i.test(raw);
+    return {
+      ok: false,
+      count: 0,
+      error: transient ? "Ligação interrompida ou timeout. Tenta novamente." : raw,
+      transient,
+    };
+  }
+}
+
 export async function banUser(userId: string): Promise<void> {
   await callAdminFn("ban_user", { user_id: userId });
 }
