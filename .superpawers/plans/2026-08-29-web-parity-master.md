@@ -348,7 +348,9 @@ Port from `mobile/src/lib/plans.ts`: `Currency`, `PlanId`, `PaymentMethod`, `WA_
 
 ---
 
-# PHASE 4 — Admin completo (12 tabs) + central de notificações + admin-gate
+# PHASE 4 — Admin completo (12 tabs) + central de notificações + admin-gate — ✅ COMPLETE
+
+**Status: DONE.** See sub-plan `2026-08-29-web-parity-phase4.md` (tasks 4.1–4.12, all `[x]`, Phase 4 verification results recorded 2026-08-30) for full task details. Result: tsc (app + full) 0 errors, `npm run build` PASS, eslint 0 errors across all 34 Phase 4 files (1 benign `react-refresh` warning in `AuthContext.tsx`), Playwright smoke green (`/admin-gate` restricted state, `/admin` → home for non-admin, `/notificacoes` empty state, no bell logged-out). Commits: `62479a2` `9c1538f` `20328b5` `176b50c` `64214b8` `8591e61` `d5ada23` `4b0e91c` `c8d9a42` `35ad8c4` `85256a2` `c4a754e` `5c74abe` `7346b09` `f4d9e49` `b1ff82a`. Shipped to git: mobile app (74 commits fast-forward to `Noturno22/TMT` main) and web (`master` branch on `magic-market-insights`, original `main` preserved).
 
 **Goal:** `/admin` matches mobile admin panel (dashboard, signals, boom, boom_times, posts, users, receipts, withdrawals, messaging, reports, channels, announcements) with bulk actions; web gets notifications center `/notificacoes` and admin access flow `/admin-gate`.
 
