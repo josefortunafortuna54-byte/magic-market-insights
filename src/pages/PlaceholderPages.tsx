@@ -4,10 +4,6 @@ export function DiarioTraderPage() {
   return <PagePlaceholder title="Diário do Trader" />;
 }
 
-export function SuporteIaPage() {
-  return <PagePlaceholder title="Suporte IA" />;
-}
-
 export function DefinicoesBoomsPage() {
   return <PagePlaceholder title="Definições de Booms" />;
 }

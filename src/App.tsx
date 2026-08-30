@@ -10,7 +10,6 @@ import Depositos from "./pages/Depositos";
 import Banca from "./pages/Banca";
 import {
   DiarioTraderPage,
-  SuporteIaPage,
   DefinicoesBoomsPage,
   TemaPage,
   IdiomaPage,
@@ -19,6 +18,7 @@ import Notificacoes from "./pages/Notificacoes";
 import Index from "./pages/Index";
 import Analises from "./pages/Analises";
 import Historico from "./pages/Historico";
+import SuporteIa from "./pages/SuporteIa";
 import Planos from "./pages/Planos";
 import Login from "./pages/Login";
 import Registro from "./pages/Registro";
@@ -60,7 +60,7 @@ const App = () => (
             <Route path="/depositos" element={<Depositos />} />
             <Route path="/notificacoes" element={<Notificacoes />} />
             <Route path="/diario-trader" element={<DiarioTraderPage />} />
-            <Route path="/suporte-ia" element={<SuporteIaPage />} />
+            <Route path="/suporte-ia" element={<SuporteIa />} />
             <Route path="/definicoes-booms" element={<DefinicoesBoomsPage />} />
             <Route path="/tema" element={<TemaPage />} />
             <Route path="/idioma" element={<IdiomaPage />} />
