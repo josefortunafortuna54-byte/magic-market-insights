@@ -299,6 +299,7 @@ export async function generateCryptoSignals(): Promise<GenerateSignalsResult> {
         Authorization: `Bearer ${session.access_token}`,
       },
       body: JSON.stringify({}),
+      signal: AbortSignal.timeout(80_000),
     });
 
     const data = (await res.json().catch(() => ({}))) as Record<string, unknown>;

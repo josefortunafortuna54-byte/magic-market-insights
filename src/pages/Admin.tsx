@@ -20,6 +20,7 @@ import { AdminReceiptsTab } from "@/components/admin/AdminReceiptsTab";
 import { AdminWithdrawalsTab } from "@/components/admin/AdminWithdrawalsTab";
 import { NotificationBadge } from "@/components/admin/NotificationBadge";
 import { NotificationListModal } from "@/components/admin/NotificationListModal";
+import { SkeletonList } from "@/components/admin/SkeletonList";
 
 type Tab = "dashboard" | "receipts" | "signals" | "boom" | "boom_times" | "posts" | "users" | "withdrawals" | "messaging" | "reports" | "channels" | "announcements";
 
@@ -151,8 +152,8 @@ export default function Admin() {
 
   if (loading) return (
     <Layout>
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full" />
+      <div className="container mx-auto px-4 py-8">
+        <SkeletonList count={6} variant="row" />
       </div>
     </Layout>
   );
