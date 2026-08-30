@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Sparkles, BarChart3, History, Crown, LogIn, LogOut, User, Clock, MessageCircle } from "lucide-react";
+import { Menu, X, Sparkles, BarChart3, History, Crown, LogIn, LogOut, User, Clock, MessageCircle, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSubscription } from "@/hooks/useSubscription";
+import { useUnreadUserNotifications } from "@/hooks/useUnreadUserNotifications";
 import { planLabel, type PlanId } from "@/lib/plans";
 
 const navLinks = [
@@ -31,6 +32,7 @@ export function Navbar() {
   const userMenuRef = useRef<HTMLDivElement>(null);
   const { user, signOut } = useAuth();
   const { tier } = useSubscription();
+  const { unread } = useUnreadUserNotifications();
   const isPremium = tier !== "free";
 
   useEffect(() => {
@@ -88,6 +90,19 @@ export function Navbar() {
           {/* Auth */}
           <div className="hidden md:flex items-center gap-3">
             {user ? (
+              <>
+              <Link
+                to="/notificacoes"
+                aria-label="Notificações"
+                className="relative flex h-8 w-8 items-center justify-center rounded-xl hover:bg-secondary/60 active:scale-95 transition-all"
+              >
+                <Bell className="h-5 w-5" />
+                {unread > 0 ? (
+                  <span className="absolute -right-1 -top-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-bold text-white border border-background">
+                    {unread > 9 ? "9+" : unread}
+                  </span>
+                ) : null}
+              </Link>
               <div className="relative" ref={userMenuRef}>
                 <button
                   onClick={() => setShowUserMenu(!showUserMenu)}
@@ -152,6 +167,7 @@ export function Navbar() {
                   )}
                 </AnimatePresence>
               </div>
+              </>
             ) : (
               <>
                 <Link to="/login">

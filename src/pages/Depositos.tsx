@@ -28,6 +28,7 @@ import { useMovements, type WalletMovement } from "@/hooks/useMovements";
 import { supabase } from "@/lib/supabaseClient";
 import { uploadReceipt, type ReceiptFile } from "@/lib/payments";
 import { saveReceipt, submitWithdrawalRequest } from "@/lib/adminApi";
+import { notifyPlanRequestSubmitted } from "@/lib/planRequests";
 import {
   PAYMENT_METHODS,
   PAYMENT_METHOD_ICONS,
@@ -213,6 +214,8 @@ export default function Depositos() {
           } catch {
             /* ignore */
           }
+          // Regista o pedido de ativação na caixa de notificações do utilizador.
+          void notifyPlanRequestSubmitted(planLabel(plan), price);
         }
       } catch {
         toast.error("Erro de ligação", {
