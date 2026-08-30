@@ -1,9 +1,5 @@
 import { PagePlaceholder } from "@/components/layout/PagePlaceholder";
 
-export function NotificacoesPage() {
-  return <PagePlaceholder title="Notificações" />;
-}
-
 export function DiarioTraderPage() {
   return <PagePlaceholder title="Diário do Trader" />;
 }
