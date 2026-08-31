@@ -15,11 +15,13 @@ import {
   Activity,
   AlertTriangle,
   Lock,
+  Maximize2,
 } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
 import { TradingViewChart } from "@/components/signals/TradingViewChart";
 import { PremiumLock } from "@/components/signals/PremiumLock";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabaseClient";
 import { formatSymbol, formatTimeframe, formatType } from "@/lib/format";
 import { useSubscription } from "@/hooks/useSubscription";
@@ -303,12 +305,19 @@ export default function SignalDetail() {
                 </div>
 
                 {/* Chart */}
-                <div className="mb-6" style={{ height: "480px", width: "100%" }}>
+                <div className="mb-2" style={{ height: "480px", width: "100%" }}>
                   <TradingViewChart symbol={signal.pair} interval={tvInterval} height="100%" />
                 </div>
-                <p className="text-xs text-muted-foreground mb-6">
-                  Gráfico TradingView · {signal.timeframe} · Indicadores: EMA, RSI, MACD, Bollinger, Estocástico
-                </p>
+                <div className="mb-6 flex items-center justify-between gap-3">
+                  <p className="text-xs text-muted-foreground">
+                    Gráfico TradingView · {signal.timeframe} · Indicadores: EMA, RSI, MACD, Bollinger, Estocástico
+                  </p>
+                  <Link to={`/analises/${signal.id}/chart`} className="shrink-0">
+                    <Button variant="outline" size="sm">
+                      <Maximize2 className="h-4 w-4 mr-1.5" /> Gráfico completo
+                    </Button>
+                  </Link>
+                </div>
 
                 {/* Análise Técnica (gated) */}
                 {signal.analysis && (

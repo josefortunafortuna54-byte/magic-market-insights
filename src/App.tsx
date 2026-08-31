@@ -15,6 +15,7 @@ import {
 import Notificacoes from "./pages/Notificacoes";
 import { DiarioTrader } from "./pages/DiarioTrader";
 import { DefinicoesBooms } from "./pages/DefinicoesBooms";
+import SinalChart from "./pages/SinalChart";
 import Index from "./pages/Index";
 import Analises from "./pages/Analises";
 import Historico from "./pages/Historico";
@@ -53,6 +54,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/analises" element={<Analises />} />
             <Route path="/analises/:id" element={<SignalDetail />} />
+            <Route path="/analises/:id/chart" element={<SinalChart />} />
             <Route path="/historico" element={<Historico />} />
             <Route path="/planos" element={<Planos />} />
             <Route path="/perfil" element={<Perfil />} />
