@@ -1,9 +1,5 @@
 import { PagePlaceholder } from "@/components/layout/PagePlaceholder";
 
-export function DiarioTraderPage() {
-  return <PagePlaceholder title="Diário do Trader" />;
-}
-
 export function DefinicoesBoomsPage() {
   return <PagePlaceholder title="Definições de Booms" />;
 }

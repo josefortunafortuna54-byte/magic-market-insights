@@ -38,3 +38,20 @@ export function calcOpenPips(
   const diff = type === 'SELL' ? entry - current : current - entry;
   return round1(diff * mult);
 }
+
+export function pipSize(pair: string): number {
+  if (pair === 'USD/JPY') return 0.01;
+  if (pair === 'XAU/USD') return 0.1;
+  if (pair === 'BTC/USD' || pair === 'ETH/USD') return 1;
+  return 0.0001;
+}
+
+export function calcTradePips(
+  pair: string,
+  direction: 'BUY' | 'SELL',
+  entry: number,
+  exit: number,
+): number {
+  const raw = direction === 'BUY' ? exit - entry : entry - exit;
+  return Math.round((raw / pipSize(pair)) * 100) / 100;
+}
