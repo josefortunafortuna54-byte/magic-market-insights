@@ -289,17 +289,25 @@ Port the chart/gating behavior from `mobile/src/app/sinal/chart/[id].tsx` onto t
 
 # Task 5.6: Phase 5 verification
 
-- [ ] **Step 1:** `npx tsc --noEmit -p tsconfig.app.json` → 0; `npx tsc --noEmit` → 0.
-- [ ] **Step 2:** `npm run build` → PASS.
-- [ ] **Step 3:** eslint over all Phase 5 touched files → 0 errors (list them at run time: `src/lib/aiSupport.ts`, `src/lib/boomPrefs.ts`, `src/lib/notifications.ts`, `src/lib/economicCalendar.ts`, `src/hooks/useTradeJournal.ts`, `src/hooks/useEconomicCalendar.ts`, `src/pages/SuporteIa.tsx`, `src/pages/DiarioTrader.tsx`, `src/pages/DefinicoesBooms.tsx`, `src/pages/Horarios.tsx`, `src/pages/SinalChart.tsx`, `src/pages/SignalDetail.tsx`, `src/components/AlarmToggle.tsx`, `src/components/journal/AddTradeModal.tsx`, `src/components/economics/EconomicEventBadge.tsx`, `src/App.tsx`, `src/pages/PlaceholderPages.tsx`).
-- [ ] **Step 4:** dev server + Playwright smoke (anonymous/free user):
-  - `/suporte-ia` → renders header "Suporte IA", welcome copy, 4 suggestion chips, input; no console errors.
-  - `/diario-trader` → calendar renders with current month, "Registar" button opens AddTradeModal, empty-day state copy.
-  - `/definicoes-booms` → free user sees `PremiumLock` ("Personalização Premium").
-  - `/horarios` → clock + boom cards render; alarm toggle present (works or shows blocked when Notification denied); no crash with empty `VITE_FOREX_CALENDAR_KEY` (econ feed hidden).
-  - `/analises/:id/chart` with an existing signal id → renders fullscreen chart (or PremiumLock for a locked pair/TF); back works.
-  - Console: 0 app errors (external-resource warnings OK).
-- [ ] **Step 5:** Record results in this file under `Phase 5 verification results`.
+- [x] **Step 1:** `npx tsc --noEmit -p tsconfig.app.json` → 0; `npx tsc --noEmit` → 0.
+- [x] **Step 2:** `npm run build` → PASS.
+- [x] **Step 3:** eslint over all Phase 5 touched files → 0 errors (18 files, all green).
+- [x] **Step 4:** dev server + Playwright smoke (anonymous/free user) — all green.
+- [x] **Step 5:** Record results in this file under `Phase 5 verification results`.
+
+---
+
+## Phase 5 verification results
+
+**Gates:** `tsc` app + full → 0 errors; `npm run build` → PASS; `eslint` over all 18 Phase 5 files → 0 errors.
+
+**Playwright smoke (2026-08-31, dev server `vite` on :8080):**
+- `/suporte-ia` ✓ — h1 "Suporte IA", subtitle "Assistente The Magic Trader", welcome copy, 4 suggestion chips, input + disabled "Enviar". Console: 0 app errors.
+- `/diario-trader` ✓ — calendar renders current month "agosto de 2026", weekday headers, month stats (Operações no mês / Win Rate / P&L do mês), empty-day state copy + "Registar" button opens AddTradeModal (Cancelar/Guardar visible). Console: 0 app errors.
+- `/definicoes-booms` ✓ — free/anonymous user sees alarms card ("Alarmes & Notificações") ABOVE the gate + `PremiumLock` "Personalização Premium" + "Ver Planos" (m7 confirmed). Console: 0 app errors.
+- `/horarios` ✓ — clock (WAT/GMT), boom card (XAUUSD 16:00) with alarm toggle (armed → "Notificação ativa" + "Notificamos-te 5 min antes."); no crash with empty `VITE_FOREX_CALENDAR_KEY` (econ feed hidden — no "Notícias Económicas"). Console: 0 app errors.
+- `/analises/:id/chart` ✓ (EUR/USD M15 signal) — fullscreen TradingView iframe w/ indicators, overlay header "EUR/USD · M15", "Fechar" → navigate(-1) back to `/analises`. Console: 0 app errors (only external `cannot_get_metainfo` / frankfurter CORS on `/analises` — pre-existing, not Phase 5).
+- `/analises/:id` (SignalDetail) ✓ — "Gráfico completo" button renders, links to `/analises/:id/chart`.
 
 ---
 
