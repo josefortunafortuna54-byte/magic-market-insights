@@ -1,0 +1,19 @@
+name: Close Signals
+
+on:
+  schedule:
+    - cron: "*/30 * * * *"
+  workflow_dispatch: {}
+
+jobs:
+  close-signals:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Invocar close-signals (Supabase edge function)
+        run: |
+          curl -sS -X POST \
+            "${{ secrets.VITE_SUPABASE_URL }}/functions/v1/close-signals" \
+            -H "Authorization: Bearer ${{ secrets.SERVICE_ROLE_KEY }}" \
+            -H "apikey: ${{ secrets.SERVICE_ROLE_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d "{}"
