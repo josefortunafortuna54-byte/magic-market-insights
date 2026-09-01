@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { RefreshCw, X } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
@@ -32,6 +33,7 @@ interface SignalRow {
 }
 
 export default function SinalChart() {
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { tier, loading: subLoading } = useSubscription();
@@ -78,7 +80,7 @@ export default function SinalChart() {
         <div className="flex h-screen w-full items-center justify-center bg-background">
           <div className="text-center">
             <RefreshCw className="h-8 w-8 text-muted-foreground mx-auto mb-4 animate-spin" />
-            <p className="text-muted-foreground">A carregar análise…</p>
+            <p className="text-muted-foreground">{t("sinal.loading")}</p>
           </div>
         </div>
       </Layout>
@@ -90,9 +92,9 @@ export default function SinalChart() {
       <Layout noFooter>
         <div className="flex h-screen w-full items-center justify-center bg-background">
           <div className="text-center">
-            <p className="text-destructive mb-2">Sinal não encontrado</p>
+            <p className="text-destructive mb-2">{t("sinal.notFound")}</p>
             <Button variant="ghost" onClick={() => navigate(-1)}>
-              <X className="h-4 w-4 mr-1" /> Fechar
+              <X className="h-4 w-4 mr-1" /> {t("common.close")}
             </Button>
           </div>
         </div>
@@ -112,13 +114,13 @@ export default function SinalChart() {
         <div className="relative flex h-screen w-full items-center justify-center bg-background px-4">
           <PremiumLock
             title={`${signal.pair} ${signal.timeframe}`}
-            description="Desbloqueia todos os pares e timeframes com o plano PRO."
+            description={t("analises.premiumDesc")}
           />
           <Button
             variant="ghost"
             size="icon"
             onClick={() => navigate(-1)}
-            aria-label="Fechar"
+            aria-label={t("common.close")}
             className="absolute right-3 top-3 text-foreground"
           >
             <X className="h-5 w-5" />
@@ -141,7 +143,7 @@ export default function SinalChart() {
             variant="ghost"
             size="icon"
             onClick={() => navigate(-1)}
-            aria-label="Fechar"
+            aria-label={t("common.close")}
             className="pointer-events-auto bg-black/40 text-white hover:bg-black/60"
           >
             <X className="h-5 w-5" />

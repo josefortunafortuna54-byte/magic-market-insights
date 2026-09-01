@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
 import { TrendingUp, TrendingDown, Clock, Target, BarChart3, Trophy, AlertTriangle, Coins } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
@@ -12,6 +13,7 @@ function formatDate(dateStr: string): string {
 }
 
 export default function Historico() {
+  const { t } = useTranslation();
   const { signals, stats, loading } = useHistory();
   const [pair, setPair] = useState("Todos");
 
@@ -25,10 +27,10 @@ export default function Historico() {
         <div className="container mx-auto px-4">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
             <h1 className="font-display text-2xl sm:text-3xl font-bold mb-1">
-              Histórico de Sinais
+              {t("historico.title")}
             </h1>
             <p className="text-muted-foreground text-sm">
-              Desempenho real dos sinais fechados
+              {t("historico.subtitle")}
             </p>
           </motion.div>
         </div>
@@ -39,10 +41,10 @@ export default function Historico() {
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
-              { icon: BarChart3, label: "Total de Sinais", value: displayStats.total, color: "text-primary", bg: "bg-primary/10" },
-              { icon: Trophy, label: "Take Profit (TP)", value: displayStats.tp, color: "text-success", bg: "bg-success/10" },
-              { icon: AlertTriangle, label: "Stop Loss (SL)", value: displayStats.sl, color: "text-destructive", bg: "bg-destructive/10" },
-              { icon: Target, label: "Taxa de Acerto", value: `${displayStats.winRate}%`, color: displayStats.winRate >= 60 ? "text-success" : "text-warning", bg: displayStats.winRate >= 60 ? "bg-success/10" : "bg-warning/10" },
+              { icon: BarChart3, label: t("historico.totalSignals"), value: displayStats.total, color: "text-primary", bg: "bg-primary/10" },
+              { icon: Trophy, label: t("historico.tpLabel"), value: displayStats.tp, color: "text-success", bg: "bg-success/10" },
+              { icon: AlertTriangle, label: t("historico.slLabel"), value: displayStats.sl, color: "text-destructive", bg: "bg-destructive/10" },
+              { icon: Target, label: t("historico.winRate"), value: `${displayStats.winRate}%`, color: displayStats.winRate >= 60 ? "text-success" : "text-warning", bg: displayStats.winRate >= 60 ? "bg-success/10" : "bg-warning/10" },
             ].map((stat, i) => (
               <motion.div
                 key={i}
@@ -72,7 +74,7 @@ export default function Historico() {
                 <Coins className="h-5 w-5 text-accent" />
               </div>
               <div>
-                <p className="text-xs text-muted-foreground">Total de Pips</p>
+                <p className="text-xs text-muted-foreground">{t("historico.totalPips")}</p>
                 <p className={`font-display text-xl font-bold ${displayStats.totalPips >= 0 ? "text-success" : "text-destructive"}`}>
                   {displayStats.totalPips >= 0 ? "+" : ""}{displayStats.totalPips} pips
                 </p>
@@ -95,7 +97,7 @@ export default function Historico() {
                   : "bg-secondary text-muted-foreground hover:text-foreground"
               }`}
             >
-              Todos
+              {t("historico.allPairs")}
             </button>
             {ALL_PAIRS.map((p) => (
               <button
@@ -121,14 +123,14 @@ export default function Historico() {
           {loading ? (
             <div className="glass-card p-8 text-center">
               <div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full mx-auto mb-4" />
-              <p className="text-muted-foreground text-sm">A carregar histórico...</p>
+              <p className="text-muted-foreground text-sm">{t("historico.loading")}</p>
             </div>
           ) : historicalSignals.length === 0 ? (
             <div className="glass-card p-12 text-center">
               <Clock className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="font-display text-lg font-semibold mb-2">Sem histórico ainda</h3>
+              <h3 className="font-display text-lg font-semibold mb-2">{t("historico.emptyTitle")}</h3>
               <p className="text-sm text-muted-foreground">
-                Os sinais fechados (TP ou SL) aparecerão aqui automaticamente.
+                {t("historico.emptyBody")}
               </p>
             </div>
           ) : (
@@ -137,16 +139,16 @@ export default function Historico() {
                 <table className="w-full">
                   <thead>
                     <tr className="border-b border-border/50">
-                      <th className="text-left p-4 text-xs text-muted-foreground font-medium">Par</th>
-                      <th className="text-left p-4 text-xs text-muted-foreground font-medium">TF</th>
-                      <th className="text-left p-4 text-xs text-muted-foreground font-medium">Tipo</th>
-                      <th className="text-left p-4 text-xs text-muted-foreground font-medium">Confiança</th>
-                      <th className="text-left p-4 text-xs text-muted-foreground font-medium">Entrada</th>
-                      <th className="text-left p-4 text-xs text-muted-foreground font-medium">SL</th>
-                      <th className="text-left p-4 text-xs text-muted-foreground font-medium">TP</th>
-                      <th className="text-left p-4 text-xs text-muted-foreground font-medium">Resultado</th>
-                      <th className="text-left p-4 text-xs text-muted-foreground font-medium">Pips</th>
-                      <th className="text-left p-4 text-xs text-muted-foreground font-medium">Data</th>
+                      <th className="text-left p-4 text-xs text-muted-foreground font-medium">{t("historico.pair")}</th>
+                      <th className="text-left p-4 text-xs text-muted-foreground font-medium">{t("historico.tf")}</th>
+                      <th className="text-left p-4 text-xs text-muted-foreground font-medium">{t("historico.type")}</th>
+                      <th className="text-left p-4 text-xs text-muted-foreground font-medium">{t("historico.confidence")}</th>
+                      <th className="text-left p-4 text-xs text-muted-foreground font-medium">{t("historico.entry")}</th>
+                      <th className="text-left p-4 text-xs text-muted-foreground font-medium">{t("historico.sl")}</th>
+                      <th className="text-left p-4 text-xs text-muted-foreground font-medium">{t("historico.tp")}</th>
+                      <th className="text-left p-4 text-xs text-muted-foreground font-medium">{t("historico.result")}</th>
+                      <th className="text-left p-4 text-xs text-muted-foreground font-medium">{t("historico.pips")}</th>
+                      <th className="text-left p-4 text-xs text-muted-foreground font-medium">{t("historico.date")}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -188,7 +190,7 @@ export default function Historico() {
                           <span className={`text-xs font-semibold px-2 py-1 rounded-lg ${
                             signal.result === "tp" ? "bg-success/10 text-success" : "bg-destructive/10 text-destructive"
                           }`}>
-                            {signal.result === "tp" ? "✓ TP" : "✗ SL"}
+                            {signal.result === "tp" ? t("historico.tpShort") : t("historico.slShort")}
                           </span>
                         </td>
                         <td className="p-4">

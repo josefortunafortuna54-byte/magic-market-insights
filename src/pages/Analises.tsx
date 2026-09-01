@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 import { Filter, Search, TrendingUp, TrendingDown, Minus, ExternalLink, RefreshCw, Lock, Crown, Clock } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
@@ -30,6 +31,7 @@ function formatPrice(pair: string, price: string): string {
 }
 
 export default function Analises() {
+  const { t } = useTranslation();
   const [selectedTimeframe, setSelectedTimeframe] = useState("M15");
   const [selectedType, setSelectedType] = useState("Todos");
   const [selectedPair, setSelectedPair] = useState("EUR/USD");
@@ -113,7 +115,7 @@ export default function Analises() {
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75" />
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-success" />
               </span>
-              <h1 className="font-display text-xl font-bold">Painel de Sinais</h1>
+              <h1 className="font-display text-xl font-bold">{t("analises.painelTitle")}</h1>
               {(loading || pricesLoading) && <RefreshCw className="h-4 w-4 text-muted-foreground animate-spin" />}
             </div>
 
@@ -151,7 +153,7 @@ export default function Analises() {
                     }
                     setSelectedPair(pair);
                   }}
-                  aria-label={locked ? `Desbloquear ${pair}` : undefined}
+                  aria-label={locked ? t("analises.unlock", { what: pair }) : undefined}
                   className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-sm font-medium transition-all duration-200 border ${
                     locked
                       ? "border-accent/30 bg-accent/5 text-accent hover:bg-accent/10"
@@ -174,7 +176,7 @@ export default function Analises() {
               <motion.button whileTap={{ scale: 0.97 }} onClick={() => setUpsellOpen(true)}
                 className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-sm font-medium border border-accent/30 bg-accent/5 text-accent/70 hover:bg-accent/10 transition-all">
                 <Lock className="h-3 w-3" />
-                {lockedPairsCount > 0 ? `+${lockedPairsCount} pares Premium` : `+${lockedTimeframesCount} timeframe Premium`}
+                {lockedPairsCount > 0 ? t("analises.pairsPremium", { count: lockedPairsCount }) : t("analises.timeframePremium", { count: lockedTimeframesCount })}
               </motion.button>
             )}
           </div>
@@ -186,9 +188,9 @@ export default function Analises() {
             <div className="flex items-start gap-3 rounded-xl border border-primary/30 bg-primary/5 p-4">
               <Clock className="h-5 w-5 text-primary shrink-0 mt-0.5" />
               <div className="space-y-1">
-                <p className="text-sm font-semibold text-primary">Mercado fechado (fim de semana)</p>
-                <p className="text-xs text-muted-foreground">Sinais forex regressam segunda-feira.</p>
-                <p className="text-xs text-muted-foreground">Ao fim de semana a IA do TMT gera sinais de BTC e ETH para todos os planos.</p>
+                <p className="text-sm font-semibold text-primary">{t("analises.weekendMarketClosed")}</p>
+                <p className="text-xs text-muted-foreground">{t("analises.weekendMarketClosedBody")}</p>
+                <p className="text-xs text-muted-foreground">{t("analises.weekendCryptoAiBody")}</p>
               </div>
             </div>
           </div>
@@ -203,8 +205,8 @@ export default function Analises() {
 
         <div className="container mx-auto px-4 py-2">
           <p className="text-xs text-muted-foreground">
-            Gráfico TradingView · Indicadores incluídos: EMA, RSI, MACD, Bollinger, Estocástico
-            {selectedTimeframe !== "Todos" && <> · Timeframe: {selectedTimeframe}</>}
+            {t("analises.chartCaption")}
+            {selectedTimeframe !== "Todos" && <>{t("analises.chartTimeframe", { tf: selectedTimeframe })}</>}
           </p>
         </div>
 
@@ -214,10 +216,10 @@ export default function Analises() {
             <div className="flex flex-wrap items-center gap-4">
               <div className="flex items-center gap-2">
                 <Filter className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm font-medium">Filtros:</span>
+                <span className="text-sm font-medium">{t("analises.filters")}</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-xs text-muted-foreground">TF:</span>
+                <span className="text-xs text-muted-foreground">{t("analises.tfLabel")}</span>
                 <div className="flex gap-1 flex-wrap">
                   {TIMEFRAMES.map((tf) => {
                     const locked = gatingOn && tf !== "Todos" && !canAccessTimeframe(tf);
@@ -231,7 +233,7 @@ export default function Analises() {
                           }
                           setSelectedTimeframe(tf);
                         }}
-                        aria-label={locked ? `Desbloquear ${tf}` : undefined}
+                        aria-label={locked ? t("analises.unlock", { what: tf }) : undefined}
                         className={`px-3 py-1 rounded-lg text-xs font-medium transition-all flex items-center gap-1 ${
                           locked
                             ? "bg-accent/5 text-accent border border-accent/30"
@@ -247,7 +249,7 @@ export default function Analises() {
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-xs text-muted-foreground">Tipo:</span>
+                <span className="text-xs text-muted-foreground">{t("analises.typeLabel")}</span>
                 <div className="flex gap-1">
                   {SIGNAL_TYPES.map((type) => (
                     <button key={type} onClick={() => setSelectedType(type)}
@@ -258,7 +260,7 @@ export default function Analises() {
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-xs text-muted-foreground">SMC:</span>
+                <span className="text-xs text-muted-foreground">{t("analises.smcLabel")}</span>
                 <div className="flex gap-1 flex-wrap">
                   {SMC_SETUPS.map((s) => (
                     <button key={s} onClick={() => setSmcFilter(s)}
@@ -270,7 +272,7 @@ export default function Analises() {
               </div>
               <div className="ml-auto flex items-center gap-2">
                 <span className="text-xs text-muted-foreground">
-                  <span className="text-foreground font-semibold">{activeSignals.length}</span> sinais ativos
+                  <span className="text-foreground font-semibold">{activeSignals.length}</span> {t("analises.activeSignals", { count: activeSignals.length })}
                 </span>
                 <button onClick={() => { refetch(); refetchPrices(); }} className="p-1.5 rounded-lg hover:bg-secondary/60 transition-colors">
                   <RefreshCw className="h-3.5 w-3.5 text-muted-foreground" />
@@ -284,8 +286,8 @@ export default function Analises() {
         <div className="container mx-auto px-4 pb-24">
           {lockedTimeframe ? (
             <PremiumLock
-              title={`Sinais ${selectedTimeframe} — Exclusivo Premium`}
-              description="Acede a sinais em todos os timeframes com análise técnica completa. RSI, EMA, MACD, Bollinger e Estocástico."
+              title={t("analises.premiumSignals", { what: selectedTimeframe })}
+              description={t("analises.lockedTimeframeDesc")}
             />
           ) : loading ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -299,8 +301,8 @@ export default function Analises() {
           ) : activeSignals.length === 0 ? (
             <div className="glass-card p-12 text-center">
               <Search className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="font-display text-lg font-semibold mb-2">Nenhum sinal encontrado</h3>
-              <p className="text-sm text-muted-foreground">Ajusta os filtros ou aguarda novos sinais.</p>
+              <h3 className="font-display text-lg font-semibold mb-2">{t("analises.noSignalsFound")}</h3>
+              <p className="text-sm text-muted-foreground">{t("analises.noSignalsFoundDesc")}</p>
             </div>
           ) : (
             <>
@@ -320,16 +322,16 @@ export default function Analises() {
                     </div>
                     <div>
                       <p className="font-semibold text-sm">
-                        Estás a ver apenas sinais do plano gratuito ({freePairs.length} pares · {freeTimeframes.join(" + ")})
+                        {t("analises.freePlanView", { pairs: freePairs.length, timeframes: freeTimeframes.join(" + ") })}
                       </p>
-                      <p className="text-xs text-muted-foreground">Basic, Pro e Premium desbloqueiam mais pares e timeframes</p>
+                      <p className="text-xs text-muted-foreground">{t("analises.freePlanMore")}</p>
                     </div>
                   </div>
                   <Link to="/planos">
                     <button className="shrink-0 flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm text-white whitespace-nowrap"
                       style={{ background: "var(--gradient-gold)" }}>
                       <Crown className="h-4 w-4" />
-                      Ver Planos
+                      {t("components.premiumLock.viewPlans")}
                     </button>
                   </Link>
                 </motion.div>
@@ -339,19 +341,19 @@ export default function Analises() {
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
                   className="mt-8 glass-card p-6 border-primary/20 flex flex-col sm:flex-row items-center justify-between gap-4">
                   <div>
-                    <p className="font-semibold text-sm">Cria uma conta para aceder a mais sinais</p>
-                    <p className="text-xs text-muted-foreground">Regista-te gratuitamente e acede a sinais M15</p>
+                    <p className="font-semibold text-sm">{t("analises.createAccountTitle")}</p>
+                    <p className="text-xs text-muted-foreground">{t("analises.createAccountDesc")}</p>
                   </div>
                   <div className="flex gap-3 shrink-0">
                     <Link to="/login">
                       <button className="px-4 py-2 rounded-xl text-sm font-medium border border-border/60 hover:bg-secondary/60 transition-all">
-                        Entrar
+                        {t("analises.signIn")}
                       </button>
                     </Link>
                     <Link to="/registro">
                       <button className="px-4 py-2 rounded-xl text-sm font-medium text-white"
                         style={{ background: "var(--gradient-primary)" }}>
-                        Criar Conta
+                        {t("analises.createAccount")}
                       </button>
                     </Link>
                   </div>

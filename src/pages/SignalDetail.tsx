@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
 import {
   ArrowLeft,
@@ -48,6 +49,7 @@ function pad2(n: number): string {
 }
 
 function ExpiryCountdown({ expiresAt }: { expiresAt: string }) {
+  const { t } = useTranslation();
   const target = Date.parse(expiresAt);
   const [remaining, setRemaining] = useState<number>(() =>
     isFinite(target) ? Math.max(0, target - Date.now()) : 0
@@ -72,7 +74,7 @@ function ExpiryCountdown({ expiresAt }: { expiresAt: string }) {
   return (
     <span className={`inline-flex items-center gap-1 text-sm ${isClose ? "text-warning" : "text-muted-foreground"}`}>
       <Clock className="h-4 w-4" />
-      Expira em {pad2(hours)}:{pad2(minutes)}:{pad2(seconds)}
+      {t("sinal.expiresIn", { time: `${pad2(hours)}:${pad2(minutes)}:${pad2(seconds)}` })}
     </span>
   );
 }
@@ -109,6 +111,7 @@ function determineStatus(row: SignalRow): Signal["status"] {
 }
 
 export default function SignalDetail() {
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const [signal, setSignal] = useState<Signal | null>(null);
   const [loading, setLoading] = useState(true);
@@ -196,18 +199,18 @@ export default function SignalDetail() {
         <div className="container mx-auto px-4 max-w-6xl">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
             <Link to="/analises" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-6 transition-colors">
-              <ArrowLeft className="h-3 w-3" /> Voltar às Análises
+              <ArrowLeft className="h-3 w-3" /> {t("common.back")}
             </Link>
 
             {loading ? (
               <div className="glass-card p-12 text-center">
                 <RefreshCw className="h-8 w-8 text-muted-foreground mx-auto mb-4 animate-spin" />
-                <p className="text-muted-foreground">A carregar sinal...</p>
+                <p className="text-muted-foreground">{t("sinal.loading")}</p>
               </div>
             ) : error || !signal ? (
               <div className="glass-card p-12 text-center">
-                <p className="text-destructive mb-2">Sinal não encontrado</p>
-                <p className="text-sm text-muted-foreground">{error || "O sinal pode ter sido removido."}</p>
+                <p className="text-destructive mb-2">{t("sinal.notFound")}</p>
+                <p className="text-sm text-muted-foreground">{t("sinal.removed")}</p>
               </div>
             ) : (
               <>
@@ -237,19 +240,19 @@ export default function SignalDetail() {
                         </Badge>
                       )}
                       <span className={`text-xs font-semibold px-2 py-1 rounded-lg ${signal.status === "tp" ? "bg-success/20 text-success" : signal.status === "sl" ? "bg-destructive/20 text-destructive" : "bg-warning/20 text-warning"}`}>
-                        {signal.status === "tp" ? "✓ Take Profit" : signal.status === "sl" ? "✗ Stop Loss" : "● Ativo"}
+                        {signal.status === "tp" ? t("sinal.statusTp") : signal.status === "sl" ? t("sinal.statusSl") : t("sinal.statusActive")}
                       </span>
                     </div>
                     <div className="flex items-center gap-3 flex-wrap mt-2">
                       <span className="text-xs text-muted-foreground">
-                        {new Date(signal.createdAt).toLocaleString("pt-PT")} · há {elapsed}h
+                        {new Date(signal.createdAt).toLocaleString("pt-PT")} · {t("sinal.agoHours", { count: elapsed })}
                       </span>
                       {isLiveStatus && signal.expiresAt && <ExpiryCountdown expiresAt={signal.expiresAt} />}
                     </div>
                   </div>
                   <div className="flex items-center gap-4">
                     <div className="text-right">
-                      <p className="text-xs text-muted-foreground">Confiança</p>
+                      <p className="text-xs text-muted-foreground">{t("sinal.confidence")}</p>
                       <p className={`font-display text-3xl font-bold ${signal.confidence >= 80 ? "text-success" : signal.confidence >= 60 ? "text-warning" : "text-muted-foreground"}`}>
                         {signal.confidence}%
                       </p>
@@ -261,7 +264,7 @@ export default function SignalDetail() {
                 {signal.probabilityScore != null && (
                   <div className="glass-card p-4 mb-4 flex items-center justify-between">
                     <span className="text-sm text-muted-foreground flex items-center gap-1">
-                      <Percent className="h-4 w-4" /> Probabilidade
+                      <Percent className="h-4 w-4" /> {t("sinal.probability")}
                     </span>
                     <span className={`font-display text-lg font-bold ${probabilityColor}`}>
                       {signal.probabilityScore}%
@@ -273,33 +276,33 @@ export default function SignalDetail() {
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
                   <div className="glass-card p-4 text-center">
                     <p className="text-xs text-muted-foreground mb-1 flex items-center justify-center gap-1">
-                      <Shield className="h-3 w-3 text-destructive" /> Stop Loss
+                      <Shield className="h-3 w-3 text-destructive" /> {t("sinal.stopLoss")}
                     </p>
                     <p className="font-mono text-lg font-bold text-destructive">{signal.stopLoss.toFixed(5)}</p>
-                    <p className="text-xs text-destructive/70 mt-1">{slPips.toFixed(1)} pips</p>
+                    <p className="text-xs text-destructive/70 mt-1">{t("components.signalCard.pips", { count: slPips.toFixed(1) })}</p>
                   </div>
                   <div className="glass-card p-4 text-center border-primary/20 bg-primary/5">
                     <p className="text-xs text-primary mb-1 flex items-center justify-center gap-1">
-                      <BarChart3 className="h-3 w-3" /> Entrada
+                      <BarChart3 className="h-3 w-3" /> {t("sinal.entry")}
                     </p>
                     <p className="font-mono text-lg font-bold text-foreground">{signal.entry.toFixed(5)}</p>
                   </div>
                   <div className="glass-card p-4 text-center">
                     <p className="text-xs text-muted-foreground mb-1 flex items-center justify-center gap-1">
-                      <Target className="h-3 w-3 text-success" /> Take Profit
+                      <Target className="h-3 w-3 text-success" /> {t("sinal.takeProfit")}
                     </p>
                     <p className="font-mono text-lg font-bold text-success">{signal.takeProfit.toFixed(5)}</p>
-                    <p className="text-xs text-success/70 mt-1">{tpPips.toFixed(1)} pips</p>
+                    <p className="text-xs text-success/70 mt-1">{t("components.signalCard.pips", { count: tpPips.toFixed(1) })}</p>
                   </div>
                   <div className="glass-card p-4 text-center">
                     <p className="text-xs text-muted-foreground mb-1 flex items-center justify-center gap-1">
-                      <Zap className="h-3 w-3" /> Risco/Retorno
+                      <Zap className="h-3 w-3" /> {t("sinal.riskReturn")}
                     </p>
                     <p className={`font-display text-2xl font-bold ${riskReward >= 2 ? "text-success" : riskReward >= 1.5 ? "text-warning" : "text-destructive"}`}>
                       1:{riskReward.toFixed(1)}
                     </p>
                     <p className="text-xs text-muted-foreground mt-1">
-                      {riskReward >= 2 ? "Excelente" : riskReward >= 1.5 ? "Bom" : "Baixo"}
+                      {riskReward >= 2 ? t("sinal.ratingExcellent") : riskReward >= 1.5 ? t("sinal.ratingGood") : t("sinal.ratingLow")}
                     </p>
                   </div>
                 </div>
@@ -310,11 +313,11 @@ export default function SignalDetail() {
                 </div>
                 <div className="mb-6 flex items-center justify-between gap-3">
                   <p className="text-xs text-muted-foreground">
-                    Gráfico TradingView · {signal.timeframe} · Indicadores: EMA, RSI, MACD, Bollinger, Estocástico
+                    {t("sinal.chartCaption", { tf: signal.timeframe })}
                   </p>
                   <Link to={`/analises/${signal.id}/chart`} className="shrink-0">
                     <Button variant="outline" size="sm">
-                      <Maximize2 className="h-4 w-4 mr-1.5" /> Gráfico completo
+                      <Maximize2 className="h-4 w-4 mr-1.5" /> {t("sinal.fullChart")}
                     </Button>
                   </Link>
                 </div>
@@ -324,7 +327,7 @@ export default function SignalDetail() {
                   <div className="glass-card p-6 mb-6">
                     <h2 className="font-display text-lg font-bold mb-4 flex items-center gap-2">
                       <Activity className="h-5 w-5 text-primary" />
-                      Análise Técnica
+                      {t("sinal.technical")}
                     </h2>
                     {hasAnalysis ? (
                       <p className="text-sm text-foreground/80 leading-relaxed whitespace-pre-line">
@@ -332,8 +335,8 @@ export default function SignalDetail() {
                       </p>
                     ) : (
                       <PremiumLock
-                        title="Análise Premium"
-                        description="A análise técnica completa está disponível nos planos Basic, Pro e Premium."
+                        title={t("sinal.analysisPremium")}
+                        description={t("sinal.analysisPremiumDesc")}
                       />
                     )}
                   </div>
@@ -344,7 +347,7 @@ export default function SignalDetail() {
                   <div className="glass-card p-6 mb-6">
                     <h2 className="font-display text-lg font-bold mb-4 flex items-center gap-2">
                       <Lock className="h-5 w-5 text-muted-foreground" />
-                      Motivos
+                      {t("sinal.reasons")}
                     </h2>
                     <div className="space-y-3">
                       {signal.reasons.map((reason, i) => {
@@ -375,10 +378,9 @@ export default function SignalDetail() {
                 <div className="glass-card p-4 border-warning/20 bg-warning/5 flex items-start gap-3">
                   <AlertTriangle className="h-5 w-5 text-warning shrink-0 mt-0.5" />
                   <div>
-                    <p className="text-sm font-semibold text-warning mb-1">Aviso Importante</p>
+                    <p className="text-sm font-semibold text-warning mb-1">{t("sinal.importantWarning")}</p>
                     <p className="text-xs text-muted-foreground">
-                      Estes sinais são apenas para fins educacionais. Não constituem aconselhamento financeiro.
-                      O trading envolve risco significativo de perda de capital. Não invistas mais do que podes perder.
+                      {t("sinal.disclaimerBody")}
                     </p>
                   </div>
                 </div>
