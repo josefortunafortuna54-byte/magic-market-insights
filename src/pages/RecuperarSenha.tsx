@@ -7,8 +7,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Layout } from "@/components/layout/Layout";
 import { supabase } from "@/lib/supabaseClient";
+import { useTranslation } from "react-i18next";
 
 export default function RecuperarSenha() {
+  const { t } = useTranslation();
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
@@ -42,8 +44,8 @@ export default function RecuperarSenha() {
                 <Sparkles className="h-8 w-8 text-primary" />
                 <span className="font-display text-xl font-bold">The Magic Trader</span>
               </Link>
-              <h1 className="font-display text-2xl font-bold mb-2">Recuperar senha</h1>
-              <p className="text-muted-foreground">Introduza o seu email para receber um link de recuperação</p>
+              <h1 className="font-display text-2xl font-bold mb-2">{t('auth.recoverPassword')}</h1>
+              <p className="text-muted-foreground">{t('auth.recoverSubtitle')}</p>
             </div>
 
             <div className="glass-card p-8">
@@ -52,14 +54,14 @@ export default function RecuperarSenha() {
                   <div className="w-14 h-14 rounded-full bg-success/10 flex items-center justify-center mx-auto mb-4">
                     <CheckCircle className="h-7 w-7 text-success" />
                   </div>
-                  <h2 className="font-display text-lg font-bold mb-2">Email enviado!</h2>
+                  <h2 className="font-display text-lg font-bold mb-2">{t('auth.emailSent')}</h2>
                   <p className="text-sm text-muted-foreground mb-6">
-                    Verifique a sua caixa de entrada e siga as instruções para redefinir a sua senha.
+                    {t('auth.checkEmailRecover')}
                   </p>
                   <Link to="/login">
                     <Button variant="outline" className="w-full">
                       <ArrowLeft className="h-4 w-4 mr-2" />
-                      Voltar ao login
+                      {t('auth.backToLogin')}
                     </Button>
                   </Link>
                 </div>
@@ -74,24 +76,24 @@ export default function RecuperarSenha() {
 
                   <form onSubmit={handleSubmit} className="space-y-5">
                     <div className="space-y-2">
-                      <Label htmlFor="email">Email</Label>
+                      <Label htmlFor="email">{t('auth.email')}</Label>
                       <div className="relative">
                         <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input id="email" type="email" placeholder="seu@email.com"
+                        <Input id="email" type="email" placeholder={t('auth.emailPlaceholder')}
                           value={email} onChange={(e) => setEmail(e.target.value)}
                           className="pl-10" required />
                       </div>
                     </div>
 
                     <Button type="submit" variant="hero" className="w-full" disabled={loading}>
-                      {loading ? "A enviar..." : "Enviar link de recuperação"}
+                      {loading ? t('auth.sending') : t('auth.sendRecoveryLink')}
                     </Button>
                   </form>
 
                   <div className="mt-6 text-center">
                     <Link to="/login" className="text-sm text-muted-foreground hover:text-foreground inline-flex items-center gap-1">
                       <ArrowLeft className="h-3 w-3" />
-                      Voltar ao login
+                      {t('auth.backToLogin')}
                     </Link>
                   </div>
                 </>

@@ -7,8 +7,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Layout } from "@/components/layout/Layout";
 import { supabase } from "@/lib/supabaseClient";
+import { useTranslation } from "react-i18next";
 
 export default function Registro() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
@@ -20,7 +22,7 @@ export default function Registro() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (password.length < 6) { setError("A senha deve ter pelo menos 6 caracteres."); return; }
+    if (password.length < 6) { setError(t('auth.passwordTooShort')); return; }
     setLoading(true);
     setError("");
     try {
@@ -32,7 +34,7 @@ export default function Registro() {
       setSuccess(true);
     } catch (err: any) {
       setError(err.message === "User already registered"
-        ? "Este email já está registado. Tenta fazer login."
+        ? t('auth.emailExists')
         : err.message);
     } finally {
       setLoading(false);
@@ -62,13 +64,12 @@ export default function Registro() {
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="max-w-md mx-auto text-center">
               <div className="glass-card p-10">
                 <CheckCircle className="h-16 w-16 text-success mx-auto mb-4" />
-                <h1 className="font-display text-2xl font-bold mb-2">Conta criada!</h1>
+                <h1 className="font-display text-2xl font-bold mb-2">{t('auth.accountCreated')}</h1>
                 <p className="text-muted-foreground mb-6">
-                  Enviámos um email de confirmação para <strong>{email}</strong>.
-                  Verifica a tua caixa de entrada para ativar a conta.
+                  {t('auth.checkEmailConfirm')} <strong>{email}</strong>. {t('auth.checkEmailInstructions')}
                 </p>
                 <Link to="/login">
-                  <Button variant="hero" className="w-full">Ir para o Login</Button>
+                  <Button variant="hero" className="w-full">{t('auth.goToLogin')}</Button>
                 </Link>
               </div>
             </motion.div>
@@ -88,8 +89,8 @@ export default function Registro() {
                 <Sparkles className="h-8 w-8 text-primary" />
                 <span className="font-display text-xl font-bold">The Magic Trader</span>
               </Link>
-              <h1 className="font-display text-2xl font-bold mb-2">Criar conta</h1>
-              <p className="text-muted-foreground">Comece gratuitamente hoje</p>
+              <h1 className="font-display text-2xl font-bold mb-2">{t('auth.createAccount')}</h1>
+              <p className="text-muted-foreground">{t('auth.registerSubtitle')}</p>
             </div>
 
             <div className="glass-card p-8">
@@ -105,12 +106,12 @@ export default function Registro() {
                     <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
                   </svg>
                 )}
-                {googleLoading ? "A redirecionar..." : "Registar com Google"}
+                {googleLoading ? t('auth.redirecting') : t('auth.registerWithGoogle')}
               </button>
 
               <div className="flex items-center gap-3 mb-6">
                 <div className="flex-1 h-px bg-border/50" />
-                <span className="text-xs text-muted-foreground">ou com email</span>
+                <span className="text-xs text-muted-foreground">{t('auth.orWithEmail')}</span>
                 <div className="flex-1 h-px bg-border/50" />
               </div>
 
@@ -123,21 +124,21 @@ export default function Registro() {
 
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="email">{t('auth.email')}</Label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input id="email" type="email" placeholder="seu@email.com"
+                    <Input id="email" type="email" placeholder={t('auth.emailPlaceholder')}
                       value={email} onChange={(e) => setEmail(e.target.value)}
                       className="pl-10" required />
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="password">Senha</Label>
+                  <Label htmlFor="password">{t('auth.password')}</Label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input id="password" type={showPassword ? "text" : "password"}
-                      placeholder="Mínimo 6 caracteres" value={password}
+                      placeholder={t('auth.passwordMinPlaceholder')} value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       className="pl-10 pr-10" required />
                     <button type="button" onClick={() => setShowPassword(!showPassword)}
@@ -148,13 +149,13 @@ export default function Registro() {
                 </div>
 
                 <Button type="submit" variant="hero" className="w-full" disabled={loading}>
-                  {loading ? "A criar conta..." : "Criar Conta"}
+                  {loading ? t('auth.creatingAccount') : t('auth.createAccount')}
                 </Button>
               </form>
 
               <div className="mt-6 text-center text-sm">
-                <span className="text-muted-foreground">Já tem uma conta?</span>{" "}
-                <Link to="/login" className="text-primary hover:underline font-medium">Entrar</Link>
+                <span className="text-muted-foreground">{t('auth.hasAccount')}</span>{" "}
+                <Link to="/login" className="text-primary hover:underline font-medium">{t('perfil.signIn')}</Link>
               </div>
             </div>
           </motion.div>
