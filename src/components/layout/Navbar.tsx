@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, Sparkles, BarChart3, History, Crown, LogIn, LogOut, User, Clock, MessageCircle, Bell } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSubscription } from "@/hooks/useSubscription";
@@ -9,13 +10,13 @@ import { useUnreadUserNotifications } from "@/hooks/useUnreadUserNotifications";
 import { planLabel, type PlanId } from "@/lib/plans";
 
 const navLinks = [
-  { href: "/", label: "Home", icon: Sparkles },
-  { href: "/analises", label: "Análises", icon: BarChart3 },
-  { href: "/historico", label: "Histórico", icon: History },
-  { href: "/planos", label: "Planos", icon: Crown },
-  { href: "/horarios", label: "Horários", icon: Clock },
-  { href: "/comunidade", label: "Comunidade", icon: MessageCircle },
-  { href: "/perfil", label: "Perfil", icon: User },
+  { href: "/", key: "tabs.inicio", icon: Sparkles },
+  { href: "/analises", key: "tabs.analises", icon: BarChart3 },
+  { href: "/historico", key: "tabs.historico", icon: History },
+  { href: "/planos", key: "planos.title", icon: Crown },
+  { href: "/horarios", key: "tabs.horarios", icon: Clock },
+  { href: "/comunidade", key: "tabs.comunidade", icon: MessageCircle },
+  { href: "/perfil", key: "tabs.perfil", icon: User },
 ];
 
 const PLAN_BADGE_LABEL: Record<string, string> = {
@@ -25,6 +26,7 @@ const PLAN_BADGE_LABEL: Record<string, string> = {
 };
 
 export function Navbar() {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const location = useLocation();
@@ -80,7 +82,7 @@ export function Navbar() {
                 <Link key={link.href} to={link.href}>
                   <Button variant={isActive ? "secondary" : "ghost"} className="gap-2">
                     <Icon className="h-4 w-4" />
-                    {link.label}
+                    {t(link.key)}
                   </Button>
                 </Link>
               );
@@ -93,7 +95,7 @@ export function Navbar() {
               <>
               <Link
                 to="/notificacoes"
-                aria-label="Notificações"
+                aria-label={t("notificacoes.title")}
                 className="relative flex h-8 w-8 items-center justify-center rounded-xl hover:bg-secondary/60 active:scale-95 transition-all"
               >
                 <Bell className="h-5 w-5" />
@@ -152,7 +154,7 @@ export function Navbar() {
                         <Link to="/planos" onClick={() => setShowUserMenu(false)}>
                           <button className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-accent hover:bg-accent/10 transition-colors">
                             <Crown className="h-4 w-4" />
-                            Upgrade Premium
+                            {t("common.upgradePremium")}
                           </button>
                         </Link>
                       )}
@@ -161,7 +163,7 @@ export function Navbar() {
                         className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-destructive hover:bg-destructive/10 transition-colors mt-1"
                       >
                         <LogOut className="h-4 w-4" />
-                        Sair
+                        {t("perfil.signOut")}
                       </button>
                     </motion.div>
                   )}
@@ -173,11 +175,11 @@ export function Navbar() {
                 <Link to="/login">
                   <Button variant="ghost" size="sm">
                     <LogIn className="h-4 w-4 mr-2" />
-                    Entrar
+                    {t("perfil.signIn")}
                   </Button>
                 </Link>
                 <Link to="/registro">
-                  <Button variant="hero" size="sm">Criar Conta</Button>
+                  <Button variant="hero" size="sm">{t("auth.enterApp")}</Button>
                 </Link>
               </>
             )}
@@ -207,7 +209,7 @@ export function Navbar() {
                   <Link key={link.href} to={link.href} onClick={() => setIsOpen(false)}>
                     <div className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${isActive ? "bg-secondary text-foreground" : "text-muted-foreground hover:bg-secondary/50"}`}>
                       <Icon className="h-5 w-5" />
-                      {link.label}
+                      {t(link.key)}
                     </div>
                   </Link>
                 );
@@ -230,16 +232,16 @@ export function Navbar() {
                     </div>
                     <button onClick={handleLogout} className="w-full flex items-center gap-2 px-4 py-3 rounded-lg text-destructive hover:bg-destructive/10 transition-colors">
                       <LogOut className="h-4 w-4" />
-                      Sair
+                      {t("perfil.signOut")}
                     </button>
                   </>
                 ) : (
                   <>
                     <Link to="/login" onClick={() => setIsOpen(false)}>
-                      <Button variant="outline" className="w-full">Entrar</Button>
+                      <Button variant="outline" className="w-full">{t("perfil.signIn")}</Button>
                     </Link>
                     <Link to="/registro" onClick={() => setIsOpen(false)}>
-                      <Button variant="hero" className="w-full">Criar Conta</Button>
+                      <Button variant="hero" className="w-full">{t("auth.enterApp")}</Button>
                     </Link>
                   </>
                 )}

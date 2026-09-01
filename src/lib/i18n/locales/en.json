@@ -32,7 +32,12 @@
     "trader": "Trader",
     "waiting": "WAIT",
     "permission": "Permission",
-    "notNow": "Not now"
+    "notNow": "Not now",
+    "upgradePremium": "Upgrade Premium",
+    "navigation": "Navigation",
+    "legal": "Legal",
+    "footerTagline": "Advanced technical analysis platform for the Forex market. We use artificial intelligence and technical indicators to provide high-quality educational analysis.",
+    "copyright": "All rights reserved."
   },
   "tabs": {
     "inicio": "Home",
