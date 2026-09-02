@@ -27,8 +27,6 @@ dist-ssr
 .env*.local
 vite.config.ts.timestamp-*
 
-mobile/
-
 # Playwright MCP artifacts
 .playwright-mcp/
 

@@ -1,0 +1,17 @@
+project_id = "the-magic-trader-mobile"
+
+[api]
+port = 54321
+
+[db]
+port = 54322
+shadow_port = 54323
+
+[storage]
+enabled = false
+
+[analytics]
+enabled = false
+
+[studio]
+enabled = false
