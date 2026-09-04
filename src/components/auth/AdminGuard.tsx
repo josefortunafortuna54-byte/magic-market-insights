@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Navigate } from "react-router-dom";
-import { isCurrentUserAdmin } from "@/lib/admin";
+import { supabase } from "@/lib/supabaseClient";
+import { isAdminEmail } from "@/lib/admin";
 import { Layout } from "@/components/layout/Layout";
 
 export function AdminGuard({ children }: { children: React.ReactNode }) {
@@ -8,7 +9,12 @@ export function AdminGuard({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const check = async () => {
-      setAllowed(await isCurrentUserAdmin());
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user || !isAdminEmail(user.email)) {
+        setAllowed(false);
+        return;
+      }
+      setAllowed(true);
     };
     check();
   }, []);

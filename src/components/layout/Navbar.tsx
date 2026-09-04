@@ -1,54 +1,41 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Sparkles, BarChart3, History, Crown, LogIn, LogOut, Settings, Clock, MessageCircle } from "lucide-react";
+import { Menu, X, Sparkles, BarChart3, History, Crown, LogIn, LogOut, User, Clock, MessageCircle, Bell } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
-import { supabase } from "@/lib/supabaseClient";
-import type { User } from "@supabase/supabase-js";
+import { useAuth } from "@/contexts/AuthContext";
+import { useSubscription } from "@/hooks/useSubscription";
+import { useUnreadUserNotifications } from "@/hooks/useUnreadUserNotifications";
+import { planLabel, type PlanId } from "@/lib/plans";
 
 const navLinks = [
-  { href: "/", label: "Home", icon: Sparkles },
-  { href: "/analises", label: "Análises", icon: BarChart3 },
-  { href: "/historico", label: "Histórico", icon: History },
-  { href: "/planos", label: "Planos", icon: Crown },
-  { href: "/horarios", label: "Horários", icon: Clock },
-  { href: "/comunidade", label: "Comunidade", icon: MessageCircle },
+  { href: "/", key: "tabs.inicio", icon: Sparkles },
+  { href: "/analises", key: "tabs.analises", icon: BarChart3 },
+  { href: "/historico", key: "tabs.historico", icon: History },
+  { href: "/planos", key: "planos.title", icon: Crown },
+  { href: "/horarios", key: "tabs.horarios", icon: Clock },
+  { href: "/comunidade", key: "tabs.comunidade", icon: MessageCircle },
+  { href: "/perfil", key: "tabs.perfil", icon: User },
 ];
 
+const PLAN_BADGE_LABEL: Record<string, string> = {
+  basic: "BASIC",
+  pro: "PRO",
+  premium: "PREMIUM",
+};
+
 export function Navbar() {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
-  const [isPremium, setIsPremium] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const userMenuRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const getUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
-      if (user) checkPremium(user.id);
-    };
-    getUser();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
-      setUser(session?.user || null);
-      if (session?.user) checkPremium(session.user.id);
-      else setIsPremium(false);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  const checkPremium = async (userId: string) => {
-    const { data } = await supabase
-      .from("subscriptions")
-      .select("status")
-      .eq("user_id", userId)
-      .single();
-    setIsPremium(data?.status === "active");
-  };
+  const { user, signOut } = useAuth();
+  const { tier } = useSubscription();
+  const { unread } = useUnreadUserNotifications();
+  const isPremium = tier !== "free";
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -61,9 +48,7 @@ export function Navbar() {
   }, []);
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
-    setUser(null);
-    setIsPremium(false);
+    await signOut();
     setShowUserMenu(false);
     navigate("/");
   };
@@ -97,7 +82,7 @@ export function Navbar() {
                 <Link key={link.href} to={link.href}>
                   <Button variant={isActive ? "secondary" : "ghost"} className="gap-2">
                     <Icon className="h-4 w-4" />
-                    {link.label}
+                    {t(link.key)}
                   </Button>
                 </Link>
               );
@@ -107,6 +92,19 @@ export function Navbar() {
           {/* Auth */}
           <div className="hidden md:flex items-center gap-3">
             {user ? (
+              <>
+              <Link
+                to="/notificacoes"
+                aria-label={t("notificacoes.title")}
+                className="relative flex h-8 w-8 items-center justify-center rounded-xl hover:bg-secondary/60 active:scale-95 transition-all"
+              >
+                <Bell className="h-5 w-5" />
+                {unread > 0 ? (
+                  <span className="absolute -right-1 -top-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-bold text-white border border-background">
+                    {unread > 9 ? "9+" : unread}
+                  </span>
+                ) : null}
+              </Link>
               <div className="relative" ref={userMenuRef}>
                 <button
                   onClick={() => setShowUserMenu(!showUserMenu)}
@@ -120,9 +118,15 @@ export function Navbar() {
                   </div>
                   <span className="text-sm font-medium max-w-24 truncate">{userName}</span>
                   {isPremium && (
-                    <span className="badge-premium text-xs py-0.5">
-                      <Crown className="h-2.5 w-2.5" />
-                      PRO
+                    <span
+                      className={
+                        tier === "premium"
+                          ? "badge-premium text-xs py-0.5"
+                          : "inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-xs font-semibold bg-primary/10 text-primary border border-primary/20"
+                      }
+                    >
+                      {tier === "premium" && <Crown className="h-2.5 w-2.5" />}
+                      {PLAN_BADGE_LABEL[tier as string] ?? planLabel(tier as Exclude<PlanId, "free">).toUpperCase()}
                     </span>
                   )}
                 </button>
@@ -142,7 +146,7 @@ export function Navbar() {
                         <p className="text-xs text-muted-foreground truncate">{user.email}</p>
                         {isPremium && (
                           <span className="inline-flex items-center gap-1 text-xs text-accent mt-1">
-                            <Crown className="h-3 w-3" /> Premium ativo
+                            <Crown className="h-3 w-3" /> {planLabel(tier as Exclude<PlanId, "free">)}
                           </span>
                         )}
                       </div>
@@ -150,7 +154,7 @@ export function Navbar() {
                         <Link to="/planos" onClick={() => setShowUserMenu(false)}>
                           <button className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-accent hover:bg-accent/10 transition-colors">
                             <Crown className="h-4 w-4" />
-                            Upgrade Premium
+                            {t("common.upgradePremium")}
                           </button>
                         </Link>
                       )}
@@ -159,22 +163,23 @@ export function Navbar() {
                         className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-destructive hover:bg-destructive/10 transition-colors mt-1"
                       >
                         <LogOut className="h-4 w-4" />
-                        Sair
+                        {t("perfil.signOut")}
                       </button>
                     </motion.div>
                   )}
                 </AnimatePresence>
               </div>
+              </>
             ) : (
               <>
                 <Link to="/login">
                   <Button variant="ghost" size="sm">
                     <LogIn className="h-4 w-4 mr-2" />
-                    Entrar
+                    {t("perfil.signIn")}
                   </Button>
                 </Link>
                 <Link to="/registro">
-                  <Button variant="hero" size="sm">Criar Conta</Button>
+                  <Button variant="hero" size="sm">{t("auth.enterApp")}</Button>
                 </Link>
               </>
             )}
@@ -204,7 +209,7 @@ export function Navbar() {
                   <Link key={link.href} to={link.href} onClick={() => setIsOpen(false)}>
                     <div className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${isActive ? "bg-secondary text-foreground" : "text-muted-foreground hover:bg-secondary/50"}`}>
                       <Icon className="h-5 w-5" />
-                      {link.label}
+                      {t(link.key)}
                     </div>
                   </Link>
                 );
@@ -218,21 +223,25 @@ export function Navbar() {
                       </div>
                       <div>
                         <p className="text-sm font-medium">{userName}</p>
-                        {isPremium && <p className="text-xs text-accent">Premium</p>}
+                        {isPremium && (
+                          <p className="text-xs text-accent">
+                            {PLAN_BADGE_LABEL[tier as string] ?? planLabel(tier as Exclude<PlanId, "free">)}
+                          </p>
+                        )}
                       </div>
                     </div>
                     <button onClick={handleLogout} className="w-full flex items-center gap-2 px-4 py-3 rounded-lg text-destructive hover:bg-destructive/10 transition-colors">
                       <LogOut className="h-4 w-4" />
-                      Sair
+                      {t("perfil.signOut")}
                     </button>
                   </>
                 ) : (
                   <>
                     <Link to="/login" onClick={() => setIsOpen(false)}>
-                      <Button variant="outline" className="w-full">Entrar</Button>
+                      <Button variant="outline" className="w-full">{t("perfil.signIn")}</Button>
                     </Link>
                     <Link to="/registro" onClick={() => setIsOpen(false)}>
-                      <Button variant="hero" className="w-full">Criar Conta</Button>
+                      <Button variant="hero" className="w-full">{t("auth.enterApp")}</Button>
                     </Link>
                   </>
                 )}

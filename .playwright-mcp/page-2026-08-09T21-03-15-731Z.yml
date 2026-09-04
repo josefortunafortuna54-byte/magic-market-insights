@@ -1,0 +1,159 @@
+- generic [ref=f1e22]:
+  - generic [ref=f1e23]:
+    - generic [ref=f1e25]:
+      - heading [level=1] [ref=f1e130]: Início
+      - generic [ref=f1e32]:
+        - generic [ref=f1e33]:
+          - generic [ref=f1e34]: The Magic Trader
+          - generic [ref=f1e35]: 
+        - generic [ref=f1e36]:
+          - generic [ref=f1e37]: Análises de Forex com IA e Precisão
+          - generic [ref=f1e38]: Sinais inteligentes, gestão de banca e comunidade ativa para traders que buscam consistência.
+        - generic [ref=f1e39]:
+          - generic [ref=f1e40]:
+            - generic [ref=f1e41]: 
+            - generic [ref=f1e42]: Sinais gerados por IA
+          - generic [ref=f1e43]:
+            - generic [ref=f1e44]: 
+            - generic [ref=f1e45]: Análises multi-timeframe
+          - generic [ref=f1e46]:
+            - generic [ref=f1e47]: 
+            - generic [ref=f1e48]: Comunidade & Hora do Boom
+          - generic [ref=f1e49]:
+            - generic [ref=f1e50]: 
+            - generic [ref=f1e51]: Gestão de banca e capital
+        - generic [ref=f1e52]:
+          - generic [ref=f1e53]:
+            - generic [ref=f1e54]: +10K
+            - generic [ref=f1e55]: Utilizadores ativos
+          - generic [ref=f1e56]:
+            - generic [ref=f1e57]: 85%
+            - generic [ref=f1e58]: Taxa de acerto
+          - generic [ref=f1e59]:
+            - generic [ref=f1e60]: 50%
+            - generic [ref=f1e61]: Retornos/mês
+        - generic [ref=f1e62]:
+          - generic [ref=f1e63] [cursor=pointer]: Ver análises
+          - generic [ref=f1e65] [cursor=pointer]: Ver planos
+          - generic [ref=f1e67] [cursor=pointer]: Explorar como convidado
+    - generic [ref=f1e132]:
+      - generic:
+        - generic:
+          - generic:
+            - heading [level=1] [ref=f1e192]: Análises
+            - generic: PLANOS
+      - generic [ref=f1e142]:
+        - generic [ref=f1e143]:
+          - generic [ref=f1e144]: Análises
+          - generic [ref=f1e145]:
+            - generic [ref=f1e146] [cursor=pointer]: 
+            - generic [ref=f1e148] [cursor=pointer]: 
+        - generic [ref=f1e150]:
+          - generic [ref=f1e151] [cursor=pointer]: EUR/USD
+          - generic [ref=f1e154] [cursor=pointer]: GBP/USD
+          - generic [ref=f1e157] [cursor=pointer]: USD/JPY
+        - generic [ref=f1e160]:
+          - generic [ref=f1e161] [cursor=pointer]: Todos
+          - generic [ref=f1e163] [cursor=pointer]: M15
+          - generic: 🔒 H1
+          - generic: 🔒 H4
+        - generic [ref=f1e167]:
+          - generic [ref=f1e168] [cursor=pointer]: Todos
+          - generic [ref=f1e170] [cursor=pointer]: BUY
+          - generic [ref=f1e172] [cursor=pointer]: SELL
+          - generic [ref=f1e174] [cursor=pointer]: AGUARDAR
+        - generic [ref=f1e176]: React Native WebView does not support this platform.
+        - generic [ref=f1e179]: EUR/USD — (0%)
+        - generic [ref=f1e180]: 0 SINAIS ATIVOS
+        - generic [ref=f1e189]:
+          - generic [ref=f1e190]: Erro a carregar sinais
+          - generic [ref=f1e191]: "TypeError: Failed to fetch"
+    - generic [ref=f1e194]:
+      - heading [level=1] [ref=f1e225]: Histórico
+      - generic [ref=f1e201]:
+        - generic [ref=f1e202]: Histórico
+        - generic [ref=f1e204]:
+          - generic [ref=f1e205]:
+            - generic [ref=f1e206]: Total Sinais
+            - generic [ref=f1e207]: "0"
+          - generic [ref=f1e208]:
+            - generic [ref=f1e209]: Taxa de Acerto
+            - generic [ref=f1e210]: 0%
+          - generic [ref=f1e211]:
+            - generic [ref=f1e212]: Pips Totais
+            - generic [ref=f1e213]: "+0"
+        - generic [ref=f1e214] [cursor=pointer]:
+          - generic [ref=f1e215]: Todos os pares
+          - generic [ref=f1e216]: 
+        - generic [ref=f1e217]: SINAIS FECHADOS
+        - generic [ref=f1e264]:
+          - progressbar [ref=f1e265]
+          - generic [ref=f1e270]: A carregar histórico…
+    - generic [ref=f1e227]:
+      - heading [level=1] [ref=f1e271]: Horários
+      - generic [ref=f1e234]:
+        - generic [ref=f1e235]:
+          - generic [ref=f1e236]: Hora do Boom
+          - generic [ref=f1e237] [cursor=pointer]: 
+        - generic [ref=f1e239]:
+          - generic [ref=f1e240]: 9 de Agosto de 2026
+          - generic [ref=f1e241]: WAT (UTC-1)
+        - generic [ref=f1e242]:
+          - generic [ref=f1e243]:
+            - generic [ref=f1e244]: WAT · ANGOLA
+            - generic [ref=f1e245]: 22:03:15
+          - generic [ref=f1e247]:
+            - generic [ref=f1e248]: GMT
+            - generic [ref=f1e249]: 21:03:15
+        - generic [ref=f1e250]: Janelas de alta volatilidade. Ativa alarmes para não perderes a entrada.
+        - generic [ref=f1e261]:
+          - generic [ref=f1e262]: Erro
+          - generic [ref=f1e263]: "TypeError: Failed to fetch"
+    - generic [ref=f1e273]:
+      - heading "Comunidade" [level=1] [ref=f1e275]
+      - generic [ref=f1e280]:
+        - generic [ref=f1e281]: Boom Times
+        - generic [ref=f1e283]:
+          - generic [ref=f1e284] [cursor=pointer]: Todos
+          - generic [ref=f1e286] [cursor=pointer]: Ao Vivo
+          - generic [ref=f1e288] [cursor=pointer]: Próximos
+          - generic [ref=f1e290] [cursor=pointer]: Encerrados
+        - generic [ref=f1e292]:
+          - progressbar [ref=f1e293]
+          - generic [ref=f1e298]: A carregar comunidade…
+  - tablist [ref=f1e73]:
+    - tab "  Início" [ref=f1e75] [cursor=pointer]:
+      - generic [ref=f1e76]:
+        - generic [ref=f1e77]: 
+        - generic [ref=f1e79]: 
+      - generic [ref=f1e81]: Início
+    - tab "  Análises" [ref=f1e83] [cursor=pointer]:
+      - generic [ref=f1e84]:
+        - generic [ref=f1e85]: 
+        - generic [ref=f1e87]: 
+      - generic [ref=f1e89]: Análises
+    - tab "  Histórico" [ref=f1e91] [cursor=pointer]:
+      - generic [ref=f1e92]:
+        - generic [ref=f1e93]: 
+        - generic [ref=f1e95]: 
+      - generic [ref=f1e97]: Histórico
+    - tab "  Horários" [ref=f1e99] [cursor=pointer]:
+      - generic [ref=f1e100]:
+        - generic [ref=f1e101]: 
+        - generic [ref=f1e103]: 
+      - generic [ref=f1e105]: Horários
+    - tab "  Comunidade" [active] [selected] [ref=f1e107] [cursor=pointer]:
+      - generic [ref=f1e108]:
+        - generic [ref=f1e109]: 
+        - generic [ref=f1e111]: 
+      - generic [ref=f1e113]: Comunidade
+    - tab "  Perfil" [ref=f1e115] [cursor=pointer]:
+      - generic [ref=f1e116]:
+        - generic [ref=f1e117]: 
+        - generic [ref=f1e119]: 
+      - generic [ref=f1e121]: Perfil
+    - tab "⏷ ⏷ admin" [ref=f1e123] [cursor=pointer]:
+      - generic [ref=f1e124]:
+        - generic [ref=f1e125]: ⏷
+        - generic [ref=f1e127]: ⏷
+      - generic [ref=f1e129]: admin

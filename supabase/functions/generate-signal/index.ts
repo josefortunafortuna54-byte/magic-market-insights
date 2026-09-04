@@ -1,6 +1,5 @@
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
-import { verifyAdminRequest } from "../_shared/admin.ts";
 
 // ─── Indicadores Técnicos ───────────────────────────────────────────────────
 
@@ -181,24 +180,6 @@ const ASSET_CONFIGS: Record<string, AssetConfig> = {
   BTCUSD: { symbol: "BTCUSD", type: "crypto", volatility: 0.025,  pipSize: 1,      priceDigits: 2 },
 };
 
-const TIMEFRAMES = ["15m", "1h", "4h"] as const;
-type Timeframe = typeof TIMEFRAMES[number];
-
-function normalizeTimeframe(tf: string): Timeframe {
-  const map: Record<string, Timeframe> = {
-    "m15": "15m", "15m": "15m", "15": "15m", "M15": "15m",
-    "1h": "1h", "h1": "1h", "60": "1h", "H1": "1h",
-    "4h": "4h", "h4": "4h", "240": "4h", "H4": "4h",
-  };
-  return map[tf.toLowerCase()] ?? "1h";
-}
-
-const TIMEFRAME_PARAMS: Record<Timeframe, { slMult: number; tpMult: number }> = {
-  "15m": { slMult: 1.2, tpMult: 2 },
-  "1h":  { slMult: 1.8, tpMult: 3 },
-  "4h":  { slMult: 2.5, tpMult: 4 },
-};
-
 async function fetchHistoricalPrices(symbol: string): Promise<number[]> {
   const config = ASSET_CONFIGS[symbol];
 
@@ -207,9 +188,7 @@ async function fetchHistoricalPrices(symbol: string): Promise<number[]> {
       const res = await fetch(`https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=90&interval=daily`);
       const json = await res.json();
       if (json?.prices?.length > 0) return json.prices.map((p: [number, number]) => p[1]);
-    } catch {
-      /* usa o fallback sintético abaixo */
-    }
+    } catch { }
     return generateRealisticPrices(110000, 90, 0.025);
   }
 
@@ -223,12 +202,10 @@ async function fetchHistoricalPrices(symbol: string): Promise<number[]> {
       const res = await fetch(`https://api.frankfurter.app/${startStr}..${endStr}?from=XAU&to=USD`);
       const json = await res.json();
       if (json?.rates) {
-        const prices = Object.values(json.rates).map((r) => Number(r.USD)).filter(Boolean);
+        const prices = Object.values(json.rates).map((r: any) => Number(r.USD)).filter(Boolean);
         if (prices.length > 10) return prices;
       }
-    } catch {
-      /* usa o fallback sintético abaixo */
-    }
+    } catch { }
     return generateRealisticPrices(3300, 90, 0.006);
   }
 
@@ -243,12 +220,10 @@ async function fetchHistoricalPrices(symbol: string): Promise<number[]> {
     const res = await fetch(`https://api.frankfurter.app/${startStr}..${endStr}?from=${base}&to=${quote}`);
     const json = await res.json();
     if (json?.rates) {
-      const prices = Object.values(json.rates).map((r) => Number(r[quote])).filter(Boolean);
+      const prices = Object.values(json.rates).map((r: any) => Number(r[quote])).filter(Boolean);
       if (prices.length > 10) return prices;
     }
-  } catch {
-    /* usa o fallback sintético abaixo */
-  }
+  } catch { }
 
   const fallbacks: Record<string, number> = {
     EURUSD: 1.085, GBPUSD: 1.271, USDJPY: 148.5,
@@ -296,9 +271,8 @@ interface TechnicalAnalysis {
   bb: { upper: number; middle: number; lower: number };
 }
 
-function analyzeMarket(closes: number[], symbol: string, timeframe: Timeframe = "1h"): TechnicalAnalysis {
+function analyzeMarket(closes: number[], symbol: string): TechnicalAnalysis {
   const config = ASSET_CONFIGS[symbol] || { volatility: 0.001, pipSize: 0.0001, priceDigits: 5 };
-  const tfParams = TIMEFRAME_PARAMS[timeframe];
   const entry = closes[closes.length - 1];
   const { highs, lows } = generateHighLows(closes, config.volatility);
 
@@ -336,8 +310,8 @@ function analyzeMarket(closes: number[], symbol: string, timeframe: Timeframe = 
         `Preço entre suporte (${support.toFixed(config.priceDigits)}) e resistência (${resistance.toFixed(config.priceDigits)})`,
         `Aguardar ADX > 20 para confirmar início de tendência`,
       ],
-      stopLoss: entry - atr * tfParams.slMult,
-      takeProfit: entry + atr * tfParams.tpMult,
+      stopLoss: entry - atr * 1.5,
+      takeProfit: entry + atr * 2,
       rsi, adx, stochastic, ema21, ema50, ema200, atr, macd, bb,
     };
   }
@@ -504,15 +478,15 @@ function analyzeMarket(closes: number[], symbol: string, timeframe: Timeframe = 
     // Confiança ponderada: mais indicadores = mais confiança
     const ratio = bullScore.weighted / (bullScore.weighted + bearScore.weighted);
     confidence = Math.min(92, Math.round(55 + ratio * 37));
-    stopLoss = entry - atr * tfParams.slMult;
-    takeProfit = entry + atr * tfParams.tpMult;
+    stopLoss = entry - atr * 1.8;
+    takeProfit = entry + atr * 3;
   } else if (bearScore.raw >= minIndicators && bearScore.weighted >= minWeightedScore && bearScore.weighted > bullScore.weighted) {
     signalType = "SELL";
     reasons = bearishSignals.slice(0, 5);
     const ratio = bearScore.weighted / (bullScore.weighted + bearScore.weighted);
     confidence = Math.min(92, Math.round(55 + ratio * 37));
-    stopLoss = entry + atr * tfParams.slMult;
-    takeProfit = entry - atr * tfParams.tpMult;
+    stopLoss = entry + atr * 1.8;
+    takeProfit = entry - atr * 3;
   } else {
     signalType = "AGUARDAR";
     reasons = [
@@ -522,8 +496,8 @@ function analyzeMarket(closes: number[], symbol: string, timeframe: Timeframe = 
       `Aguardar mais confirmação antes de entrar — mínimo ${minIndicators} indicadores e ${minWeightedScore} pontos`,
     ];
     confidence = 25;
-    stopLoss = entry - atr * tfParams.slMult;
-    takeProfit = entry + atr * tfParams.tpMult;
+    stopLoss = entry - atr * 1.5;
+    takeProfit = entry + atr * 2;
   }
 
   // RR baseado na confiança
@@ -539,6 +513,11 @@ function analyzeMarket(closes: number[], symbol: string, timeframe: Timeframe = 
 
 // ─── Servidor ────────────────────────────────────────────────────────────────
 
+const ADMIN_EMAILS = (Deno.env.get("ADMIN_EMAILS") || "")
+  .split(",")
+  .map((e: string) => e.trim())
+  .filter(Boolean);
+
 serve(async (req) => {
   const corsHeaders = {
     "Access-Control-Allow-Origin": "*",
@@ -550,34 +529,51 @@ serve(async (req) => {
   }
 
   try {
-    const auth = await verifyAdminRequest(req);
-    if (!auth.ok) {
-      return new Response(JSON.stringify({ error: auth.error }), {
-        status: 403,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
     const PROJECT_URL = Deno.env.get("PROJECT_URL") || Deno.env.get("SUPABASE_URL");
+    const ANON_KEY = Deno.env.get("ANON_KEY") || Deno.env.get("SUPABASE_ANON_KEY");
     const SERVICE_ROLE_KEY = Deno.env.get("SERVICE_ROLE_KEY") || Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
     if (!PROJECT_URL || !SERVICE_ROLE_KEY) {
       return new Response(JSON.stringify({ error: "Missing env keys" }), { status: 500, headers: corsHeaders });
     }
 
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: "Não autenticado" }), { status: 401, headers: corsHeaders });
+    }
+    const token = authHeader.replace("Bearer ", "");
+    const userRes = await fetch(`${PROJECT_URL}/auth/v1/user`, {
+      headers: { Authorization: `Bearer ${token}`, apikey: ANON_KEY },
+    });
+    if (!userRes.ok) {
+      return new Response(JSON.stringify({ error: "Auth failed" }), { status: 401, headers: corsHeaders });
+    }
+    const user = await userRes.json();
+    if (!ADMIN_EMAILS.includes(user.email)) {
+      return new Response(JSON.stringify({ error: "Não autorizado" }), { status: 403, headers: corsHeaders });
+    }
+
     const supabase = createClient(PROJECT_URL, SERVICE_ROLE_KEY);
 
     const body = await req.json().catch(() => ({}));
     const symbolsToAnalyze = Array.isArray(body) ? body : [body];
-    const results: Array<Record<string, unknown>> = [];
+    const results = [];
 
     for (const item of symbolsToAnalyze) {
       const rawSymbol = (item.symbol || "EURUSD").replace("/", "");
       const symbol = rawSymbol.toUpperCase();
-      const timeframe = normalizeTimeframe(item.timeframe || "1h");
+      const timeframe = item.timeframe || "1h";
 
       if (!ASSET_CONFIGS[symbol]) {
         results.push({ symbol, error: `Símbolo não suportado: ${symbol}` });
+        continue;
+      }
+
+      // Fim de semana: mercado forex/ouro fechado — apenas crypto
+      const dayOfWeek = new Date().getUTCDay();
+      const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+      if (isWeekend && ASSET_CONFIGS[symbol].type !== "crypto") {
+        results.push({ symbol, error: "Mercado fechado ao fim de semana — apenas crypto" });
         continue;
       }
 
@@ -591,14 +587,13 @@ serve(async (req) => {
       }
 
       const entry = closes[closes.length - 1];
-      const analysis = analyzeMarket(closes, symbol, timeframe);
+      const analysis = analyzeMarket(closes, symbol);
       const config = ASSET_CONFIGS[symbol];
 
       await supabase
         .from("signals")
         .delete()
         .eq("symbol", symbol)
-        .eq("timeframe", timeframe)
         .lt("created_at", new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString());
 
       const { data, error } = await supabase.from("signals").insert([{
@@ -636,9 +631,8 @@ serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
 
-  } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : "Erro desconhecido";
-    return new Response(JSON.stringify({ error: message }), {
+  } catch (err: any) {
+    return new Response(JSON.stringify({ error: err.message }), {
       status: 500,
       headers: corsHeaders,
     });

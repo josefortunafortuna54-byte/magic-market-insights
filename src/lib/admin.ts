@@ -9,10 +9,5 @@ export function isAdminEmail(email: string | undefined): boolean {
 
 export async function isCurrentUserAdmin(): Promise<boolean> {
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return false;
-
-  const { data, error } = await supabase.rpc("is_admin");
-  if (!error) return !!data || isAdminEmail(user.email);
-
-  return isAdminEmail(user.email);
+  return isAdminEmail(user?.email);
 }

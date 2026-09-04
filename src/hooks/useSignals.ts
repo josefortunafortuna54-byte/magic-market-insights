@@ -1,33 +1,8 @@
 import { useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabaseClient";
-import { Signal } from "@/components/signals/SignalCard";
-
-function formatSymbol(symbol: string): string {
-  if (!symbol) return "N/A";
-  if (symbol.includes("/")) return symbol;
-  if (symbol.length === 6) return symbol.slice(0, 3) + "/" + symbol.slice(3);
-  return symbol;
-}
-
-function formatTimeframe(tf: string): string {
-  if (!tf) return "H1";
-  const map: Record<string, string> = {
-    "1m": "M1", "5m": "M5", "15m": "M15", "30m": "M30",
-    "1h": "H1", "4h": "H4", "1d": "D1",
-    "M1": "M1", "M5": "M5", "M15": "M15", "M30": "M30",
-    "H1": "H1", "H4": "H4", "D1": "D1",
-  };
-  return map[tf] ?? tf.toUpperCase();
-}
-
-function formatType(type: string): "BUY" | "SELL" | "AGUARDAR" {
-  if (!type) return "AGUARDAR";
-  const upper = type.toUpperCase();
-  if (upper === "BUY") return "BUY";
-  if (upper === "SELL") return "SELL";
-  return "AGUARDAR";
-}
+import type { Signal } from "@/lib/types";
+import { formatSymbol, formatTimeframe, formatType } from "@/lib/format";
 
 interface SignalRow {
   id: string;
@@ -39,8 +14,14 @@ interface SignalRow {
   stop_loss: number;
   target_price: number;
   reasons: string[];
-  status: string;
   created_at: string;
+  status: string;
+  tier: string | null;
+  risk_reward: number | null;
+  expires_at: string | null;
+  analysis: string | null;
+  probability_score: number | null;
+  smc_setup: string | null;
 }
 
 function determineStatus(row: SignalRow): "active" | "pending" | "tp" | "sl" {
@@ -72,6 +53,13 @@ async function fetchSignals(): Promise<Signal[]> {
     reasons: row.reasons ?? [],
     createdAt: row.created_at ?? new Date().toISOString(),
     status: determineStatus(row),
+    // Novos campos do modelo Pro/SMC
+    tier: (row.tier as Signal["tier"]) ?? "free",
+    riskReward: row.risk_reward != null ? Number(row.risk_reward) : undefined,
+    expiresAt: row.expires_at ?? undefined,
+    analysis: row.analysis ?? undefined,
+    probabilityScore: row.probability_score != null ? Number(row.probability_score) : undefined,
+    smcSetup: row.smc_setup ?? undefined,
   }));
 }
 

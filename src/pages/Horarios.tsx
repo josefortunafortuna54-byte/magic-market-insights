@@ -1,21 +1,21 @@
-import { useState, useEffect, useCallback } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { Zap, Info, Bell, BellOff, Clock } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Bell, BellOff, ChevronRight, Clock, Filter, Info, Settings2, SlidersHorizontal, Zap } from "lucide-react";
+import { AlarmToggle } from "@/components/AlarmToggle";
+import { EconomicEventsRow } from "@/components/economics/EconomicEventBadge";
 import { Layout } from "@/components/layout/Layout";
-import { supabase } from "@/lib/supabaseClient";
-
-interface BoomHour {
-  id: string;
-  title: string;
-  time_gmt: string;
-  time_wat: string;
-  pairs: string[];
-  description: string;
-  volatility: number;
-  is_active: boolean;
-  badge: string;
-  days: string;
-}
+import { useAuth } from "@/contexts/AuthContext";
+import { useBoomHours } from "@/hooks/useBoomHours";
+import { useEconomicCalendar } from "@/hooks/useEconomicCalendar";
+import {
+  DEFAULT_BOOM_PREFS,
+  applyBoomPrefs,
+  hasActiveFilters,
+  loadBoomPrefs,
+  type BoomPrefs,
+} from "@/lib/boomPrefs";
+import { boomEpochMs } from "@/lib/notifications";
 
 function VolatilityDots({ level }: { level: number }) {
   return (
@@ -52,67 +52,33 @@ function getStatus(time_wat: string): "active" | "expired" | "upcoming" {
 }
 
 export default function Horarios() {
-  const [boomHours, setBoomHours] = useState<BoomHour[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [alarms, setAlarms] = useState<Record<string, boolean>>({});
+  const { user } = useAuth();
+  const { booms, loading } = useBoomHours();
+  const { newsForBoom } = useEconomicCalendar();
+  const navigate = useNavigate();
+  const [prefs, setPrefs] = useState<BoomPrefs>(DEFAULT_BOOM_PREFS);
   const [notifPermission, setNotifPermission] = useState<string>("default");
   const [currentTime, setCurrentTime] = useState(getWATTime());
 
   useEffect(() => {
-    const saved = localStorage.getItem("boom_alarms");
-    if (saved) setAlarms(JSON.parse(saved));
+    let active = true;
+    void loadBoomPrefs(user?.id).then((p) => {
+      if (active) setPrefs(p);
+    });
+    return () => {
+      active = false;
+    };
+  }, [user?.id]);
+
+  useEffect(() => {
     if ("Notification" in window) setNotifPermission(Notification.permission);
     const interval = setInterval(() => setCurrentTime(getWATTime()), 30000);
     return () => clearInterval(interval);
   }, []);
 
-  useEffect(() => {
-    const fetch = async () => {
-      const { data } = await supabase
-        .from("boom_hours")
-        .select("*")
-        .eq("is_active", true)
-        .order("time_wat", { ascending: true });
-      setBoomHours(data || []);
-      setLoading(false);
-    };
-    fetch();
-  }, []);
-
-  useEffect(() => {
-    if (boomHours.length === 0) return;
-    const interval = setInterval(() => {
-      boomHours.forEach(item => {
-        if (!alarms[item.id]) return;
-        const { start } = parseWAT(item.time_wat);
-        const { total } = getWATTime();
-        const diff = start - total;
-        if (diff > 0 && diff <= 5 / 60) {
-          if (Notification.permission === "granted") {
-            new Notification("⚡ Hora do Boom!", {
-              body: `${item.pairs.join(", ")} — ${item.time_wat} WAT`,
-              icon: "/logo.png",
-            });
-          }
-        }
-      });
-    }, 60000);
-    return () => clearInterval(interval);
-  }, [boomHours, alarms]);
-
-  const toggleAlarm = useCallback(async (id: string) => {
-    if (notifPermission !== "granted") {
-      const perm = await Notification.requestPermission();
-      setNotifPermission(perm);
-      if (perm !== "granted") {
-        alert("Precisas de permitir notificações para ativar o alarme!");
-        return;
-      }
-    }
-    const newAlarms = { ...alarms, [id]: !alarms[id] };
-    setAlarms(newAlarms);
-    localStorage.setItem("boom_alarms", JSON.stringify(newAlarms));
-  }, [alarms, notifPermission]);
+  const filteredHours = useMemo(() => applyBoomPrefs(booms, prefs), [booms, prefs]);
+  const hiddenCount = Math.max(0, booms.length - filteredHours.length);
+  const filtersActive = hasActiveFilters(prefs);
 
   return (
     <Layout>
@@ -123,10 +89,16 @@ export default function Horarios() {
             <div className="flex items-center gap-3 mb-1">
               <Bell className="h-6 w-6 text-primary" />
               <h1 className="font-display text-2xl font-bold">⚡ Hora do Boom</h1>
+              <button
+                onClick={() => navigate("/definicoes-booms")}
+                aria-label="Definições do Boom"
+                className="ml-auto p-1.5 rounded-lg hover:bg-muted transition-colors"
+              >
+                <Settings2 className="h-5 w-5 text-muted-foreground" />
+              </button>
             </div>
             <p className="text-muted-foreground text-sm">
-              Horários de grandes movimentos selecionados pela equipa{" "}
-              <span className="text-primary font-semibold">The Magic Trader</span>
+              Janelas de alta volatilidade. Ativa alarmes para não perderes a entrada.
             </p>
           </motion.div>
 
@@ -155,22 +127,51 @@ export default function Horarios() {
             </div>
           )}
 
+          {/* Filtros ativos */}
+          {filtersActive && (
+            <button
+              onClick={() => navigate("/definicoes-booms")}
+              className="glass-card p-3 mb-4 w-full flex items-center gap-2 border border-primary/40 bg-primary/5 text-left"
+            >
+              <Filter className="h-4 w-4 text-primary shrink-0" />
+              <span className="text-sm font-semibold text-primary flex-1">
+                Filtros ativos · {hiddenCount} boom(s) oculto(s)
+              </span>
+              <ChevronRight className="h-4 w-4 text-primary shrink-0" />
+            </button>
+          )}
+
           {loading ? (
             <div className="glass-card p-12 text-center">
               <div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full mx-auto mb-4" />
-              <p className="text-muted-foreground text-sm">A carregar horários...</p>
+              <p className="text-muted-foreground text-sm">A carregar horários…</p>
             </div>
-          ) : boomHours.length === 0 ? (
+          ) : booms.length === 0 ? (
             <div className="glass-card p-12 text-center">
               <Zap className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-40" />
-              <h3 className="font-display text-lg font-semibold mb-2">Sem horários publicados</h3>
-              <p className="text-sm text-muted-foreground">A equipa ainda não publicou horários.</p>
+              <h3 className="font-display text-lg font-semibold mb-2">Sem horários</h3>
+              <p className="text-sm text-muted-foreground">Ainda não há horários ativos.</p>
+            </div>
+          ) : filteredHours.length === 0 ? (
+            <div className="glass-card p-12 text-center space-y-4">
+              <div>
+                <h3 className="font-display text-lg font-semibold mb-2">Sem booms nos filtros</h3>
+                <p className="text-sm text-muted-foreground">
+                  Nenhum boom corresponde aos teus filtros. Ajusta-os nas definições.
+                </p>
+              </div>
+              <button
+                onClick={() => navigate("/definicoes-booms")}
+                className="inline-flex items-center gap-2 rounded-lg border border-accent/55 bg-accent/10 px-4 py-2 text-sm font-bold text-accent"
+              >
+                <SlidersHorizontal className="h-4 w-4" />
+                Ajustar filtros
+              </button>
             </div>
           ) : (
             <div className="space-y-0">
-              {boomHours.map((item, i) => {
+              {filteredHours.map((item, i) => {
                 const status = getStatus(item.time_wat);
-                const isOn = !!alarms[item.id];
                 const [startWAT] = item.time_wat.split(" – ");
 
                 return (
@@ -178,66 +179,72 @@ export default function Horarios() {
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: i * 0.08 }}
-                    className={`border-b border-border/40 py-5 flex items-center justify-between ${
-                      status === "active" ? "bg-primary/5 px-3 rounded-xl border-primary/20" : ""
-                    }`}>
+                    className={`border-b border-border/40 py-5 ${status === "active" ? "bg-primary/5 px-3 rounded-xl border-primary/20" : ""}`}>
 
-                    <div className="flex-1">
-                      <div className="flex items-baseline gap-3 mb-1">
-                        <span className={`font-display text-5xl font-light tracking-tight ${
-                          status === "expired" ? "text-muted-foreground/40" : "text-foreground"
-                        }`}>
-                          {startWAT}
-                        </span>
-                        {status === "active" && (
-                          <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full font-semibold animate-pulse">
-                            ● Agora
-                          </span>
-                        )}
-                        {status === "expired" && (
-                          <span className="text-xs bg-muted/50 text-muted-foreground px-2 py-0.5 rounded-full flex items-center gap-1">
-                            <Clock className="h-3 w-3" /> Expirado
-                          </span>
-                        )}
-                      </div>
-
-                      <div className="flex items-center gap-2 flex-wrap mb-1">
-                        {item.pairs.map(pair => (
-                          <span key={pair} className={`font-mono text-sm font-semibold ${
-                            status === "expired" ? "text-muted-foreground/40" : "text-primary"
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-baseline gap-3 mb-1">
+                          <span className={`font-display text-5xl font-light tracking-tight ${
+                            status === "expired" ? "text-muted-foreground/40" : "text-foreground"
                           }`}>
-                            {pair}
+                            {startWAT}
                           </span>
-                        ))}
-                        {item.badge && <span className="text-sm">{item.badge}</span>}
-                      </div>
+                          {status === "active" && (
+                            <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full font-semibold animate-pulse">
+                              ● Agora
+                            </span>
+                          )}
+                          {status === "expired" && (
+                            <span className="text-xs bg-muted/50 text-muted-foreground px-2 py-0.5 rounded-full flex items-center gap-1">
+                              <Clock className="h-3 w-3" /> Expirado
+                            </span>
+                          )}
+                        </div>
 
-                      <p className={`text-xs ${status === "expired" ? "text-muted-foreground/30" : "text-muted-foreground"}`}>
-                        {item.days || "Todos os dias"} · GMT {item.time_gmt}
-                      </p>
+                        <div className="flex items-center gap-2 flex-wrap mb-1">
+                          {item.pairs.map(pair => (
+                            <span key={pair} className={`font-mono text-sm font-semibold ${
+                              status === "expired" ? "text-muted-foreground/40" : "text-primary"
+                            }`}>
+                              {pair}
+                            </span>
+                          ))}
+                          {item.badge && <span className="text-sm">{item.badge}</span>}
+                        </div>
 
-                      {item.description && (
-                        <p className={`text-xs mt-1 ${status === "expired" ? "text-muted-foreground/30" : "text-muted-foreground/70"}`}>
-                          {item.description}
+                        <p className={`text-xs ${status === "expired" ? "text-muted-foreground/30" : "text-muted-foreground"}`}>
+                          {item.days || "Todos os dias"} · GMT {item.time_gmt}
                         </p>
-                      )}
 
-                      <div className="mt-2">
-                        <VolatilityDots level={item.volatility} />
+                        {item.description && (
+                          <p className={`text-xs mt-1 ${status === "expired" ? "text-muted-foreground/30" : "text-muted-foreground/70"}`}>
+                            {item.description}
+                          </p>
+                        )}
+
+                        <div className="mt-2">
+                          <VolatilityDots level={item.volatility} />
+                        </div>
                       </div>
+
+                      {status === "expired" ? (
+                        <span className="ml-4 shrink-0 text-xs text-muted-foreground/40">
+                          Encerrado · o ciclo recomeça amanhã
+                        </span>
+                      ) : (
+                        <div className="ml-4 shrink-0">
+                          <AlarmToggle
+                            boomId={item.id}
+                            boomTime={new Date(boomEpochMs(new Date(), item.time_wat)).toISOString()}
+                            title={item.title}
+                          />
+                        </div>
+                      )}
                     </div>
 
-                    {/* Toggle alarme */}
-                    <button onClick={() => toggleAlarm(item.id)}
-                      className={`ml-4 w-14 h-7 rounded-full relative transition-all ${
-                        status === "expired" ? "opacity-40 cursor-not-allowed" :
-                        isOn ? "bg-primary" : "bg-secondary"
-                      }`}
-                      disabled={status === "expired"}>
-                      <div className={`absolute top-0.5 w-6 h-6 rounded-full bg-white shadow transition-all ${
-                        isOn ? "right-0.5" : "left-0.5"
-                      }`} />
-                    </button>
+                    <div className="mt-3">
+                      <EconomicEventsRow events={newsForBoom(item.time_wat, item.pairs)} />
+                    </div>
                   </motion.div>
                 );
               })}

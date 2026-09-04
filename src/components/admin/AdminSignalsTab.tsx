@@ -1,28 +1,38 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { TrendingUp, TrendingDown, Trash2, Plus } from "lucide-react";
+import { toast } from "sonner";
 import * as adminApi from "@/lib/adminApi";
-import { getErrorMessage } from "@/lib/utils";
+import { useAdminSearch } from "@/hooks/useAdminSearch";
+import { SearchBar } from "@/components/admin/SearchBar";
+import { FilterChips } from "@/components/admin/FilterChips";
+import { ExportButton } from "@/components/admin/ExportButton";
+import { BulkActionsBar } from "@/components/admin/BulkActionsBar";
 
 const SYMBOLS = ["EURUSD", "GBPUSD", "USDJPY", "AUDUSD", "EURGBP", "USDCHF", "NZDUSD", "USDCAD", "XAUUSD", "BTCUSD"];
 const TIMEFRAMES = ["M15", "H1", "H4"];
 
-interface AdminSignal {
+interface SignalRow {
   id: string;
   symbol: string;
   timeframe: string;
   signal_type: string;
-  entry_price: number;
-  stop_loss: number;
-  target_price: number;
-  confidence: number;
+  entry_price: number | string;
+  stop_loss: number | string;
+  target_price: number | string;
+  confidence: number | string;
   status: string;
 }
 
 interface Props {
-  signals: AdminSignal[];
+  signals: Record<string, unknown>[];
   onRefresh: () => Promise<void>;
 }
+
+const SIGNAL_FILTERS = [
+  { key: "buy", label: "BUY", value: "BUY" },
+  { key: "sell", label: "SELL", value: "SELL" },
+];
 
 export function AdminSignalsTab({ signals, onRefresh }: Props) {
   const [form, setForm] = useState({
@@ -30,16 +40,51 @@ export function AdminSignalsTab({ signals, onRefresh }: Props) {
     entry_price: "", stop_loss: "", target_price: "", confidence: "75", reasons: "",
   });
   const [showAdd, setShowAdd] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+
+  const {
+    searchQuery, setSearchQuery, activeFilters, toggleFilter, clearFilters, filteredData,
+  } = useAdminSearch({
+    data: signals,
+    searchFields: ["symbol", "signal_type"],
+    filterConfig: SIGNAL_FILTERS,
+    filterField: "signal_type",
+  });
 
   const deleteSignal = async (id: string) => {
     if (!confirm("Apagar este sinal?")) return;
-    try { await adminApi.deleteSignal(id); } catch (e: unknown) { alert("Erro: " + getErrorMessage(e)); }
+    try { await adminApi.deleteSignal(id); } catch (e: unknown) { alert("Erro: " + (e instanceof Error ? e.message : e)); }
     await onRefresh();
   };
 
   const updateStatus = async (id: string, status: string) => {
-    try { await adminApi.updateSignalStatus(id, status); } catch (e: unknown) { alert("Erro: " + getErrorMessage(e)); }
+    try { await adminApi.updateSignalStatus(id, status); } catch (e: unknown) { alert("Erro: " + (e instanceof Error ? e.message : e)); }
     await onRefresh();
+  };
+
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) => prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]);
+  };
+
+  const toggleAll = () => {
+    const filteredIds = filteredData.map((s) => (s as unknown as SignalRow).id);
+    if (selectedIds.length === filteredIds.length && filteredIds.length > 0) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(filteredIds);
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (!confirm(`Apagar ${selectedIds.length} sinais selecionados?`)) return;
+    try {
+      await adminApi.bulkDeleteSignals(selectedIds);
+      toast.success("Sinais apagados");
+      setSelectedIds([]);
+      await onRefresh();
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : "Erro ao apagar sinais");
+    }
   };
 
   const addSignal = async () => {
@@ -58,7 +103,7 @@ export function AdminSignalsTab({ signals, onRefresh }: Props) {
       setForm({ symbol: "EURUSD", timeframe: "H1", signal_type: "BUY", entry_price: "", stop_loss: "", target_price: "", confidence: "75", reasons: "" });
       setShowAdd(false);
       await onRefresh();
-    } catch (e: unknown) { alert("Erro: " + getErrorMessage(e)); }
+    } catch (e: unknown) { alert("Erro: " + (e instanceof Error ? e.message : e)); }
   };
 
   return (
@@ -136,48 +181,103 @@ export function AdminSignalsTab({ signals, onRefresh }: Props) {
       )}
 
       <div className="glass-card overflow-hidden">
+        <div className="p-4 border-b border-border/50 space-y-3">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h3 className="font-display font-semibold">Sinais ({filteredData.length})</h3>
+            <ExportButton
+              label="Exportar sinais"
+              filename="sinais"
+              data={filteredData}
+              columns={[
+                { key: "symbol", label: "Par" },
+                { key: "timeframe", label: "Timeframe" },
+                { key: "signal_type", label: "Tipo" },
+                { key: "entry_price", label: "Entrada" },
+                { key: "stop_loss", label: "Stop Loss" },
+                { key: "target_price", label: "Take Profit" },
+                { key: "confidence", label: "Confiança (%)" },
+                { key: "status", label: "Status" },
+              ]}
+            />
+          </div>
+          <SearchBar value={searchQuery} onChange={setSearchQuery} placeholder="Pesquisar sinais..." />
+          <FilterChips
+            filters={SIGNAL_FILTERS}
+            activeFilters={activeFilters}
+            onToggle={toggleFilter}
+            onClear={clearFilters}
+          />
+        </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border/50">
+                <th className="p-3 w-10">
+                  <input
+                    type="checkbox"
+                    checked={selectedIds.length > 0 && selectedIds.length === filteredData.length}
+                    onChange={toggleAll}
+                    aria-label="Selecionar todos"
+                  />
+                </th>
                 {["Par","TF","Tipo","Entrada","SL","TP","Conf.","Status","Ações"].map(h => (
                   <th key={h} className="text-left p-3 text-xs text-muted-foreground">{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {signals.map(s => (
-                <tr key={s.id} className="border-b border-border/30 hover:bg-secondary/20">
-                  <td className="p-3 font-semibold">{s.symbol}</td>
-                  <td className="p-3 text-muted-foreground">{s.timeframe}</td>
-                  <td className="p-3">
-                    <span className={`text-xs font-semibold px-2 py-1 rounded-lg flex items-center gap-1 w-fit ${s.signal_type === "BUY" ? "bg-success/10 text-success" : s.signal_type === "SELL" ? "bg-destructive/10 text-destructive" : "bg-secondary text-muted-foreground"}`}>
-                      {s.signal_type === "BUY" ? <TrendingUp className="h-3 w-3" /> : s.signal_type === "SELL" ? <TrendingDown className="h-3 w-3" /> : null}
-                      {s.signal_type}
-                    </span>
-                  </td>
-                  <td className="p-3 font-mono">{Number(s.entry_price).toFixed(5)}</td>
-                  <td className="p-3 font-mono text-destructive">{Number(s.stop_loss).toFixed(5)}</td>
-                  <td className="p-3 font-mono text-success">{Number(s.target_price).toFixed(5)}</td>
-                  <td className="p-3">{s.confidence}%</td>
-                  <td className="p-3">
-                    <select value={s.status} onChange={e => updateStatus(s.id, e.target.value)}
-                      className={`text-xs px-2 py-1 rounded-lg border-0 font-semibold ${s.status === "active" ? "bg-warning/20 text-warning" : s.status === "tp" ? "bg-success/20 text-success" : s.status === "sl" ? "bg-destructive/20 text-destructive" : "bg-secondary text-muted-foreground"}`}>
-                      <option value="active">Ativo</option><option value="pending">Pendente</option>
-                      <option value="tp">✓ TP</option><option value="sl">✗ SL</option>
-                    </select>
-                  </td>
-                  <td className="p-3">
-                    <button onClick={() => deleteSignal(s.id)} className="text-destructive hover:opacity-70">
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </td>
-                </tr>
-              ))}
+              {filteredData.map((raw) => {
+                const s = raw as unknown as SignalRow;
+                return (
+                  <tr key={s.id} className={`border-b border-border/30 hover:bg-secondary/20 ${selectedIds.includes(s.id) ? "bg-primary/5" : ""}`}>
+                    <td className="p-3">
+                      <input
+                        type="checkbox"
+                        checked={selectedIds.includes(s.id)}
+                        onChange={() => toggleSelect(s.id)}
+                        aria-label={`Selecionar ${s.symbol}`}
+                      />
+                    </td>
+                    <td className="p-3 font-semibold">{s.symbol}</td>
+                    <td className="p-3 text-muted-foreground">{s.timeframe}</td>
+                    <td className="p-3">
+                      <span className={`text-xs font-semibold px-2 py-1 rounded-lg flex items-center gap-1 w-fit ${s.signal_type === "BUY" ? "bg-success/10 text-success" : s.signal_type === "SELL" ? "bg-destructive/10 text-destructive" : "bg-secondary text-muted-foreground"}`}>
+                        {s.signal_type === "BUY" ? <TrendingUp className="h-3 w-3" /> : s.signal_type === "SELL" ? <TrendingDown className="h-3 w-3" /> : null}
+                        {s.signal_type}
+                      </span>
+                    </td>
+                    <td className="p-3 font-mono">{Number(s.entry_price).toFixed(5)}</td>
+                    <td className="p-3 font-mono text-destructive">{Number(s.stop_loss).toFixed(5)}</td>
+                    <td className="p-3 font-mono text-success">{Number(s.target_price).toFixed(5)}</td>
+                    <td className="p-3">{s.confidence}%</td>
+                    <td className="p-3">
+                      <select value={s.status} onChange={e => updateStatus(s.id, e.target.value)}
+                        className={`text-xs px-2 py-1 rounded-lg border-0 font-semibold ${s.status === "active" ? "bg-warning/20 text-warning" : s.status === "tp" ? "bg-success/20 text-success" : s.status === "sl" ? "bg-destructive/20 text-destructive" : "bg-secondary text-muted-foreground"}`}>
+                        <option value="active">Ativo</option><option value="pending">Pendente</option>
+                        <option value="tp">✓ TP</option><option value="sl">✗ SL</option>
+                      </select>
+                    </td>
+                    <td className="p-3">
+                      <button onClick={() => deleteSignal(s.id)} className="text-destructive hover:opacity-70">
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
+        {filteredData.length === 0 && (
+          <p className="p-6 text-center text-sm text-muted-foreground">Sem sinais.</p>
+        )}
       </div>
+
+      <BulkActionsBar
+        selectedCount={selectedIds.length}
+        onDelete={() => void handleBulkDelete()}
+        onCancel={() => setSelectedIds([])}
+      />
     </div>
   );
 }

@@ -27,6 +27,6 @@ dist-ssr
 .env*.local
 vite.config.ts.timestamp-*
 
-# Supabase CLI artifacts
-supabase/.temp/
-*.sql.save
+# Playwright MCP artifacts
+.playwright-mcp/
+

@@ -1,23 +1,27 @@
 import { useMemo } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { Sparkles, TrendingUp, Brain, Shield, Crown, ChevronRight, BarChart3, Zap, Target } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { Sparkles, TrendingUp, Brain, Shield, Crown, ChevronRight, BarChart3, Zap, Target, Flame, Activity } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Layout } from "@/components/layout/Layout";
 import { SignalCard } from "@/components/signals/SignalCard";
 import { useSignals } from "@/hooks/useSignals";
+import { useBoomHours } from "@/hooks/useBoomHours";
 import { useHistory } from "@/hooks/useHistory";
 
-const features = [
-  { icon: BarChart3, title: "Análise Técnica Avançada", description: "RSI, EMAs, suportes e resistências combinados para identificar as melhores oportunidades." },
-  { icon: Brain, title: "Inteligência Artificial", description: "Algoritmos de IA analisam padrões e tendências para aumentar a precisão dos sinais." },
-  { icon: Shield, title: "Gestão de Risco", description: "Cada sinal inclui Stop Loss e Take Profit com RR mínimo de 1:2." },
-  { icon: Crown, title: "Plano Premium", description: "Acesso a todos os pares, timeframes e alertas em tempo real." },
-];
-
 export default function Index() {
+  const { t } = useTranslation();
   const { signals, loading } = useSignals();
+  const { nextBoom, loading: boomLoading } = useBoomHours();
   const { stats } = useHistory();
+
+  const features = [
+    { icon: BarChart3, title: t("inicio.feature1Title"), description: t("inicio.feature1Desc") },
+    { icon: Brain, title: t("inicio.feature2Title"), description: t("inicio.feature2Desc") },
+    { icon: Shield, title: t("inicio.feature3Title"), description: t("inicio.feature3Desc") },
+    { icon: Crown, title: t("inicio.feature4Title"), description: t("inicio.feature4Desc") },
+  ];
 
   const featuredSignals = signals
     .filter(s => s.status === "active" && s.type !== "AGUARDAR")
@@ -42,10 +46,10 @@ export default function Index() {
   }, [signals]);
 
   const displayStats = [
-    { value: winRate, label: "Taxa de Acerto" },
-    { value: avgRR ?? "—", label: "RR Médio" },
-    { value: "24/7", label: "Monitoramento" },
-    { value: totalPairs, label: "Pares Forex" },
+    { value: winRate, label: t("inicio.statWinRate") },
+    { value: avgRR ?? "—", label: t("inicio.statAvgRR") },
+    { value: "24/7", label: t("inicio.statMonitoring") },
+    { value: totalPairs, label: t("inicio.statPairs") },
   ];
 
   return (
@@ -72,7 +76,7 @@ export default function Index() {
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75" />
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-success" />
               </span>
-              <span className="text-sm font-medium">Sinais ao Vivo — Análise Inteligente de Forex</span>
+              <span className="text-sm font-medium">{t("inicio.heroBadge")}</span>
             </motion.div>
 
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
@@ -86,13 +90,13 @@ export default function Index() {
 
             <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}
               className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-6">
-              Análise inteligente.{" "}
-              <span className="gradient-shield">Entradas estratégicas.</span>
+              {t("inicio.heroTitle1")}{" "}
+              <span className="gradient-shield">{t("inicio.heroTitle2")}</span>
             </motion.h1>
 
             <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
               className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-10">
-              Sinais de Forex gerados por IA com análise técnica avançada. RSI, EMAs, MACD e Bollinger Bands combinados para entradas precisas.
+              {t("inicio.heroSubtitle")}
             </motion.p>
 
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
@@ -100,12 +104,12 @@ export default function Index() {
               <Link to="/analises">
                 <Button variant="hero" size="xl">
                   <TrendingUp className="h-5 w-5" />
-                  Ver Análises ao Vivo
+                  {t("inicio.heroCtaLive")}
                 </Button>
               </Link>
               <Link to="/planos">
                 <Button variant="outline" size="xl">
-                  Conhecer Planos
+                  {t("inicio.heroCtaPlans")}
                   <ChevronRight className="h-5 w-5" />
                 </Button>
               </Link>
@@ -124,12 +128,69 @@ export default function Index() {
         </div>
       </section>
 
+      {/* Painel — NextBoom + Performance */}
+      <section className="py-12">
+        <div className="container mx-auto px-4">
+          <div className="grid md:grid-cols-2 gap-6">
+            <div className="glass-card p-6 group hover:border-accent/40 transition-all duration-300">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center">
+                  <Flame className="h-5 w-5 text-accent" />
+                </div>
+                <div>
+                  <h3 className="font-display text-lg font-bold">{t("components.nextBoomCard.title")}</h3>
+                  <p className="text-xs text-muted-foreground">{t("inicio.nextBoomSubtitle")}</p>
+                </div>
+              </div>
+              {boomLoading ? (
+                <div className="h-5 bg-muted/40 rounded animate-pulse w-2/3" />
+              ) : nextBoom ? (
+                <div>
+                  <div className="flex flex-wrap items-center gap-2 mb-2">
+                    <span className="text-xl font-display font-bold">{nextBoom.time_wat}</span>
+                    <span className="badge-premium text-xs">{nextBoom.badge}</span>
+                  </div>
+                  <p className="font-semibold text-accent">{nextBoom.title}</p>
+                  {nextBoom.pairs.length > 0 && (
+                    <p className="text-sm text-muted-foreground mt-1">{nextBoom.pairs.join(" · ")}</p>
+                  )}
+                  <p className="text-xs text-muted-foreground mt-1">{nextBoom.description}</p>
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">{t("inicio.nextBoomNoSchedule")}</p>
+              )}
+            </div>
+
+            <div className="glass-card p-6 group hover:border-primary/40 transition-all duration-300">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <Activity className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-display text-lg font-bold">{t("components.performanceCard.title")}</h3>
+                  <p className="text-xs text-muted-foreground">{t("inicio.perfSubtitle")}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-4">
+                <p className={`font-display text-3xl font-bold ${stats.total > 0 ? (stats.winRate >= 60 ? "text-success" : stats.winRate >= 40 ? "text-warning" : "text-muted-foreground") : "text-muted-foreground"}`}>
+                  {stats.total > 0 ? `${stats.winRate}%` : "—"}
+                </p>
+                <div className="text-xs text-muted-foreground space-y-0.5">
+                  <p>{t("components.performanceCard.winRate")}</p>
+                  <p>{t("inicio.perfSignalsAnalyzed", { count: stats.total })}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Features */}
       <section className="py-24 bg-card/30">
         <div className="container mx-auto px-4">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-16">
-            <h2 className="font-display text-3xl sm:text-4xl font-bold mb-4">Por que escolher The Magic Trader?</h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">Combinamos análise técnica avançada com inteligência artificial para fornecer sinais de alta qualidade.</p>
+            <h2 className="font-display text-3xl sm:text-4xl font-bold mb-4">{t("inicio.featuresTitle")}</h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">{t("inicio.featuresSubtitle")}</p>
           </motion.div>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {features.map((feature, i) => {
@@ -155,12 +216,12 @@ export default function Index() {
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
             className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-12">
             <div>
-              <h2 className="font-display text-3xl sm:text-4xl font-bold mb-2">Sinais em Destaque</h2>
-              <p className="text-muted-foreground">Análises mais recentes com alta confiança</p>
+              <h2 className="font-display text-3xl sm:text-4xl font-bold mb-2">{t("inicio.featuredTitle")}</h2>
+              <p className="text-muted-foreground">{t("inicio.featuredSubtitle")}</p>
             </div>
             <Link to="/analises">
               <Button variant="outline">
-                Ver Todos
+                {t("inicio.viewAll")}
                 <ChevronRight className="h-4 w-4 ml-2" />
               </Button>
             </Link>
@@ -196,14 +257,14 @@ export default function Index() {
       <section className="py-24 bg-card/30">
         <div className="container mx-auto px-4">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-16">
-            <h2 className="font-display text-3xl sm:text-4xl font-bold mb-4">Como Funciona</h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">Três passos simples para começar a receber análises</p>
+            <h2 className="font-display text-3xl sm:text-4xl font-bold mb-4">{t("inicio.howTitle")}</h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">{t("inicio.howSubtitle")}</p>
           </motion.div>
           <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
             {[
-              { step: "01", icon: Zap, title: "Crie sua Conta", description: "Registe-se gratuitamente e tenha acesso a sinais básicos." },
-              { step: "02", icon: BarChart3, title: "Receba Análises", description: "Acompanhe os sinais com entradas, SL e TP definidos." },
-              { step: "03", icon: Target, title: "Estude o Mercado", description: "Use as análises para aprender e desenvolver sua estratégia." },
+              { step: "01", icon: Zap, title: t("inicio.howStep1Title"), description: t("inicio.howStep1Desc") },
+              { step: "02", icon: BarChart3, title: t("inicio.howStep2Title"), description: t("inicio.howStep2Desc") },
+              { step: "03", icon: Target, title: t("inicio.howStep3Title"), description: t("inicio.howStep3Desc") },
             ].map((item, i) => (
               <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }} className="relative text-center">
                 <div className="text-6xl font-display font-bold text-primary/10 absolute -top-4 left-1/2 -translate-x-1/2">{item.step}</div>
@@ -226,17 +287,17 @@ export default function Index() {
         <div className="container mx-auto px-4 relative z-10">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="max-w-3xl mx-auto text-center">
             <Crown className="h-16 w-16 text-primary mx-auto mb-6" />
-            <h2 className="font-display text-3xl sm:text-4xl font-bold mb-4">Pronto para elevar sua análise?</h2>
-            <p className="text-muted-foreground mb-8">Junte-se aos traders que utilizam o The Magic Trader para análises técnicas de alta qualidade.</p>
+            <h2 className="font-display text-3xl sm:text-4xl font-bold mb-4">{t("inicio.ctaTitle")}</h2>
+            <p className="text-muted-foreground mb-8">{t("inicio.ctaSubtitle")}</p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link to="/registro">
                 <Button variant="hero" size="xl">
-                  Começar Agora
+                  {t("inicio.ctaStart")}
                   <Sparkles className="h-5 w-5 ml-2" />
                 </Button>
               </Link>
               <Link to="/planos">
-                <Button variant="outline" size="lg">Ver Planos Premium</Button>
+                <Button variant="outline" size="lg">{t("inicio.ctaPlansPremium")}</Button>
               </Link>
             </div>
           </motion.div>

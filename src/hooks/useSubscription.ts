@@ -1,67 +1,57 @@
-import { useState, useEffect } from "react";
-import type { User } from "@supabase/supabase-js";
+import { useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabaseClient";
+import { useAuth } from "@/contexts/AuthContext";
+import { PLAN_LIMITS, canAccessPair, canAccessTimeframe, type PlanTier } from "@/lib/gating";
+import type { Subscription } from "@/lib/types";
 
-export interface Subscription {
-  status: "active" | "inactive";
-  currency: string;
-  stripe_price_id: string;
-  current_period_end: string;
+const VALID_TIERS: PlanTier[] = ["free", "basic", "pro", "premium"];
+
+async function fetchSubscription(userId: string): Promise<Subscription | null> {
+  const { data } = await supabase
+    .from("subscriptions")
+    .select("*")
+    .eq("user_id", userId)
+    .order("updated_at", { ascending: false, nullsFirst: false })
+    .limit(1);
+  return data?.[0] ?? null;
 }
 
 export function useSubscription() {
-  const [subscription, setSubscription] = useState<Subscription | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState<User | null>(null);
+  const { user } = useAuth();
 
-  const fetchData = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    setUser(user);
-    if (!user) { setLoading(false); return; }
-    const { data } = await supabase
-      .from("subscriptions")
-      .select("*")
-      .eq("user_id", user.id)
-      .single();
-    setSubscription(data || null);
-    setLoading(false);
-  };
+  const { data: subscription, isLoading } = useQuery({
+    queryKey: ["subscription", user?.id],
+    queryFn: () => (user ? fetchSubscription(user.id) : Promise.resolve(null)),
+    enabled: !!user,
+    staleTime: 60_000,
+  });
 
-  useEffect(() => {
-    fetchData();
-    const { data: { subscription: authSub } } = supabase.auth.onAuthStateChange((_, session) => {
-      setUser(session?.user || null);
-      if (!session?.user) { setSubscription(null); setLoading(false); }
-      else fetchData();
-    });
-    return () => authSub.unsubscribe();
-  }, []);
+  const value = useMemo(() => {
+    const active = subscription?.status === "active";
+    const rawPlan = subscription?.plan ?? "free";
+    const tier: PlanTier =
+      active && VALID_TIERS.includes(rawPlan as PlanTier) ? (rawPlan as PlanTier) : "free";
+    const isPremium = tier !== "free";
+    const limits = PLAN_LIMITS[tier];
+    const currency = (subscription?.currency as "usd" | "aoa") ?? "usd";
+    return {
+      user,
+      subscription,
+      tier,
+      currency,
+      loading: isLoading,
+      isPremium,
+      canAccessBanca: tier === "premium",
+      hasAnalysis: limits.hasAnalysis,
+      limits,
+      canAccessPair: (pair: string) => canAccessPair(pair, tier),
+      canAccessTimeframe: (tf: string) => canAccessTimeframe(tf, tier),
+      checkout: async (_priceId?: string, _currency?: "usd" | "aoa") => {
+        window.location.href = "/planos";
+      },
+    };
+  }, [subscription, user, isLoading]);
 
-  const isPremium = subscription?.status === "active";
-
-  const checkout = async (priceId: string, currency: string) => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) { window.location.href = "/login"; return; }
-
-    try {
-      const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/stripe-checkout`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${session.access_token}`,
-          "apikey": import.meta.env.VITE_SUPABASE_ANON_KEY,
-        },
-        body: JSON.stringify({ priceId, currency }),
-      });
-
-      const data = await res.json();
-      if (data.error) { alert("Erro: " + data.error); return; }
-      if (!data.url) { alert("Erro: URL de pagamento não recebida."); return; }
-      window.location.href = data.url;
-    } catch (err) {
-      alert("Erro de ligação. Tenta novamente.");
-    }
-  };
-
-  return { user, subscription, isPremium, loading, checkout };
+  return value;
 }

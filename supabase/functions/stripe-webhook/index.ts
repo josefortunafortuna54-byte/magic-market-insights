@@ -18,12 +18,11 @@ serve(async (req) => {
     let event: Stripe.Event;
     try {
       event = await stripe.webhooks.constructEventAsync(body, signature!, STRIPE_WEBHOOK_SECRET!);
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Webhook Error";
-      return new Response(`Webhook Error: ${message}`, { status: 400 });
+    } catch (err: any) {
+      return new Response(`Webhook Error: ${err.message}`, { status: 400 });
     }
 
-    const session = event.data.object as Stripe.Checkout.Session;
+    const session = event.data.object as any;
 
     if (event.type === "checkout.session.completed") {
       const userId = session.metadata?.user_id;
@@ -59,8 +58,7 @@ serve(async (req) => {
     }
 
     return new Response(JSON.stringify({ received: true }), { status: 200 });
-  } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : "Erro desconhecido";
-    return new Response(JSON.stringify({ error: message }), { status: 500 });
+  } catch (err: any) {
+    return new Response(JSON.stringify({ error: err.message }), { status: 500 });
   }
 });

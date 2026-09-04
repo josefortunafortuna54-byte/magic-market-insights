@@ -1,0 +1,22 @@
+- generic [ref=f1e376]:
+  - generic [ref=f1e377]:
+    - generic [ref=f1e378]: The Magic Trader
+    - generic [ref=f1e379]: Análise inteligente. Entradas estratégicas.
+  - generic [ref=f1e380]:
+    - generic [ref=f1e381]:
+      - generic [ref=f1e382]: EMAIL
+      - textbox "nome@email.com" [ref=f1e383]
+    - generic [ref=f1e384]:
+      - generic [ref=f1e385]:
+        - generic [ref=f1e386]: SENHA
+        - textbox "••••••••" [ref=f1e387]
+      - generic [ref=f1e388] [cursor=pointer]: 
+    - generic [ref=f1e389] [cursor=pointer]: Entrar
+    - generic [ref=f1e391] [cursor=pointer]: Continuar com Google
+  - generic [ref=f1e393]:
+    - link "Esqueci a senha" [ref=f1e394] [cursor=pointer]:
+      - /url: /recuperar-senha
+    - generic [ref=f1e395]:
+      - generic [ref=f1e396]: Ainda não tens conta?
+      - link "Criar conta" [ref=f1e397] [cursor=pointer]:
+        - /url: /registro
