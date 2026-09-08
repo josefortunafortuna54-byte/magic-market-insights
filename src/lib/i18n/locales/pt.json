@@ -722,7 +722,13 @@
     "capitalItem2": "Meta de retorno com juros compostos automáticos",
     "capitalItem3": "Levantamentos semanais dos lucros",
     "capitalItem4": "Relatórios de desempenho e progresso da meta",
-    "capitalCta": "Ver Gestão de Capital"
+    "capitalCta": "Ver Gestão de Capital",
+    "choose": "Escolher",
+    "featurePairs": "{{count}} pares ({{list}})",
+    "featureTimeframes": "{{count}} timeframes ({{list}})",
+    "featureAlertsUnlimited": "Alertas push ilimitados/dia",
+    "featureAlertsCount": "{{count}} alertas push/dia",
+    "featureAnalysis": "Análises técnicas"
   },
   "banca": {
     "title": "Gestão de Banca",
@@ -900,7 +906,8 @@
     "receiptSaveError": "Comprovativo enviado mas não foi possível registar no servidor. Contacte o suporte.",
     "deleteMovement": "Apagar",
     "deleteMovementTitle": "Apagar movimento?",
-    "deleteMovementMsg": "Tem certeza que deseja apagar este movimento pendente?"
+    "deleteMovementMsg": "Tem certeza que deseja apagar este movimento pendente?",
+    "copyError": "Não foi possível copiar o número"
   },
   "notificacoes": {
     "title": "Notificações",

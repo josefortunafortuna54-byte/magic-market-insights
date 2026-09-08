@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Check, Copy, ImagePlus, Loader2, X } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -44,6 +45,7 @@ export function PaymentModal({
   busy = false,
   titleText,
 }: PaymentModalProps) {
+  const { t } = useTranslation();
   const selectedMethod = method ? availableMethods.find((m) => m.id === method) : null;
   const [proof, setProof] = useState<ReceiptFile | null>(initialProof);
   const [copied, setCopied] = useState(false);
@@ -78,7 +80,7 @@ export function PaymentModal({
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      toast.error("Não foi possível copiar o número");
+      toast.error(t("depositos.copyError"));
     }
   };
 
@@ -107,7 +109,7 @@ export function PaymentModal({
         <DialogHeader>
           <div className="flex items-start justify-between gap-4">
             <DialogTitle className="font-display text-xl">
-              {titleText ?? `Pagamento: ${planLabel(plan)}`}
+              {titleText ?? t("planos.paymentTitle", { plan: planLabel(plan) })}
             </DialogTitle>
             <Button
               variant="ghost"
@@ -119,12 +121,12 @@ export function PaymentModal({
               <X className="h-4 w-4" />
             </Button>
           </div>
-          <p className="text-sm text-muted-foreground">Valor: {price}/mês</p>
+          <p className="text-sm text-muted-foreground">{t("planos.paymentAmount", { amount: price })}</p>
         </DialogHeader>
 
         {!method ? (
           <div className="py-2">
-            <p className="text-sm text-muted-foreground mb-3">Escolha o método:</p>
+            <p className="text-sm text-muted-foreground mb-3">{t("planos.chooseMethod")}</p>
             <div className="grid grid-cols-2 gap-3">
               {availableMethods.map((m) => {
                 return (
@@ -172,7 +174,7 @@ export function PaymentModal({
                 onClick={() => onMethodSelect(undefined)}
                 disabled={busy}
               >
-                Alterar
+                {t("planos.change")}
               </Button>
             </div>
 
@@ -182,13 +184,13 @@ export function PaymentModal({
               </p>
               <Button variant="success" className="mx-auto flex" onClick={copyValue} disabled={busy}>
                 {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                {copied ? "Copiado" : "Copiar"}
+                {copied ? t("depositos.numberCopied") : t("depositos.copyNumber")}
               </Button>
             </div>
 
             <div className="rounded-xl border border-border bg-secondary/50 p-4">
               <p className="text-center text-base font-bold text-accent">
-                Pague para o número/UID acima
+                {t("planos.payInstructions")}
               </p>
             </div>
 
@@ -202,8 +204,8 @@ export function PaymentModal({
                   <ImagePlus className="h-5 w-5 text-primary" />
                 </div>
                 <div className="flex-1">
-                  <p className="text-sm font-semibold text-primary">Anexar comprovativo</p>
-                  <p className="text-xs text-muted-foreground">Galeria ou ficheiros</p>
+                  <p className="text-sm font-semibold text-primary">{t("depositos.sendProof")}</p>
+                  <p className="text-xs text-muted-foreground">{t("depositos.sendProofHint")}</p>
                 </div>
               </button>
             ) : (
@@ -212,7 +214,7 @@ export function PaymentModal({
                   <img src={proof.uri} alt="Comprovativo" className="h-full w-full object-cover" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-semibold text-success">Comprovativo anexado</p>
+                  <p className="text-sm font-semibold text-success">{t("depositos.proofAttached")}</p>
                   <p className="truncate text-xs text-muted-foreground">{proof.fileName}</p>
                 </div>
                 <Button
@@ -228,19 +230,19 @@ export function PaymentModal({
             )}
 
             <p className="text-center text-xs text-muted-foreground leading-relaxed">
-              Após o pagamento, envie o comprovante…
+              {t("planos.afterPayment")}
             </p>
           </div>
         )}
 
         <DialogFooter className="gap-2 sm:gap-2 flex-col sm:flex-col">
           <Button variant="outline" className="w-full" onClick={onClose} disabled={busy}>
-            Cancelar
+            {t("common.cancel")}
           </Button>
           {method ? (
             <Button variant="premium" className="w-full" onClick={handleConfirm} disabled={busy}>
               {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-              ENVIAR O COMPROVATIVO
+              {t("planos.receiptSent")}
             </Button>
           ) : null}
         </DialogFooter>

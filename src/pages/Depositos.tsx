@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
@@ -88,6 +89,7 @@ const formatMovementAmount = (amount: number, curr: Currency) =>
   curr === "usd" ? `$${formatMoney(amount)}` : `${formatMoney(amount)} Kz`;
 
 export default function Depositos() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { config: banca } = useBanca();
   const { movements, loading, addMovement, deleteMovement } = useMovements();
@@ -158,9 +160,8 @@ export default function Depositos() {
   };
 
   const alertPendingDeposit = () => {
-    toast.warning("Depósito Pendente", {
-      description:
-        "Já tens um pedido de depósito em análise. Aguarda o processamento antes de enviares outro.",
+    toast.warning(t("depositos.pendingDepositTitle"), {
+      description: t("depositos.pendingDepositMsg"),
     });
   };
 
@@ -175,7 +176,7 @@ export default function Depositos() {
   const confirmDeposit = async (proof: ReceiptFile | null, retries = 2) => {
     if (!depositModal?.method || !proof) return;
     if (!user) {
-      toast.error("Erro de ligação");
+      toast.error(t("planos.connectionError"));
       return;
     }
     if (await hasPendingDepositRequest()) {
@@ -193,10 +194,10 @@ export default function Depositos() {
     }
     if (!result.url) {
       setSending(false);
-      toast.error("Erro de ligação", {
-        description: result.error || "Verifique a sua ligação e tente novamente.",
+      toast.error(t("planos.connectionError"), {
+        description: result.error || t("planos.retryMessage"),
         action: {
-          label: "Tentar novamente",
+          label: t("planos.tryAgain"),
           onClick: () => confirmDeposit(proof, retries),
         },
       });
@@ -249,11 +250,10 @@ export default function Depositos() {
       }
       if (!saved) {
         setSending(false);
-        toast.error("Erro de ligação", {
-          description:
-            "Comprovativo enviado mas não foi possível registar no servidor. Contacte o suporte.",
+        toast.error(t("planos.connectionError"), {
+          description: t("depositos.receiptSaveError"),
           action: {
-            label: "Tentar novamente",
+            label: t("planos.tryAgain"),
             onClick: () => confirmDeposit(proof, retries),
           },
         });
@@ -280,9 +280,7 @@ export default function Depositos() {
   const submitWithdrawal = async () => {
     const amount = parseFloat(withdrawAmount.replace(",", "."));
     if (!withdrawMethod || !isFinite(amount) || amount <= 0 || !withdrawDetails.trim()) {
-      toast.error(
-        "Verifica os dados do levantamento: escolhe o método, indica o valor e preenche os dados de pagamento.",
-      );
+      toast.error(t("depositos.invalidWithdraw"));
       return;
     }
     try {
@@ -306,8 +304,8 @@ export default function Depositos() {
     setWithdrawAmount("");
     setWithdrawDetails("");
     setWithdrawMethod(null);
-    toast.success("Levantamento pedido", {
-      description: "O teu pedido foi registado como pendente e será analisado pela equipa.",
+    toast.success(t("depositos.confirmWithdrawOk"), {
+      description: t("depositos.confirmWithdrawMsg"),
     });
   };
 
@@ -317,7 +315,7 @@ export default function Depositos() {
     const isPending = m.status === "pendente";
 
     const handleDelete = () => {
-      if (window.confirm("Tem certeza que deseja apagar este movimento pendente?")) {
+      if (window.confirm(t("depositos.deleteMovementMsg"))) {
         void deleteMovement(m.id);
       }
     };
@@ -346,9 +344,9 @@ export default function Depositos() {
           <p className="font-semibold">
             {isDeposit
               ? m.plan === "capital"
-                ? "Depósito de capital"
-                : `Depósito ${planLabel(m.plan as Exclude<PlanId, "free">)}`
-              : "Levantamento"}
+                ? t("depositos.movementCapital")
+                : t("depositos.movementDeposit", { plan: planLabel(m.plan as Exclude<PlanId, "free">) })
+              : t("depositos.movementWithdraw")}
           </p>
           <p className="truncate text-xs text-muted-foreground">
             {method?.label} · {formatShortDate(m.createdAt)}
@@ -373,13 +371,13 @@ export default function Depositos() {
                     : "bg-warning/20 text-warning border-warning/30"
               }
             >
-              {m.status === "concluido" ? "Concluído" : "Pendente"}
+              {m.status === "concluido" ? t("depositos.statusConcluido") : t("depositos.statusPendente")}
             </Badge>
             {isPending ? (
               <button
                 onClick={handleDelete}
                 className="text-destructive hover:opacity-80 transition-opacity"
-                aria-label="Apagar"
+                aria-label={t("depositos.deleteMovement")}
               >
                 <Trash2 className="h-3.5 w-3.5" />
               </button>
@@ -404,7 +402,7 @@ export default function Depositos() {
             )}
           >
             {active ? <span className="absolute inset-0 rounded-full bg-accent shadow-lg shadow-accent/35" /> : null}
-            <span className="relative">{c === "usd" ? "USD ($)" : "AOA (Kz)"}</span>
+            <span className="relative">{c === "usd" ? t("planos.usd") : t("planos.aoa")}</span>
           </button>
         );
       })}
@@ -423,7 +421,7 @@ export default function Depositos() {
               <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-white/15">
                 <Wallet className="h-4 w-4 text-white" />
               </div>
-              <span className="text-[13px] font-bold tracking-widest text-white/90">SALDO</span>
+              <span className="text-[13px] font-bold tracking-widest text-white/90">{t("depositos.balance")}</span>
             </div>
             <span className="rounded-full bg-white/15 px-2.5 py-1 text-xs font-bold text-white">
               {currencySymbol}
@@ -434,15 +432,15 @@ export default function Depositos() {
           </p>
           <div className="flex items-center gap-1.5">
             <Lock className="h-3.5 w-3.5 text-white/65" />
-            <span className="text-xs text-white/70">Disponível na carteira</span>
+            <span className="text-xs text-white/70">{t("depositos.balanceSub")}</span>
           </div>
         </div>
 
         {/* Tabs */}
         <div className="flex rounded-full bg-secondary/70 p-1">
           {[
-            { id: "deposit" as TabId, icon: ArrowDownCircle, label: "Depositar" },
-            { id: "withdraw" as TabId, icon: ArrowUpCircle, label: "Levantar" },
+            { id: "deposit" as TabId, icon: ArrowDownCircle, label: t("depositos.tabDeposit") },
+            { id: "withdraw" as TabId, icon: ArrowUpCircle, label: t("depositos.tabWithdraw") },
           ].map((tab) => {
             const active = activeTab === tab.id;
             return (
@@ -510,12 +508,12 @@ export default function Depositos() {
                     </div>
                     <div className="flex-1">
                       <p className="font-semibold">
-                        {isCapitalDeposit ? "Depósito de capital" : planLabel(plan)}
+                        {isCapitalDeposit ? t("depositos.capitalDepositTitle") : planLabel(plan)}
                       </p>
                       <p className="text-xs text-muted-foreground">
                         {isCapitalDeposit
-                          ? "Gestão de Banca — valor definido no simulador"
-                          : "Valor"}
+                          ? t("depositos.capitalDepositSubtitle")
+                          : t("depositos.amount")}
                       </p>
                     </div>
                     <p className="text-xl font-extrabold tracking-tight">
@@ -527,12 +525,16 @@ export default function Depositos() {
                     className="w-full h-[54px]"
                     onClick={openDepositModal}
                   >
-                    Depositar {isCapitalDeposit ? formatBancaMoney(customAmount ?? 0, currency) : price}
+                    {t("depositos.depositCta", {
+                      amount: isCapitalDeposit
+                        ? formatBancaMoney(customAmount ?? 0, currency)
+                        : price,
+                    })}
                   </Button>
                   <div className="flex items-center justify-center gap-1.5">
                     <ShieldCheck className="h-3.5 w-3.5 text-success" />
                     <span className="text-xs text-muted-foreground">
-                      Pagamentos seguros · Processados pela equipa
+                      {t("depositos.secureNote")}
                     </span>
                   </div>
                 </CardContent>
@@ -544,19 +546,18 @@ export default function Depositos() {
               <Card>
                 <CardContent className="space-y-4 pt-6">
                   <p className="text-sm text-muted-foreground">
-                    Pede o teu levantamento. Os pedidos são analisados e o valor é enviado pelos
-                    nossos canais oficiais.
+                    {t("depositos.withdrawSubtitle")}
                   </p>
                   <div className="flex items-center justify-between rounded-xl border border-border bg-secondary/60 px-4 py-3">
                     <span className="text-sm font-semibold text-muted-foreground">
-                      Disponível para levantar
+                      {t("depositos.withdrawAvailable")}
                     </span>
                     <span className="font-semibold text-success">
                       {formatBancaMoney(banca.achieved, banca.currency ?? "usd")}
                     </span>
                   </div>
                   <p className="text-sm font-semibold text-muted-foreground">
-                    Método de pagamento
+                    {t("depositos.withdrawMethod")}
                   </p>
                   <div className="flex flex-wrap gap-2">
                     {availableMethods.map((m) => {
@@ -581,7 +582,7 @@ export default function Depositos() {
                   </div>
                   <div className="space-y-1.5">
                     <label className="text-xs text-muted-foreground">
-                      Valor a levantar ({currencySymbol})
+                      {t("depositos.withdrawAmount", { currency: currencySymbol })}
                     </label>
                     <Input
                       value={withdrawAmount}
@@ -592,7 +593,7 @@ export default function Depositos() {
                   </div>
                   <div className="space-y-1.5">
                     <label className="text-xs text-muted-foreground">
-                      Dados de pagamento (UID/número)
+                      {t("depositos.withdrawDetails")}
                     </label>
                     <Textarea
                       value={withdrawDetails}
@@ -606,7 +607,7 @@ export default function Depositos() {
                     />
                   </div>
                   <Button variant="secondary" className="w-full h-[54px]" onClick={submitWithdrawal}>
-                    Pedir levantamento
+                    {t("depositos.withdrawCta")}
                   </Button>
                 </CardContent>
               </Card>
@@ -616,18 +617,18 @@ export default function Depositos() {
 
         {/* Histórico */}
         <div className="space-y-3">
-          <h2 className="font-display text-xl font-bold">Histórico</h2>
+          <h2 className="font-display text-xl font-bold">{t("depositos.historySection")}</h2>
           {loading ? (
             <Card>
               <CardContent>
-                <p className="py-4 text-center text-sm text-muted-foreground">A carregar…</p>
+                <p className="py-4 text-center text-sm text-muted-foreground">{t("common.loading")}</p>
               </CardContent>
             </Card>
           ) : movements.length === 0 ? (
             <Card>
               <CardContent>
                 <p className="py-4 text-center text-sm text-muted-foreground">
-                  Ainda não há movimentos.
+                  {t("depositos.empty")}
                 </p>
               </CardContent>
             </Card>

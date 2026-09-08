@@ -718,7 +718,13 @@
     "capitalItem2": "Return target with automatic compound interest",
     "capitalItem3": "Weekly profit withdrawals",
     "capitalItem4": "Performance reports and target progress tracking",
-    "capitalCta": "View Capital Management"
+    "capitalCta": "View Capital Management",
+    "choose": "Choose",
+    "featurePairs": "{{count}} pairs ({{list}})",
+    "featureTimeframes": "{{count}} timeframes ({{list}})",
+    "featureAlertsUnlimited": "Unlimited push alerts/day",
+    "featureAlertsCount": "{{count}} push alerts/day",
+    "featureAnalysis": "Technical analysis"
   },
   "banca": {
     "title": "Bankroll Management",
@@ -896,7 +902,8 @@
     "receiptSaveError": "Proof sent but could not be registered on the server. Please contact support.",
     "deleteMovement": "Delete",
     "deleteMovementTitle": "Delete movement?",
-    "deleteMovementMsg": "Are you sure you want to delete this pending movement?"
+    "deleteMovementMsg": "Are you sure you want to delete this pending movement?",
+    "copyError": "Couldn't copy the number"
   },
   "notificacoes": {
     "title": "Notifications",

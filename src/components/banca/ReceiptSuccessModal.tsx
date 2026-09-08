@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 import { Check, Clock } from "lucide-react";
 import {
   Dialog,
@@ -17,6 +18,7 @@ export function ReceiptSuccessModal({
   open: boolean;
   onOpenChange: (o: boolean) => void;
 }) {
+  const { t } = useTranslation();
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-sm">
@@ -37,24 +39,24 @@ export function ReceiptSuccessModal({
               <Check className="h-10 w-10 text-white" />
             </motion.div>
           </div>
-          <DialogTitle className="font-display text-xl">Comprovante recebido</DialogTitle>
+          <DialogTitle className="font-display text-xl">{t("planos.receiptOk")}</DialogTitle>
           <DialogDescription className="leading-relaxed">
-            Obrigado! O seu comprovante foi enviado para revisão.
+            {t("planos.receiptMsg")}
           </DialogDescription>
         </DialogHeader>
 
         <div className="flex items-center justify-center gap-2 rounded-full border border-warning/40 bg-warning/15 px-4 py-1.5 mx-auto">
           <Clock className="h-3.5 w-3.5 text-warning" />
-          <span className="text-xs font-bold text-warning">Pendente</span>
+          <span className="text-xs font-bold text-warning">{t("depositos.statusPendente")}</span>
         </div>
 
         <p className="text-center text-xs text-muted-foreground leading-relaxed">
-          A equipa irá analisar e aprovar o teu pagamento em breve.
+          {t("planos.receiptHint")}
         </p>
 
         <DialogFooter className="flex-col sm:flex-col">
           <Button variant="premium" className="w-full" onClick={() => onOpenChange(false)}>
-            Entendido
+            {t("planos.ok")}
           </Button>
         </DialogFooter>
       </DialogContent>

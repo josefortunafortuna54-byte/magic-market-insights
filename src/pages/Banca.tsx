@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
 import {
   Coins,
@@ -45,6 +46,7 @@ const PROVIDER_COLORS = {
 };
 
 export default function Banca() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { canAccessBanca, loading: subLoading } = useSubscription();
   const { config, loading } = useBanca();
@@ -56,8 +58,8 @@ export default function Banca() {
       <Layout>
         <section className="container mx-auto max-w-3xl px-4 py-8">
           <PremiumLock
-            title="Gerenciamento de Capital Premium"
-            description="Acompanha os teus investimentos e lucros geridos pela nossa equipa profissional."
+            title={t("capital.lockTitle")}
+            description={t("capital.lockDesc")}
           />
         </section>
       </Layout>
@@ -68,7 +70,7 @@ export default function Banca() {
     return (
       <Layout>
         <section className="container mx-auto max-w-3xl px-4 py-8">
-          <p className="text-sm text-muted-foreground">A carregar…</p>
+          <p className="text-sm text-muted-foreground">{t("common.loading")}</p>
         </section>
       </Layout>
     );
@@ -94,38 +96,37 @@ export default function Banca() {
   const hasManagement = Boolean(account) || capital > 0 || current > 0;
 
   const steps = [
-    { icon: Wallet, color: PROVIDER_COLORS.success, title: "Depósitas", desc: "Escolhes o plano e depositas o capital inicial." },
-    { icon: TrendingUp, color: PROVIDER_COLORS.accent, title: "Nós Gerimos", desc: "A nossa equipa profissional gere o teu capital no mercado forex." },
-    { icon: Coins, color: PROVIDER_COLORS.warning, title: "Recebes Lucros", desc: "Acompanhas os resultados na app e fazes levantamentos semanais." },
+    { icon: Wallet, color: PROVIDER_COLORS.success, title: t("capital.step1Title"), desc: t("capital.step1Desc") },
+    { icon: TrendingUp, color: PROVIDER_COLORS.accent, title: t("capital.step2Title"), desc: t("capital.step2Desc") },
+    { icon: Coins, color: PROVIDER_COLORS.warning, title: t("capital.step3Title"), desc: t("capital.step3Desc") },
   ];
 
   if (!hasManagement) {
     return (
       <Layout>
         <section className="container mx-auto max-w-3xl space-y-6 px-4 py-8">
-          <h1 className="font-display text-2xl font-bold">Gerenciamento de Capital</h1>
+          <h1 className="font-display text-2xl font-bold">{t("capital.title")}</h1>
           <p className="text-sm text-muted-foreground">
-            Acompanha o teu investimento e resultados geridos pela nossa equipa.
+            {t("capital.subtitle")}
           </p>
 
           <div className="relative space-y-3 overflow-hidden rounded-2xl bg-gradient-to-br from-accent/20 to-primary/10 p-6">
             <p className="text-xs font-bold uppercase tracking-widest" style={{ color: PROVIDER_COLORS.accent }}>
-              RETORNO FIXO
+              {t("capital.inactiveEyebrow")}
             </p>
             <p className="font-mono text-4xl font-bold tracking-wide text-foreground">+25%</p>
             <p className="text-sm text-muted-foreground">
-              Deposite uma vez e deixe a nossa equipa gerir o seu capital no mercado forex. Acompanhe
-              cada resultado na app e levante semanalmente.
+              {t("capital.inactiveHeroDesc")}
             </p>
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <p className="text-xs text-muted-foreground">Depósito mínimo: $50 USD</p>
-              <StatusPill label="Ainda não ativa" color={PROVIDER_COLORS.warning} />
+              <p className="text-xs text-muted-foreground">{t("capital.minDeposit")}: $50 USD</p>
+              <StatusPill label={t("capital.inactiveBadge")} color={PROVIDER_COLORS.warning} />
             </div>
           </div>
 
           <Card>
             <CardContent className="space-y-4 pt-6">
-              <p className="font-semibold">Como Funciona</p>
+              <p className="font-semibold">{t("capital.howItWorks")}</p>
               {steps.map((step, i) => (
                 <div key={i} className="flex items-center gap-4">
                   <div
@@ -157,26 +158,26 @@ export default function Banca() {
   }
 
   const stats = [
-    { icon: Wallet, color: "text-foreground", label: "Investido", value: formatBancaMoney(totalInvested, cur) },
-    { icon: TrendingUp, color: "text-success", label: "Lucro", value: `+${formatBancaMoney(profit, cur)}`, valueColor: "text-success" },
-    { icon: Flag, color: "text-accent", label: "Meta", value: `+${targetPct}%`, valueColor: "text-accent" },
-    { icon: Coins, color: "text-warning", label: "Levantado", value: formatBancaMoney(totalWithdrawn, cur), valueColor: "text-warning" },
+    { icon: Wallet, color: "text-foreground", label: t("capital.invested"), value: formatBancaMoney(totalInvested, cur) },
+    { icon: TrendingUp, color: "text-success", label: t("capital.profit"), value: `+${formatBancaMoney(profit, cur)}`, valueColor: "text-success" },
+    { icon: Flag, color: "text-accent", label: t("capital.target"), value: `+${targetPct}%`, valueColor: "text-accent" },
+    { icon: Coins, color: "text-warning", label: t("capital.withdrawn"), value: formatBancaMoney(totalWithdrawn, cur), valueColor: "text-warning" },
   ];
 
   return (
     <Layout>
       <section className="container mx-auto max-w-3xl space-y-6 px-4 py-8">
-        <h1 className="font-display text-2xl font-bold">Gerenciamento de Capital</h1>
+        <h1 className="font-display text-2xl font-bold">{t("capital.title")}</h1>
         <p className="text-sm text-muted-foreground">
-          Acompanha o teu investimento e resultados geridos pela nossa equipa.
+          {t("capital.subtitle")}
         </p>
 
         <div className="relative space-y-3 overflow-hidden rounded-2xl bg-gradient-to-br from-primary/20 to-success/15 p-6">
           <div className="flex items-center justify-between">
             <p className="text-xs font-bold uppercase tracking-widest text-foreground/70">
-              SALDO ATUAL
+              {t("capital.currentBalance")}
             </p>
-            <StatusPill label="ATIVO" color={PROVIDER_COLORS.success} />
+            <StatusPill label={t("capital.active")} color={PROVIDER_COLORS.success} />
           </div>
           <p
             className={cn(
@@ -187,7 +188,7 @@ export default function Banca() {
             {formatBancaMoney(current, cur)}
           </p>
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <p className="text-xs text-muted-foreground">Depositado: {formatBancaMoney(capital, cur)}</p>
+            <p className="text-xs text-muted-foreground">{t("capital.deposited")}{formatBancaMoney(capital, cur)}</p>
             <p className={cn("text-xs font-semibold", isProfit ? "text-success" : "text-destructive")}>
               {isProfit ? "+" : ""}
               {formatBancaMoney(profit, cur)} ({profitPct > 0 ? "+" : ""}
@@ -205,7 +206,7 @@ export default function Banca() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-1.5">
                   <FileText className="h-4 w-4 text-accent" />
-                  <p className="text-sm font-semibold">Último Relatório</p>
+                  <p className="text-sm font-semibold">{t("capital.latestReport")}</p>
                 </div>
                 <Badge
                   className={
@@ -252,7 +253,7 @@ export default function Banca() {
         <Card>
           <CardContent className="space-y-3 pt-6">
             <div className="flex items-center justify-between">
-              <p className="font-semibold">Progresso da Meta</p>
+              <p className="font-semibold">{t("capital.progressTitle")}</p>
               <p className="text-xs text-muted-foreground">{Math.round(progressPct)}%</p>
             </div>
             <div className="h-2 overflow-hidden rounded-full bg-secondary">
@@ -266,7 +267,7 @@ export default function Banca() {
             <div className="flex items-center justify-between">
               <p className="text-xs text-muted-foreground">+{formatBancaMoney(profit, cur)}</p>
               <p className="text-xs font-semibold text-accent">
-                Meta: +{formatBancaMoney(targetValue, cur)}
+                {t("capital.target")}: +{formatBancaMoney(targetValue, cur)}
               </p>
             </div>
           </CardContent>
@@ -277,25 +278,23 @@ export default function Banca() {
         <Card>
           <CardContent className="space-y-4 pt-6">
             <div className="flex items-center justify-between">
-              <p className="font-semibold">Levantamentos</p>
-              <Badge className="border-success/30 bg-success/20 text-success">Semanal</Badge>
+              <p className="font-semibold">{t("capital.withdrawalTitle")}</p>
+              <Badge className="border-success/30 bg-success/20 text-success">{t("capital.weekly")}</Badge>
             </div>
             <p className="text-sm text-muted-foreground">
-              Podes pedir o levantamento dos teus lucros uma vez por semana. O processamento leva 1-3
-              dias úteis.
+              {t("capital.withdrawalDesc")}
             </p>
             <Button
               variant="secondary"
               className="h-[54px] w-full"
               onClick={() =>
-                toast.info("Levantamento", {
-                  description:
-                    "O teu pedido de levantamento foi registado. A equipa irá processá-lo em 1-3 dias úteis.",
+                toast.info(t("capital.withdrawalRequest"), {
+                  description: t("capital.withdrawalMsg"),
                 })
               }
             >
               <FileBarChart className="mr-2 h-4 w-4 text-accent" />
-              Pedir Levantamento
+              {t("capital.requestWithdrawal")}
             </Button>
           </CardContent>
         </Card>
