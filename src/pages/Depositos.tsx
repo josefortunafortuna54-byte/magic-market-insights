@@ -68,6 +68,22 @@ const clearReceiptInbox = () => {
   }
 };
 
+// Verifica se o comprovativo ficou realmente registado no servidor. Usado
+// para evitar falsos negativos (insert que foi confirmado mas a resposta
+// perdeu-se na rede) e falsos sucessos (erro silencioso).
+const receiptRegisteredOnServer = async (userId: string, proofUrl: string): Promise<boolean> => {
+  try {
+    const { count, error } = await supabase
+      .from("payment_receipts")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", userId)
+      .eq("proof_url", proofUrl);
+    return !error && (count ?? 0) > 0;
+  } catch {
+    return false;
+  }
+};
+
 const formatMovementAmount = (amount: number, curr: Currency) =>
   curr === "usd" ? `$${formatMoney(amount)}` : `${formatMoney(amount)} Kz`;
 
@@ -195,33 +211,65 @@ export default function Depositos() {
       status: "pendente",
     });
     if (user) {
+      const payload = {
+        user_id: user.id,
+        user_email: user.email ?? "",
+        proof_url: result.url,
+        plan: isCapitalDeposit ? "capital" : plan,
+        method: depositModal.method,
+        amount: depositAmount,
+        currency,
+      };
+      // O upload já foi feito; agora regista-se a linha no servidor com retry.
+      // Se um insert "falhou" mas o registo existe, considera-se sucesso.
+      let saved = false;
       try {
-        await saveReceipt({
-          user_id: user.id,
-          user_email: user.email ?? "",
-          proof_url: result.url,
-          plan: isCapitalDeposit ? "capital" : plan,
-          method: depositModal.method,
-          amount: depositAmount,
-          currency,
-        });
-        if (!isCapitalDeposit) {
+        for (let attempt = 0; attempt <= 2; attempt++) {
           try {
-            localStorage.setItem(
-              "pending_plan_payment",
-              JSON.stringify({ plan, amount: depositAmount, currency }),
+            await saveReceipt(payload);
+            saved = true;
+            break;
+          } catch (err) {
+            console.warn(
+              "[deposito] saveReceipt falhou:",
+              err instanceof Error ? err.message : err,
             );
-          } catch {
-            /* ignore */
+            if (await receiptRegisteredOnServer(user.id, result.url)) {
+              saved = true;
+              break;
+            }
+            if (attempt < 2) await new Promise((r) => setTimeout(r, 1500));
           }
-          // Regista o pedido de ativação na caixa de notificações do utilizador.
-          void notifyPlanRequestSubmitted(planLabel(plan), price);
         }
-      } catch {
+      } catch (err) {
+        console.warn(
+          "[deposito] verificação do comprovativo falhou:",
+          err instanceof Error ? err.message : err,
+        );
+      }
+      if (!saved) {
+        setSending(false);
         toast.error("Erro de ligação", {
           description:
             "Comprovativo enviado mas não foi possível registar no servidor. Contacte o suporte.",
+          action: {
+            label: "Tentar novamente",
+            onClick: () => confirmDeposit(proof, retries),
+          },
         });
+        return;
+      }
+      if (!isCapitalDeposit) {
+        try {
+          localStorage.setItem(
+            "pending_plan_payment",
+            JSON.stringify({ plan, amount: depositAmount, currency }),
+          );
+        } catch {
+          /* ignore */
+        }
+        // Regista o pedido de ativação na caixa de notificações do utilizador.
+        void notifyPlanRequestSubmitted(planLabel(plan), price);
       }
     }
     setSending(false);
