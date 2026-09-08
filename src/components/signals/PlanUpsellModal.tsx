@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { PLANS, PRICES, planLabel } from "@/lib/plans";
 import { useSubscription } from "@/hooks/useSubscription";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 const PLAN_ICONS: Record<string, typeof Zap> = {
   flash: Zap,
@@ -28,16 +29,17 @@ export function PlanUpsellModal({
   onOpenChange: (o: boolean) => void;
 }) {
   const { currency, tier } = useSubscription();
+  const { t } = useTranslation();
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader className="text-center">
           <DialogTitle className="gradient-text-gold text-2xl">
-            Desbloqueie o Premium
+            {t('components.planUpsell.title')}
           </DialogTitle>
           <DialogDescription>
-            Escolha um plano e desbloqueie todas as análises e sinais.
+            {t('components.planUpsell.description')}
           </DialogDescription>
         </DialogHeader>
 
@@ -86,12 +88,12 @@ export function PlanUpsellModal({
         <DialogFooter className="flex-col gap-2 sm:flex-col">
           <Link to="/planos" className="w-full">
             <Button variant="premium" className="w-full" onClick={() => onOpenChange(false)}>
-              Subscrever
+              {t('components.planUpsell.subscribe')}
             </Button>
           </Link>
           {tier !== "free" && (
             <p className="text-center text-xs text-muted-foreground">
-              Já tens Premium?
+              {t('components.planUpsell.alreadyPremium')}
             </p>
           )}
         </DialogFooter>

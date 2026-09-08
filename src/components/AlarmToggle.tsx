@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Bell, BellOff, BellRing, Loader2 } from 'lucide-react';
 import { cancelBoomAlarm, getBoomAlarm, scheduleBoomAlarm } from '@/lib/notifications';
+import { useTranslation } from 'react-i18next';
 
 export function AlarmToggle({
   boomId,
@@ -14,6 +15,7 @@ export function AlarmToggle({
   const [armed, setArmed] = useState(false);
   const [busy, setBusy] = useState(true);
   const [blocked, setBlocked] = useState(false);
+  const { t } = useTranslation();
 
   useEffect(() => {
     let active = true;
@@ -62,15 +64,15 @@ export function AlarmToggle({
         }
       >
         {armed ? <BellRing className="h-4 w-4" /> : <Bell className="h-4 w-4" />}
-        {armed ? 'Notificação ativa' : 'Ativar notificação'}
+        {armed ? t('components.alarmToggle.active') : t('components.alarmToggle.activate')}
       </button>
       {armed ? (
-        <p className="text-xs text-muted-foreground">Notificamos-te 5 min antes.</p>
+        <p className="text-xs text-muted-foreground">{t('components.alarmToggle.hint5min')}</p>
       ) : null}
       {blocked ? (
         <p className="flex items-center gap-1 text-xs text-destructive">
           <BellOff className="h-3.5 w-3.5" />
-          Notificações bloqueadas — ativa nas definições do sistema.
+          {t('components.alarmToggle.blocked')}
         </p>
       ) : null}
     </div>

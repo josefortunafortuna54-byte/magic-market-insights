@@ -1200,6 +1200,12 @@
     "premiumLock": {
       "viewPlans": "View Plans"
     },
+    "planUpsell": {
+      "title": "Unlock Premium",
+      "description": "Choose a plan and unlock all analysis and signals.",
+      "subscribe": "Subscribe",
+      "alreadyPremium": "Already have Premium?"
+    },
     "signalCard": {
       "waiting": "WAITING",
       "active": "ACTIVE",
@@ -1212,7 +1218,13 @@
       "inLoss": "In loss",
       "atPoint": "At the point",
       "analysis": "ANALYSIS",
-      "moreReasons": "+{{count}} reasons"
+      "moreReasons": "+{{count}} reasons",
+      "viewFull": "View Full Analysis"
+    },
+    "economicEvent": {
+      "newsTitle": "Economic News",
+      "forecastLabel": "F",
+      "actualLabel": "A"
     },
     "boomCard": {
       "live": "🚨 LIVE",

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 import {
   TrendingUp,
   TrendingDown,
@@ -64,15 +65,18 @@ function ExpiryCountdown({ expiresAt }: { expiresAt: string }) {
   const seconds = totalSeconds % 60;
   const isClose = remaining < 30 * 60 * 1000;
 
+  const { t } = useTranslation();
+
   return (
     <span className={`inline-flex items-center gap-1 text-xs ${isClose ? "text-warning" : "text-muted-foreground"}`}>
       <Clock className="h-3 w-3" />
-      Expira em {pad2(hours)}:{pad2(minutes)}:{pad2(seconds)}
+      {t('sinal.expiresIn', { time: `${pad2(hours)}:${pad2(minutes)}:${pad2(seconds)}` })}
     </span>
   );
 }
 
 function PremiumAnalysisLock() {
+  const { t } = useTranslation();
   return (
     <div className="flex items-center justify-between gap-3 rounded-lg border border-accent/30 bg-accent/5 px-3 py-2">
       <span className="inline-flex items-center gap-2">
@@ -85,7 +89,7 @@ function PremiumAnalysisLock() {
         to="/planos"
         className="text-xs font-semibold text-accent hover:text-accent/80 transition-colors"
       >
-        Ver Planos
+        {t('components.premiumLock.viewPlans')}
       </Link>
     </div>
   );
@@ -98,6 +102,7 @@ export function SignalCard({
   showAnalysis = false,
   hasAnalysis = false,
 }: SignalCardProps) {
+  const { t } = useTranslation();
   const getSignalStyles = () => {
     switch (signal.type) {
       case "BUY":
@@ -183,7 +188,7 @@ export function SignalCard({
                 variant={signal.status === "tp" ? "default" : signal.status === "sl" ? "destructive" : "secondary"}
                 className="text-xs"
               >
-                {signal.status === "tp" ? "✓ TP" : signal.status === "sl" ? "✗ SL" : "Ativo"}
+                {signal.status === "tp" ? "✓ TP" : signal.status === "sl" ? "✗ SL" : t('components.signalCard.active')}
               </Badge>
             )}
           </div>
@@ -202,7 +207,7 @@ export function SignalCard({
       {/* Probabilidade */}
       {signal.probabilityScore != null && (
         <div className="flex items-center justify-between text-sm mb-4 px-2">
-          <span className="text-muted-foreground">Probabilidade</span>
+          <span className="text-muted-foreground">{t('sinal.probability')}</span>
           <span className={`font-semibold ${probabilityColor}`}>{signal.probabilityScore}%</span>
         </div>
       )}
@@ -212,7 +217,7 @@ export function SignalCard({
         <div className="flex items-center justify-between text-sm mb-1">
           <span className="text-muted-foreground flex items-center gap-1">
             <Percent className="h-4 w-4" />
-            Confiança
+            {t('sinal.confidence')}
           </span>
           <span className={`font-semibold ${signal.confidence >= 80 ? "text-success" : signal.confidence >= 60 ? "text-warning" : "text-muted-foreground"}`}>
             {signal.confidence}%
@@ -233,7 +238,7 @@ export function SignalCard({
       {/* Levels */}
       <div className="grid grid-cols-3 gap-3 mb-4">
         <div className="bg-secondary/50 rounded-lg p-3 text-center">
-          <p className="text-xs text-primary mb-1">Entrada</p>
+          <p className="text-xs text-primary mb-1">{t('sinal.entry')}</p>
           <p className="font-mono font-semibold text-sm">{signal.entry.toFixed(5)}</p>
         </div>
         <div className="bg-destructive/10 rounded-lg p-3 text-center">
@@ -257,7 +262,7 @@ export function SignalCard({
       {/* Risk/Reward */}
       <div className="flex items-center justify-between text-sm mb-4 px-2">
         <span className="text-muted-foreground flex items-center gap-1">
-          <Zap className="h-3 w-3" /> Risco/Retorno
+          <Zap className="h-3 w-3" /> {t('sinal.riskReturn')}
         </span>
         <span className={`font-semibold ${riskReward >= 2 ? "text-success" : "text-warning"}`}>
           1:{riskReward.toFixed(1)}
@@ -268,7 +273,7 @@ export function SignalCard({
       {showDetails && (signal.reasons.length > 0 || showAnalysisBlock) && (
         <div className="border-t border-border/50 pt-4">
           <p className="text-xs text-muted-foreground mb-2 flex items-center gap-1">
-            <Activity className="h-3 w-3" /> Análise Técnica
+            <Activity className="h-3 w-3" /> {t('sinal.technical')}
           </p>
           {showAnalysisBlock &&
             (hasAnalysis ? (
@@ -302,7 +307,7 @@ export function SignalCard({
       {/* View Details */}
       <Link to={`/analises/${signal.id}`} className="block mt-4">
         <Button variant="ghost" className="w-full group-hover:bg-secondary">
-          Ver Análise Completa
+          {t('components.signalCard.viewFull')}
           <ChevronRight className="h-4 w-4 ml-2 transition-transform group-hover:translate-x-1" />
         </Button>
       </Link>

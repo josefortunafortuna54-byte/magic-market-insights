@@ -1,5 +1,6 @@
 import { AlertOctagon, AlertTriangle, Calendar, Info, Newspaper } from 'lucide-react';
 import type { EconomicEvent, ImpactLevel } from '@/lib/economicCalendar';
+import { useTranslation } from 'react-i18next';
 
 const ICON_MAP: Record<ImpactLevel, typeof AlertOctagon> = {
   high: AlertOctagon,
@@ -25,6 +26,7 @@ function ValueCell({ label, value, color }: { label: string; value: string; colo
 }
 
 export function EconomicEventBadge({ event }: { event: EconomicEvent }) {
+  const { t } = useTranslation();
   const style = IMPACT_STYLE[event.impact];
   const Icon = ICON_MAP[event.impact];
   return (
@@ -37,20 +39,21 @@ export function EconomicEventBadge({ event }: { event: EconomicEvent }) {
         <p className="text-[10px] text-muted-foreground">{event.time}</p>
       </div>
       {event.forecast ? (
-        <ValueCell label="F" value={event.forecast} color="text-muted-foreground" />
+        <ValueCell label={t('components.economicEvent.forecastLabel')} value={event.forecast} color="text-muted-foreground" />
       ) : null}
-      {event.actual ? <ValueCell label="A" value={event.actual} color={style.text} /> : null}
+      {event.actual ? <ValueCell label={t('components.economicEvent.actualLabel')} value={event.actual} color={style.text} /> : null}
     </div>
   );
 }
 
 export function EconomicEventsRow({ events }: { events: EconomicEvent[] }) {
+  const { t } = useTranslation();
   if (!events.length) return null;
   return (
     <div className="mt-2 space-y-1">
       <p className="mb-0.5 flex items-center gap-1 text-xs font-semibold text-muted-foreground">
         <Newspaper className="h-3 w-3" />
-        Notícias Económicas
+        {t('components.economicEvent.newsTitle')}
       </p>
       {events.map((e, i) => (
         <EconomicEventBadge key={`${e.currency}-${e.event}-${i}`} event={e} />

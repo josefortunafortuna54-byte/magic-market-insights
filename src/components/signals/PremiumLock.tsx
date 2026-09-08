@@ -1,6 +1,7 @@
 import { Lock } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { useTranslation } from "react-i18next";
 
 interface PremiumLockProps {
   title?: string;
@@ -13,6 +14,7 @@ export function PremiumLock({
   description = "Desbloqueia com os planos Basic, Pro ou Premium",
   compact,
 }: PremiumLockProps) {
+  const { t } = useTranslation();
   return (
     <div
       className={`flex items-center gap-4 rounded-xl border border-accent/30 bg-accent/5 ${
@@ -32,7 +34,7 @@ export function PremiumLock({
       </div>
       <Link to="/planos" className="shrink-0">
         <Button variant="premium" size={compact ? "sm" : "default"}>
-          Ver Planos
+          {t('components.premiumLock.viewPlans')}
         </Button>
       </Link>
     </div>

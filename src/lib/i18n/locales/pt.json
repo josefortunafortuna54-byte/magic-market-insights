@@ -1204,6 +1204,12 @@
     "premiumLock": {
       "viewPlans": "Ver Planos"
     },
+    "planUpsell": {
+      "title": "Desbloqueie o Premium",
+      "description": "Escolha um plano e desbloqueie todas as análises e sinais.",
+      "subscribe": "Subscrever",
+      "alreadyPremium": "Já tens Premium?"
+    },
     "signalCard": {
       "waiting": "AGUARDAR",
       "active": "ATIVO",
@@ -1216,7 +1222,13 @@
       "inLoss": "Em perda",
       "atPoint": "No ponto",
       "analysis": "ANÁLISE",
-      "moreReasons": "+{{count}} razões"
+      "moreReasons": "+{{count}} razões",
+      "viewFull": "Ver Análise Completa"
+    },
+    "economicEvent": {
+      "newsTitle": "Notícias Económicas",
+      "forecastLabel": "F",
+      "actualLabel": "A"
     },
     "boomCard": {
       "live": "🚨 AO VIVO",
