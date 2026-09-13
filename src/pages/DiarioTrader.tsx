@@ -10,8 +10,6 @@ import { useTradeJournal } from '@/hooks/useTradeJournal';
 import { formatMoney } from '@/lib/format';
 import type { TradeEntry } from '@/lib/types';
 
-const WEEKDAYS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
-
 function localDateKey(d: Date): string {
   const y = d.getFullYear();
   const m = String(d.getMonth() + 1).padStart(2, '0');
@@ -109,7 +107,8 @@ function TradeRow({ trade, onDelete }: { trade: TradeEntry; onDelete: () => void
 }
 
 export function DiarioTrader() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const weekdayLabels = t('diario.weekdays', { returnObjects: true }) as unknown as string[];
   const { trades, addTrade, removeTrade } = useTradeJournal();
   const now = new Date();
   const [year, setYear] = useState(now.getFullYear());
@@ -117,18 +116,10 @@ export function DiarioTrader() {
   const [selectedDay, setSelectedDay] = useState(now.getDate());
   const [showAdd, setShowAdd] = useState(false);
 
-  const exportColumns = [
-    { key: 'date', label: 'Data' },
-    { key: 'pair', label: 'Par' },
-    { key: 'dir', label: 'Direção' },
-    { key: 'entry', label: 'Entrada' },
-    { key: 'exit', label: 'Saída' },
-    { key: 'lots', label: 'Lotes' },
-    { key: 'result', label: 'Resultado' },
-    { key: 'pnl', label: 'PnL (USD)' },
-    { key: 'pips', label: 'Pips' },
-    { key: 'notes', label: 'Notas' },
-  ];
+  const csvColumnLabels = t('diario.csvColumns', { returnObjects: true }) as unknown as string[];
+  const exportColumns = (
+    ['date', 'pair', 'dir', 'entry', 'exit', 'lots', 'result', 'pnl', 'pips', 'notes'] as const
+  ).map((key, i) => ({ key, label: csvColumnLabels[i] ?? key }));
   const exportData = trades.map((t) => ({
     date: t.createdAt.slice(0, 10),
     pair: t.pair,
@@ -144,7 +135,8 @@ export function DiarioTrader() {
 
   const todayKey = localDateKey(now);
   const monthDays = useMemo(() => getMonthDays(year, month), [year, month]);
-  const monthLabel = new Date(year, month).toLocaleString('pt-PT', { month: 'long', year: 'numeric' });
+  const monthLocale = i18n.language?.split('-')[0] ?? 'pt';
+  const monthLabel = new Date(year, month).toLocaleString(monthLocale, { month: 'long', year: 'numeric' });
 
   const dateKey = (d: number) => localDateKey(new Date(year, month, d));
 
@@ -223,7 +215,7 @@ export function DiarioTrader() {
             </div>
 
             <div className="mb-1 flex">
-              {WEEKDAYS.map((w) => (
+              {weekdayLabels.map((w) => (
                 <span key={w} className="flex-1 text-center text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
                   {w}
                 </span>
@@ -277,7 +269,7 @@ export function DiarioTrader() {
             <h2 className="text-lg font-bold">{selectedKey}</h2>
             {selectedTrades.length > 0 ? (
               <p className="text-sm text-muted-foreground">
-                {selectedTrades.length} {t("diario.tradesCount")}
+                {t("diario.tradesCount", { count: selectedTrades.length })}
                 {selectedPnl !== 0 ? ` · ${selectedPnl >= 0 ? '+' : ''}${formatMoney(selectedPnl)} USD` : ''}
               </p>
             ) : null}

@@ -68,7 +68,7 @@ export default function Perfil() {
                       <Button variant="hero" className="w-full">{t("perfil.signIn")}</Button>
                     </Link>
                     <Link to="/registro" className="block w-full">
-                      <Button variant="outline" className="w-full">{t("auth.enterApp")}</Button>
+                      <Button variant="outline" className="w-full">{t("auth.createAccount")}</Button>
                     </Link>
                   </div>
                 </CardContent>
