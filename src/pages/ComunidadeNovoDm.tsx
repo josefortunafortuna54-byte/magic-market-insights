@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 import { DmRow } from "@/components/community/DmRow";
 import { Layout } from "@/components/layout/Layout";
 import { useAuth } from "@/hooks/useAuth";
@@ -8,6 +9,7 @@ import { findOrCreateConversation } from "@/lib/community";
 
 export default function ComunidadeNovoDm() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { profiles, loading } = useProfiles();
 
@@ -21,7 +23,7 @@ export default function ComunidadeNovoDm() {
       const conversationId = await findOrCreateConversation(user.id, memberId);
       navigate(`/comunidade/dm/${conversationId}`, { replace: true });
     } catch {
-      toast.error("Erro", { description: "Não enviada" });
+      toast.error(t("common.error"), { description: t("workspace.failed") });
     }
   };
 
@@ -29,16 +31,16 @@ export default function ComunidadeNovoDm() {
     <Layout noFooter>
       <section className="pt-8 pb-24">
         <div className="container mx-auto max-w-2xl px-4">
-          <h1 className="mb-3 font-display text-xl font-bold">Nova mensagem</h1>
+          <h1 className="mb-3 font-display text-xl font-bold">{t("workspace.selectUser")}</h1>
 
           {loading ? (
             <p className="flex items-center justify-center gap-3 py-24 text-sm text-muted-foreground">
               <span className="h-5 w-5 rounded-full border-2 border-primary border-t-transparent animate-spin" />
-              A carregar…
+              {t("common.loading")}
             </p>
           ) : candidates.length === 0 ? (
             <p className="py-24 text-center text-sm text-muted-foreground">
-              Sem utilizadores disponíveis.
+              {t("workspace.noProfiles")}
             </p>
           ) : (
             <div className="space-y-2">

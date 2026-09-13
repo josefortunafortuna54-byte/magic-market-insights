@@ -1,5 +1,6 @@
 import { ChevronLeft } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Composer } from "@/components/community/Composer";
 import { MessageList } from "@/components/community/MessageList";
 import { UserAvatar } from "@/components/community/UserAvatar";
@@ -12,6 +13,7 @@ import { useProfiles } from "@/hooks/useProfiles";
 export default function ComunidadeDm() {
   const { conversationId } = useParams<{ conversationId: string }>();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { user } = useAuth();
   const conversations = useConversations();
   const profiles = useProfiles();
@@ -32,7 +34,7 @@ export default function ComunidadeDm() {
               type="button"
               onClick={() => navigate("/comunidade")}
               className="rounded-full p-1.5 transition-colors hover:bg-muted/60"
-              aria-label="Voltar"
+              aria-label={t("common.back")}
             >
               <ChevronLeft className="h-5 w-5" />
             </button>
@@ -73,7 +75,7 @@ export default function ComunidadeDm() {
 
           {!dm && !conversations.loading && !messages.loading ? (
             <p className="shrink-0 border-t border-border px-4 py-2 text-center text-xs text-muted-foreground">
-              Sem conversas ainda. Inicia uma nova DM!
+              {t("workspace.emptyDms")}
             </p>
           ) : null}
         </div>

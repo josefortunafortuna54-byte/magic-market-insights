@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { ChevronRight, Search, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { UserAvatar } from "@/components/community/UserAvatar";
 import { Layout } from "@/components/layout/Layout";
 import { useChannels } from "@/hooks/useChannels";
@@ -12,6 +13,7 @@ import type { Message } from "@/lib/types";
 
 export default function ComunidadePesquisa() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [query, setQuery] = useState("");
   const { results, loading } = useMessageSearch(query);
   const channels = useChannels();
@@ -52,7 +54,7 @@ export default function ComunidadePesquisa() {
               autoFocus
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Pesquisar mensagens…"
+              placeholder={t("workspace.searchPlaceholder")}
               className="flex-1 bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground"
             />
             {query.length > 0 ? (
@@ -60,7 +62,7 @@ export default function ComunidadePesquisa() {
                 type="button"
                 onClick={() => setQuery("")}
                 className="shrink-0 text-muted-foreground transition-colors hover:text-foreground"
-                aria-label="Limpar"
+                aria-label={t("workspace.clearSearch")}
               >
                 <X className="h-4 w-4" />
               </button>
@@ -70,10 +72,10 @@ export default function ComunidadePesquisa() {
           {loading ? (
             <p className="flex items-center justify-center gap-3 py-24 text-sm text-muted-foreground">
               <span className="h-5 w-5 rounded-full border-2 border-primary border-t-transparent animate-spin" />
-              A carregar…
+              {t("workspace.loading")}
             </p>
           ) : query.trim().length === 0 || results.length === 0 ? (
-            <p className="py-24 text-center text-sm text-muted-foreground">Sem resultados.</p>
+            <p className="py-24 text-center text-sm text-muted-foreground">{t("workspace.searchEmpty")}</p>
           ) : (
             <div className="space-y-2">
               {results.map((m) => {

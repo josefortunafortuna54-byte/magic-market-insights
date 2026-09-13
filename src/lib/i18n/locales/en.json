@@ -309,7 +309,12 @@
     "emptyChannelsHintCreator": "Create the community's first channel.",
     "emptyPairRoomsHint": "Rooms open automatically with the market session.",
     "emptyDmsHint": "Find traders in search to start conversations.",
-    "emptyDmsHintPremium": "Tap + above to start a conversation."
+    "emptyDmsHintPremium": "Tap + above to start a conversation.",
+    "premiumChannelToast": "This channel is Premium.",
+    "premiumChannelDesc": "This channel is Premium. Unlock it with a plan to join.",
+    "newChannelLockDesc": "Create community channels with a Premium plan.",
+    "channelSlugPlaceholder": "analyses",
+    "clearSearch": "Clear"
   },
   "userProfile": {
     "title": "Profile",
@@ -1325,6 +1330,7 @@
     "incMentor3": "Direct support",
     "incEbook1": "Instant access",
     "incEbook2": "Practical examples",
-    "incEbook3": "Free updates"
+    "incEbook3": "Free updates",
+    "refresh": "Refresh"
   }
 }

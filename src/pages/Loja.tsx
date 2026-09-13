@@ -22,6 +22,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { useStoreProducts, type StoreCategory, type StoreProduct } from "@/hooks/useStoreProducts";
@@ -52,23 +53,24 @@ const ICON_MAP: Record<string, LucideIcon> = {
   "shield-checkmark-outline": ShieldCheck,
 };
 
-const CATEGORIES: { key: Category; label: string; icon: LucideIcon }[] = [
-  { key: "all", label: "Todos", icon: LayoutGrid },
-  { key: "bots", label: "Bots", icon: Cpu },
-  { key: "mentorias", label: "Mentorias", icon: Users },
-  { key: "ebooks", label: "Ebooks", icon: BookOpen },
+const CATEGORIES: { key: Category; labelKey: string; icon: LucideIcon }[] = [
+  { key: "all", labelKey: "store.categoryAll", icon: LayoutGrid },
+  { key: "bots", labelKey: "store.categoryBots", icon: Cpu },
+  { key: "mentorias", labelKey: "store.categoryMentorias", icon: Users },
+  { key: "ebooks", labelKey: "store.categoryEbooks", icon: BookOpen },
 ];
 
 const INCLUDED_KEYS: Record<StoreCategory, string[]> = {
-  bots: ["Acesso vitalício", "Actualizações automáticas", "Suporte prioritário"],
-  mentorias: ["Sessões ao vivo", "Comunidade exclusiva", "Suporte directo"],
-  ebooks: ["Acesso imediato", "Exemplos práticos", "Actualizações gratuitas"],
+  bots: ["store.incBot1", "store.incBot2", "store.incBot3"],
+  mentorias: ["store.incMentor1", "store.incMentor2", "store.incMentor3"],
+  ebooks: ["store.incEbook1", "store.incEbook2", "store.incEbook3"],
 };
 
 const productIcon = (item: StoreProduct): LucideIcon => ICON_MAP[item.icon] ?? Package;
 
 export default function Loja() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { isPremium } = useSubscription();
   const { products, refresh } = useStoreProducts();
   const [selectedCategory, setSelectedCategory] = useState<Category>("all");
@@ -126,7 +128,7 @@ export default function Loja() {
     item.isPremium || locked ? (
       <span className="text-sm font-extrabold text-foreground">{item.price}</span>
     ) : (
-      <span className="text-sm font-extrabold text-primary">Grátis</span>
+      <span className="text-sm font-extrabold text-primary">{t("store.free")}</span>
     );
 
   const ProBadge = ({ item }: { item: StoreProduct }) =>
@@ -137,7 +139,7 @@ export default function Loja() {
       </span>
     ) : (
       <span className="rounded-md bg-primary/15 px-1.5 py-0.5 text-[10px] font-extrabold text-primary">
-        Grátis
+        {t("store.free")}
       </span>
     );
 
@@ -151,7 +153,7 @@ export default function Loja() {
             className="mb-4 flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
           >
             <ChevronLeft className="h-4 w-4" />
-            Voltar
+            {t("common.back")}
           </button>
 
           <div className="mb-4 rounded-2xl border border-border bg-[linear-gradient(135deg,rgba(255,159,10,0.14),rgba(22,164,58,0.08),rgba(255,255,255,0.02))] p-4">
@@ -160,9 +162,9 @@ export default function Loja() {
                 <Store className="h-[22px] w-[22px] text-amber-400" />
               </div>
               <div className="min-w-0 flex-1">
-                <h1 className="font-display text-xl font-bold">Loja</h1>
+                <h1 className="font-display text-xl font-bold">{t("store.title")}</h1>
                 <p className="mt-0.5 text-sm text-muted-foreground">
-                  Bots, mentorias e ebooks para o teu sucesso
+                  {t("store.subtitle")}
                 </p>
               </div>
               <button
@@ -170,16 +172,16 @@ export default function Loja() {
                 onClick={onRefresh}
                 disabled={refreshing}
                 className="shrink-0 rounded-full border border-border bg-card p-2 text-muted-foreground transition-colors hover:text-foreground disabled:opacity-50"
-                aria-label="Atualizar"
+                aria-label={t("store.refresh")}
               >
                 <RefreshCw className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`} />
               </button>
             </div>
             <div className="mt-4 flex items-center rounded-xl border border-border bg-background py-2">
               {[
-                { value: stats.total, label: "Produtos" },
-                { value: stats.free, label: "Grátis" },
-                { value: stats.rating, label: "Avaliação", star: true },
+                { value: stats.total, label: t("store.statsProducts") },
+                { value: stats.free, label: t("store.statsFree") },
+                { value: stats.rating, label: t("store.statsRating"), star: true },
               ].map((stat, idx) => (
                 <div className="flex flex-1 items-center" key={idx}>
                   {idx > 0 ? <span className="h-6 w-px shrink-0 bg-border" /> : null}
@@ -199,7 +201,7 @@ export default function Loja() {
             <>
               <div className="mb-3 flex items-center gap-1.5">
                 <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
-                <span className="text-xs font-semibold text-foreground">Destaques</span>
+                <span className="text-xs font-semibold text-foreground">{t("store.featuredSection")}</span>
               </div>
               <div className="-mx-4 mb-4 flex gap-2 overflow-x-auto px-4 pb-1 snap-x">
                 {featuredItems.map((item) => {
@@ -215,7 +217,7 @@ export default function Loja() {
                     >
                       <span className="absolute right-4 top-0 flex items-center gap-1 rounded-b-md bg-amber-400 px-2 py-0.5 text-[10px] font-extrabold uppercase text-[#1A1A2E]">
                         <Star className="h-2.5 w-2.5" />
-                        Destaques
+                        {t("store.featuredSection")}
                       </span>
                       <div className="mt-3 flex items-center gap-4">
                         <div
@@ -285,7 +287,7 @@ export default function Loja() {
                   }`}
                 >
                   <CatIcon className="h-3.5 w-3.5" />
-                  {cat.label}
+                  {t(cat.labelKey)}
                   <span
                     className={`min-w-[18px] rounded-full px-1 py-px text-center text-[10px] ${
                       isActive ? "bg-[#1A1A2E]/25 text-[#1A1A2E]" : "bg-muted text-muted-foreground"
@@ -299,14 +301,14 @@ export default function Loja() {
           </div>
 
           <div className="mb-3 flex items-center justify-between">
-            <span className="text-xs font-semibold text-foreground">{activeCategory.label}</span>
+            <span className="text-xs font-semibold text-foreground">{t(activeCategory.labelKey)}</span>
             <span className="text-xs text-muted-foreground">
-              {filteredItems.length} {filteredItems.length === 1 ? "item" : "itens"}
+              {t("store.items", { count: filteredItems.length })}
             </span>
           </div>
 
           {filteredItems.length === 0 ? (
-            <p className="py-24 text-center text-sm text-muted-foreground">Nenhum item disponível</p>
+            <p className="py-24 text-center text-sm text-muted-foreground">{t("store.empty")}</p>
           ) : (
             <div className="grid grid-cols-2 gap-2 md:grid-cols-3 lg:grid-cols-4">
               {filteredItems.map((item) => {
@@ -362,7 +364,7 @@ export default function Loja() {
             type="button"
             className="absolute inset-0 bg-black/65"
             onClick={closeItem}
-            aria-label="Fechar"
+            aria-label={t("common.close")}
           />
           <div className="relative flex max-h-[85vh] w-full flex-col overflow-hidden rounded-t-3xl border border-border border-b-0 bg-card">
             <div className="mx-auto mt-2 h-1 w-10 shrink-0 rounded-full bg-muted" />
@@ -370,7 +372,7 @@ export default function Loja() {
               type="button"
               onClick={closeItem}
               className="absolute right-4 top-4 z-10 rounded-full border border-border bg-card p-1.5 text-muted-foreground transition-colors hover:text-foreground"
-              aria-label="Fechar"
+              aria-label={t("common.close")}
             >
               <X className="h-4 w-4" />
             </button>
@@ -396,7 +398,7 @@ export default function Loja() {
                         const Icon = CATEGORY_ICON[selectedItem.category];
                         return <Icon className="h-2.5 w-2.5" />;
                       })()}
-                      {CATEGORIES.find((c) => c.key === selectedItem.category)!.label}
+                      {t(CATEGORIES.find((c) => c.key === selectedItem.category)!.labelKey)}
                     </span>
                     <ProBadge item={selectedItem} />
                   </div>
@@ -421,14 +423,14 @@ export default function Loja() {
                 {selectedItem.description}
               </p>
 
-              <p className="mb-2 mt-5 text-xs font-semibold text-foreground">O que inclui</p>
+              <p className="mb-2 mt-5 text-xs font-semibold text-foreground">{t("store.included")}</p>
               <div className="space-y-2">
                 {INCLUDED_KEYS[selectedItem.category].map((text) => (
                   <div key={text} className="flex items-center gap-2">
                     <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/15">
                       <Check className="h-3 w-3 text-primary" />
                     </span>
-                    <span className="flex-1 text-sm text-muted-foreground">{text}</span>
+                    <span className="flex-1 text-sm text-muted-foreground">{t(text)}</span>
                   </div>
                 ))}
               </div>
@@ -438,7 +440,7 @@ export default function Loja() {
                 variant={isLocked(selectedItem) ? "premium" : "default"}
                 onClick={handleCta}
               >
-                {isLocked(selectedItem) ? "Tornar-se Premium" : "Pedir agora"}
+                {isLocked(selectedItem) ? t("store.upgradeCta") : t("store.requestCta")}
               </Button>
             </div>
           </div>

@@ -303,7 +303,12 @@
     "emptyChannelsHintCreator": "Cria o primeiro canal da comunidade.",
     "emptyPairRoomsHint": "As salas abrem automaticamente com a sessão de mercado.",
     "emptyDmsHint": "Encontra traders na pesquisa para iniciares conversas.",
-    "emptyDmsHintPremium": "Usa o + no topo para iniciares uma conversa."
+    "emptyDmsHintPremium": "Usa o + no topo para iniciares uma conversa.",
+    "premiumChannelToast": "Este canal é Premium.",
+    "premiumChannelDesc": "Este canal é Premium. Desbloqueia com um plano para participar.",
+    "newChannelLockDesc": "Cria canais da comunidade com um plano Premium.",
+    "channelSlugPlaceholder": "analises",
+    "clearSearch": "Limpar"
   },
   "userProfile": {
     "title": "Perfil",
@@ -1329,6 +1334,7 @@
     "incMentor3": "Suporte directo",
     "incEbook1": "Acesso imediato",
     "incEbook2": "Exemplos práticos",
-    "incEbook3": "Actualizações gratuitas"
+    "incEbook3": "Actualizações gratuitas",
+    "refresh": "Atualizar"
   }
 }

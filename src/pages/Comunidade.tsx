@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Camera, Network, Newspaper, Plus, Search, Store } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 import { ChannelCard } from "@/components/community/ChannelCard";
 import { ChannelPickerModal } from "@/components/community/ChannelPickerModal";
 import { CommunityFeed } from "@/components/community/CommunityFeed";
@@ -51,6 +52,7 @@ function WorkspaceSkeleton() {
 export default function Comunidade() {
   const [tab, setTab] = useState<Tab>("workspace");
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const channels = useChannels();
   const conversations = useConversations();
@@ -63,7 +65,7 @@ export default function Comunidade() {
 
   const openChannel = (channel: Channel) => {
     if (channel.is_premium && !isPremium) {
-      toast.error("Este canal é Premium.");
+      toast.error(t("workspace.premiumChannelToast"));
       return;
     }
     navigate(`/comunidade/canais/${channel.id}`);
@@ -87,7 +89,7 @@ export default function Comunidade() {
               className="flex flex-1 items-center gap-2 rounded-full border border-border bg-card px-4 py-2.5 text-sm text-muted-foreground transition-colors hover:border-primary/40"
             >
               <Search className="h-4 w-4" />
-              Pesquisar mensagens…
+              {t("workspace.searchPlaceholder")}
             </button>
             <input
               ref={camera.fileRef}
@@ -134,7 +136,7 @@ export default function Comunidade() {
                   }`}
                 >
                   <Icon className="h-4 w-4" />
-                  {key === "workspace" ? "Workspace" : "Feed"}
+                  {key === "workspace" ? t("workspace.segmented") : t("workspace.feed")}
                 </button>
               );
             })}
@@ -146,14 +148,14 @@ export default function Comunidade() {
             <>
               {channels.error ? (
                 <div className="mb-4 flex items-center gap-3 rounded-lg bg-destructive/10 p-3">
-                  <p className="flex-1 text-sm text-destructive">Erro</p>
+                  <p className="flex-1 text-sm text-destructive">{t("workspace.errorTitle")}</p>
                   <button
                     type="button"
                     onClick={channels.refresh}
                     disabled={channels.loading}
                     className="rounded-full bg-destructive/20 px-3 py-1.5 text-xs font-bold text-destructive hover:bg-destructive/30 disabled:opacity-50"
                   >
-                    Tocar para tentar de novo
+                    {t("workspace.retry")}
                   </button>
                 </div>
               ) : null}
@@ -170,7 +172,7 @@ export default function Comunidade() {
                   </motion.div>
 
                   <WorkspaceSection
-                    title="Canais"
+                    title={t("workspace.channels")}
                     right={
                       canCreateChannel ? (
                         <button
@@ -185,11 +187,11 @@ export default function Comunidade() {
                   >
                     {channels.regular.length === 0 ? (
                       <p className="rounded-2xl border border-border bg-card px-4 py-6 text-center text-sm text-muted-foreground">
-                        Sem canais disponíveis.
+                        {t("workspace.emptyChannels")}
                         <span className="block text-xs mt-1">
                           {canCreateChannel
-                            ? "Cria o primeiro canal da comunidade."
-                            : "A comunidade está a crescer - volta em breve."}
+                            ? t("workspace.emptyChannelsHintCreator")
+                            : t("workspace.emptyChannelsHint")}
                         </span>
                       </p>
                     ) : (
@@ -200,7 +202,7 @@ export default function Comunidade() {
                   </WorkspaceSection>
 
                   <WorkspaceSection
-                    title="Salas de Pares"
+                    title={t("workspace.pairRooms")}
                     right={
                       liveRooms > 0 ? (
                         <span className="inline-flex items-center gap-1 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-2.5 py-1 text-xs font-extrabold text-emerald-400">
@@ -212,8 +214,8 @@ export default function Comunidade() {
                   >
                     {channels.pairRooms.length === 0 ? (
                       <p className="rounded-2xl border border-border bg-card px-4 py-6 text-center text-sm text-muted-foreground">
-                        Sem salas de pares ativas.
-                        <span className="block text-xs mt-1">As salas abrem automaticamente com a sessão de mercado.</span>
+                        {t("workspace.emptyPairRooms")}
+                        <span className="block text-xs mt-1">{t("workspace.emptyPairRoomsHint")}</span>
                       </p>
                     ) : (
                       channels.pairRooms.map((c, i) => (
@@ -223,7 +225,7 @@ export default function Comunidade() {
                   </WorkspaceSection>
 
                   <WorkspaceSection
-                    title="Mensagens Diretas"
+                    title={t("workspace.dms")}
                     right={
                       isPremium ? (
                         <button
@@ -244,11 +246,11 @@ export default function Comunidade() {
                       </div>
                     ) : conversations.dms.length === 0 ? (
                       <p className="rounded-2xl border border-border bg-card px-4 py-6 text-center text-sm text-muted-foreground">
-                        Sem conversas ainda. Inicia uma nova DM!
+                        {t("workspace.emptyDms")}
                         <span className="block text-xs mt-1">
                           {isPremium
-                            ? "Usa o + no topo para iniciares uma conversa."
-                            : "Encontra traders na pesquisa para iniciares conversas."}
+                            ? t("workspace.emptyDmsHintPremium")
+                            : t("workspace.emptyDmsHint")}
                         </span>
                       </p>
                     ) : (

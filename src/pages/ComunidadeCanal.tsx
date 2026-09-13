@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { ChevronLeft, Hash } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Composer } from "@/components/community/Composer";
 import { MessageList } from "@/components/community/MessageList";
 import { Layout } from "@/components/layout/Layout";
@@ -15,6 +16,7 @@ import { consumePendingQuickShare } from "@/hooks/useQuickCamera";
 export default function ComunidadeCanal() {
   const { channelId } = useParams<{ channelId: string }>();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { isPremium, loading: subLoading } = useSubscription();
   const channels = useChannels();
@@ -31,7 +33,7 @@ export default function ComunidadeCanal() {
       <Layout noFooter>
         <section className="flex items-center justify-center gap-3 py-24">
           <div className="h-5 w-5 rounded-full border-2 border-primary border-t-transparent animate-spin" />
-          <p className="text-sm text-muted-foreground">A carregar...</p>
+          <p className="text-sm text-muted-foreground">{t("common.loading")}</p>
         </section>
       </Layout>
     );
@@ -48,11 +50,11 @@ export default function ComunidadeCanal() {
               className="mb-4 flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
             >
               <ChevronLeft className="h-4 w-4" />
-              Voltar
+              {t("common.back")}
             </button>
             <PremiumLock
               title={channel?.display_name || "#"}
-              description="Este canal é Premium. Desbloqueia com um plano para participar."
+              description={t("workspace.premiumChannelDesc")}
             />
           </div>
         </section>
@@ -69,7 +71,7 @@ export default function ComunidadeCanal() {
               type="button"
               onClick={() => navigate("/comunidade")}
               className="rounded-full p-1.5 transition-colors hover:bg-muted/60"
-              aria-label="Voltar"
+              aria-label={t("common.back")}
             >
               <ChevronLeft className="h-5 w-5" />
             </button>
@@ -105,7 +107,7 @@ export default function ComunidadeCanal() {
 
           {!channel && !channels.loading && !messages.loading ? (
             <p className="shrink-0 border-t border-border px-4 py-2 text-center text-xs text-muted-foreground">
-              Sem canais disponíveis.
+              {t("workspace.emptyChannels")}
             </p>
           ) : null}
         </div>
