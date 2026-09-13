@@ -210,7 +210,10 @@
     "closed": "ENCERRADOS",
     "errorTitle": "Erro",
     "noFilteredBooms": "Sem booms nos filtros",
-    "noFilteredBoomsDesc": "Nenhum boom corresponde aos teus filtros. Ajusta-os nas definições."
+    "noFilteredBoomsDesc": "Nenhum boom corresponde aos teus filtros. Ajusta-os nas definições.",
+    "everyDay": "Todos os dias",
+    "tipLabel": "💥 Dica The Magic Trader:",
+    "tip": "Ativa o alarme para receberes uma notificação 5 minutos antes de cada Hora do Boom!"
   },
   "comunidade": {
     "all": "Todos",
@@ -345,6 +348,7 @@
     "express": "Express",
     "signOut": "Sair",
     "signIn": "Entrar",
+    "signInSubtitle": "Entra na tua conta para veres o teu perfil e gestão de capital.",
     "version": "The Magic Trader · v1.0.0",
     "signOutTitle": "Sair",
     "signOutBody": "Tens a certeza que queres sair?",
@@ -838,6 +842,8 @@
     "subtitle": "Regista e acompanha as tuas operações dia a dia.",
     "addTrade": "Registar",
     "dayTitle": "{{date}}",
+    "previousMonth": "Mês anterior",
+    "nextMonth": "Próximo mês",
     "noTrades": "Sem operações neste dia",
     "noTradesHint": "Toca em 'Registar' para adicionar a primeira operação do dia.",
     "tradesCount": "operações",
@@ -938,7 +944,9 @@
     "daysAgo_one": "há {{count}} d",
     "daysAgo_other": "há {{count}} d",
     "scheduledFor": "Agendado para {{time}}",
-    "refresh": "Atualizar"
+    "refresh": "Atualizar",
+    "deleteNotification": "Apagar {{title}}",
+    "loadMore": "Carregar mais"
   },
   "tour": {
     "skip": "Saltar",
@@ -1258,6 +1266,9 @@
       "capitalBase": "Capital base · ",
       "targetReturn": "Meta de retorno · ",
       "capital": "Capital",
+      "profit": "Lucro",
+      "withdrawals": "Levantamentos",
+      "soon": "Em breve",
       "target": "Meta",
       "riskPerOp": "Risco/op",
       "movements": "MOVIMENTAÇÕES"

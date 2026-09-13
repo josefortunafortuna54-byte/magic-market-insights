@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AlertCircle, Loader2, Sparkles, Trash2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,11 +8,11 @@ import { askAssistant, type AiMessage } from "@/lib/aiSupport";
 
 const STORAGE_KEY = "tmt_ai_chat";
 
-const SUGGESTIONS = [
-  "Como funcionam os planos?",
-  "O que é a Hora do Boom?",
-  "Como ativo os alarmes?",
-  "Como gero a minha banca?",
+const SUGGESTION_KEYS = [
+  "suporteIa.suggestion1",
+  "suporteIa.suggestion2",
+  "suporteIa.suggestion3",
+  "suporteIa.suggestion4",
 ] as const;
 
 function isAiMessage(v: unknown): v is AiMessage {
@@ -44,6 +45,7 @@ function writeChat(messages: AiMessage[]): void {
 }
 
 export default function SuporteIa() {
+  const { t } = useTranslation();
   const [messages, setMessages] = useState<AiMessage[]>([]);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
@@ -99,35 +101,35 @@ export default function SuporteIa() {
               <Sparkles className="h-5 w-5 text-white" />
             </div>
             <div className="flex-1 min-w-0">
-              <h1 className="font-display text-xl font-bold leading-tight">Suporte IA</h1>
+              <h1 className="font-display text-xl font-bold leading-tight">{t("suporteIa.title")}</h1>
               <p className="text-xs text-muted-foreground truncate">
                 {remaining !== null
-                  ? `Mensagens restantes hoje: ${remaining}`
-                  : "Assistente The Magic Trader"}
+                  ? t("suporteIa.remainingChat", { count: remaining })
+                  : t("suporteIa.subtitle")}
               </p>
             </div>
-            <Button variant="ghost" size="sm" onClick={clearChat} aria-label="Limpar conversa">
+            <Button variant="ghost" size="sm" onClick={clearChat} aria-label={t("suporteIa.clear")}>
               <Trash2 className="h-4 w-4" />
-              Limpar conversa
+              {t("suporteIa.clear")}
             </Button>
           </div>
 
           <div ref={listRef} className="flex-1 min-h-0 overflow-y-auto py-4 space-y-3">
             {messages.length === 0 ? (
               <div className="text-center py-8 space-y-2">
-                <h2 className="font-display text-xl font-bold">Olá, sou o assistente do TMT 👋</h2>
+                <h2 className="font-display text-xl font-bold">{t("suporteIa.welcome")}</h2>
                 <p className="text-sm text-muted-foreground">
-                  Tiro dúvidas sobre sinais, planos, alertas, banca e a app.
+                  {t("suporteIa.welcomeDesc")}
                 </p>
                 <div className="flex flex-col items-center gap-2 pt-2">
-                  {SUGGESTIONS.map((s) => (
+                  {SUGGESTION_KEYS.map((k) => (
                     <button
-                      key={s}
+                      key={k}
                       type="button"
-                      onClick={() => send(s)}
+                      onClick={() => send(t(k))}
                       disabled={sending}
                       className="px-4 py-2 rounded-xl bg-card border border-primary/35 text-primary text-sm font-semibold hover:opacity-70 disabled:opacity-50 transition-opacity">
-                      {s}
+                      {t(k)}
                     </button>
                   ))}
                 </div>
@@ -165,12 +167,12 @@ export default function SuporteIa() {
                   send();
                 }
               }}
-              placeholder="Escreve a tua pergunta…"
+              placeholder={t("suporteIa.placeholder")}
               maxLength={2000}
               className="flex-1"
             />
-            <Button onClick={() => send()} disabled={!input.trim() || sending} aria-label="Enviar">
-              Enviar
+            <Button onClick={() => send()} disabled={!input.trim() || sending} aria-label={t("suporteIa.send")}>
+              {t("suporteIa.send")}
             </Button>
           </div>
         </div>

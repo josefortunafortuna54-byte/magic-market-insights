@@ -210,7 +210,10 @@
     "closed": "CLOSED",
     "errorTitle": "Error",
     "noFilteredBooms": "No booms matching the filters",
-    "noFilteredBoomsDesc": "No boom matches your filters. Adjust them in the settings."
+    "noFilteredBoomsDesc": "No boom matches your filters. Adjust them in the settings.",
+    "everyDay": "Every day",
+    "tipLabel": "💥 The Magic Trader tip:",
+    "tip": "Enable the alarm to receive a notification 5 minutes before each Boom Time!"
   },
   "comunidade": {
     "all": "All",
@@ -348,6 +351,7 @@
     "express": "Express",
     "signOut": "Sign out",
     "signIn": "Sign in",
+    "signInSubtitle": "Sign in to see your profile and capital management.",
     "version": "The Magic Trader · v1.0.0",
     "signOutTitle": "Sign out",
     "signOutBody": "Are you sure you want to sign out?",
@@ -834,6 +838,8 @@
     "subtitle": "Log and track your trades day by day.",
     "addTrade": "Log",
     "dayTitle": "{{date}}",
+    "previousMonth": "Previous month",
+    "nextMonth": "Next month",
     "noTrades": "No trades on this day",
     "noTradesHint": "Tap 'Log' to add your first trade of the day.",
     "tradesCount": "trades",
@@ -934,7 +940,9 @@
     "daysAgo_one": "{{count}} d ago",
     "daysAgo_other": "{{count}} d ago",
     "scheduledFor": "Scheduled for {{time}}",
-    "refresh": "Refresh"
+    "refresh": "Refresh",
+    "deleteNotification": "Delete {{title}}",
+    "loadMore": "Load more"
   },
   "tour": {
     "skip": "Skip",
@@ -1254,6 +1262,9 @@
       "capitalBase": "Base capital · ",
       "targetReturn": "Target return · ",
       "capital": "Capital",
+      "profit": "Profit",
+      "withdrawals": "Withdrawals",
+      "soon": "Coming soon",
       "target": "Target",
       "riskPerOp": "Risk/trade",
       "movements": "MOVEMENTS"

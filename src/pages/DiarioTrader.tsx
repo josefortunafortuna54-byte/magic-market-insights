@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Trash2, ChevronLeft, ChevronRight, ArrowUp, ArrowDown, Minus, CalendarPlus } from 'lucide-react';
+import { useTranslation } from "react-i18next";
 import { ExportButton } from '@/components/admin/ExportButton';
 import { AddTradeModal } from '@/components/journal/AddTradeModal';
 import { Layout } from '@/components/layout/Layout';
@@ -70,6 +71,7 @@ function DayCell({
 }
 
 function TradeRow({ trade, onDelete }: { trade: TradeEntry; onDelete: () => void }) {
+  const { t } = useTranslation();
   const isWin = trade.result === 'WIN';
   const isLoss = trade.result === 'LOSS';
   const color = isWin ? 'text-green-600' : isLoss ? 'text-red-500' : 'text-muted-foreground';
@@ -98,7 +100,7 @@ function TradeRow({ trade, onDelete }: { trade: TradeEntry; onDelete: () => void
           {pnlSign}
           {formatMoney(trade.profitUsd)}
         </span>
-        <button onClick={onDelete} className="p-1 text-muted-foreground hover:text-foreground" aria-label="Apagar">
+        <button onClick={onDelete} className="p-1 text-muted-foreground hover:text-foreground" aria-label={t("diario.delete")}>
           <Trash2 className="h-3.5 w-3.5" />
         </button>
       </div>
@@ -107,6 +109,7 @@ function TradeRow({ trade, onDelete }: { trade: TradeEntry; onDelete: () => void
 }
 
 export function DiarioTrader() {
+  const { t } = useTranslation();
   const { trades, addTrade, removeTrade } = useTradeJournal();
   const now = new Date();
   const [year, setYear] = useState(now.getFullYear());
@@ -176,7 +179,7 @@ export function DiarioTrader() {
   };
 
   const handleDelete = (id: string) => {
-    const ok = window.confirm('Tem certeza que quer apagar esta operação?');
+    const ok = window.confirm(t("diario.deleteTradeConfirm"));
     if (ok) void removeTrade(id);
   };
 
@@ -193,10 +196,10 @@ export function DiarioTrader() {
       <div className="container mx-auto max-w-3xl space-y-6 px-4 py-8">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <h1 className="font-display text-2xl font-bold">Diário de Trader</h1>
-            <p className="text-sm text-muted-foreground">Regista e acompanha as tuas operações dia a dia.</p>
+            <h1 className="font-display text-2xl font-bold">{t("diario.title")}</h1>
+            <p className="text-sm text-muted-foreground">{t("diario.subtitle")}</p>
           </div>
-          <ExportButton data={exportData} filename="tmt-diario" columns={exportColumns} label="Exportar CSV" />
+          <ExportButton data={exportData} filename="tmt-diario" columns={exportColumns} label={t("diario.exportCsv")} />
         </div>
 
         <Card>
@@ -205,7 +208,7 @@ export function DiarioTrader() {
               <button
                 onClick={prevMonth}
                 className="flex h-9 w-9 items-center justify-center rounded-full bg-muted text-primary hover:text-foreground"
-                aria-label="Mês anterior"
+                aria-label={t("diario.previousMonth")}
               >
                 <ChevronLeft className="h-5 w-5" />
               </button>
@@ -213,7 +216,7 @@ export function DiarioTrader() {
               <button
                 onClick={nextMonth}
                 className="flex h-9 w-9 items-center justify-center rounded-full bg-muted text-primary hover:text-foreground"
-                aria-label="Próximo mês"
+                aria-label={t("diario.nextMonth")}
               >
                 <ChevronRight className="h-5 w-5" />
               </button>
@@ -251,17 +254,17 @@ export function DiarioTrader() {
 
         <div className="flex items-center gap-2 rounded-xl border border-border bg-card p-4">
           <div className="flex-1 text-center">
-            <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Operações no mês</p>
+            <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{t("diario.monthTrades")}</p>
             <p className="text-lg font-extrabold tabular-nums">{monthTrades.length}</p>
           </div>
           <div className="h-8 w-px bg-border" />
           <div className="flex-1 text-center">
-            <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Win Rate</p>
+            <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{t("diario.monthWinRate")}</p>
             <p className="text-lg font-extrabold tabular-nums text-green-600">{monthWinRate}%</p>
           </div>
           <div className="h-8 w-px bg-border" />
           <div className="flex-1 text-center">
-            <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">P&L do mês</p>
+            <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{t("diario.monthPnl")}</p>
             <p className={'text-lg font-extrabold tabular-nums ' + (monthPnl >= 0 ? 'text-green-600' : 'text-red-500')}>
               {monthPnl >= 0 ? '+' : ''}
               {formatMoney(monthPnl)}
@@ -274,14 +277,14 @@ export function DiarioTrader() {
             <h2 className="text-lg font-bold">{selectedKey}</h2>
             {selectedTrades.length > 0 ? (
               <p className="text-sm text-muted-foreground">
-                {selectedTrades.length} operações
+                {selectedTrades.length} {t("diario.tradesCount")}
                 {selectedPnl !== 0 ? ` · ${selectedPnl >= 0 ? '+' : ''}${formatMoney(selectedPnl)} USD` : ''}
               </p>
             ) : null}
           </div>
           <Button onClick={() => setShowAdd(true)}>
             <CalendarPlus className="mr-2 h-4 w-4" />
-            Registar
+            {t("diario.addTrade")}
           </Button>
         </div>
 
@@ -292,9 +295,9 @@ export function DiarioTrader() {
                 <CalendarPlus className="h-6 w-6" />
               </div>
               <div className="flex-1">
-                <p className="text-sm font-medium">Sem operações neste dia</p>
+                <p className="text-sm font-medium">{t("diario.noTrades")}</p>
                 <p className="text-sm text-muted-foreground">
-                  Toca em 'Registar' para adicionar a primeira operação do dia.
+                  {t("diario.noTradesHint")}
                 </p>
               </div>
             </CardContent>

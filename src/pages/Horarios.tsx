@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { Bell, BellOff, ChevronRight, Clock, Filter, Info, Settings2, SlidersHorizontal, Zap } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { AlarmToggle } from "@/components/AlarmToggle";
 import { EconomicEventsRow } from "@/components/economics/EconomicEventBadge";
 import { Layout } from "@/components/layout/Layout";
@@ -52,6 +53,7 @@ function getStatus(time_wat: string): "active" | "expired" | "upcoming" {
 }
 
 export default function Horarios() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { booms, loading } = useBoomHours();
   const { newsForBoom } = useEconomicCalendar();
@@ -88,17 +90,17 @@ export default function Horarios() {
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
             <div className="flex items-center gap-3 mb-1">
               <Bell className="h-6 w-6 text-primary" />
-              <h1 className="font-display text-2xl font-bold">⚡ Hora do Boom</h1>
+              <h1 className="font-display text-2xl font-bold">⚡ {t("horarios.title")}</h1>
               <button
                 onClick={() => navigate("/definicoes-booms")}
-                aria-label="Definições do Boom"
+                aria-label={t("definicoesBooms.title")}
                 className="ml-auto p-1.5 rounded-lg hover:bg-muted transition-colors"
               >
                 <Settings2 className="h-5 w-5 text-muted-foreground" />
               </button>
             </div>
             <p className="text-muted-foreground text-sm">
-              Janelas de alta volatilidade. Ativa alarmes para não perderes a entrada.
+              {t("horarios.description")}
             </p>
           </motion.div>
 
@@ -106,13 +108,13 @@ export default function Horarios() {
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
             className="glass-card p-4 mb-6 flex items-center justify-between">
             <div>
-              <p className="text-xs text-muted-foreground">Hora atual (Angola)</p>
+              <p className="text-xs text-muted-foreground">{t("horarios.watAngola")}</p>
               <p className="font-display text-2xl font-bold text-primary">
                 {String(currentTime.h).padStart(2, "0")}:{String(currentTime.m).padStart(2, "0")} WAT
               </p>
             </div>
             <div className="text-right">
-              <p className="text-xs text-muted-foreground">GMT</p>
+              <p className="text-xs text-muted-foreground">{t("horarios.watUtc")}</p>
               <p className="font-mono text-sm text-muted-foreground">
                 {String((currentTime.h - 1 + 24) % 24).padStart(2, "0")}:{String(currentTime.m).padStart(2, "0")}
               </p>
@@ -123,7 +125,7 @@ export default function Horarios() {
           {notifPermission === "denied" && (
             <div className="glass-card p-3 mb-4 border border-warning/30 bg-warning/5 flex items-center gap-2">
               <BellOff className="h-4 w-4 text-warning shrink-0" />
-              <p className="text-xs text-warning">Notificações bloqueadas. Ativa nas definições do browser para receber alertas.</p>
+              <p className="text-xs text-warning">{t("components.alarmToggle.blocked")}</p>
             </div>
           )}
 
@@ -135,7 +137,7 @@ export default function Horarios() {
             >
               <Filter className="h-4 w-4 text-primary shrink-0" />
               <span className="text-sm font-semibold text-primary flex-1">
-                Filtros ativos · {hiddenCount} boom(s) oculto(s)
+                {t("horarios.filtersActive", { count: hiddenCount })}
               </span>
               <ChevronRight className="h-4 w-4 text-primary shrink-0" />
             </button>
@@ -144,20 +146,20 @@ export default function Horarios() {
           {loading ? (
             <div className="glass-card p-12 text-center">
               <div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full mx-auto mb-4" />
-              <p className="text-muted-foreground text-sm">A carregar horários…</p>
+              <p className="text-muted-foreground text-sm">{t("horarios.loading")}</p>
             </div>
           ) : booms.length === 0 ? (
             <div className="glass-card p-12 text-center">
               <Zap className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-40" />
-              <h3 className="font-display text-lg font-semibold mb-2">Sem horários</h3>
-              <p className="text-sm text-muted-foreground">Ainda não há horários ativos.</p>
+              <h3 className="font-display text-lg font-semibold mb-2">{t("horarios.emptyTitle")}</h3>
+              <p className="text-sm text-muted-foreground">{t("horarios.emptyBody")}</p>
             </div>
           ) : filteredHours.length === 0 ? (
             <div className="glass-card p-12 text-center space-y-4">
               <div>
-                <h3 className="font-display text-lg font-semibold mb-2">Sem booms nos filtros</h3>
+                <h3 className="font-display text-lg font-semibold mb-2">{t("horarios.noFilteredBooms")}</h3>
                 <p className="text-sm text-muted-foreground">
-                  Nenhum boom corresponde aos teus filtros. Ajusta-os nas definições.
+                  {t("horarios.noFilteredBoomsDesc")}
                 </p>
               </div>
               <button
@@ -165,7 +167,7 @@ export default function Horarios() {
                 className="inline-flex items-center gap-2 rounded-lg border border-accent/55 bg-accent/10 px-4 py-2 text-sm font-bold text-accent"
               >
                 <SlidersHorizontal className="h-4 w-4" />
-                Ajustar filtros
+                {t("horarios.adjustFilters")}
               </button>
             </div>
           ) : (
@@ -191,12 +193,12 @@ export default function Horarios() {
                           </span>
                           {status === "active" && (
                             <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full font-semibold animate-pulse">
-                              ● Agora
+                              {t("components.boomHourCard.live")}
                             </span>
                           )}
                           {status === "expired" && (
                             <span className="text-xs bg-muted/50 text-muted-foreground px-2 py-0.5 rounded-full flex items-center gap-1">
-                              <Clock className="h-3 w-3" /> Expirado
+                              <Clock className="h-3 w-3" /> {t("components.boomHourCard.closed")}
                             </span>
                           )}
                         </div>
@@ -213,7 +215,7 @@ export default function Horarios() {
                         </div>
 
                         <p className={`text-xs ${status === "expired" ? "text-muted-foreground/30" : "text-muted-foreground"}`}>
-                          {item.days || "Todos os dias"} · GMT {item.time_gmt}
+                          {item.days || t("horarios.everyDay")} · GMT {item.time_gmt}
                         </p>
 
                         {item.description && (
@@ -229,7 +231,7 @@ export default function Horarios() {
 
                       {status === "expired" ? (
                         <span className="ml-4 shrink-0 text-xs text-muted-foreground/40">
-                          Encerrado · o ciclo recomeça amanhã
+                          {t("components.boomHourCard.closedHint")}
                         </span>
                       ) : (
                         <div className="ml-4 shrink-0">
@@ -256,8 +258,8 @@ export default function Horarios() {
             <div className="flex gap-3">
               <Info className="h-5 w-5 text-primary shrink-0 mt-0.5" />
               <p className="text-sm text-muted-foreground">
-                <span className="text-primary font-semibold">💥 Dica The Magic Trader:</span>{" "}
-                Ativa o alarme para receberes uma notificação 5 minutos antes de cada Hora do Boom!
+                <span className="text-primary font-semibold">{t("horarios.tipLabel")}</span>{" "}
+                {t("horarios.tip")}
               </p>
             </div>
           </motion.div>

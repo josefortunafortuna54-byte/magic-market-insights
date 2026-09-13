@@ -20,6 +20,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useSubscription } from "@/hooks/useSubscription";
 import { isAdminEmail } from "@/lib/admin";
 import { planLabel, type PlanId } from "@/lib/plans";
+import { useTranslation } from "react-i18next";
 
 const PLAN_BADGE_LABEL: Record<string, string> = {
   basic: "BASIC",
@@ -43,6 +44,7 @@ export default function Perfil() {
   const { user, signOut } = useAuth();
   const { tier } = useSubscription();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   if (!user) {
     return (
@@ -56,17 +58,17 @@ export default function Perfil() {
                     <LogIn className="h-8 w-8 text-primary" />
                   </div>
                   <div>
-                    <h1 className="font-display text-2xl font-bold mb-2">Inicia sessão</h1>
+                    <h1 className="font-display text-2xl font-bold mb-2">{t("perfil.signIn")}</h1>
                     <p className="text-muted-foreground">
-                      Entra na tua conta para veres o teu perfil e gestão de capital.
+                      {t("perfil.signInSubtitle")}
                     </p>
                   </div>
                   <div className="flex flex-col gap-3">
                     <Link to="/login" className="block w-full">
-                      <Button variant="hero" className="w-full">Entrar</Button>
+                      <Button variant="hero" className="w-full">{t("perfil.signIn")}</Button>
                     </Link>
                     <Link to="/registro" className="block w-full">
-                      <Button variant="outline" className="w-full">Criar Conta</Button>
+                      <Button variant="outline" className="w-full">{t("auth.enterApp")}</Button>
                     </Link>
                   </div>
                 </CardContent>
@@ -84,17 +86,17 @@ export default function Perfil() {
   const isPremium = tier !== "free";
 
   const menuRows: MenuRow[] = [
-    { href: "/banca", label: "Banca", icon: Wallet },
-    { href: "/depositos", label: "Depósitos e Saques", icon: Landmark },
-    { href: "/notificacoes", label: "Notificações", icon: Bell },
-    { href: "/diario-trader", label: "Diário do Trader", icon: BookOpen },
-    { href: "/suporte-ia", label: "Suporte IA", icon: Bot },
-    { href: "/definicoes-booms", label: "Definições de Booms", icon: AlarmClock },
-    { href: "/tema", label: "Tema", icon: Moon },
-    { href: "/idioma", label: "Idioma", icon: Languages },
+    { href: "/banca", label: t("perfil.banca"), icon: Wallet },
+    { href: "/depositos", label: t("depositos.title"), icon: Landmark },
+    { href: "/notificacoes", label: t("perfil.notifications"), icon: Bell },
+    { href: "/diario-trader", label: t("perfil.diario"), icon: BookOpen },
+    { href: "/suporte-ia", label: t("suporteIa.title"), icon: Bot },
+    { href: "/definicoes-booms", label: t("definicoesBooms.title"), icon: AlarmClock },
+    { href: "/tema", label: t("theme.title"), icon: Moon },
+    { href: "/idioma", label: t("language.title"), icon: Languages },
   ];
   if (isAdminEmail(user.email)) {
-    menuRows.push({ href: "/admin-gate", label: "Admin", icon: Shield });
+    menuRows.push({ href: "/admin-gate", label: t("admin.title"), icon: Shield });
   }
 
   const handleLogout = async () => {
@@ -132,16 +134,16 @@ export default function Perfil() {
           <Card className="glass-card mb-6">
             <CardContent className="pt-6 grid grid-cols-3 gap-4 text-center">
               <div>
-                <p className="text-xs text-muted-foreground mb-1">Capital</p>
+                <p className="text-xs text-muted-foreground mb-1">{t("components.walletCard.capital")}</p>
                 <p className="text-sm font-semibold text-muted-foreground">Kz 0,00</p>
               </div>
               <div>
-                <p className="text-xs text-muted-foreground mb-1">Lucro</p>
+                <p className="text-xs text-muted-foreground mb-1">{t("components.walletCard.profit")}</p>
                 <p className="text-sm font-semibold text-muted-foreground">Kz 0,00</p>
               </div>
               <div>
-                <p className="text-xs text-muted-foreground mb-1">Levantamentos</p>
-                <p className="text-sm font-semibold text-muted-foreground">Em breve</p>
+                <p className="text-xs text-muted-foreground mb-1">{t("components.walletCard.withdrawals")}</p>
+                <p className="text-sm font-semibold text-muted-foreground">{t("components.walletCard.soon")}</p>
               </div>
             </CardContent>
           </Card>
@@ -168,7 +170,7 @@ export default function Perfil() {
             {/* Logout */}
             <Button variant="destructive" className="w-full mt-4" onClick={handleLogout}>
               <LogOut className="h-4 w-4 mr-2" />
-              Terminar Sessão
+              {t("perfil.signOut")}
             </Button>
           </div>
         </div>

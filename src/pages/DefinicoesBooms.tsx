@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Bell } from 'lucide-react';
 import { toast } from 'sonner';
+import { useTranslation } from "react-i18next";
+import type { TFunction } from "i18next";
 import { Layout } from '@/components/layout/Layout';
 import { PremiumLock } from '@/components/signals/PremiumLock';
 import { Button } from '@/components/ui/button';
@@ -20,23 +22,24 @@ import {
 } from '@/lib/boomPrefs';
 import { requestNotificationPermission } from '@/lib/notifications';
 
-const VOL_TIER_LABELS: Record<string, string> = {
-  todas: 'Todas',
-  alta: 'Alta',
-  media: 'Média',
-  baixa: 'Baixa',
+const VOL_TIER_KEYS: Record<string, string> = {
+  todas: "definicoesBooms.volAll",
+  alta: "definicoesBooms.volHigh",
+  media: "definicoesBooms.volMedium",
+  baixa: "definicoesBooms.volLow",
 };
 
-async function enableNotifications() {
+async function enableNotifications(t: TFunction) {
   const granted = await requestNotificationPermission();
   if (!granted) {
-    toast.error('Notificações', {
-      description: 'Ativa as notificações nas definições do teu telemóvel.',
+    toast.error(t("notificacoes.title"), {
+      description: t("definicoesBooms.enableNotification"),
     });
   }
 }
 
 export function DefinicoesBooms() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { isPremium, tier, loading: subLoading } = useSubscription();
   const { booms: hours, loading: hoursLoading } = useBoomHours();
@@ -91,65 +94,65 @@ export function DefinicoesBooms() {
   return (
     <Layout>
       <div className="container mx-auto max-w-2xl space-y-5 px-4 py-8">
-        <h1 className="font-display text-2xl font-bold">Definições do Boom</h1>
+        <h1 className="font-display text-2xl font-bold">{t("definicoesBooms.title")}</h1>
 
         <div className="flex items-center gap-4 rounded-xl border border-primary/40 bg-primary/5 p-4">
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
             <Bell className="h-5 w-5" />
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-medium">Alarmes &amp; Notificações</p>
+            <p className="text-sm font-medium">{t("definicoesBooms.alarmsTitle")}</p>
             <p className="text-sm text-muted-foreground">
-              Recebe avisos 5 minutos antes de cada janela de alta volatilidade.
+              {t("definicoesBooms.alarmsDesc")}
             </p>
           </div>
-          <Button variant="outline" onClick={() => void enableNotifications()}>
-            Ativar
+          <Button variant="outline" onClick={() => void enableNotifications(t)}>
+            {t("definicoesBooms.enable")}
           </Button>
         </div>
 
         {subLoading || prefs === null ? (
-          <p className="text-sm text-muted-foreground">A carregar definições…</p>
+          <p className="text-sm text-muted-foreground">{t("definicoesBooms.loading")}</p>
         ) : !premium ? (
           <PremiumLock
-            title="Personalização Premium"
-            description="Filtra os booms por tendência, pares e volatilidade."
+            title={t("definicoesBooms.lockTitle")}
+            description={t("definicoesBooms.lockDesc")}
           />
         ) : hoursLoading ? (
-          <p className="text-sm text-muted-foreground">A carregar booms…</p>
+          <p className="text-sm text-muted-foreground">{t("definicoesBooms.loadingBooms")}</p>
         ) : (
           <>
             <p className="text-sm text-muted-foreground">
-              {visibleCount} de {hours.length} booms visíveis no teu horário.
+              {t("definicoesBooms.visibleCount", { visible: visibleCount, total: hours.length })}
             </p>
 
             <div className="space-y-4">
               <div>
-                <p className="font-bold">Tendência</p>
-                <p className="text-sm text-muted-foreground">Janelas por volatilidade</p>
+                <p className="font-bold">{t("definicoesBooms.trend")}</p>
+                <p className="text-sm text-muted-foreground">{t("definicoesBooms.windowsByVol")}</p>
                 <div className="mt-2 flex flex-wrap gap-2">
-                  {VOL_TIERS.map((t) => (
+                  {VOL_TIERS.map((tier) => (
                     <button
-                      key={t.key}
-                      onClick={() => update({ volTier: t.key })}
+                      key={tier.key}
+                      onClick={() => update({ volTier: tier.key })}
                       className={
-                        prefs.volTier === t.key
+                        prefs.volTier === tier.key
                           ? 'rounded-md border border-primary bg-primary px-3 py-1.5 text-sm font-semibold text-primary-foreground'
                           : 'rounded-md border border-border bg-muted px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground'
                       }
                     >
-                      {VOL_TIER_LABELS[t.key]}
+                      {t(VOL_TIER_KEYS[tier.key])}
                     </button>
                   ))}
                 </div>
                 <p className="mt-2 text-sm text-muted-foreground">
-                  As janelas do nível escolhido aparecem primeiro. Todos os BOOMs activos continuam sempre visíveis.
+                  {t("definicoesBooms.volHint")}
                 </p>
               </div>
 
               <div>
-                <p className="font-bold">Pares</p>
-                <p className="text-sm text-muted-foreground">Só vês booms com estes pares</p>
+                <p className="font-bold">{t("definicoesBooms.pairs")}</p>
+                <p className="text-sm text-muted-foreground">{t("definicoesBooms.pairsHint")}</p>
                 <div className="mt-2 flex flex-wrap gap-2">
                   <button
                     onClick={() => update({ pairs: [] })}
@@ -159,7 +162,7 @@ export function DefinicoesBooms() {
                         : 'rounded-md border border-border bg-muted px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground'
                     }
                   >
-                    Todos
+                    {t("definicoesBooms.all")}
                   </button>
                   {allPairs.map((p) => (
                     <button
@@ -176,15 +179,15 @@ export function DefinicoesBooms() {
                   ))}
                 </div>
                 {allPairs.length === 0 ? (
-                  <p className="mt-2 text-sm text-muted-foreground">Nenhum par associado aos booms.</p>
+                  <p className="mt-2 text-sm text-muted-foreground">{t("definicoesBooms.noPairs")}</p>
                 ) : null}
               </div>
 
               <div>
-                <p className="font-bold">Filtrar booms</p>
-                <p className="text-sm text-muted-foreground">Oculta janelas que não queres ver</p>
+                <p className="font-bold">{t("definicoesBooms.filterBooms")}</p>
+                <p className="text-sm text-muted-foreground">{t("definicoesBooms.filterDesc")}</p>
                 {hours.length === 0 ? (
-                  <p className="mt-2 text-sm text-muted-foreground">Sem booms</p>
+                  <p className="mt-2 text-sm text-muted-foreground">{t("definicoesBooms.emptyTitle")}</p>
                 ) : (
                   <Card className="mt-2">
                     <CardContent className="space-y-2 pt-4">
@@ -214,7 +217,7 @@ export function DefinicoesBooms() {
               </div>
 
               <Button variant="ghost" onClick={reset}>
-                Repor predefinições
+                {t("definicoesBooms.reset")}
               </Button>
             </div>
           </>

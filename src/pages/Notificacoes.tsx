@@ -2,6 +2,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { ComponentType } from "react";
 import { useNavigate } from "react-router-dom";
 import { AlarmClock, Bell, BellOff, Flame, RefreshCw, Sparkles, Trash2, Zap } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import type { TFunction } from "i18next";
 import { Layout } from "@/components/layout/Layout";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -59,26 +61,26 @@ function groupOf(item: NotifItem): Group {
   return "earlier";
 }
 
-function relativeTime(d: Date): string {
+function relativeTime(d: Date, t: TFunction): string {
   const diff = Date.now() - d.getTime();
-  if (diff < 60_000) return "Agora mesmo";
+  if (diff < 60_000) return t("notificacoes.justNow");
   const mins = Math.floor(diff / 60_000);
-  if (mins < 60) return `há ${mins} min`;
+  if (mins < 60) return t("notificacoes.minAgo", { count: mins });
   const hours = Math.floor(mins / 60);
-  if (hours < 24) return `há ${hours} h`;
+  if (hours < 24) return t("notificacoes.hoursAgo", { count: hours });
   const days = Math.floor(hours / 24);
-  return `há ${days} d`;
+  return t("notificacoes.daysAgo", { count: days });
 }
 
-function formatFire(fireAt: Date | null): string {
-  if (!fireAt) return "Em breve";
+function formatFire(fireAt: Date | null, t: TFunction): string {
+  if (!fireAt) return t("notificacoes.soon");
   const diff = fireAt.getTime() - Date.now();
-  if (diff <= 0) return "Entregue";
+  if (diff <= 0) return t("notificacoes.delivered");
   const mins = Math.ceil(diff / 60_000);
-  if (mins < 60) return `Em ${mins} min`;
+  if (mins < 60) return t("notificacoes.inMin", { count: mins });
   const hh = Math.floor(mins / 60);
   const mm = mins % 60;
-  return `Em ${hh}h${mm}min`;
+  return t("notificacoes.inHm", { h: hh, min: mm });
 }
 
 function pad2(n: number): string {
@@ -95,22 +97,23 @@ const KIND_STYLE: Record<
   other: { icon: Bell, text: "text-muted-foreground", bg: "bg-muted/40", border: "border-border" },
 };
 
-const GROUP_LABEL: Record<Group, string> = {
-  today: "Hoje",
-  week: "Esta semana",
-  earlier: "Anteriores",
-};
-
 const GROUP_ORDER: Group[] = ["today", "week", "earlier"];
 
 export default function Notificacoes() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [items, setItems] = useState<NotifItem[] | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(false);
   const markReadTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const GROUP_LABEL: Record<Group, string> = {
+    today: t("notificacoes.today"),
+    week: t("notificacoes.thisWeek"),
+    earlier: t("notificacoes.earlier"),
+  };
 
   const toNotifItems = useCallback(
     (remote: UserNotification[], planRequests: PlanRequestEntry[]): NotifItem[] => {
@@ -287,11 +290,11 @@ export default function Notificacoes() {
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
               <Bell className="h-6 w-6 text-primary" />
-              <h1 className="font-display text-2xl font-bold">Notificações</h1>
+              <h1 className="font-display text-2xl font-bold">{t("notificacoes.title")}</h1>
             </div>
             <Button variant="outline" size="sm" onClick={refresh} disabled={refreshing}>
               <RefreshCw className={cn("h-4 w-4", refreshing && "animate-spin")} />
-              Atualizar
+              {t("notificacoes.refresh")}
             </Button>
           </div>
 
@@ -304,20 +307,20 @@ export default function Notificacoes() {
                   <Skeleton className="h-3 w-1/2" />
                 </div>
               </div>
-              <p className="text-center text-sm text-muted-foreground mt-5">A carregar…</p>
+              <p className="text-center text-sm text-muted-foreground mt-5">{t("notificacoes.loading")}</p>
             </div>
           ) : items.length === 0 ? (
             <div className="glass-card p-12 text-center">
               <div className="w-24 h-24 mx-auto rounded-3xl bg-card border border-border flex items-center justify-center mb-6">
                 <BellOff className="h-11 w-11 text-muted-foreground/60" />
               </div>
-              <h3 className="font-display text-xl font-bold mb-2">Sem notificações</h3>
+              <h3 className="font-display text-xl font-bold mb-2">{t("notificacoes.emptyTitle")}</h3>
               <p className="text-sm text-muted-foreground mb-8">
-                Os alarmes da Hora do Boom aparecem aqui quando os ativares.
+                {t("notificacoes.emptyBody")}
               </p>
               <Button variant="secondary" onClick={() => navigate("/horarios")}>
                 <AlarmClock className="h-4 w-4 text-accent" />
-                Ativar alarmes
+                {t("notificacoes.enableAlarms")}
               </Button>
             </div>
           ) : (
@@ -332,9 +335,9 @@ export default function Notificacoes() {
                     ) : null}
                   </div>
                   <div>
-                    <p className="text-xs font-semibold text-foreground">Caixa de entrada</p>
+                    <p className="text-xs font-semibold text-foreground">{t("notificacoes.summaryTitle")}</p>
                     <p className="text-xs text-muted-foreground">
-                      {unreadCount > 0 ? `${unreadCount} por ler` : "Tudo lido"}
+                      {unreadCount > 0 ? t("notificacoes.unreadCount", { count: unreadCount }) : t("notificacoes.allRead")}
                       {scheduledCount > 0 ? ` · ${scheduledCount} ⏰` : ""}
                     </p>
                   </div>
@@ -344,7 +347,7 @@ export default function Notificacoes() {
                   disabled={busyId === "all"}
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted/50 border border-border text-muted-foreground hover:bg-muted disabled:opacity-50 transition-colors">
                   <Trash2 className="h-3.5 w-3.5" />
-                  <span className="text-xs font-semibold">Limpar tudo</span>
+                  <span className="text-xs font-semibold">{t("notificacoes.clearAll")}</span>
                 </button>
               </div>
 
@@ -362,12 +365,12 @@ export default function Notificacoes() {
                       const isPendingPlan = item.source === "plan-request";
                       const date = itemDate(item);
                       const meta = isPendingPlan
-                        ? "Em análise"
+                        ? t("notificacoes.planProcessing")
                         : item.fireAt && item.fireAt.getTime() > now
-                          ? `Agendado para ${pad2(item.fireAt.getHours())}:${pad2(item.fireAt.getMinutes())}`
+                          ? t("notificacoes.scheduledFor", { time: `${pad2(item.fireAt.getHours())}:${pad2(item.fireAt.getMinutes())}` })
                           : item.createdAt
-                            ? relativeTime(date)
-                            : formatFire(item.fireAt);
+                            ? relativeTime(date, t)
+                            : formatFire(item.fireAt, t);
                       return (
                         <div
                           key={item.identifier}
@@ -415,13 +418,13 @@ export default function Notificacoes() {
                           </div>
                           {isPendingPlan ? (
                             <Badge variant="warning" className="shrink-0">
-                              Pendente
+                              {t("notificacoes.planPending")}
                             </Badge>
                           ) : (
                             <button
                               onClick={() => remove(item.identifier)}
                               disabled={busy}
-                              aria-label={`Apagar ${item.title}`}
+                              aria-label={t("notificacoes.deleteNotification", { title: item.title })}
                               className="p-1.5 rounded-lg text-muted-foreground hover:bg-secondary/60 hover:text-destructive disabled:opacity-50 transition-colors shrink-0">
                               <Trash2 className="h-4 w-4" />
                             </button>
@@ -436,12 +439,12 @@ export default function Notificacoes() {
               <div className="mt-2">
                 {hasMore ? (
                   <Button variant="outline" className="w-full" onClick={loadMore}>
-                    Carregar mais
+                    {t("notificacoes.loadMore")}
                   </Button>
                 ) : null}
                 <Button variant="secondary" className="w-full mt-3" onClick={() => navigate("/horarios")}>
                   <AlarmClock className="h-4 w-4 text-accent" />
-                  Gerenciar Alertas
+                  {t("notificacoes.manageAlerts")}
                 </Button>
               </div>
             </>
