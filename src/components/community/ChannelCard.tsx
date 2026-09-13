@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { ChevronRight, Gem } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import { channelIcon, tileFor } from "@/components/community/channel-meta";
 import type { Channel } from "@/lib/types";
@@ -13,6 +14,7 @@ export function ChannelCard({
   index?: number;
   onPress: () => void;
 }) {
+  const { t } = useTranslation();
   const Icon = channelIcon(channel.icon);
   const letter = (channel.display_name.trim().charAt(0) || "#").toUpperCase();
   const [from, to] = tileFor(channel.name);
@@ -51,7 +53,7 @@ export function ChannelCard({
           ) : null}
         </div>
         <p className="truncate text-xs text-muted-foreground">
-          {channel.description || "Sem descrição"}
+          {channel.description || t("workspace.channelNoDesc")}
         </p>
       </div>
 

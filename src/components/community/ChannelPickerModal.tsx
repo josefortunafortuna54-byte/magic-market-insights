@@ -1,5 +1,6 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { ChannelRow } from "@/components/community/ChannelRow";
 import type { Channel } from "@/lib/types";
@@ -15,6 +16,7 @@ export function ChannelPickerModal({
   onSelect: (channelId: string) => void;
   onCancel: () => void;
 }) {
+  const { t } = useTranslation();
   return (
     <AnimatePresence>
       {visible ? (
@@ -34,7 +36,7 @@ export function ChannelPickerModal({
             className="relative w-full max-w-md rounded-t-3xl border border-border bg-card p-4 sm:mb-8 sm:rounded-2xl"
           >
             <div className="mb-3 flex items-center justify-between">
-              <h2 className="text-sm font-bold text-foreground">Enviar para.</h2>
+              <h2 className="text-sm font-bold text-foreground">{t("workspace.sendTo")}</h2>
               <button
                 type="button"
                 onClick={onCancel}
@@ -45,7 +47,7 @@ export function ChannelPickerModal({
             </div>
 
             {channels.length === 0 ? (
-              <p className="py-6 text-center text-sm text-muted-foreground">Sem canais disponíveis.</p>
+              <p className="py-6 text-center text-sm text-muted-foreground">{t("workspace.emptyChannels")}</p>
             ) : (
               <div className="flex max-h-[50vh] flex-col gap-1.5 overflow-y-auto pb-1">
                 {channels.map((channel, i) => (
@@ -64,7 +66,7 @@ export function ChannelPickerModal({
               className="mt-3 w-full text-muted-foreground"
               onClick={onCancel}
             >
-              Cancelar
+              {t("common.cancel")}
             </Button>
           </motion.div>
         </div>

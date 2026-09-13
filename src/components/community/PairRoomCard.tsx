@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { ChevronRight, Gem, Lock } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { formatClosesIn, pairRoomClosesInMs, pairRoomState } from "@/lib/community";
 import type { Channel } from "@/lib/types";
 
@@ -13,6 +14,7 @@ export function PairRoomCard({
   index?: number;
   onPress: () => void;
 }) {
+  const { t } = useTranslation();
   const [, tick] = useState(0);
 
   useEffect(() => {
@@ -59,14 +61,14 @@ export function PairRoomCard({
         {active ? (
           <div className="flex items-center gap-1.5">
             <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400" />
-            <span className="text-xs font-extrabold text-emerald-400">AO VIVO</span>
+            <span className="text-xs font-extrabold text-emerald-400">{t("workspace.liveBadge")}</span>
             <span className="text-xs text-muted-foreground">·</span>
-            <span className="truncate text-xs text-muted-foreground">Fecha em {closesIn}</span>
+            <span className="truncate text-xs text-muted-foreground">{t("workspace.closesIn", { time: closesIn })}</span>
           </div>
         ) : (
           <div className="flex items-center gap-1">
             <Lock className="h-3 w-3 text-muted-foreground" />
-            <span className="text-xs text-muted-foreground">Só leitura</span>
+            <span className="text-xs text-muted-foreground">{t("workspace.closed")}</span>
           </div>
         )}
       </div>
@@ -78,7 +80,7 @@ export function PairRoomCard({
             : "border-border bg-muted/40 text-muted-foreground"
         }`}
       >
-        {active ? "Entrar" : "Entrar"}
+        {t("workspace.enterRoom")}
       </span>
     </motion.button>
   );

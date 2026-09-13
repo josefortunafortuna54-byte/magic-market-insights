@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Lock } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { formatClosesIn, pairRoomClosesInMs, pairRoomState } from "@/lib/community";
 import type { Channel } from "@/lib/types";
 
@@ -13,6 +14,7 @@ export function PairRoomRow({
   index?: number;
   onPress: () => void;
 }) {
+  const { t } = useTranslation();
   const [, tick] = useState(0);
 
   useEffect(() => {
@@ -38,7 +40,7 @@ export function PairRoomRow({
       <div className="min-w-0 flex-1">
         <span className="block truncate text-sm font-bold text-foreground">{pair}</span>
         <span className={`block truncate text-[11px] ${active ? "text-emerald-400" : "text-muted-foreground"}`}>
-          {active ? `#${channel.display_name} · ${closesIn}` : "Só leitura"}
+          {active ? `#${channel.display_name} · ${closesIn}` : t("workspace.closed")}
         </span>
       </div>
       {active ? (

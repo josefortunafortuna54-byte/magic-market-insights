@@ -4,6 +4,8 @@ import {
   TrendingUp, TrendingDown, MessageCircle, Mic, MicOff,
   Send, Play, Pause, Clock, Zap, Crown, Users, ChevronDown, ChevronUp
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import type { TFunction } from "i18next";
 import { supabase } from "@/lib/supabaseClient";
 
 interface BoomTime {
@@ -47,12 +49,12 @@ interface FeedUser {
 
 type FeedFilter = "all" | "upcoming" | "live" | "expired";
 
-function timeAgo(dateStr: string) {
+function timeAgo(dateStr: string, t: TFunction) {
   const diff = (Date.now() - new Date(dateStr).getTime()) / 1000;
-  if (diff < 60) return "agora mesmo";
-  if (diff < 3600) return `há ${Math.floor(diff / 60)}min`;
-  if (diff < 86400) return `há ${Math.floor(diff / 3600)}h`;
-  return `há ${Math.floor(diff / 86400)}d`;
+  if (diff < 60) return t("comunidade.justNow");
+  if (diff < 3600) return t("comunidade.minAgo", { count: Math.floor(diff / 60) });
+  if (diff < 86400) return t("comunidade.hoursAgo", { count: Math.floor(diff / 3600) });
+  return t("comunidade.daysAgo", { count: Math.floor(diff / 86400) });
 }
 
 function getBoomStatus(boomTime: string): "upcoming" | "live" | "expired" {
@@ -93,6 +95,7 @@ function CountdownTimer({ boomTime, onExpire }: { boomTime: string; onExpire: ()
 }
 
 function AudioPlayer({ url }: { url: string }) {
+  const { t } = useTranslation();
   const [playing, setPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -114,7 +117,7 @@ function AudioPlayer({ url }: { url: string }) {
           <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${progress}%` }} />
         </div>
       </div>
-      <span className="text-xs text-muted-foreground">Áudio</span>
+      <span className="text-xs text-muted-foreground">{t("comunidade.audio")}</span>
       <audio ref={audioRef} src={url}
         onTimeUpdate={e => setProgress((e.currentTarget.currentTime / e.currentTarget.duration) * 100)}
         onEnded={() => { setPlaying(false); setProgress(0); }} />
@@ -123,6 +126,7 @@ function AudioPlayer({ url }: { url: string }) {
 }
 
 function BoomCard({ boom, user, isPremium }: { boom: BoomTime; user: FeedUser | null; isPremium: boolean }) {
+  const { t } = useTranslation();
   const [votes, setVotes] = useState<BoomVote[]>([]);
   const [comments, setComments] = useState<BoomComment[]>([]);
   const [showComments, setShowComments] = useState(false);
@@ -162,7 +166,7 @@ function BoomCard({ boom, user, isPremium }: { boom: BoomTime; user: FeedUser | 
   };
 
   const vote = async (type: "BUY" | "SELL") => {
-    if (!user) { alert("Faz login para votar!"); return; }
+    if (!user) { alert(t("comunidade.loginToVote")); return; }
     if (status === "expired") return;
     if (userVote === type) {
       await supabase.from("boom_votes").delete().eq("boom_id", boom.id).eq("user_id", user.id);
@@ -192,13 +196,13 @@ function BoomCard({ boom, user, isPremium }: { boom: BoomTime; user: FeedUser | 
       mr.start();
       setMediaRecorder(mr);
       setRecording(true);
-    } catch { alert("Sem acesso ao microfone!"); }
+    } catch { alert(t("comunidade.noMicAccess")); }
   };
 
   const stopRecording = () => { mediaRecorder?.stop(); setRecording(false); };
 
   const sendComment = async () => {
-    if (!user) { alert("Faz login para comentar!"); return; }
+    if (!user) { alert(t("comunidade.loginToComment")); return; }
     if (!commentText && !audioBlob) return;
     setSubmitting(true);
     let audio_url = "";
@@ -213,7 +217,7 @@ function BoomCard({ boom, user, isPremium }: { boom: BoomTime; user: FeedUser | 
     await supabase.from("boom_comments").insert([{
       boom_id: boom.id,
       user_id: user.id,
-      user_name: user?.user_metadata?.full_name || user?.email?.split("@")[0] || "Trader",
+      user_name: user?.user_metadata?.full_name || user?.email?.split("@")[0] || t("common.trader"),
       user_avatar: user?.user_metadata?.avatar_url || "",
       text: commentText,
       audio_url,
@@ -232,9 +236,9 @@ function BoomCard({ boom, user, isPremium }: { boom: BoomTime; user: FeedUser | 
   const boomDate = new Date(boom.boom_time);
 
   const statusConfig = {
-    upcoming: { label: "Próximo Boom", color: "bg-warning/20 text-warning border-warning/30", dot: "bg-warning" },
-    live: { label: "🚨 AO VIVO", color: "bg-destructive/20 text-destructive border-destructive/30 animate-pulse", dot: "bg-destructive animate-pulse" },
-    expired: { label: "Expirado", color: "bg-muted/50 text-muted-foreground border-border", dot: "bg-muted-foreground" },
+    upcoming: { labelKey: "comunidade.nextBoom", prefix: "", color: "bg-warning/20 text-warning border-warning/30", dot: "bg-warning" },
+    live: { labelKey: "comunidade.liveBadge", prefix: "🚨 ", color: "bg-destructive/20 text-destructive border-destructive/30 animate-pulse", dot: "bg-destructive animate-pulse" },
+    expired: { labelKey: "comunidade.expired", prefix: "", color: "bg-muted/50 text-muted-foreground border-border", dot: "bg-muted-foreground" },
   };
 
   const cfg = statusConfig[status];
@@ -250,7 +254,7 @@ function BoomCard({ boom, user, isPremium }: { boom: BoomTime; user: FeedUser | 
       <div className="absolute top-4 right-4 z-10">
         <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border ${cfg.color}`}>
           <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`} />
-          {cfg.label}
+          {cfg.prefix}{t(cfg.labelKey)}
         </span>
       </div>
 
@@ -271,13 +275,13 @@ function BoomCard({ boom, user, isPremium }: { boom: BoomTime; user: FeedUser | 
               <span className="font-display text-2xl font-bold text-primary">{boom.pair}</span>
               {boom.confidence && (
                 <span className="text-xs bg-primary/10 text-primary border border-primary/20 px-2 py-0.5 rounded-full">
-                  {boom.confidence}% confiança
+                  {t("comunidade.confidence", { value: boom.confidence })}
                 </span>
               )}
             </div>
             <div className="flex items-center gap-2 text-muted-foreground text-sm">
               <Clock className="h-3.5 w-3.5" />
-              <span>{boomDate.toLocaleDateString("pt-PT")} às {String(boomDate.getHours()).padStart(2,"0")}:{String(boomDate.getMinutes()).padStart(2,"0")} WAT</span>
+              <span>{boomDate.toLocaleDateString("pt-PT")} {t("comunidade.at")} {String(boomDate.getHours()).padStart(2,"0")}:{String(boomDate.getMinutes()).padStart(2,"0")} WAT</span>
             </div>
           </div>
         </div>
@@ -285,7 +289,7 @@ function BoomCard({ boom, user, isPremium }: { boom: BoomTime; user: FeedUser | 
         {status !== "expired" && (
           <div className="glass-card p-4 mb-5 text-center border border-primary/20 bg-primary/5 rounded-2xl">
             <p className="text-xs text-muted-foreground mb-1 uppercase tracking-widest">
-              {status === "live" ? "🚨 BOOM ATIVO" : "Começa em"}
+              {status === "live" ? t("comunidade.boomActive") : t("comunidade.startsIn")}
             </p>
             <CountdownTimer boomTime={boom.boom_time} onExpire={() => setStatus("expired")} />
           </div>
@@ -295,12 +299,12 @@ function BoomCard({ boom, user, isPremium }: { boom: BoomTime; user: FeedUser | 
           <div className={`rounded-2xl p-4 mb-5 text-center border ${
             boom.result === "BUY" ? "bg-success/10 border-success/30" : "bg-destructive/10 border-destructive/30"
           }`}>
-            <p className="text-xs text-muted-foreground mb-1">Resultado</p>
+            <p className="text-xs text-muted-foreground mb-1">{t("comunidade.result")}</p>
             <p className={`font-display text-xl font-bold ${boom.result === "BUY" ? "text-success" : "text-destructive"}`}>
               {boom.result === "BUY" ? "✅ BUY" : "❌ SELL"}
             </p>
             <p className="text-xs text-muted-foreground mt-1">
-              {boom.result === "BUY" ? buyPct : sellPct}% dos traders acertaram
+              {t("comunidade.tradersHit", { value: boom.result === "BUY" ? buyPct : sellPct })}
             </p>
           </div>
         )}
@@ -308,7 +312,7 @@ function BoomCard({ boom, user, isPremium }: { boom: BoomTime; user: FeedUser | 
         {boom.audio_url && <div className="mb-5"><AudioPlayer url={boom.audio_url} /></div>}
 
         <div className="mb-5">
-          <p className="text-xs text-muted-foreground uppercase tracking-widest mb-3">A tua previsão</p>
+          <p className="text-xs text-muted-foreground uppercase tracking-widest mb-3">{t("comunidade.yourPrediction")}</p>
           <div className="flex gap-3 mb-3">
             <motion.button
               whileTap={{ scale: 0.97 }}
@@ -349,7 +353,7 @@ function BoomCard({ boom, user, isPremium }: { boom: BoomTime; user: FeedUser | 
               <div className="flex justify-between text-xs">
                 <span className="text-success font-bold">{buyPct}% BUY</span>
                 <span className="text-muted-foreground flex items-center gap-1">
-                  <Users className="h-3 w-3" /> {buyVotes + sellVotes} votos
+                  <Users className="h-3 w-3" /> {buyVotes + sellVotes} {t("comunidade.votes")}
                 </span>
                 <span className="text-destructive font-bold">{sellPct}% SELL</span>
               </div>
@@ -360,7 +364,7 @@ function BoomCard({ boom, user, isPremium }: { boom: BoomTime; user: FeedUser | 
             {justVoted && (
               <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
                 className={`mt-3 text-center text-sm font-semibold ${justVoted === "BUY" ? "text-success" : "text-destructive"}`}>
-                ✓ Votaste {justVoted}!
+                {"✓ "}{t("comunidade.voted", { vote: justVoted })}
               </motion.div>
             )}
           </AnimatePresence>
@@ -370,7 +374,7 @@ function BoomCard({ boom, user, isPremium }: { boom: BoomTime; user: FeedUser | 
           className="w-full flex items-center justify-between text-sm text-muted-foreground hover:text-foreground transition-colors py-2 border-t border-border/40">
           <span className="flex items-center gap-2">
             <MessageCircle className="h-4 w-4" />
-            {comments.length} comentário{comments.length !== 1 ? "s" : ""}
+            {t("comunidade.commentsCount", { count: comments.length })}
           </span>
           {showComments ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
         </button>
@@ -393,9 +397,9 @@ function BoomCard({ boom, user, isPremium }: { boom: BoomTime; user: FeedUser | 
                     </div>
                     <div className="flex-1 bg-secondary/40 rounded-2xl px-4 py-3">
                       <div className="flex items-center gap-2 mb-1">
-                        <span className="text-xs font-semibold">{c.user_name || "Trader"}</span>
+                        <span className="text-xs font-semibold">{c.user_name || t("common.trader")}</span>
                         {c.is_premium && <Crown className="h-3 w-3 text-accent" />}
-                        <span className="text-xs text-muted-foreground ml-auto">{timeAgo(c.created_at)}</span>
+                        <span className="text-xs text-muted-foreground ml-auto">{timeAgo(c.created_at, t)}</span>
                       </div>
                       {c.text && <p className="text-sm">{c.text}</p>}
                       {c.audio_url && <div className="mt-2"><AudioPlayer url={c.audio_url} /></div>}
@@ -412,12 +416,12 @@ function BoomCard({ boom, user, isPremium }: { boom: BoomTime; user: FeedUser | 
                     </div>
                     <textarea value={commentText} onChange={e => setCommentText(e.target.value)}
                       className="flex-1 bg-secondary/60 border border-border/60 rounded-2xl px-4 py-3 text-sm resize-none h-16 focus:border-primary/50 focus:outline-none transition-colors"
-                      placeholder="Partilha a tua análise..." />
+                      placeholder={t("comunidade.commentPlaceholder")} />
                   </div>
                   {audioBlob && (
                     <div className="flex items-center gap-2 bg-primary/10 border border-primary/20 rounded-xl px-3 py-2 ml-11">
                       <Mic className="h-4 w-4 text-primary" />
-                      <span className="text-xs text-primary">Áudio pronto</span>
+                      <span className="text-xs text-primary">{t("comunidade.audioReady")}</span>
                       <button onClick={() => setAudioBlob(null)} className="ml-auto text-xs text-destructive">✕</button>
                     </div>
                   )}
@@ -434,13 +438,13 @@ function BoomCard({ boom, user, isPremium }: { boom: BoomTime; user: FeedUser | 
                     <button onClick={sendComment} disabled={submitting || (!commentText && !audioBlob)}
                       className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-primary text-white text-sm font-bold hover:opacity-90 disabled:opacity-50 transition-all">
                       <Send className="h-4 w-4" />
-                      {submitting ? "A enviar..." : "Enviar"}
+                      {submitting ? t("common.sending") : t("common.send")}
                     </button>
                   </div>
                 </div>
               ) : (
                 <div className="mt-4 text-center py-4 border border-border/40 rounded-2xl">
-                  <p className="text-sm text-muted-foreground">Faz <a href="/login" className="text-primary font-semibold">login</a> para comentar</p>
+                  <p className="text-sm text-muted-foreground">{t("comunidade.commentLoginBefore")}<a href="/login" className="text-primary font-semibold">{t("comunidade.commentLoginLink")}</a>{t("comunidade.commentLoginAfter")}</p>
                 </div>
               )}
             </motion.div>
@@ -452,6 +456,7 @@ function BoomCard({ boom, user, isPremium }: { boom: BoomTime; user: FeedUser | 
 }
 
 export function CommunityFeed() {
+  const { t } = useTranslation();
   const [booms, setBooms] = useState<BoomTime[]>([]);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<FeedUser | null>(null);
@@ -513,7 +518,7 @@ export function CommunityFeed() {
               <Zap className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <h1 className="font-display text-2xl font-bold">Comunidade</h1>
+              <h1 className="font-display text-2xl font-bold">{t("tabs.comunidade")}</h1>
               <p className="text-xs text-muted-foreground">The Magic Trader</p>
             </div>
           </div>
@@ -521,7 +526,7 @@ export function CommunityFeed() {
             <motion.div animate={{ scale: [1, 1.05, 1] }} transition={{ repeat: Infinity, duration: 1.5 }}
               className="flex items-center gap-2 bg-destructive/10 border border-destructive/30 text-destructive px-3 py-1.5 rounded-full text-xs font-bold">
               <span className="w-2 h-2 rounded-full bg-destructive animate-pulse" />
-              {liveCount} AO VIVO
+              {liveCount} {t("comunidade.liveBadge")}
             </motion.div>
           )}
         </div>
@@ -529,16 +534,16 @@ export function CommunityFeed() {
 
       <div className="flex gap-2 mb-6 overflow-x-auto pb-1">
         {[
-          { key: "all", label: "Todos" } as { key: FeedFilter; label: string },
-          { key: "live", label: "🚨 Ao Vivo" } as { key: FeedFilter; label: string },
-          { key: "upcoming", label: "⏳ Próximos" } as { key: FeedFilter; label: string },
-          { key: "expired", label: "✓ Histórico" } as { key: FeedFilter; label: string },
+          { key: "all", labelKey: "comunidade.all", prefix: "" } as { key: FeedFilter; labelKey: string; prefix: string },
+          { key: "live", labelKey: "comunidade.live", prefix: "🚨 " } as { key: FeedFilter; labelKey: string; prefix: string },
+          { key: "upcoming", labelKey: "comunidade.upcoming", prefix: "⏳ " } as { key: FeedFilter; labelKey: string; prefix: string },
+          { key: "expired", labelKey: "comunidade.history", prefix: "✓ " } as { key: FeedFilter; labelKey: string; prefix: string },
         ].map(f => (
           <button key={f.key} onClick={() => setFilter(f.key)}
             className={`px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all ${
               filter === f.key ? "bg-primary text-white" : "bg-secondary text-muted-foreground hover:text-foreground"
             }`}>
-            {f.label}
+            {f.prefix}{t(f.labelKey)}
           </button>
         ))}
       </div>
@@ -546,13 +551,13 @@ export function CommunityFeed() {
       {loading ? (
         <div className="flex flex-col items-center justify-center py-24 gap-4">
           <div className="w-12 h-12 rounded-full border-2 border-primary border-t-transparent animate-spin" />
-          <p className="text-muted-foreground text-sm">A carregar booms...</p>
+          <p className="text-muted-foreground text-sm">{t("comunidade.loadingBooms")}</p>
         </div>
       ) : filtered.length === 0 ? (
         <div className="text-center py-24">
           <Zap className="h-16 w-16 text-muted-foreground mx-auto mb-4 opacity-20" />
-          <h3 className="font-display text-lg font-semibold mb-2">Nenhum boom encontrado</h3>
-          <p className="text-sm text-muted-foreground">A equipa irá publicar em breve!</p>
+          <h3 className="font-display text-lg font-semibold mb-2">{t("comunidade.noBoomsFound")}</h3>
+          <p className="text-sm text-muted-foreground">{t("comunidade.teamPublishingSoon")}</p>
         </div>
       ) : (
         filtered.map(boom => <BoomCard key={boom.id} boom={boom} user={user} isPremium={isPremium} />)

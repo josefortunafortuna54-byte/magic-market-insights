@@ -1,6 +1,7 @@
 import { useMemo, useRef, useState } from "react";
 import { Loader2, ImagePlus, Send, X } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 import { UserAvatar } from "@/components/community/UserAvatar";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
@@ -23,6 +24,7 @@ export function Composer({
   initialImage?: { file: File; url: string } | null;
 }) {
   const { user } = useAuth();
+  const { t } = useTranslation();
   const [text, setText] = useState("");
   const [selectionStart, setSelectionStart] = useState(0);
   const [mentionIds, setMentionIds] = useState<string[]>([]);
@@ -78,8 +80,8 @@ export function Composer({
       setUploading(false);
       if (!imageUrl) {
         setSending(false);
-        toast.error("Falha no envio da imagem", {
-          description: "Não foi possível carregar a imagem. Verifica a ligação e tenta novamente.",
+        toast.error(t("workspace.imageUploadFailedTitle"), {
+          description: t("workspace.imageUploadFailedBody"),
         });
         return;
       }
@@ -102,7 +104,7 @@ export function Composer({
     <div className="space-y-2">
       {activeMention && suggestions.length > 0 ? (
         <div className="rounded-2xl border border-border bg-card p-2">
-          <p className="px-2 pb-1 text-[11px] font-bold text-muted-foreground">Mencionar</p>
+          <p className="px-2 pb-1 text-[11px] font-bold text-muted-foreground">{t("workspace.mentionHeader")}</p>
           <div className="flex flex-col">
             {suggestions.map((p) => (
               <button
@@ -153,7 +155,7 @@ export function Composer({
               if (canSend && !sending && !uploading) void send();
             }
           }}
-          placeholder={placeholder || "Escreve uma mensagem."}
+          placeholder={placeholder || t("workspace.composerPlaceholder")}
           rows={1}
           className="min-h-[42px] max-h-[100px] flex-1 resize-none rounded-2xl border border-border bg-secondary/60 px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary/50 focus:outline-none"
         />
@@ -168,12 +170,12 @@ export function Composer({
           ) : (
             <Send className="h-4 w-4" />
           )}
-          {sending || uploading ? "A enviar…" : "Enviar"}
+          {sending || uploading ? t("common.sending") : t("common.send")}
         </Button>
       </div>
 
       {uploading ? (
-        <p className="text-xs text-muted-foreground">A enviar imagem.</p>
+        <p className="text-xs text-muted-foreground">{t("workspace.uploadingImage")}</p>
       ) : null}
     </div>
   );

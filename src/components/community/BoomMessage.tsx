@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Clock, Pause, Play } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/lib/supabaseClient";
 import type { Message } from "@/lib/types";
 
@@ -16,31 +17,33 @@ interface BoomTime {
 }
 
 function BoomStatusBadge({ boomTime }: { boomTime: string }) {
+  const { t } = useTranslation();
   const now = Date.now();
   const boom = new Date(boomTime).getTime();
   const diff = boom - now;
   if (diff > 0 && diff <= 15 * 60 * 1000) {
     return (
       <span className="rounded-full border border-destructive/30 bg-destructive/20 px-2 py-0.5 text-[10px] font-extrabold text-destructive animate-pulse">
-        🚨 AO VIVO
+        {"🚨 "}{t("comunidade.liveBadge")}
       </span>
     );
   }
   if (diff > 0) {
     return (
       <span className="rounded-full border border-warning/30 bg-warning/20 px-2 py-0.5 text-[10px] font-extrabold text-warning">
-        ⏳ Próximo Boom
+        {"⏳ "}{t("comunidade.nextBoom")}
       </span>
     );
   }
   return (
     <span className="rounded-full border border-border bg-muted/50 px-2 py-0.5 text-[10px] font-extrabold text-muted-foreground">
-      Expirado
+      {t("comunidade.expired")}
     </span>
   );
 }
 
 function AudioPlayer({ url }: { url: string }) {
+  const { t } = useTranslation();
   const [playing, setPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
 
@@ -69,12 +72,13 @@ function AudioPlayer({ url }: { url: string }) {
       <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-secondary">
         <div className="h-full bg-primary transition-all" style={{ width: `${progress}%` }} />
       </div>
-      <span className="text-[10px] text-muted-foreground">Áudio</span>
+      <span className="text-[10px] text-muted-foreground">{t("comunidade.audio")}</span>
     </div>
   );
 }
 
 export function BoomMessage({ message }: { message: Message }) {
+  const { t } = useTranslation();
   const [boom, setBoom] = useState<BoomTime | null>(null);
 
   useEffect(() => {
@@ -91,7 +95,7 @@ export function BoomMessage({ message }: { message: Message }) {
   }, [message.boom_id]);
 
   if (!boom) {
-    return <p className="text-xs text-muted-foreground">A carregar.</p>;
+    return <p className="text-xs text-muted-foreground">{t("workspace.loading")}</p>;
   }
 
   const d = new Date(boom.boom_time);
@@ -103,7 +107,7 @@ export function BoomMessage({ message }: { message: Message }) {
           <span className="font-display text-lg font-bold text-primary">{boom.pair}</span>
           {boom.confidence ? (
             <span className="ml-2 rounded-full border border-primary/20 bg-primary/10 px-2 py-0.5 text-[11px] text-primary">
-              {boom.confidence}% confiança
+              {t("comunidade.confidence", { value: boom.confidence })}
             </span>
           ) : null}
         </div>
@@ -112,7 +116,7 @@ export function BoomMessage({ message }: { message: Message }) {
 
       <p className="mb-2 flex items-center gap-1 text-xs text-muted-foreground">
         <Clock className="h-3.5 w-3.5" />
-        {d.toLocaleDateString("pt-PT")} às {String(d.getHours()).padStart(2, "0")}:
+        {d.toLocaleDateString("pt-PT")} {t("comunidade.at")} {String(d.getHours()).padStart(2, "0")}:
         {String(d.getMinutes()).padStart(2, "0")}
       </p>
 

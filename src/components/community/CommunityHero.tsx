@@ -1,3 +1,5 @@
+import { useTranslation } from "react-i18next";
+
 export function CommunityHero({
   channelsCount,
   liveRooms,
@@ -5,6 +7,7 @@ export function CommunityHero({
   channelsCount: number;
   liveRooms: number;
 }) {
+  const { t } = useTranslation();
   return (
     <div
       className="relative overflow-hidden rounded-3xl border border-emerald-500/30 p-6 mb-4"
@@ -19,18 +22,18 @@ export function CommunityHero({
       <div className="mb-2">
         <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/40 bg-emerald-500/10 px-2.5 py-1 text-[10px] font-extrabold tracking-widest text-emerald-400">
           <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-          AO VIVO
+          {t("workspace.liveBadge")}
         </span>
       </div>
 
-      <h1 className="text-2xl font-bold text-foreground mb-0.5">Comunidade ao vivo</h1>
-      <p className="text-sm text-muted-foreground">Salas, sinais e traders em tempo real.</p>
+      <h1 className="text-2xl font-bold text-foreground mb-0.5">{t("workspace.heroTitle")}</h1>
+      <p className="text-sm text-muted-foreground">{t("workspace.heroSubtitle")}</p>
 
       <div className="mt-4 flex gap-2">
         <div className="flex items-baseline gap-1.5 rounded-xl border border-border bg-black/40 px-3 py-2">
           <span className="text-lg font-extrabold text-foreground">{channelsCount}</span>
           <span className="text-sm text-muted-foreground">
-            {channelsCount === 1 ? "1 canal" : `${channelsCount} canais`}
+            {t("workspace.statsChannels", { count: channelsCount })}
           </span>
         </div>
         <div
@@ -42,7 +45,7 @@ export function CommunityHero({
             {liveRooms}
           </span>
           <span className="text-sm text-muted-foreground">
-            {liveRooms === 1 ? "1 sala ativa" : `${liveRooms} salas ativas`}
+            {t("workspace.statsRooms", { count: liveRooms })}
           </span>
         </div>
       </div>

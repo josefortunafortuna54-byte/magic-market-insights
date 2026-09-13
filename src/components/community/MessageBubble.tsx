@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { MoreVertical, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 import { UserAvatar } from "@/components/community/UserAvatar";
 import {
   DropdownMenu,
@@ -21,6 +22,13 @@ import type { Message, MessageReaction, UserProfile } from "@/lib/types";
 function escapeRegex(s: string): string {
   return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
+
+const REPORT_OPTIONS = [
+  { value: "Spam", labelKey: "workspace.reportReasonSpam" },
+  { value: "Assédio", labelKey: "workspace.reportReasonHarassment" },
+  { value: "Inadequado", labelKey: "workspace.reportReasonInappropriate" },
+  { value: "Outro", labelKey: "workspace.reportReasonOther" },
+] as const;
 
 function MentionedText({ text, mentionNames }: { text: string; mentionNames: string[] }) {
   if (mentionNames.length === 0) return <p className="whitespace-pre-wrap break-words text-sm">{text}</p>;
@@ -66,12 +74,13 @@ export function MessageBubble({
   onEdit: (message: Message, text: string) => void;
   onOpenProfile?: (userId: string) => void;
 }) {
+  const { t } = useTranslation();
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState("");
   const [showReactions, setShowReactions] = useState(false);
 
   const isOwn = message.user_id === currentUserId;
-  const name = profile?.display_name || "Trader";
+  const name = profile?.display_name || t("common.trader");
   const editable = isOwn && !message.boom_id && !message.pending && !message.failed;
 
   const grouped = useMemo(() => {
@@ -88,9 +97,9 @@ export function MessageBubble({
   const handleReport = async (reason: string) => {
     try {
       await reportMessage(message.id, reason);
-      toast.success("Report enviado.");
+      toast.success(t("workspace.reportSent"));
     } catch {
-      toast.error("Não foi possível enviar.");
+      toast.error(t("workspace.reportFailed"));
     }
   };
 
@@ -129,12 +138,12 @@ export function MessageBubble({
           ) : null}
           {profile?.role === "admin" ? (
             <span className="rounded-full bg-amber-400/10 px-1.5 py-0.5 text-[9px] font-extrabold tracking-wide text-amber-400">
-              BOT
+              {t("workspace.bot")}
             </span>
           ) : null}
           <span className="text-[11px] text-muted-foreground">{timeAgo(message.created_at)}</span>
           {message.edited_at ? (
-            <span className="text-[11px] italic text-muted-foreground">Editado</span>
+            <span className="text-[11px] italic text-muted-foreground">{t("workspace.edited")}</span>
           ) : null}
         </div>
 
@@ -151,16 +160,16 @@ export function MessageBubble({
             <textarea
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
-              placeholder="Edita a mensagem."
+              placeholder={t("workspace.editPlaceholder")}
               autoFocus
               className="w-full resize-none rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-primary/50 focus:outline-none"
             />
             <div className="flex gap-2">
               <Button size="sm" onClick={saveEdit} disabled={!draft.trim()}>
-                Guardar
+                {t("workspace.save")}
               </Button>
               <Button size="sm" variant="ghost" onClick={() => { setEditing(false); setDraft(""); }}>
-                Cancelar
+                {t("common.cancel")}
               </Button>
             </div>
           </div>
@@ -175,10 +184,10 @@ export function MessageBubble({
             className="mt-1 flex items-center gap-1 text-xs font-semibold text-destructive hover:underline"
           >
             <RefreshCw className="h-3 w-3" />
-            Não enviada — Tocar para tentar de novo
+            {t("workspace.failed")} — {t("workspace.retry")}
           </button>
         ) : message.pending ? (
-          <p className="mt-1 text-[11px] text-muted-foreground">A carregar.</p>
+          <p className="mt-1 text-[11px] text-muted-foreground">{t("workspace.loading")}</p>
         ) : null}
 
         {editable || grouped.length > 0 || !isOwn ? (
@@ -240,23 +249,23 @@ export function MessageBubble({
                   <DropdownMenuItem
                     onClick={() => { setDraft(message.text); setEditing(true); }}
                   >
-                    Editar
+                    {t("workspace.edit")}
                   </DropdownMenuItem>
                 ) : null}
                 <DropdownMenuItem
                   className="text-destructive focus:text-destructive"
                   onClick={() => onDelete(message)}
                 >
-                  Apagar mensagem
+                  {t("workspace.deleteMessage")}
                 </DropdownMenuItem>
               </>
             ) : (
               <>
-                <DropdownMenuLabel>Reportar</DropdownMenuLabel>
+                <DropdownMenuLabel>{t("workspace.reportMessage")}</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                {["Spam", "Assédio", "Inadequado", "Outro"].map((reason) => (
-                  <DropdownMenuItem key={reason} onClick={() => handleReport(reason)}>
-                    {reason}
+                {REPORT_OPTIONS.map((opt) => (
+                  <DropdownMenuItem key={opt.value} onClick={() => handleReport(opt.value)}>
+                    {t(opt.labelKey)}
                   </DropdownMenuItem>
                 ))}
               </>

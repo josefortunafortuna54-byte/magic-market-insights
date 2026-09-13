@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ChevronUp } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { BoomMessage } from "@/components/community/BoomMessage";
 import { MessageBubble } from "@/components/community/MessageBubble";
 import { formatChatDate } from "@/lib/format";
@@ -44,6 +45,7 @@ export function MessageList({
   onReload?: () => void;
   onOpenProfile?: (userId: string) => void;
 }) {
+  const { t } = useTranslation();
   const scrollRef = useRef<HTMLDivElement>(null);
   const nearBottomRef = useRef(true);
 
@@ -98,7 +100,7 @@ export function MessageList({
       <div className="flex flex-1 items-center justify-center px-4">
         {error ? (
           <div className="text-center">
-            <p className="text-sm font-semibold text-foreground">Erro</p>
+            <p className="text-sm font-semibold text-foreground">{t("workspace.errorTitle")}</p>
             <p className="mt-1 text-sm text-muted-foreground">{error}</p>
             {onReload ? (
               <button
@@ -106,12 +108,12 @@ export function MessageList({
                 onClick={onReload}
                 className="mt-3 rounded-full bg-primary/15 px-3.5 py-1.5 text-xs font-bold text-primary hover:bg-primary/25"
               >
-                Tocar para tentar de novo
+                {t("workspace.retry")}
               </button>
             ) : null}
           </div>
         ) : (
-          <p className="text-sm text-muted-foreground">Sem mensagens ainda. Começa a conversa!</p>
+          <p className="text-sm text-muted-foreground">{t("workspace.noMessages")}</p>
         )}
       </div>
     );
@@ -137,7 +139,7 @@ export function MessageList({
             className="flex items-center justify-center gap-1.5 py-2 text-xs font-semibold text-muted-foreground hover:text-foreground disabled:opacity-60"
           >
             <ChevronUp className="h-3.5 w-3.5" />
-            {loadingOlder ? "A carregar." : "Carregar mensagens mais antigas"}
+            {loadingOlder ? t("workspace.loading") : t("workspace.loadOlder")}
           </button>
         ) : null}
 

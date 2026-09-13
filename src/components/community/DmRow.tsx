@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { ChevronRight } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { UserAvatar } from "@/components/community/UserAvatar";
 import { isUserOnline } from "@/lib/community";
 import type { UserProfile } from "@/lib/types";
@@ -19,6 +20,7 @@ export function DmRow({
   onPress: () => void;
   onOpenProfile?: (userId: string) => void;
 }) {
+  const { t } = useTranslation();
   const [, setTick] = useState(0);
 
   useEffect(() => {
@@ -27,7 +29,7 @@ export function DmRow({
   }, []);
 
   const profile = profiles[dm.memberId];
-  const name = profile?.display_name || "Trader";
+  const name = profile?.display_name || t("common.trader");
   const online = isUserOnline(profile);
 
   return (
@@ -55,7 +57,7 @@ export function DmRow({
             className={`h-1.5 w-1.5 shrink-0 rounded-full ${online ? "bg-emerald-400" : "bg-muted-foreground/40"}`}
           />
           <span className={online ? "font-semibold text-emerald-400" : "text-muted-foreground"}>
-            {online ? "Ativo agora" : "Ausente"}
+            {online ? t("workspace.dmOnline") : t("workspace.dmOffline")}
           </span>
         </span>
       </div>
