@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Download, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -32,11 +33,12 @@ function convertToCSV(data: Record<string, unknown>[], columns: ExportColumn[]):
 }
 
 export function ExportButton({ data, filename, columns, label }: ExportButtonProps) {
+  const { t } = useTranslation();
   const [exporting, setExporting] = useState(false);
 
   const handleExport = async () => {
     if (data.length === 0) {
-      toast.error("Erro ao exportar");
+      toast.error(t("adminErrors.export"));
       return;
     }
     setExporting(true);
@@ -54,9 +56,9 @@ export function ExportButton({ data, filename, columns, label }: ExportButtonPro
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
-      toast.success(`${label ?? "Exportar sinais"} (${fullFilename})`);
+      toast.success(`${label ?? t("admin.exportSignals")} (${fullFilename})`);
     } catch {
-      toast.error("Erro ao exportar");
+      toast.error(t("adminErrors.export"));
     } finally {
       setExporting(false);
     }
@@ -65,7 +67,7 @@ export function ExportButton({ data, filename, columns, label }: ExportButtonPro
   return (
     <Button variant="outline" size="sm" onClick={() => void handleExport()} disabled={exporting}>
       {exporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
-      {exporting ? "A exportar…" : (label ?? "Exportar sinais")}
+      {exporting ? t("admin.exporting") : (label ?? t("admin.exportSignals"))}
     </Button>
   );
 }

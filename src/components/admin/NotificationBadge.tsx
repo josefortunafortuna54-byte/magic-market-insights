@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -7,13 +8,14 @@ interface NotificationBadgeProps {
 }
 
 export function NotificationBadge({ count, onPress }: NotificationBadgeProps) {
+  const { t } = useTranslation();
   return (
     <Button
       variant="ghost"
       size="icon"
       onClick={onPress}
       className="relative"
-      aria-label="Notificações"
+      aria-label={t("admin.notifications")}
     >
       <Bell className="h-5 w-5" />
       {count > 0 && (

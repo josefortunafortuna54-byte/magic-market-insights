@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/lib/supabaseClient";
 import { isAdminEmail } from "@/lib/admin";
@@ -27,24 +28,25 @@ import { SkeletonList } from "@/components/admin/SkeletonList";
 
 type Tab = "dashboard" | "receipts" | "signals" | "boom" | "boom_times" | "posts" | "users" | "withdrawals" | "messaging" | "reports" | "channels" | "announcements";
 
-const TABS: { key: Tab; label: string }[] = [
-  { key: "dashboard", label: "Dashboard" },
-  { key: "receipts", label: "Comprovativos" },
-  { key: "signals", label: "Sinais" },
-  { key: "boom", label: "Boom Hours" },
-  { key: "boom_times", label: "Boom Times" },
-  { key: "posts", label: "Posts" },
-  { key: "users", label: "Usuários" },
-  { key: "withdrawals", label: "Levantamentos" },
-  { key: "messaging", label: "Mensagens" },
-  { key: "reports", label: "Reports" },
-  { key: "channels", label: "Canais" },
-  { key: "announcements", label: "Anúncios" },
+const TABS: { key: Tab; labelKey: string }[] = [
+  { key: "dashboard", labelKey: "admin.tabDashboard" },
+  { key: "receipts", labelKey: "admin.tabReceipts" },
+  { key: "signals", labelKey: "admin.tabSignals" },
+  { key: "boom", labelKey: "admin.tabBoom" },
+  { key: "boom_times", labelKey: "admin.tabBoomTimes" },
+  { key: "posts", labelKey: "admin.tabPosts" },
+  { key: "users", labelKey: "admin.tabUsers" },
+  { key: "withdrawals", labelKey: "admin.tabWithdrawals" },
+  { key: "messaging", labelKey: "admin.tabMessaging" },
+  { key: "reports", labelKey: "admin.tabReports" },
+  { key: "channels", labelKey: "admin.tabChannels" },
+  { key: "announcements", labelKey: "admin.tabAnnouncements" },
 ];
 
 type AdminRow = Record<string, unknown>;
 
 export default function Admin() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
@@ -144,7 +146,7 @@ export default function Admin() {
       toast.success(`${label}: ${n}`);
       await loadData();
     } catch (e: unknown) {
-      toast.error(e instanceof Error ? e.message : "Erro desconhecido");
+      toast.error(e instanceof Error ? e.message : t("adminErrors.unknown"));
     } finally {
       setBusy(false);
     }
@@ -165,8 +167,8 @@ export default function Admin() {
           {/* Header */}
           <div className="flex items-center gap-3 mb-8">
             <Shield className="h-6 w-6 text-primary" />
-            <h1 className="font-display text-2xl font-bold flex-1">Admin</h1>
-            <Button variant="ghost" size="icon" onClick={loadData} aria-label="Atualizar">
+            <h1 className="font-display text-2xl font-bold flex-1">{t("admin.title")}</h1>
+            <Button variant="ghost" size="icon" onClick={loadData} aria-label={t("admin.refresh")}>
               <RefreshCw className="h-5 w-5" />
             </Button>
             <NotificationBadge count={unreadAdmin} onPress={() => setShowNotifications(true)} />
@@ -174,7 +176,7 @@ export default function Admin() {
               <button
                 onClick={() => setTab("reports")}
                 className="flex items-center gap-1 rounded-full bg-warning/20 px-2.5 py-1 text-xs font-bold text-warning hover:opacity-90"
-                title="Reports por rever"
+                title={t("admin.reportsToReview")}
               >
                 <Flag className="h-3.5 w-3.5" />
                 {pendingReports}
@@ -190,7 +192,7 @@ export default function Admin() {
                 onClick={() => setTab(tb.key)}
                 className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${tab === tb.key ? "bg-primary text-white" : "bg-secondary text-muted-foreground hover:bg-secondary/70"}`}
               >
-                {tb.label}
+                {t(tb.labelKey)}
               </button>
             ))}
           </div>
@@ -226,7 +228,7 @@ export default function Admin() {
             setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
             setUnreadAdmin((prev) => Math.max(0, prev - 1));
           } catch (e: unknown) {
-            toast.error(e instanceof Error ? e.message : "Erro ao marcar notificação");
+            toast.error(e instanceof Error ? e.message : t("adminErrors.markRead"));
           }
         }}
         onMarkAllRead={async () => {
@@ -235,7 +237,7 @@ export default function Admin() {
             setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
             setUnreadAdmin(0);
           } catch (e: unknown) {
-            toast.error(e instanceof Error ? e.message : "Erro ao marcar notificações");
+            toast.error(e instanceof Error ? e.message : t("adminErrors.markAllRead"));
           }
         }}
       />

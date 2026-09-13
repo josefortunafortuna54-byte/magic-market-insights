@@ -13,6 +13,7 @@ import {
   XCircle,
   type LucideIcon,
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import {
   Dialog,
   DialogContent,
@@ -52,17 +53,18 @@ export function NotificationListModal({
   onMarkRead,
   onMarkAllRead,
 }: NotificationListModalProps) {
+  const { t } = useTranslation();
   const unreadCount = notifications.filter((n) => !n.read).length;
 
   return (
     <Dialog open={open} onOpenChange={(o) => { if (!o) onClose(); }}>
       <DialogContent className="flex max-h-[85vh] max-w-md flex-col p-0">
         <DialogHeader className="flex-row items-center justify-between border-b border-border px-4 py-3">
-          <DialogTitle className="font-display text-lg">Notificações</DialogTitle>
+          <DialogTitle className="font-display text-lg">{t("admin.notifications")}</DialogTitle>
           <div className="flex items-center gap-2">
             {unreadCount > 0 && (
               <Button variant="secondary" size="sm" onClick={onMarkAllRead}>
-                Marcar todas como lidas
+                {t("admin.markAllRead")}
               </Button>
             )}
           </div>
@@ -71,7 +73,7 @@ export function NotificationListModal({
         {notifications.length === 0 ? (
           <div className="flex flex-1 flex-col items-center justify-center gap-3 py-24">
             <Bell className="h-12 w-12 text-muted-foreground/40" />
-            <p className="text-sm text-muted-foreground">Sem notificações</p>
+            <p className="text-sm text-muted-foreground">{t("admin.noNotifications")}</p>
           </div>
         ) : (
           <div className="flex-1 overflow-y-auto">

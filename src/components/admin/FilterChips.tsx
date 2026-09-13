@@ -1,14 +1,22 @@
-import type { FilterConfig } from "@/hooks/useAdminSearch";
+import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 
+interface FilterChipConfig {
+  key: string;
+  label: string;
+  value: string;
+  labelKey?: string;
+}
+
 interface FilterChipsProps {
-  filters: FilterConfig[];
+  filters: FilterChipConfig[];
   activeFilters: string[];
   onToggle: (filter: string) => void;
   onClear: () => void;
 }
 
 export function FilterChips({ filters, activeFilters, onToggle, onClear }: FilterChipsProps) {
+  const { t } = useTranslation();
   if (filters.length === 0) return null;
 
   return (
@@ -19,7 +27,7 @@ export function FilterChips({ filters, activeFilters, onToggle, onClear }: Filte
           onClick={onClear}
           className="rounded-lg border border-border bg-secondary px-3 py-1 text-xs text-destructive"
         >
-          Limpar filtros
+          {t("admin.clearFilters")}
         </button>
       )}
       {filters.map((filter) => {
@@ -34,7 +42,7 @@ export function FilterChips({ filters, activeFilters, onToggle, onClear }: Filte
               isActive && "border-primary bg-primary text-primary-foreground",
             )}
           >
-            {filter.label}
+            {filter.labelKey ? t(filter.labelKey) : filter.label}
           </button>
         );
       })}

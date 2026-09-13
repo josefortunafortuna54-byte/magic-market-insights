@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Navigate, useNavigate } from "react-router-dom";
 import { ShieldAlert, ShieldCheck, ChevronLeft, KeyRound, AlertCircle } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
@@ -11,6 +12,7 @@ import { isAdminEmail } from "@/lib/admin";
 import { isAdminUnlocked, unlockAdmin, verifyAdminCode } from "@/lib/adminGate";
 
 export default function AdminGate() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { user } = useAuth();
   const [code, setCode] = useState("");
@@ -26,9 +28,9 @@ export default function AdminGate() {
               <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-destructive/10">
                 <ShieldAlert className="h-8 w-8 text-destructive" />
               </div>
-              <h1 className="font-display text-2xl font-bold">Acesso restrito</h1>
+              <h1 className="font-display text-2xl font-bold">{t("admin.restrictedTitle")}</h1>
               <p className="mt-2 text-sm text-muted-foreground">
-                Esta área é exclusiva para administradores.
+                {t("admin.restrictedDesc")}
               </p>
             </div>
           </div>
@@ -58,7 +60,7 @@ export default function AdminGate() {
       setBusy(false);
     }
     setCode("");
-    setError("Código incorreto. Tenta novamente.");
+    setError(t("admin.gateWrong"));
   };
 
   return (
@@ -71,7 +73,7 @@ export default function AdminGate() {
             className="mb-4 flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
           >
             <ChevronLeft className="h-4 w-4" />
-            Voltar
+            {t("common.back")}
           </button>
 
           <Card className="glass-card">
@@ -80,14 +82,14 @@ export default function AdminGate() {
                 <ShieldCheck className="h-8 w-8 text-primary" />
               </div>
 
-              <h1 className="font-display text-2xl font-bold">Área de Administração</h1>
+              <h1 className="font-display text-2xl font-bold">{t("admin.gateTitle")}</h1>
               <p className="mt-2 text-sm text-muted-foreground">
-                Introduz o código de acesso para entrares na área de administração.
+                {t("admin.gateSubtitle")}
               </p>
 
               <div className="mt-6 w-full text-left">
                 <label className="mb-2 block text-xs font-semibold tracking-wide text-muted-foreground">
-                  CÓDIGO DE ACESSO
+                  {t("admin.gateCodeLabel")}
                 </label>
                 <Input
                   type="password"
@@ -117,10 +119,10 @@ export default function AdminGate() {
                 onClick={submit}
                 disabled={busy}
               >
-                {busy ? "A verificar…" : (
+                {busy ? t("admin.checkingAccess") : (
                   <>
                     <KeyRound className="h-4 w-4" />
-                    Entrar
+                    {t("admin.gateCta")}
                   </>
                 )}
               </Button>
