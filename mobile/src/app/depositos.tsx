@@ -32,6 +32,21 @@ import { useTheme } from '@/hooks/useTheme';
 
 type TabId = 'deposit' | 'withdraw';
 
+// Verifica se o comprovativo ficou realmente registado no servidor, evitando
+// falsos negativos (insert confirmado mas resposta perdida na rede).
+async function receiptRegisteredOnServer(userId: string, proofUrl: string): Promise<boolean> {
+  try {
+    const { count, error } = await supabase
+      .from('payment_receipts')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', userId)
+      .eq('proof_url', proofUrl);
+    return !error && (count ?? 0) > 0;
+  } catch {
+    return false;
+  }
+}
+
 export default function DepositosScreen() {
   const { colors } = useTheme();
   const styles = makeStyles(colors);
@@ -184,28 +199,49 @@ export default function DepositosScreen() {
     });
     // Save receipt server-side for admin review
     if (user) {
-      try {
-        await saveReceipt({
-          user_id: user.id,
-          user_email: user.email ?? '',
-          proof_url: result.url,
-          plan: isCapitalDeposit ? 'capital' : plan,
-          method: depositModal.method,
-          amount: depositAmount,
-          currency,
-        });
-        // Regista o valor pago — ao ativar o premium passa a ser o saldo da
-        // gestão de capital (para utilizadores vindos de link de afiliado).
-        // Depósitos de capital não são ativação de plano.
-        if (!isCapitalDeposit) {
-          void savePendingPlanPayment({ plan, amount: depositAmount, currency });
+      const payload = {
+        user_id: user.id,
+        user_email: user.email ?? '',
+        proof_url: result.url,
+        plan: isCapitalDeposit ? 'capital' : plan,
+        method: depositModal.method,
+        amount: depositAmount,
+        currency,
+      };
+      // O upload já foi feito; regista-se a linha no servidor com retry.
+      // Se um insert "falhou" mas o registo existe, considera-se sucesso.
+      let saved = false;
+      for (let attempt = 0; attempt <= 2; attempt++) {
+        try {
+          await saveReceipt(payload);
+          saved = true;
+          break;
+        } catch (err: any) {
+          console.warn('[confirmDeposit] saveReceipt failed:', err?.message);
+          if (await receiptRegisteredOnServer(user.id, result.url)) {
+            saved = true;
+            break;
+          }
+          if (attempt < 2) await new Promise((r) => setTimeout(r, 1500));
         }
-      } catch (err: any) {
-        console.warn('[confirmDeposit] saveReceipt failed:', err?.message);
+      }
+      if (!saved) {
+        setSending(false);
         Alert.alert(
           t('planos.connectionError'),
           t('depositos.receiptSaveError') || 'Comprovativo enviado mas não foi possível registar no servidor. Contacte o suporte.',
+          [
+            { text: t('planos.cancel'), style: 'cancel' },
+            { text: t('planos.tryAgain') || 'Tentar novamente', onPress: () => confirmDeposit(proof, retries) },
+          ],
         );
+        return;
+      }
+      // Regista o valor pago — ao ativar o premium passa a ser o saldo da
+      // gestão de capital (para utilizadores vindos de link de afiliado).
+      // Depósitos de capital não são ativação de plano.
+      if (!isCapitalDeposit) {
+        void savePendingPlanPayment({ plan, amount: depositAmount, currency });
       }
     }
     setSending(false);

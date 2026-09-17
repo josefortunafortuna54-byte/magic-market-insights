@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
 import { TrendingUp, TrendingDown, Trash2, Plus } from "lucide-react";
 import { toast } from "sonner";
@@ -35,6 +36,7 @@ const SIGNAL_FILTERS = [
 ];
 
 export function AdminSignalsTab({ signals, onRefresh }: Props) {
+  const { t } = useTranslation();
   const [form, setForm] = useState({
     symbol: "EURUSD", timeframe: "H1", signal_type: "BUY",
     entry_price: "", stop_loss: "", target_price: "", confidence: "75", reasons: "",
@@ -52,13 +54,13 @@ export function AdminSignalsTab({ signals, onRefresh }: Props) {
   });
 
   const deleteSignal = async (id: string) => {
-    if (!confirm("Apagar este sinal?")) return;
-    try { await adminApi.deleteSignal(id); } catch (e: unknown) { alert("Erro: " + (e instanceof Error ? e.message : e)); }
+    if (!confirm(t("admin.deleteSignalTitle"))) return;
+    try { await adminApi.deleteSignal(id); } catch (e: unknown) { alert(`${t("adminErrors.unknown")}: ${e instanceof Error ? e.message : e}`); }
     await onRefresh();
   };
 
   const updateStatus = async (id: string, status: string) => {
-    try { await adminApi.updateSignalStatus(id, status); } catch (e: unknown) { alert("Erro: " + (e instanceof Error ? e.message : e)); }
+    try { await adminApi.updateSignalStatus(id, status); } catch (e: unknown) { alert(`${t("adminErrors.unknown")}: ${e instanceof Error ? e.message : e}`); }
     await onRefresh();
   };
 
@@ -76,20 +78,20 @@ export function AdminSignalsTab({ signals, onRefresh }: Props) {
   };
 
   const handleBulkDelete = async () => {
-    if (!confirm(`Apagar ${selectedIds.length} sinais selecionados?`)) return;
+    if (!confirm(t("admin.confirmDelete", { count: selectedIds.length }))) return;
     try {
       await adminApi.bulkDeleteSignals(selectedIds);
-      toast.success("Sinais apagados");
+      toast.success(t("admin.signalsDeleted"));
       setSelectedIds([]);
       await onRefresh();
     } catch (e: unknown) {
-      toast.error(e instanceof Error ? e.message : "Erro ao apagar sinais");
+      toast.error(e instanceof Error ? e.message : t("adminErrors.signalDelete"));
     }
   };
 
   const addSignal = async () => {
     if (!form.entry_price || !form.stop_loss || !form.target_price) {
-      alert("Preenche todos os campos obrigatórios!"); return;
+      alert(t("admin.requiredFields")); return;
     }
     try {
       await adminApi.addSignal({
@@ -97,20 +99,20 @@ export function AdminSignalsTab({ signals, onRefresh }: Props) {
         signal_type: form.signal_type, entry_price: Number(form.entry_price),
         stop_loss: Number(form.stop_loss), target_price: Number(form.target_price),
         confidence: Number(form.confidence),
-        reasons: form.reasons ? form.reasons.split("\n").filter(Boolean) : ["Sinal manual"],
+        reasons: form.reasons ? form.reasons.split("\n").filter(Boolean) : [t("admin.manualSignal")],
       });
-      alert("✅ Sinal adicionado!");
+      alert(t("admin.signalAdded"));
       setForm({ symbol: "EURUSD", timeframe: "H1", signal_type: "BUY", entry_price: "", stop_loss: "", target_price: "", confidence: "75", reasons: "" });
       setShowAdd(false);
       await onRefresh();
-    } catch (e: unknown) { alert("Erro: " + (e instanceof Error ? e.message : e)); }
+    } catch (e: unknown) { alert(`${t("adminErrors.unknown")}: ${e instanceof Error ? e.message : e}`); }
   };
 
   return (
     <div className="space-y-6">
       <button onClick={() => setShowAdd(!showAdd)}
         className="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-white text-sm font-medium hover:opacity-90">
-        <Plus className="h-4 w-4" /> {showAdd ? "Fechar" : "+ Adicionar Sinal"}
+        <Plus className="h-4 w-4" /> {showAdd ? t("common.close") : `+ ${t("admin.addSignal")}`}
       </button>
 
       {showAdd && (
