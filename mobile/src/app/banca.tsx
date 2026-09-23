@@ -1,19 +1,23 @@
-import { Alert, Pressable, StyleSheet, View } from 'react-native';
+import { useState } from 'react';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { AppButton, AppText, Badge, Card, Screen, SectionTitle } from '@/components/ui';
 import { GradientCard } from '@/components/GradientCard';
 import { PremiumLock } from '@/components/PremiumLock';
+import { WithdrawalModal } from '@/components/WithdrawalModal';
 import { GrowthPlanSection } from '@/components/GrowthPlanSection';
 import { CapitalSimulatorCard } from '@/components/CapitalSimulatorCard';
 import { formatBancaMoney, formatShortDate } from '@/core/format';
+import { profit, profitPct, progressPct, withdrawable } from '@/core/capital';
 import { Spacing, type Palette } from '@/core/theme';
 import { useTheme } from '@/hooks/useTheme';
 import { useBanca } from '@/hooks/useBanca';
 import { useSubscription } from '@/hooks/useSubscription';
 import { useCapitalAccount } from '@/hooks/useCapitalAccount';
-import { useMovements } from '@/hooks/useMovements';
+import { useCapitalDeposits } from '@/hooks/useCapitalDeposits';
+import { MIN_CAPITAL_DEPOSIT } from '@/lib/plans';
 
 function StatusPill({ label, color }: { label: string; color: string }) {
   const { colors } = useTheme();
@@ -33,18 +37,16 @@ export default function BancaScreen() {
   const router = useRouter();
   const { canAccessBanca, loading: subLoading } = useSubscription();
   const { config, loading } = useBanca();
-  const { account, reports } = useCapitalAccount();
-  const { movements } = useMovements();
+  const { account, reports, metaPercent } = useCapitalAccount();
+  const { deposits } = useCapitalDeposits();
+  const [withdrawOpen, setWithdrawOpen] = useState(false);
 
   // Regra absoluta: um cliente premium NUNCA vê bloqueio. Enquanto o plano
   // não está confirmado, mostramos loading — nunca a restrição.
   if (!subLoading && !canAccessBanca) {
     return (
       <Screen>
-        <PremiumLock
-          label={t('capital.lockTitle')}
-          description={t('capital.lockDesc')}
-        />
+        <PremiumLock label={t('capital.lockTitle')} description={t('capital.lockDesc')} />
       </Screen>
     );
   }
@@ -57,21 +59,21 @@ export default function BancaScreen() {
   const cur = account?.currency ?? config.currency ?? 'usd';
   const totalWithdrawn = account?.total_withdrawn ?? config.totalWithdrawn;
   const latestReport = reports[0] ?? null;
-  const profit = current - capital;
-  const profitPct = capital > 0 ? (profit / capital) * 100 : 0;
-  const isProfit = profit >= 0;
-  const targetPct = config.metaPercent;
-  const targetValue = capital * (targetPct / 100);
-  const progressPct = targetValue > 0 ? Math.min(100, Math.max(0, (profit / targetValue) * 100)) : 0;
-  // Total investido: maior entre o capital publicado pela equipa e os depósitos
-  // registados na carteira (mesma moeda), nunca abaixo do capital atual.
-  const walletDeposits = movements
-    .filter((m) => m.type === 'deposit' && m.status !== 'recusado' && m.currency === cur)
-    .reduce((sum, m) => sum + m.amount, 0);
-  const totalInvested = Math.max(walletDeposits, capital);
 
-  // Estado binário: a gestão de capital está ativa (existe conta publicada
-  // pela equipa ou há capital registado) ou ainda não começou.
+  const p = profit(current, capital);
+  const pPct = profitPct(current, capital);
+  const isProfit = p >= 0;
+  const targetPct = metaPercent;
+  const targetValue = capital * (targetPct / 100);
+  const progress = progressPct(current, capital, targetPct);
+
+  // Depósitos de gestão aprovados na moeda da conta (fonte da verdade do server)
+  const depositsNum = deposits
+    .filter((d) => d.status === 'approved' && d.currency === cur)
+    .reduce((s, d) => s + Number(d.amount), 0);
+  const hasDeposits = depositsNum >= MIN_CAPITAL_DEPOSIT[cur];
+
+  // Estado binário: gestão ativa (conta publicada ou capital registado)
   const hasManagement = Boolean(account) || capital > 0 || current > 0;
 
   if (!hasManagement) {
@@ -82,28 +84,24 @@ export default function BancaScreen() {
           {t('capital.subtitle')}
         </AppText>
 
-        <GradientCard
-          colors={[`${colors.accent}26`, `${colors.primary}12`]}
-          style={styles.hero}>
+        <GradientCard colors={[`${colors.accent}26`, `${colors.primary}12`]} style={styles.hero}>
           <AppText variant="small" style={[styles.heroEyebrow, { color: colors.accent }]}>
             {t('capital.inactiveEyebrow')}
           </AppText>
-          <AppText variant="mono" style={styles.heroValue}>+25%</AppText>
+          <AppText variant="mono" style={styles.heroValue}>+{targetPct}%</AppText>
           <AppText variant="small" style={{ color: 'rgba(255,255,255,0.7)' }}>
             {t('capital.inactiveHeroDesc')}
           </AppText>
           <View style={styles.heroFooter}>
             <AppText variant="small" style={{ color: 'rgba(255,255,255,0.6)' }}>
-              {t('capital.minDeposit')}: $50 USD
+              {t('capital.minDeposit')}: {formatMinDeposit(cur)}
             </AppText>
             <StatusPill label={t('capital.inactiveBadge')} color={colors.warning} />
           </View>
         </GradientCard>
 
         <Card style={styles.card}>
-          <View style={styles.cardHeader}>
-            <AppText variant="label">{t('capital.howItWorks')}</AppText>
-          </View>
+          <View style={styles.cardHeader}><AppText variant="label">{t('capital.howItWorks')}</AppText></View>
           {[
             { icon: 'wallet', color: colors.success, title: t('capital.step1Title'), desc: t('capital.step1Desc') },
             { icon: 'trending-up', color: colors.accent, title: t('capital.step2Title'), desc: t('capital.step2Desc') },
@@ -143,9 +141,7 @@ export default function BancaScreen() {
         {t('capital.subtitle')}
       </AppText>
 
-      <GradientCard
-        colors={[colors.primaryDim, 'rgba(22,164,58,0.15)']}
-        style={styles.hero}>
+      <GradientCard colors={[colors.primaryDim, 'rgba(22,164,58,0.15)']} style={styles.hero}>
         <View style={styles.heroTop}>
           <View style={{ flex: 1 }}>
             <AppText variant="small" style={styles.heroEyebrow}>{t('capital.currentBalance')}</AppText>
@@ -160,7 +156,7 @@ export default function BancaScreen() {
             {t('capital.deposited')}{formatBancaMoney(capital, cur)}
           </AppText>
           <AppText variant="small" style={{ color: isProfit ? colors.success : colors.destructive }}>
-            {isProfit ? '+' : ''}{formatBancaMoney(profit, cur)} ({profitPct > 0 ? '+' : ''}{profitPct.toFixed(1)}%)
+            {isProfit ? '+' : ''}{formatBancaMoney(p, cur)} ({pPct > 0 ? '+' : ''}{pPct.toFixed(1)}%)
           </AppText>
         </View>
       </GradientCard>
@@ -173,8 +169,7 @@ export default function BancaScreen() {
                 <Ionicons name="document-text" size={15} color={colors.accent} />
                 <AppText variant="label">{t('capital.latestReport')}</AppText>
               </View>
-              <Badge
-                color={latestReport.profit >= 0 ? colors.success : colors.destructive}
+              <Badge color={latestReport.profit >= 0 ? colors.success : colors.destructive}
                 bg={latestReport.profit >= 0 ? `${colors.success}20` : `${colors.destructive}20`}>
                 {`${latestReport.profit >= 0 ? '+' : ''}${latestReport.profit_pct.toFixed(1)}%`}
               </Badge>
@@ -200,12 +195,14 @@ export default function BancaScreen() {
         <Card style={styles.statCard}>
           <Ionicons name="wallet" size={18} color={colors.text} />
           <AppText variant="small" style={{ color: colors.textMuted }}>{t('capital.invested')}</AppText>
-          <AppText variant="label">{formatBancaMoney(totalInvested, cur)}</AppText>
+          <AppText variant="label">{formatBancaMoney(capital, cur)}</AppText>
         </Card>
         <Card style={styles.statCard}>
           <Ionicons name="trending-up" size={18} color={colors.success} />
           <AppText variant="small" style={{ color: colors.textMuted }}>{t('capital.profit')}</AppText>
-          <AppText variant="label" style={{ color: colors.success }}>+{formatBancaMoney(profit, cur)}</AppText>
+          <AppText variant="label" style={{ color: isProfit ? colors.success : colors.destructive }}>
+            {isProfit ? '+' : ''}{formatBancaMoney(p, cur)}
+          </AppText>
         </Card>
         <Card style={styles.statCard}>
           <Ionicons name="flag" size={18} color={colors.accent} />
@@ -222,17 +219,17 @@ export default function BancaScreen() {
       <Card style={styles.card}>
         <View style={styles.cardHeader}>
           <AppText variant="label">{t('capital.progressTitle')}</AppText>
-          <AppText variant="small" style={{ color: colors.textMuted }}>{Math.round(progressPct)}%</AppText>
+          <AppText variant="small" style={{ color: colors.textMuted }}>{Math.round(progress)}%</AppText>
         </View>
         <View style={styles.track}>
-          <View style={[styles.fill, { width: `${progressPct}%` }]} />
+          <View style={[styles.fill, { width: `${progress}%` }]} />
         </View>
         <View style={styles.progressLabels}>
           <AppText variant="small" style={{ color: colors.textMuted }}>
-            +{formatBancaMoney(profit, cur)}
+            +{formatBancaMoney(p, cur)}
           </AppText>
           <AppText variant="small" style={{ color: colors.accent }}>
-            Meta: +{formatBancaMoney(targetValue, cur)}
+            {t('capital.targetValue', { value: formatBancaMoney(targetValue, cur) })}
           </AppText>
         </View>
       </Card>
@@ -251,40 +248,53 @@ export default function BancaScreen() {
           title={t('capital.requestWithdrawal')}
           variant="secondary"
           icon={<Ionicons name="cash-outline" size={18} color={colors.accent} />}
-          onPress={() => Alert.alert(t('capital.withdrawalRequest'), t('capital.withdrawalMsg'))}
+          onPress={() => setWithdrawOpen(true)}
+          disabled={!hasDeposits}
         />
       </Card>
 
       <GrowthPlanSection capital={capital} currency={cur} />
+
+      <WithdrawalModal
+        visible={withdrawOpen}
+        available={withdrawable(current)}
+        currency={cur}
+        onClose={() => setWithdrawOpen(false)}
+      />
     </Screen>
   );
 }
 
+function formatMinDeposit(currency: 'usd' | 'aoa'): string {
+  const v = MIN_CAPITAL_DEPOSIT[currency];
+  return currency === 'aoa' ? `${v.toLocaleString('pt-PT')} Kz` : `$${v}`;
+}
+
 const makeStyles = (c: Palette) =>
   StyleSheet.create({
-  hero: { gap: Spacing.sm, marginBottom: Spacing.md },
-  heroTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  heroEyebrow: { color: 'rgba(255,255,255,0.7)', fontWeight: '700', letterSpacing: 1 },
-  heroValue: { fontSize: 36, lineHeight: 46, color: c.text, letterSpacing: 0.5 },
-  heroFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  pill: {
-    flexDirection: 'row', alignItems: 'center', gap: Spacing.xs,
-    paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999, borderWidth: 1,
-  },
-  pillDot: { width: 6, height: 6, borderRadius: 3 },
-  statsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm, marginBottom: Spacing.md },
-  statCard: { flexGrow: 1, flexBasis: '46%', alignItems: 'center', gap: Spacing.xs, paddingVertical: Spacing.md },
-  card: { marginBottom: Spacing.md, gap: Spacing.sm },
-  cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  reportCard: { marginBottom: Spacing.md, gap: Spacing.sm },
-  reportTitleRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.xs },
-  reportRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  track: {
-    height: 8, borderRadius: 4, backgroundColor: c.surfaceElevated,
-    overflow: 'hidden', marginTop: Spacing.xs,
-  },
-  fill: { height: '100%', borderRadius: 4, backgroundColor: c.accent },
-  progressLabels: { flexDirection: 'row', justifyContent: 'space-between' },
-  stepRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.md },
-  stepIcon: { width: 36, height: 36, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
-});
+    hero: { gap: Spacing.sm, marginBottom: Spacing.md },
+    heroTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+    heroEyebrow: { color: 'rgba(255,255,255,0.7)', fontWeight: '700', letterSpacing: 1 },
+    heroValue: { fontSize: 36, lineHeight: 46, color: c.text, letterSpacing: 0.5 },
+    heroFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+    pill: {
+      flexDirection: 'row', alignItems: 'center', gap: Spacing.xs,
+      paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999, borderWidth: 1,
+    },
+    pillDot: { width: 6, height: 6, borderRadius: 3 },
+    statsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm, marginBottom: Spacing.md },
+    statCard: { flexGrow: 1, flexBasis: '46%', alignItems: 'center', gap: Spacing.xs, paddingVertical: Spacing.md },
+    card: { marginBottom: Spacing.md, gap: Spacing.sm },
+    cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+    reportCard: { marginBottom: Spacing.md, gap: Spacing.sm },
+    reportTitleRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.xs },
+    reportRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+    track: {
+      height: 8, borderRadius: 4, backgroundColor: c.surfaceElevated,
+      overflow: 'hidden', marginTop: Spacing.xs,
+    },
+    fill: { height: '100%', borderRadius: 4, backgroundColor: c.accent },
+    progressLabels: { flexDirection: 'row', justifyContent: 'space-between' },
+    stepRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.md },
+    stepIcon: { width: 36, height: 36, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
+  });
