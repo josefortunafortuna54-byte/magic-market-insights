@@ -153,7 +153,7 @@ export default function InicioScreen() {
               </>
             ) : null}
             <SectionHeader title={t('inicio.upcomingSection')} />
-            {upcomingBooms.map(({ hour }, index) => (
+            {upcomingBooms.slice(0, 3).map(({ hour }, index) => (
               <Animated.View key={hour.id} entering={FadeInUp.delay(index * 60 + 200).springify()}>
                 <Pressable onPress={() => router.push('/(tabs)/horarios')}>
                   <BoomHourCard hour={hour} now={now} />
