@@ -16,15 +16,67 @@ Redesenhar o fluxo de Gestão de Capital ("banca") para um funcionamento profiss
 
 `capital_accounts` é a conta autoritativa. O cliente deixa de ler saldos de `useBanca` (AsyncStorage) ou de misturar fontes.
 
-### 1.1 Migração SQL (novo ficheiro `supabase/migrations/20260923080000_capital_management_v2.sql`)
+### 1.1 Estado actual (verificado no repositório)
+
+- **`capital_accounts` e `capital_reports` NÃO existem em qualquer migração** — `useCapitalAccount` consulta-os diretamente via cliente Supabase (JWT do utilizador): sem tabela e sem políticas RLS, a consulta falha hoje (`relation does not exist` / permissão negada) e a banca não tem dados.
+- O painel admin chama `list_capital_accounts`, `upsert_capital_account`, `post_capital_report`, `list_capital_reports` (em `adminApi.ts`), mas **a edge `admin-manage` NÃO implementa estas ações** → painel de capital partido.
+- `approve_receipt` ativa o plano de 30 dias mas **não credita capital nenhum** (nem compensação por referência).
+- `mark_withdrawal_paid` muda o estado para `paid` mas **não debita o saldo**.
+- Realtime: `payment_receipts` já está publicada; `withdrawal_requests` **não** está.
+
+### 1.2 Migração SQL (novo ficheiro `supabase/migrations/20260923080000_capital_management_v2.sql`)
+
+Cria as tabelas que faltam (idempotente, para funcionar quer existam ou não remotamente), adiciona `meta_percent`, políticas RLS e realtime:
 
 ```sql
-alter table public.capital_accounts
-  add column if not exists meta_percent numeric(8,2) not null default 25;
+create table if not exists public.capital_accounts (
+  user_id uuid primary key references auth.users (id) on delete cascade,
+  currency text not null default 'usd' check (currency in ('usd','aoa')),
+  capital numeric(14,2) not null default 0,
+  achieved numeric(14,2) not null default 0,
+  meta_percent numeric(8,2) not null default 25,
+  total_withdrawn numeric(14,2) not null default 0,
+  status text not null default 'active',
+  updated_at timestamptz not null default now()
+);
 
--- Histórico ao vivo: depósitos aprovados e levantamentos visíveis em tempo real
+create table if not exists public.capital_reports (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users (id) on delete cascade,
+  period_start date not null,
+  period_end date not null,
+  starting_balance numeric(14,2) not null,
+  ending_balance numeric(14,2) not null,
+  profit numeric(14,2) not null default 0,
+  profit_pct numeric(8,2) not null default 0,
+  note text,
+  created_at timestamptz not null default now()
+);
+create index if not exists capital_reports_user_idx on public.capital_reports (user_id, created_at desc);
+
+alter table public.capital_accounts enable row level security;
+alter table public.capital_reports enable row level security;
+
 do $$ begin
-  alter publication supabase_realtime add table public.payment_receipts;
+  if not exists (select 1 from pg_policies where policyname = 'Users select own capital account' and tablename = 'capital_accounts') then
+    create policy "Users select own capital account" on public.capital_accounts
+      for select to authenticated using (user_id = auth.uid());
+  end if;
+end $$;
+do $$ begin
+  if not exists (select 1 from pg_policies where policyname = 'Users select own capital reports' and tablename = 'capital_reports') then
+    create policy "Users select own capital reports" on public.capital_reports
+      for select to authenticated using (user_id = auth.uid());
+  end if;
+end $$;
+
+-- Meta publicada pela equipa e histórico ao vivo
+do $$ begin
+  alter publication supabase_realtime add table public.capital_accounts;
+exception when duplicate_object then null;
+end $$;
+do $$ begin
+  alter publication supabase_realtime add table public.capital_reports;
 exception when duplicate_object then null;
 end $$;
 do $$ begin
@@ -33,7 +85,9 @@ exception when duplicate_object then null;
 end $$;
 ```
 
-### 1.2 Derivações (apenas no cliente, a partir do servidor)
+> `payment_receipts` já está publicada (migração `20260822000000`). Publicar `withdrawal_requests` é novo e necessário para o histórico de levantamentos ao vivo.
+
+### 1.3 Derivações (apenas no cliente, a partir do servidor)
 
 - `capital` = investido (base)
 - `achieved` = saldo atual
@@ -46,7 +100,7 @@ end $$;
 
 Helpers puros em `src/core/capital.ts` (testáveis).
 
-### 1.3 `useBanca` deixa de alimentar saldos
+### 1.4 `useBanca` deixa de alimentar saldos
 
 `useBanca` passa a ser apenas **planner local** (escolha de estratégia e input do simulador). Remover dos pontos de cálculo de saldo:
 - `banca.tsx` — todos os saldos passam a vir de `useCapitalAccount`.
@@ -56,14 +110,16 @@ Helpers puros em `src/core/capital.ts` (testáveis).
 
 ## 2. Fluxo de dinheiro coerente
 
-### 2.1 Depósito de capital credita sempre (`admin-manage` → `handleApproveReceipt`)
+### 2.1 Depósito de capital credita sempre (`admin-manage` → ação `approve_receipt`)
 
-Ao aprovar um recibo:
-- **`plan = 'capital'`**: incrementa a conta de capital do utilizador na moeda do recibo:
+Hoje `approve_receipt` (linha ~365 de `admin-manage/index.ts`) só ativa o plano de 30 dias (`upsertSubscription`) e notifica — **não credita qualquer capital**. A alteração:
+
+Ao aprovar um recibo, com o cliente service-role (ignora RLS):
+- **`plan = 'capital'`**: credita a conta de capital do utilizador na moeda do recibo:
   - se a conta não existir → cria com `capital = amount`, `achieved = amount`, `currency = recibo.currency`.
-  - se existir → `capital += amount`, `achieved += amount` (e `currency` atualizada para a do recibo).
-- **`plan = 'premium'` + `referral_code`**: comportamento atual mantém-se (cria/inicializa a conta com o valor pago no primeiro upsert; não sobrescreve uma conta já existente com valor menor).
-- Falha ao creditar NÃO deve bloquear a ativação do plano (best-effort com `console.error`, como hoje).
+  - se existir → `capital += amount`, `achieved += amount` (e `currency` atualizada para a do recibo na 1ª criação).
+- **`plan = 'premium'` + `referral_code`** (regra afiliado de `continue.md` #4: "pagamento premium = capital"): credita igualmente `capital += amount`, `achieved += amount` (afiliado comprou, o capital entra na sócia). **Ponto a confirmar pelo utilizador no review:** se o mesmo afiliado renovar ao fim de 30 dias, o capital deve voltar a aumentar (sem crédito nesta spec? assumimos "sim, credita sempre" — mais simples e alinhado com "depósito credita sempre").
+- Falha ao creditar NÃO bloqueia a ativação do plano nem devolve erro (best-effort com `console.error`).
 
 ### 2.2 Levantamento real integrado
 
@@ -75,22 +131,22 @@ Ao aprovar um recibo:
     - montante > 0 e <= `withdrawable` (montante acima do saldo → erro visível);
     - detalhes obrigatórios.
   - Submissão: `submitWithdrawalRequest({ method, amount, currency, details })` (servidor) + `addMovement({ type: 'withdrawal', method, amount, currency, status: 'pendente', notes })` (carteira local), mesmo padrão de `/depositos.tsx`.
-  - Em caso de erro no servidor: manter a cidade local `pendente` e mostrar `Alert` de erro com opção de repetir — o pedido não se perde.
+  - Em caso de erro no servidor: manter a carteira local `pendente` e mostrar `Alert` de erro com opção de repetir — o pedido não se perde.
 - CTA na banca passa a abrir o `WithdrawalModal` (substitui o `Alert` falso).
 
 ### 2.3 Levantamento debita no servidor (`admin-manage` → `mark_withdrawal_paid`)
 
-Ao marcar como **pago**:
-- Ler `withdrawal_requests` (id).
-- Apenas se o estado anterior não for `paid` (evitar duplo débito; transição atómica com `.eq('status','approved')`).
-- Se a conta de capital existir **e** a moeda do pedido == moeda da conta → `achieved -= amount` e `total_withdrawn += amount` (guardando `achieved >= 0`; se `amount > achieved` por qualquer razão, cap a `0` e logar).
-- `approve_withdrawal` mantém-se como hoje (não debita — o dinheiro só "sai" quando marcado pago).
-- Assegurar RLS service_role (já existente).
+Hoje `mark_withdrawal_paid` só muda o estado para `paid`. A alteração, ao marcar como **pago** (cliente service-role):
+- Ler a `withdrawal_requests` pelo id.
+- Transição atómica anti-duplo-débito: atualizar `status='paid'` apenas com `.eq('id', id).eq('status', 'approved')`; se devolver 0 linhas, não debitar.
+- Se a conta de capital existir **e** a moeda do pedido == moeda da conta → `achieved -= amount` e `total_withdrawn += amount`; se `amount > achieved`, cap a `0` e logar.
+- `approve_withdrawal` / `reject_withdrawal` mantêm-se como hoje (o dinheiro só "sai" quando marcado pago).
+- RLS: service_role ignora RLS (já é o caso em toda a edge).
 
 ### 2.4 Meta publicada pela equipa
 
-- `upsert_capital_account` aceita `meta_percent` opcional (`adminApi.upsertCapitalAccount` inclui o campo).
-- `post_capital_report` mantém a atualização de `achieved` (e `capital` na primeira criação) — inalterado.
+- `upsert_capital_account` (ação a criar, ver §5) aceita `meta_percent` opcional (`adminApi.upsertCapitalAccount` passa a incluir o campo).
+- `post_capital_report` mantém a atualização de `achieved` (e `capital` na primeira criação) — ação a criar, ver §5.
 
 ---
 
@@ -103,7 +159,7 @@ Estrutura (estado ativo):
 3. **Último relatório da equipa** (já existente; mantém ligação ao `/diario-trader`).
 4. **Grelha de estatísticas** — Investido, Lucro (com sinal/cor), Meta (servidor), Levantado. Corrigir lucro sempre verde/prefixo `+` hardcoded.
 5. **Histórico de capital** — lista combinada:
-   - Depósitos de capital **aprovados**: `payment_receipts` `plan='capital'` e `status='approved'` (novo hook `useCapitalDeposits`; RLS own-select já existe; realtime via publicação adicionada em 1.1).
+   - Depósitos de capital **aprovados**: `payment_receipts` `plan='capital'` e `status='approved'` (novo hook `useCapitalDeposits`; RLS own-select já existe; realtime já publicado na migração `20260822000000`).
    - Depósitos de capital **pendentes/rejeitados**: `wallet_movements` `plan='capital'` (via `useMovements`).
    - Levantamentos com status real: `useWithdrawals` (`withdrawal_requests`, RLS own-select já existe).
    - Linhas com ícone, label, data e badge de estado. Ordenação por data (desc).
@@ -133,6 +189,8 @@ Remover do `banca.tsx`: `useBanca` (saldos), hero inativo hardcoded, `Alert` de 
 | `src/app/depositos.tsx` | hero usa `useCapitalAccount`; exportar `MIN_CAPITAL_DEPOSIT` |
 | `src/components/CapitalSimulatorCard.tsx` | usa `MIN_CAPITAL_DEPOSIT` (remove `disabled={amount < 50}` hardcoded) |
 | `src/core/types.ts` | `CapitalAccount` ganha `meta_percent` |
+| `src/lib/adminApi.ts` | `upsertCapitalAccount` aceita `meta_percent`; tipos `AdminCapitalAccount` atualizados |
+| `src/lib/plans.ts` | nova constante exportada `MIN_CAPITAL_DEPOSIT` (substitui valores `50`/`$50` hardcoded) |
 
 ### `useCapitalAccount` (alterações)
 
@@ -144,10 +202,18 @@ Remover do `banca.tsx`: `useBanca` (saldos), hero inativo hardcoded, `Alert` de 
 
 ## 5. Server / edge (`supabase/functions/admin-manage/index.ts`)
 
-- `upsert_capital_account`: passar a aceitar `meta_percent`.
-- `handleApproveReceipt`: adicionar crédito de capital para `plan='capital'` (§2.1), mantendo fluxo premium+afiliado e notificações.
-- `mark_withdrawal_paid`: débito transacional (§2.3) com glossário anti-duplo-débito.
-- Sem novas funções nem novas tabelas além da coluna `meta_percent` (evitar ledger completo — YAGNI).
+Estado actual: a edge NÃO tem quaisquer ações de capital, embora o cliente as invoque. A completar:
+
+1. **Implementar as 4 ações em falta** (já chamadas por `adminApi.ts`):
+   - `list_capital_accounts` → `select * from capital_accounts` (order por `updated_at desc`), devolve `{ accounts }`.
+   - `upsert_capital_account` → `insert ... on conflict (user_id) do update set` aceitando `capital`, `achieved`, `total_withdrawn`, `currency` e o novo `meta_percent`; devolve sucesso.
+   - `post_capital_report` → insere em `capital_reports` (com `profit`/`profit_pct` calculados a partir de balances) e atualiza `capital_accounts.achieved = ending_balance` (e `capital` na primeira criação via `upsert_capital_account`).
+   - `list_capital_reports` → devolve `{ reports }` filtrados por `user_id`.
+2. **`approve_receipt`**: adicionar crédito de capital (§2.1) além do fluxo atual de ativação + notificação.
+3. **`mark_withdrawal_paid`**: débito anti-duplo (§2.3).
+4. Sem novas tabelas além das criadas na §1.2 (evitar ledger completo — YAGNI).
+
+Nomes de ação e JSON igual ao padrão já usado na edge (`json({ success, ... })`, mensagens de erro em PT).
 
 ---
 
@@ -182,6 +248,8 @@ Remover do `banca.tsx`: `useBanca` (saldos), hero inativo hardcoded, `Alert` de 
   - premium-lock não bloqueia cliente premium (`canAccessBanca=true`).
   - `useCapitalAccount`/`useSubscription` mocks.
 
+- **Nota:** a lógica da edge `admin-manage` (crédito/débito) não tem harness automatizado no repo — validar manualmente com `supabase functions serve` + pedidos curl, e as migrações com `supabase db push` + consultas SQL.
+
 Base para mocking: `jest.config.js` já tem `moduleNameMapper` `@/` → `src/` e `preset jest-expo`.
 
 ---
@@ -197,9 +265,11 @@ Base para mocking: `jest.config.js` já tem `moduleNameMapper` `@/` → `src/` e
 
 ## 10. Critérios de aceitação
 
-1. Um recibo `plan='capital'` aprovado credita `capital`/`achieved` na conta do utilizador.
-2. Levantamento na banca cria pedido real (servidor) visível no admin; ao ser marcado `paid`, `achieved` diminui e `total_withdrawn` aumenta.
-3. Saldo/lucro/meta derivados exclusivamente de `capital_accounts` (sem AsyncStorage) e com sinais/cor corretos.
-4. Histórico de capital mostra depósitos, erros de depósito e levantamentos com status reais.
-5. Simulador/plano de crescimento continuam locais e não afectam saldos.
-6. `npx jest` verde (novos testes + regressão).
+1. Um recibo `plan='capital'` aprovado credita `capital`/`achieved` na conta do utilizador (e `plan='premium'` com `referral_code` também, na regra §2.1).
+2. Levantamento na banca cria pedido real (`withdrawal_requests`, RLS own-insert) visível no admin; ao ser marcado `paid`, `achieved` diminui e `total_withdrawn` aumenta (sem duplo débito).
+3. Painel admin: `list_capital_accounts`, `upsert_capital_account` (com `meta_percent`), `post_capital_report`, `list_capital_reports` devolvem sucesso (hoje falham).
+4. Saldo/lucro/meta derivados exclusivamente de `capital_accounts` (sem AsyncStorage) e com sinais/cor corretos.
+5. Histórico de capital mostra depósitos (aprovados em `payment_receipts` + pendentes/rejeitados locais) e levantamentos com status reais, ao vivo.
+6. Simulador/plano de crescimento continuam locais e não afectam saldos.
+7. Migração idempotente aplicar-se-á mesmo se as tabelas já existirem remotamente (ou criá-las, se não existirem).
+8. `npx jest` verde (novos testes + regressão).
