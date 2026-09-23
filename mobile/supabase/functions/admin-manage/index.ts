@@ -349,6 +349,31 @@ async function sendUserEmail(to: string | null | undefined, subject: string, htm
   }
 }
 
+/**
+ * Credita capital de forma aditiva (nunca sobrescreve o saldo já publicado).
+ * Best-effort: falha é logada mas nunca bloqueia a ativação do plano.
+ * Usa o RPC atómico da migração para evitar o `select ... for update` local
+ * (o edge role não suporta transações SQL multi-statement).
+ */
+async function creditCapitalAccount(
+  userId: string,
+  amount: number,
+  currency: string,
+): Promise<void> {
+  try {
+    const { error } = await supabase.rpc('mutation_credit_capital_account', {
+      p_user_id: userId,
+      p_amount: amount,
+      p_currency: currency === 'aoa' ? 'AOA' : 'USD',
+    });
+    if (error) {
+      console.error('[admin-manage] crédito de capital falhou', error.message);
+    }
+  } catch (e) {
+    console.error('[admin-manage] exceção no crédito de capital', e);
+  }
+}
+
 async function handleApproveReceipt(body: Record<string, unknown>) {
   const { id, reviewed_by } = body;
   if (!id) return errorJson('id em falta.');
@@ -380,8 +405,10 @@ async function handleApproveReceipt(body: Record<string, unknown>) {
     return json({ approved: true, alreadyProcessed: true });
   }
 
-  // Upsert subscription — falha já NÃO é silenciosa: sem isto o plano nunca muda
-  if (receipt.user_id && receipt.plan) {
+  // Upsert subscription — falha já NÃO é silenciosa: sem isto o plano nunca muda.
+  // Guarda CRÍTICA: 'capital' é um depósito de gestão, NÃO uma compra de plano —
+  // nunca sobrescrever a subscription do utilizador.
+  if (receipt.user_id && receipt.plan && String(receipt.plan).toLowerCase() !== 'capital') {
     const planName = String(receipt.plan).toLowerCase();
     const now = new Date();
     const periodEnd = new Date(now);
@@ -405,31 +432,21 @@ async function handleApproveReceipt(body: Record<string, unknown>) {
     }
   }
 
-  // Gestão de Capital: utilizador chegado por link de afiliado que pagou o
-  // Premium passa a ter o valor pago como saldo da conta de capital.
-  // Best-effort: falha não deve bloquear a ativação do plano.
-  if (
-    receipt.user_id &&
-    String(receipt.plan).toLowerCase() === 'premium' &&
-    Number(receipt.amount) > 0 &&
-    receipt.referral_code
-  ) {
-    const { error: capError } = await supabase
-      .from('capital_accounts')
-      .upsert(
-        {
-          user_id: receipt.user_id,
-          currency: receipt.currency === 'aoa' ? 'aoa' : 'usd',
-          capital: Number(receipt.amount),
-          achieved: Number(receipt.amount),
-          status: 'active',
-          updated_at: new Date().toISOString(),
-        },
-        { onConflict: 'user_id' },
-      );
-    if (capError) {
-      console.error('admin-manage: falha ao creditar capital do afiliado', capError.message);
-    }
+  // Gestão de Capital: o valor do comprovativo é creditado de forma SOMA na
+  // conta de capital da moeda do pagamento. Regras:
+  //   - plan = 'capital'            → depósito de gestão (sempre credita)
+  //   - plan = 'premium' + referral → afiliado: o pagamento vira capital
+  // Best-effort: falha é logada, nunca bloqueia a ativação do plano.
+  const plan = String(receipt.plan ?? '').toLowerCase();
+  const isCapitalPlan = plan === 'capital';
+  const isAffiliatePremium =
+    plan === 'premium' && Boolean(receipt.referral_code);
+  if (receipt.user_id && Number(receipt.amount) > 0 && (isCapitalPlan || isAffiliatePremium)) {
+    await creditCapitalAccount(
+      receipt.user_id,
+      Number(receipt.amount),
+      String(receipt.currency ?? 'usd'),
+    );
   }
 
   // Notifica o utilizador (apenas quem fez a transição pending→approved)
@@ -821,13 +838,17 @@ serve(async (req) => {
       });
     }
     case 'upsert_capital_account': {
-      const { user_id, capital, achieved, currency, total_withdrawn } = body;
+      const { user_id, capital, achieved, currency, total_withdrawn, meta_percent } = body;
       if (!user_id) return errorJson('user_id em falta.');
       const row: Record<string, unknown> = { user_id: String(user_id), updated_at: new Date().toISOString() };
       if (capital != null) row.capital = Number(capital);
       if (achieved != null) row.achieved = Number(achieved);
       if (total_withdrawn != null) row.total_withdrawn = Number(total_withdrawn);
       if (currency === 'usd' || currency === 'aoa') row.currency = currency;
+      if (meta_percent != null) {
+        const mp = Number(meta_percent);
+        if (mp >= 0 && mp <= 100) row.meta_percent = mp;
+      }
 
       const { data, error } = await supabase
         .from('capital_accounts')
@@ -1032,12 +1053,51 @@ serve(async (req) => {
     case 'mark_withdrawal_paid': {
       const { id } = body;
       if (!id) return errorJson('id em falta.');
-      const { error } = await supabase.from('withdrawal_requests').update({
-        status: 'paid',
-        reviewed_by: user.id,
-        reviewed_at: new Date().toISOString(),
-      }).eq('id', id);
-      if (error) return errorJson(error.message, 500);
+
+      // Transição atómica: approved → paid. Sem .eq('status') o update era
+      // idempotente na BD mas não gravava a transição correta nem evitava
+      // pagamentos duplos a partir de estados inválidos.
+      const { data: transitioned, error: updateErr } = await supabase
+        .from('withdrawal_requests')
+        .update({
+          status: 'paid',
+          reviewed_by: user.id,
+          paid_at: new Date().toISOString(),
+          reviewed_at: new Date().toISOString(),
+        })
+        .eq('id', id)
+        .eq('status', 'approved')
+        .select('user_id, amount, currency')
+        .maybeSingle();
+
+      if (updateErr) return errorJson(updateErr.message, 500);
+      if (!transitioned) {
+        return errorJson('Levantamento não está aprovado ou já foi pago.', 409);
+      }
+
+      // Débito do saldo publicado (best-effort, logado)
+      const currency = transitioned.currency === 'aoa' ? 'aoa' : 'usd';
+      const { data: account, error: acctErr } = await supabase
+        .from('capital_accounts')
+        .select('*')
+        .eq('user_id', transitioned.user_id)
+        .eq('currency', currency)
+        .maybeSingle();
+
+      if (!acctErr && account) {
+        const { error: debitErr } = await supabase
+          .from('capital_accounts')
+          .update({
+            achieved: Math.max(0, Number(account.achieved ?? 0) - Number(transitioned.amount)),
+            total_withdrawn: (Number(account.total_withdrawn ?? 0) + Number(transitioned.amount)),
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', account.id);
+        if (debitErr) {
+          console.error('[admin-manage] débito de levantamento falhou', debitErr.message);
+        }
+      }
+
       return json({ ok: true });
     }
     // ── Revenue Stats ──────────────────────────────────────────────────
