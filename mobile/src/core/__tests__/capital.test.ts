@@ -1,4 +1,4 @@
-import { clamp, profit, profitPct, progressPct, withdrawable } from '../capital';
+import { clamp, formatMinDepositCore, MIN_CAPITAL_DEPOSIT, profit, profitPct, progressPct, withdrawable } from '../capital';
 
 describe('capital helpers', () => {
   it('profit: saldo menos investido', () => {
@@ -30,5 +30,15 @@ describe('capital helpers', () => {
     expect(clamp(150, 0, 100)).toBe(100);
     expect(clamp(-5, 0, 100)).toBe(0);
     expect(clamp(42, 0, 100)).toBe(42);
+  });
+
+  it('MIN_CAPITAL_DEPOSIT: mínimo por moeda', () => {
+    expect(MIN_CAPITAL_DEPOSIT.usd).toBe(50);
+    expect(MIN_CAPITAL_DEPOSIT.aoa).toBe(50000);
+  });
+
+  it('formatMinDepositCore: formata conforme a moeda', () => {
+    expect(formatMinDepositCore('usd')).toBe('$50');
+    expect(formatMinDepositCore('aoa')).toBe(`50${'\u00A0'}000 Kz`);
   });
 });

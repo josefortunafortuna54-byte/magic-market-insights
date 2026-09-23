@@ -8,6 +8,7 @@ import { GradientCard } from '@/components/GradientCard';
 import { PaymentModal } from '@/components/PaymentModal';
 import { useMovements, type WalletMovement } from '@/hooks/useMovements';
 import { useBanca } from '@/hooks/useBanca';
+import { useCapitalAccount } from '@/hooks/useCapitalAccount';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/lib/supabase';
 import { uploadReceipt, type ReceiptFile } from '@/lib/payments';
@@ -53,8 +54,13 @@ export default function DepositosScreen() {
   const { t } = useTranslation();
   const params = useLocalSearchParams<{ plan?: string; currency?: string; amount?: string }>();
   const { config: banca } = useBanca();
+  const { account: capitalAccount } = useCapitalAccount();
   const { user } = useAuth();
   const { movements, loading, addMovement, deleteMovement } = useMovements();
+
+  // Servidor é a fonte da verdade para o hero da Gestão de Capital; o config local é fallback.
+  const heroCurrency = capitalAccount?.currency ?? banca.currency ?? 'usd';
+  const heroAchieved = capitalAccount?.achieved ?? banca.achieved;
 
   const [activeTab, setActiveTab] = useState<TabId>('deposit');
   const [tabAnim] = useState(() => new Animated.Value(0));
@@ -388,7 +394,7 @@ export default function DepositosScreen() {
             <AppText style={styles.heroUsdText}>{currencySymbol}</AppText>
           </View>
         </View>
-        <AppText style={styles.heroValue}>{formatBancaMoney(banca.achieved, banca.currency ?? 'usd')}</AppText>
+        <AppText style={styles.heroValue}>{formatBancaMoney(heroAchieved, heroCurrency)}</AppText>
         <View style={styles.heroFooter}>
           <Ionicons name="lock-closed" size={13} color="rgba(255,255,255,0.65)" />
           <AppText style={styles.heroSub}>{t('depositos.balanceSub')}</AppText>

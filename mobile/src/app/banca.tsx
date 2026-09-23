@@ -10,7 +10,7 @@ import { WithdrawalModal } from '@/components/WithdrawalModal';
 import { GrowthPlanSection } from '@/components/GrowthPlanSection';
 import { CapitalSimulatorCard } from '@/components/CapitalSimulatorCard';
 import { formatBancaMoney, formatShortDate } from '@/core/format';
-import { profit, profitPct, progressPct, withdrawable } from '@/core/capital';
+import { formatMinDepositCore, profit, profitPct, progressPct, withdrawable } from '@/core/capital';
 import { Spacing, type Palette } from '@/core/theme';
 import { useTheme } from '@/hooks/useTheme';
 import { useBanca } from '@/hooks/useBanca';
@@ -94,7 +94,7 @@ export default function BancaScreen() {
           </AppText>
           <View style={styles.heroFooter}>
             <AppText variant="small" style={{ color: 'rgba(255,255,255,0.6)' }}>
-              {t('capital.minDeposit')}: {formatMinDeposit(cur)}
+              {t('capital.minDeposit')}: {formatMinDepositCore(cur)}
             </AppText>
             <StatusPill label={t('capital.inactiveBadge')} color={colors.warning} />
           </View>
@@ -263,11 +263,6 @@ export default function BancaScreen() {
       />
     </Screen>
   );
-}
-
-function formatMinDeposit(currency: 'usd' | 'aoa'): string {
-  const v = MIN_CAPITAL_DEPOSIT[currency];
-  return currency === 'aoa' ? `${v.toLocaleString('pt-PT')} Kz` : `$${v}`;
 }
 
 const makeStyles = (c: Palette) =>

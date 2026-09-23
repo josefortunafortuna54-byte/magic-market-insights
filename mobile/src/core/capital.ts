@@ -1,3 +1,7 @@
+import { MIN_CAPITAL_DEPOSIT } from '@/lib/plans';
+
+export { MIN_CAPITAL_DEPOSIT };
+
 export function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));
 }
@@ -24,4 +28,12 @@ export function progressPct(achieved: number, capital: number, metaPercent: numb
 export function withdrawable(achieved: number): number {
   if (!isFinite(achieved)) return 0;
   return Math.max(0, achieved);
+}
+
+/** Mínimo de depósito de gestão por moeda. Ver MIN_CAPITAL_DEPOSIT em @/lib/plans. */
+
+/** Formata o depósito mínimo para exibição, ex.: "US$50" / "50 000 Kz". */
+export function formatMinDepositCore(currency: 'usd' | 'aoa'): string {
+  const v = MIN_CAPITAL_DEPOSIT[currency];
+  return currency === 'aoa' ? `${v.toLocaleString('pt-PT')} Kz` : `$${v}`;
 }
