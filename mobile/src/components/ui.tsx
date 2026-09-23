@@ -101,6 +101,7 @@ export function AppButton({
     <Pressable
       onPress={onPress}
       disabled={isDisabled}
+      accessibilityState={{ disabled: isDisabled }}
       style={({ pressed }) => [
         styles.button,
         { backgroundColor: palette.bg, borderColor: palette.border },
