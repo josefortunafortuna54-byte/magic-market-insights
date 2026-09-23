@@ -70,7 +70,7 @@ begin
 
   -- Expirar sinais fora da janela a cada 15 minutos
   IF NOT EXISTS (SELECT 1 FROM cron.job WHERE jobname = 'expire-old-signals-every-15min') THEN
-    PERFORM cron.schedule('expire-old-signals-every-15min', '*/15 * * * *', $$SELECT public.expire_old_signals()$$);
+    PERFORM cron.schedule('expire-old-signals-every-15min', '*/15 * * * *', 'SELECT public.expire_old_signals()');
   END IF;
 EXCEPTION WHEN OTHERS THEN NULL;
 end $$;
