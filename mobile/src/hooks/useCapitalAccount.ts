@@ -5,6 +5,8 @@ import { subscribeToChanges } from '@/lib/realtime';
 import { useAuth } from '@/hooks/useAuth';
 import type { CapitalAccount, CapitalReport } from '@/core/types';
 
+export const DEFAULT_META_PERCENT = 25;
+
 async function fetchAccount(userId: string): Promise<CapitalAccount | null> {
   const { data, error } = await supabase
     .from('capital_accounts')
@@ -67,5 +69,7 @@ export function useCapitalAccount() {
     account: accountQuery.data ?? null,
     reports: reportsQuery.data ?? [],
     loading: accountQuery.isLoading || reportsQuery.isLoading,
+    // Meta normalizada: valor publicado pela equipa (0-100) com fallback 25.
+    metaPercent: accountQuery.data?.meta_percent ?? DEFAULT_META_PERCENT,
   };
 }
