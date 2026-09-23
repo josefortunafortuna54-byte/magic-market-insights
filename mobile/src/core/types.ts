@@ -134,6 +134,7 @@ export interface CapitalAccount {
   achieved: number;
   total_withdrawn: number;
   status: string;
+  meta_percent?: number;
   updated_at?: string;
 }
 

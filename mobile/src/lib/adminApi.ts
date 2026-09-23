@@ -358,8 +358,11 @@ export async function upsertCapitalAccount(data: {
   achieved?: number;
   total_withdrawn?: number;
   currency?: 'usd' | 'aoa';
+  meta_percent?: number;
 }): Promise<void> {
-  await callAdminFn('upsert_capital_account', data);
+  const payload = { ...data };
+  if (payload.meta_percent == null) delete payload.meta_percent;
+  await callAdminFn('upsert_capital_account', payload);
 }
 
 export async function postCapitalReport(data: {

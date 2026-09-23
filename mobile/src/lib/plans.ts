@@ -8,6 +8,9 @@ export type PaymentMethod = 'binance' | 'rodotpay' | 'express';
 
 export const WA_GREEN = '#25D366';
 
+/** Depósito mínimo de gestão de capital por moeda. */
+export const MIN_CAPITAL_DEPOSIT: Record<Currency, number> = { usd: 50, aoa: 50000 };
+
 export const BINANCE_ID = '547723572';
 export const RODOTPAY_UID = '1927969477';
 export const EXPRESS_PHONE = '+244926717730';
