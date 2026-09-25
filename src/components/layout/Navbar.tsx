@@ -62,15 +62,12 @@ export function Navbar() {
         <div className="flex h-20 items-center justify-between">
 
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-3">
-            <img 
-              src="/logo.png" 
-              alt="The Magic Trader" 
-              className="h-14 w-14 object-contain logo-glow"
+          <Link to="/" className="flex items-center">
+            <img
+              src="/logo-txt.png"
+              alt="The Magic Trader"
+              className="h-14 w-auto object-contain logo-glow"
             />
-            <span className="hidden sm:block font-display text-lg font-bold gradient-shield">
-              The Magic Trader
-            </span>
           </Link>
 
           {/* Desktop Navigation */}
