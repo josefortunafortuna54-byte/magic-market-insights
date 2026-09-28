@@ -30,3 +30,6 @@ vite.config.ts.timestamp-*
 # Playwright MCP artifacts
 .playwright-mcp/
 
+# TypeScript incremental build info
+*.tsbuildinfo
+
