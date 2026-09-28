@@ -6,7 +6,7 @@ import { AppText, Spinner } from '@/components/ui';
 import { Spacing, type Palette } from '@/core/theme';
 import { useTheme } from '@/hooks/useTheme';
 import {
-  cancelBoomAlarm,
+  disableBoomAlarm,
   getBoomAlarm,
   scheduleBoomAlarm,
 } from '@/lib/notifications';
@@ -45,7 +45,7 @@ export function AlarmToggle({
     setBusy(true);
     try {
       if (armed) {
-        await cancelBoomAlarm(boomId);
+        await disableBoomAlarm(boomId);
         setArmed(false);
       } else {
         const ok = await scheduleBoomAlarm(boomId, boomTime, title);

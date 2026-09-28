@@ -16,6 +16,7 @@ import { OnboardingTour } from '@/components/OnboardingTour';
 import { PremiumCapitalCredit } from '@/components/PremiumCapitalCredit';
 import { PremiumWelcomeModal } from '@/components/PremiumWelcomeModal';
 import { UserNotificationWatcher } from '@/components/UserNotificationWatcher';
+import { BoomAlarmAutoSync } from '@/components/BoomAlarmAutoSync';
 import { useNotificationNavigation, usePremiumExpiryNotification, useUpgradeNotification } from '@/hooks/useNotifications';
 import { ensureChannel } from '@/lib/notifications';
 import { initReferralCapture } from '@/lib/referral';
@@ -177,6 +178,7 @@ export default function RootLayout() {
             <Presence />
             <PushTokenInit />
             <UserNotificationWatcher />
+            <BoomAlarmAutoSync />
             <PremiumCapitalCredit />
             <PremiumWelcomeModal />
             <RootNavigator />

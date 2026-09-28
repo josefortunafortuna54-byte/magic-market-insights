@@ -3,7 +3,8 @@ import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
 import Constants from 'expo-constants';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { BOOM_LIVE_WINDOW_MINUTES } from '@/core/booms';
+import { BOOM_LIVE_WINDOW_MINUTES, boomEpochMs } from '@/core/booms';
+import type { BoomHour } from '@/core/types';
 import { i18n } from '@/lib/i18n';
 
 Notifications.setNotificationHandler({
@@ -16,6 +17,8 @@ Notifications.setNotificationHandler({
 });
 
 const ALARMS_KEY = 'boom_alarms';
+const DISABLED_ALARMS_KEY = 'boom_alarms_disabled';
+const BOOM_SCHEDULE_KEY = 'boom_schedule_signature';
 const CHANNEL_ID = 'booms';
 const CHANNEL_ID_ALARM = 'booms_alarm';
 const UPGRADE_KEY_PREFIX = 'plan_upgrade_prompt';
@@ -88,6 +91,8 @@ interface AlarmEntry {
   identifier: string;
   boomId: string;
   warningId?: string;
+  daily?: boolean;
+  timeWat?: string;
 }
 
 async function loadAlarmEntries(): Promise<AlarmEntry[]> {
@@ -131,38 +136,67 @@ export async function cancelBoomAlarm(boomId: string): Promise<boolean> {
   return true;
 }
 
-export interface ScheduledAlarm {
-  id: string;
-  boomId: string;
-  fireAt: string;
-  title: string;
-}
-
-function formatWindowTime(boomTime: string): string {
+function timeWatFromIso(boomTime: string): string {
   const d = new Date(boomTime);
+  if (isNaN(d.getTime())) return '';
   const h = String((d.getUTCHours() + 1) % 24).padStart(2, '0');
   const m = String(d.getUTCMinutes()).padStart(2, '0');
   return `${h}:${m}`;
 }
 
-/**
- * Agenda DOIS alarmes para um boom:
- * 1. Aviso 5 minutos antes (para preparar)
- * 2. Alarme EXATO na hora do boom (comporta como alarme real: acorda tela, som alto, full-screen)
- * O identificador fica guardado em boom_alarms (local).
- */
-export async function scheduleBoomAlarm(boomId: string, boomTime: string, title: string): Promise<boolean> {
+/** Converte uma hora WAT ("HH:MM") para os componentes locais do dispositivo. */
+function watToLocalParts(timeWat: string, now: Date, minusMinutes: number): { hour: number; minute: number } {
+  const epoch = boomEpochMs(now, timeWat) - minusMinutes * 60_000;
+  const local = new Date(epoch);
+  return { hour: local.getHours(), minute: local.getMinutes() };
+}
+
+let permissionGranted: boolean | null = null;
+
+async function ensureBoomAlarmPermission(): Promise<boolean> {
+  if (permissionGranted === true) return true;
   const granted = await requestNotificationPermission();
+  permissionGranted = granted;
+  return granted;
+}
+
+async function loadDisabledIds(): Promise<string[]> {
+  const raw = await AsyncStorage.getItem(DISABLED_ALARMS_KEY);
+  try {
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed.filter((x): x is string => typeof x === 'string') : [];
+  } catch {
+    return [];
+  }
+}
+
+async function saveDisabledIds(ids: string[]): Promise<void> {
+  await AsyncStorage.setItem(DISABLED_ALARMS_KEY, JSON.stringify(ids));
+}
+
+/** Marca um boom como desactivado para a sync automática não o voltar a armar. */
+export async function disableBoomAlarm(boomId: string): Promise<void> {
+  await cancelBoomAlarm(boomId);
+  const ids = await loadDisabledIds();
+  if (!ids.includes(boomId)) await saveDisabledIds([...ids, boomId]);
+}
+
+/**
+ * Arma o alarme recorrente (diário) de um boom:
+ * 1. Aviso 5 minutos antes (channel normal)
+ * 2. Alarme EXATO na hora (channel MAX, acorda tela, full-screen)
+ * Recomeça todos os dias automaticamente — "quando chegar a hora, toca".
+ * Se já estiver armado para a mesma hora, é idempotente (não duplica).
+ */
+export async function armBoomAlarm(boomId: string, timeWat: string, title: string, now: Date = new Date()): Promise<boolean> {
+  if (!/^\d{2}:\d{2}$/.test(timeWat)) return false;
+  const granted = await ensureBoomAlarmPermission();
   if (!granted) return false;
-
-  const boomDate = new Date(boomTime);
-  const warningAt = new Date(boomDate.getTime() - 5 * 60 * 1000);
-  const now = Date.now();
-
-  if (warningAt.getTime() <= now && boomDate.getTime() <= now) return false;
 
   const entries = await loadAlarmEntries();
   const existing = entries.find((e) => e.boomId === boomId);
+  if (existing?.daily && existing.timeWat === timeWat) return true;
+
   if (existing) {
     try {
       await Notifications.cancelScheduledNotificationAsync(existing.identifier);
@@ -172,32 +206,31 @@ export async function scheduleBoomAlarm(boomId: string, boomTime: string, title:
     }
   }
 
-  let warningId: string | undefined;
-  let alarmId: string;
+  const warn = watToLocalParts(timeWat, now, 5);
+  const boom = watToLocalParts(timeWat, now, 0);
 
-  if (warningAt.getTime() > now) {
-    warningId = await Notifications.scheduleNotificationAsync({
-      content: {
-        title: i18n.t('notifications.prepTitle'),
-        body: i18n.t('notifications.prepBody', {
-          pair: title,
-          minutes: BOOM_LIVE_WINDOW_MINUTES,
-          windowTime: formatWindowTime(boomTime),
-        }),
-        data: { url: '/(tabs)/horarios', boomId, type: 'warning' },
-        sound: Platform.OS === 'ios' ? 'default' : undefined,
-        priority: Notifications.AndroidNotificationPriority.HIGH,
-        interruptionLevel: Platform.OS === 'ios' ? 'active' : undefined,
-      },
-      trigger: {
-        type: Notifications.SchedulableTriggerInputTypes.DATE,
-        date: warningAt,
-        channelId: Platform.OS === 'android' ? CHANNEL_ID : undefined,
-      },
-    });
-  }
+  const warningId = await Notifications.scheduleNotificationAsync({
+    content: {
+      title: i18n.t('notifications.prepTitle'),
+      body: i18n.t('notifications.prepBody', {
+        pair: title,
+        minutes: BOOM_LIVE_WINDOW_MINUTES,
+        windowTime: timeWat,
+      }),
+      data: { url: '/(tabs)/horarios', boomId, type: 'warning' },
+      sound: Platform.OS === 'ios' ? 'default' : undefined,
+      priority: Notifications.AndroidNotificationPriority.HIGH,
+      interruptionLevel: Platform.OS === 'ios' ? 'active' : undefined,
+    },
+    trigger: {
+      type: Notifications.SchedulableTriggerInputTypes.DAILY,
+      hour: warn.hour,
+      minute: warn.minute,
+      channelId: Platform.OS === 'android' ? CHANNEL_ID : undefined,
+    },
+  });
 
-  alarmId = await Notifications.scheduleNotificationAsync({
+  const alarmId = await Notifications.scheduleNotificationAsync({
     content: {
       title: i18n.t('notifications.goTitle'),
       body: i18n.t('notifications.goBody', {
@@ -211,16 +244,26 @@ export async function scheduleBoomAlarm(boomId: string, boomTime: string, title:
       interruptionLevel: Platform.OS === 'ios' ? 'timeSensitive' : undefined,
     },
     trigger: {
-      type: Notifications.SchedulableTriggerInputTypes.DATE,
-      date: boomDate,
+      type: Notifications.SchedulableTriggerInputTypes.DAILY,
+      hour: boom.hour,
+      minute: boom.minute,
       channelId: Platform.OS === 'android' ? CHANNEL_ID_ALARM : undefined,
     },
   });
 
   const filtered = entries.filter((e) => e.boomId !== boomId);
-  filtered.push({ identifier: alarmId, boomId, warningId });
+  filtered.push({ identifier: alarmId, boomId, warningId, daily: true, timeWat });
   await saveAlarmEntries(filtered);
+
+  await saveDisabledIds((await loadDisabledIds()).filter((id) => id !== boomId));
   return true;
+}
+
+/**
+ * Agenda DOIS alarmes para um boom (mantido para compatibilidade; hoje é recorrente).
+ */
+export async function scheduleBoomAlarm(boomId: string, boomTime: string, title: string): Promise<boolean> {
+  return armBoomAlarm(boomId, timeWatFromIso(boomTime), title);
 }
 
 export async function cancelAllBoomAlarms(): Promise<void> {
@@ -237,8 +280,37 @@ export async function cancelAllBoomAlarms(): Promise<void> {
 }
 
 export async function rescheduleBoomAlarm(boomId: string, boomTime: string, title: string): Promise<boolean> {
-  await cancelAllBoomAlarms();
+  await cancelBoomAlarm(boomId);
   return scheduleBoomAlarm(boomId, boomTime, title);
+}
+
+/**
+ * Sync automática: garante que TODAS as janelas activas ficam armadas
+ * (alarme dispara sozinho quando a hora chega). Remove alarmes órfãos
+ * quando a agenda muda e respeita os booms que o utilizador desactivou.
+ */
+export async function syncAutoBoomAlarms(hours: BoomHour[], now: Date = new Date()): Promise<number> {
+  if (Platform.OS === 'web') return 0;
+  const active = hours.filter((h) => h.is_active !== false);
+  if (active.length === 0) return 0;
+  const granted = await ensureBoomAlarmPermission();
+  if (!granted) return 0;
+
+  const signature = active.map((h) => `${h.id}:${h.time_wat}`).sort().join('|');
+  const prev = await AsyncStorage.getItem(BOOM_SCHEDULE_KEY);
+  if (prev && prev !== signature) {
+    await cancelAllBoomAlarms();
+  }
+  await AsyncStorage.setItem(BOOM_SCHEDULE_KEY, signature);
+
+  const disabled = await loadDisabledIds();
+  let armed = 0;
+  for (const h of active) {
+    if (disabled.includes(h.id)) continue;
+    const ok = await armBoomAlarm(h.id, h.time_wat, h.title || h.time_wat, now);
+    if (ok) armed += 1;
+  }
+  return armed;
 }
 
 export function getNotificationUrl(data?: unknown): string | null {
