@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { AppButton, AppInput, AppText, Badge, Card, Chip, EmptyState, Screen, SectionTitle } from '@/components/ui';
 import { GradientCard } from '@/components/GradientCard';
 import { PaymentModal } from '@/components/PaymentModal';
+import { PaymentMethodIcon } from '@/components/PaymentMethodIcon';
 import { useMovements, type WalletMovement } from '@/hooks/useMovements';
 import { useBanca } from '@/hooks/useBanca';
 import { useCapitalAccount } from '@/hooks/useCapitalAccount';
@@ -315,7 +316,7 @@ export default function DepositosScreen() {
                 style={[styles.methodBtn, active && styles.methodBtnActive]}
                 accessibilityRole="button"
                 accessibilityState={{ selected: active }}>
-                <Ionicons name={m.icon} size={16} color={active ? colors.bg : m.color} />
+                <PaymentMethodIcon method={m} size={16} color={active ? colors.bg : m.color} />
                 <View style={styles.methodBtnText}>
                   <AppText
                     variant="small"

@@ -5,6 +5,7 @@ import * as ImagePicker from 'expo-image-picker';
 import * as Clipboard from 'expo-clipboard';
 import { useTranslation } from 'react-i18next';
 import { AppButton, AppText } from '@/components/ui';
+import { PaymentMethodIcon } from '@/components/PaymentMethodIcon';
 import { Spacing, type Palette } from '@/core/theme';
 import { useTheme } from '@/hooks/useTheme';
 import type { ReceiptFile } from '@/lib/payments';
@@ -125,7 +126,7 @@ export function PaymentModal({
                         },
                       ]}>
                       <View style={[styles.methodIcon, { backgroundColor: `${m.color}1A` }]}>
-                        <Ionicons name={m.icon} size={28} color={m.color} />
+                        <PaymentMethodIcon method={m} size={28} color={m.color} />
                       </View>
                       <AppText variant="label" style={{ color: m.color, fontWeight: '800' }}>
                         {m.label}
@@ -138,7 +139,7 @@ export function PaymentModal({
               <>
                 <View style={styles.selectedMethod}>
                   <View style={[styles.selectedMethodIcon, { backgroundColor: `${selectedMethod?.color}1A` }]}>
-                    <Ionicons name={selectedMethod?.icon ?? 'card'} size={24} color={selectedMethod?.color} />
+                    <PaymentMethodIcon method={selectedMethod} size={24} color={selectedMethod?.color} />
                   </View>
                   <View style={styles.selectedMethodInfo}>
                     <AppText variant="label" style={{ color: selectedMethod?.color, fontWeight: '800' }}>

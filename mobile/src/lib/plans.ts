@@ -1,4 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
+import type { ImageSourcePropType } from 'react-native';
 import type { TFunction } from 'i18next';
 
 export type Currency = 'usd' | 'aoa';
@@ -19,7 +20,8 @@ export interface PaymentMethodInfo {
   id: PaymentMethod;
   label: string;
   icon: keyof typeof Ionicons.glyphMap;
-  iconImage?: any;
+  /** Logotipo oficial (resultado de require()). Tem prioridade sobre `icon`. */
+  iconImage?: ImageSourcePropType;
   color: string;
   usd: boolean;
   aoa: boolean;
@@ -32,6 +34,7 @@ export const PAYMENT_METHODS: PaymentMethodInfo[] = [
     id: 'binance',
     label: 'Binance Pay',
     icon: 'logo-bitcoin',
+    iconImage: require('@/assets/images/bnb.png'),
     color: '#F0B90B',
     usd: true,
     aoa: false,

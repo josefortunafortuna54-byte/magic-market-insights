@@ -3,6 +3,7 @@ import { Alert, Modal, Pressable, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { AppButton, AppInput, AppText } from '@/components/ui';
+import { PaymentMethodIcon } from '@/components/PaymentMethodIcon';
 import { Spacing, type Palette } from '@/core/theme';
 import { useTheme } from '@/hooks/useTheme';
 import { useMovements } from '@/hooks/useMovements';
@@ -85,7 +86,7 @@ export function WithdrawalModal({ visible, available, currency, onClose }: Withd
                 {methods.map((m) => (
                   <Pressable key={m.id} onPress={() => setMethod(m.id)} style={[styles.methodCard, { borderColor: m.color, borderWidth: 2 }]}>
                     <View style={[styles.methodIcon, { backgroundColor: `${m.color}1A` }]}>
-                      <Ionicons name={m.icon} size={24} color={m.color} />
+                      <PaymentMethodIcon method={m} size={24} color={m.color} />
                     </View>
                     <AppText variant="label" style={{ color: m.color }}>{m.label}</AppText>
                   </Pressable>
@@ -95,7 +96,7 @@ export function WithdrawalModal({ visible, available, currency, onClose }: Withd
               <>
                 <View style={styles.selectedRow}>
                   <View style={[styles.methodIcon, { backgroundColor: `${selectedMethod?.color}1A` }]}>
-                    <Ionicons name={selectedMethod?.icon ?? 'card'} size={20} color={selectedMethod?.color} />
+                    <PaymentMethodIcon method={selectedMethod} size={20} color={selectedMethod?.color} />
                   </View>
                   <View style={styles.selectedInfo}>
                     <AppText variant="label" style={{ color: selectedMethod?.color }}>{selectedMethod?.label}</AppText>
