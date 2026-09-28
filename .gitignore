@@ -30,6 +30,9 @@ vite.config.ts.timestamp-*
 # Playwright MCP artifacts
 .playwright-mcp/
 
+# Supabase CLI local state (machine-specific: versao do CLI em uso)
+supabase/.temp/
+
 # TypeScript incremental build info
 *.tsbuildinfo
 
