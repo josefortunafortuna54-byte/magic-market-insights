@@ -12,10 +12,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { Trans, useTranslation } from 'react-i18next';
 
 const WA_GREEN = '#25D366';
-const GOOGLE_BLUE = '#4285F4';
-const GOOGLE_RED = '#EA4335';
-const GOOGLE_YELLOW = '#FBBC05';
-const GOOGLE_GREEN = '#34A853';
+const GOOGLE_G = require('@/assets/images/google.png');
 
 const fadeSlide = (value: Animated.Value, fromY = 24) => ({
   opacity: value,
@@ -30,13 +27,7 @@ function GoogleG() {
   const { colors } = useTheme();
   const styles = makeStyles(colors);
   return (
-    <View style={styles.gLogo} pointerEvents="none">
-      <View style={[styles.gBar, { top: 0, right: 0, width: 22, height: 7, backgroundColor: GOOGLE_RED, borderTopRightRadius: 5 }]} />
-      <View style={[styles.gBar, { bottom: 0, left: 0, width: 22, height: 7, backgroundColor: GOOGLE_YELLOW, borderBottomLeftRadius: 5, borderBottomRightRadius: 5 }]} />
-      <View style={[styles.gBar, { right: 0, top: 7, width: 7, height: 7, backgroundColor: GOOGLE_GREEN, borderTopRightRadius: 5 }]} />
-      <View style={[styles.gBar, { right: 0, top: 14, width: 13, height: 7, backgroundColor: GOOGLE_GREEN, borderTopLeftRadius: 4 }]} />
-      <View style={[styles.gBar, { left: 0, top: 0, width: 7, height: 22, backgroundColor: GOOGLE_BLUE, borderTopLeftRadius: 5, borderBottomLeftRadius: 5 }]} />
-    </View>
+    <Image source={GOOGLE_G} style={styles.gLogo} resizeMode="contain" />
   );
 }
 
@@ -105,7 +96,7 @@ export default function LoginScreen() {
         <Image
           source={require('@/assets/images/bg-login.png')}
           style={styles.bgLogo}
-          resizeMode="contain"
+          resizeMode="cover"
         />
         <View pointerEvents="none" style={styles.aura} />
         <View pointerEvents="none" style={styles.auraBottom} />
@@ -258,7 +249,6 @@ const makeStyles = (c: Palette) =>
     fontWeight: '600',
   },
   gLogo: { width: 22, height: 22 },
-  gBar: { position: 'absolute' },
   dividerRow: {
     flexDirection: 'row',
     alignItems: 'center',
