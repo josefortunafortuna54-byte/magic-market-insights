@@ -42,6 +42,14 @@
   - [Minor — Lint] Task 6.20 AiFab imports `useEffect` but never uses it.
   - **Strengths:** Spec (master Phase 6) coverage is complete — 14-language i18n, themes, string extraction, onboarding tour, AiFab, premium welcome, and final lint/build/smoke all map to tasks (6.1–6.24). Task ordering/dependencies are sound (6.4 stubs precede 6.20–6.22; 6.23 dead-export cleanup after 6.4). The infra code samples (i18n init, `languages.ts`, `LanguageSync`, Tema, Idioma, AiFab, OnboardingTour, PremiumWelcomeModal) are internally consistent, the locale list matches mobile (`pt,en,es,fr,ja,ln,de,it,nl,zh,ko,ru,sw,ar`), the `tmt_` localStorage prefix convention is consistent, and each task has explicit build/commit steps.
 
+> **Estado real deste plano (reconciliado em 2026-09-28):** as checkboxes `- [ ]` / `- [x]` deste ficheiro **não foram mantidas** durante a execução e não são um indicador fiável de progresso.
+>
+> **Fase 6 — IMPLEMENTADA mas NÃO VERIFICADA. Esta é a única fase com trabalho real por fazer.** A secção "Phase 6 verification results" no fim deste ficheiro continua com `*(To be filled after Task 6.24 execution)*` — a Task 6.24 (verificação final da fase) nunca foi executada, e as 101 checkboxes por marcar são reais.
+>
+> Evidência do que *está* feito: a extracção de strings foi feita em 7 commits entre 2026-09-08 e 2026-09-13 — `251161d`, `b7d7db2`, `1d78696`, `10228d0`, `f6a01f7`, `6dc70e8`, `6da7c39`.
+>
+> **Por fechar:** executar a Task 6.24 (tsc + build + eslint + smoke de `/idioma`, `/tema` e do onboarding nos 14 idiomas) e preencher a secção de verificação.
+
 **Goal:** Port mobile's 14-language i18n system, dark/light theme toggle, onboarding tour, AI floating button, and premium welcome modals to the web. All UI strings become translatable; theme persists per user.
 
 **Architecture:** Install `i18next` + `react-i18next` with the same config pattern as `mobile/src/lib/i18n/index.ts`. Copy the 14 locale JSON files from mobile (normalizing trailing commas in pt/en/es). A new `src/lib/i18n/` mirrors mobile's structure. Language and theme are persisted in `localStorage` (`tmt_lang`, `tmt_theme`). i18n is initialized once via `initI18n()` called from `src/main.tsx` (using `initReactI18next` + `useTranslation` hooks; **no `<I18nextProvider>` wrapper is needed** — `main.tsx` calls `initI18n()` before render, and the `LanguageSync` component reflects language changes into `document.documentElement.lang`/`dir`). Theme is applied via `next-themes` ThemeProvider toggling a `.dark` class on `<html>`, which switches CSS variables in `src/index.css`. All 90+ `.tsx` files with hardcoded PT strings are refactored to use `t('key')` with the mobile's existing key namespaces. Onboarding tour is a simplified multi-step Dialog (web-appropriate). AiFab is a floating button linking to `/suporte-ia`.

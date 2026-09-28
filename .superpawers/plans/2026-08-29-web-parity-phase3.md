@@ -3,6 +3,10 @@
 > **Part of:** `2026-08-29-web-parity-master.md` (Phase 3). Same conventions as Phases 1–2: data-logic ports from `mobile/src/`, shadcn UI re-skin, `@/` alias, no `mobile/**` edits, per-task commits, verification = `npx tsc --noEmit -p tsconfig.app.json` + `npm run build` + per-file `eslint`.
 > **Mobile truth:** each task lists the exact `mobile/src/**` files to port. PT strings come from `mobile/src/lib/i18n/locales/pt.json` (`workspace.*`, `store.*`, `userProfile.*`, `comunidade.*`, `message.*`, `composer.*` sections — verify keys at task time). Backend RPCs/tables already deployed (shared Supabase): `search_messages` (migration `mobile/supabase/migrations/20260816010000_community_search.sql`), `store_products` (`20260822010000_store_products.sql`), plus existing `channels`, `messages`, `message_reactions`, `conversations`, `conversation_members`, `user_profiles`, `presence` from Phase 1. **Do not edit migrations/schema.**
 
+> **Estado real deste plano (reconciliado em 2026-09-28):** as checkboxes `- [ ]` / `- [x]` deste ficheiro **não foram mantidas** durante a execução e não são um indicador fiável de progresso. O registo autoritativo é a secção **"Phase 3 verification results"** no fim do ficheiro.
+>
+> **Fase 3 — DONE e verificada em 2026-08-29.** As 12 checkboxes por marcar são dívida cosmética, não trabalho em falta.
+
 **Goal:** Upgrade `/comunidade` to the full Slack-like workspace (feed|workspace toggle, canais, salas de pares, DMs 1:1, pesquisa global, perfis públicos, loja) by porting the mobile community hooks + components + routes to web.
 
 **Dependency order:** 3.1 (lib/community + realtime + types) → 3.2 (read hooks: channels/conversations/profiles/search) → 3.3 (write hooks: messages + store products) → 3.4 (workspace list components) → 3.5 (message components) → 3.6 (/comunidade index upgrade + routes) → 3.7 (channel + DM rooms) → 3.8 (search/new-channel/new-dm/public profile) → 3.9 (loja) → 3.10 (Phase 3 verification).

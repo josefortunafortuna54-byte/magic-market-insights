@@ -76,6 +76,8 @@ Full parity spans ~7 independent subsystems. This master plan splits the work in
 
 # PHASE 1 — Auth global, multi-tier premium, sistema SMC, planos por comprovativo
 
+**Status: DONE.** Executado sequencialmente (T1.1 → T1.14) e verificado. Ver «Phase 1 verification results» no fim deste ficheiro: 15 commits (`4040d01` → `fbb9f03`), `tsc` (app + full) 0 errors, `npm run build` PASS, eslint 0 errors, smoke Playwright verde. As checkboxes `- [ ]` das tasks abaixo **não foram mantidas** durante a execução — o registo autoritativo é a secção de verificação, não as checkboxes.
+
 **Goal:** Web core matches mobile: global auth, 4-tier premium gating applied to signals, SMC fields end-to-end, planos rewritten to receipt-based payments. Produces: `/perfil`, upgraded `/analises`, `/historico`, `/planos`, `/signal/:id`, new `lib/types`, `lib/gating`, `lib/plans`, `lib/format`, `contexts/AuthContext`.
 
 **Files summary**
@@ -314,6 +316,8 @@ Port from `mobile/src/lib/plans.ts`: `Currency`, `PlanId`, `PaymentMethod`, `WA_
 
 # PHASE 2 — Banca (gestão de capital) + Depósitos/Saques com comprovativo
 
+**Status: DONE.** Verificado. Ver «Phase 2 verification results» no sub-plano `2026-08-29-web-parity-phase2.md` (registado 2026-08-29 após T2.7): `tsc` (app + full) 0 errors, `npm run build` PASS, eslint 0 errors nos ficheiros da fase, smoke Playwright verde. As checkboxes do sub-plano não foram mantidas.
+
 **Goal:** Web gets `/banca` and `/depositos` (deposit via receipt upload, withdraw request), plus `WalletCard` data. Admin receives receipts/withdrawals panels (start of admin overhaul).
 
 **Files:**
@@ -368,6 +372,8 @@ Port from `mobile/src/lib/plans.ts`: `Currency`, `PlanId`, `PaymentMethod`, `WA_
 
 # PHASE 5 — Suporte IA, Diário do Trader, horários avançados, sinal chart
 
+**Status: DONE.** Verificado. Ver «Phase 5 verification results» no sub-plano `2026-08-30-web-parity-phase5.md` (registado 2026-08-31): `tsc` (app + full) 0 errors, `npm run build` PASS, eslint 0 errors nos 18 ficheiros da fase, smoke Playwright de `/suporte-ia`, `/diario-trader` e `/definicoes-booms` verde. As checkboxes do sub-plano não foram mantidas.
+
 **Goal:** Remaining utility screens: `/suporte-ia` (AI assistant w/ quota), `/diario-trader` (calendar journal), `/definicoes-booms` (boom prefs), `/sinal/:id/chart` (fullscreen TradingView), `AlarmToggle`, economic calendar on `/horarios`.
 
 **Files:**
@@ -382,6 +388,12 @@ Port from `mobile/src/lib/plans.ts`: `Currency`, `PlanId`, `PaymentMethod`, `WA_
 ---
 
 # PHASE 6 — i18n (14 idiomas) + temas light/dark/system + onboarding
+
+**Status: IMPLEMENTADO, POR VERIFICAR.** Esta é a única fase sem registo de verificação. A secção «Phase 6 verification results» do sub-plano `2026-08-31-web-parity-phase6.md` continua com o texto `*(To be filled after Task 6.24 execution)*` — ou seja, **a Task 6.24 (verificação final da fase) nunca foi executada** e as 101 checkboxes do sub-plano estão todas por marcar.
+
+O que **está** evidenciado no histórico: a extracção de strings foi feita em 7 commits entre 2026-09-08 e 2026-09-13 — `251161d` (signal components, alarm, economics), `b7d7db2` (Planos, Depositos, Banca), `1d78696` (Perfil, Notificacoes, Diario, SuporteIa, DefinicoesBooms, Horarios), `10228d0` (correcções da review da Task 6.14), `f6a01f7` (páginas de comunidade), `6dc70e8` (componentes de comunidade), `6da7c39` (páginas e componentes de admin).
+
+**Por fechar:** executar a Task 6.24 (tsc + build + eslint + smoke de `/idioma`, `/tema` e do onboarding nos 14 idiomas) e preencher a secção de verificação do sub-plano. Não o fiz nesta sessão porque é um âmbito distinto do redesign do hero e não estava autorizado.
 
 **Goal:** Web supports mobile's 14 languages and light/dark/system theme toggle; all UI strings extracted; onboarding tour + AI FAB parity where sensible.
 

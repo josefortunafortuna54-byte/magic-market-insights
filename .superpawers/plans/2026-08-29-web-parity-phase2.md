@@ -3,6 +3,10 @@
 > **Part of:** `2026-08-29-web-parity-master.md` (Phase 2). Same conventions as Phase 1: data-logic ports from `mobile/src/`, shadcn UI re-skin, `@/` alias, no `mobile/**` edits, per-task commits, verification = `npx tsc --noEmit -p tsconfig.app.json` + `npm run build` + per-file `eslint`.
 > **Sole source of mobile truth:** `zeta-digest-banca-depositos.md` (repo root) — implementers MUST read it before starting. It contains exact APIs, edge actions, table schemas and the web gap list.
 
+> **Estado real deste plano (reconciliado em 2026-09-28):** as checkboxes `- [ ]` / `- [x]` deste ficheiro **não foram mantidas** durante a execução e não são um indicador fiável de progresso. O registo autoritativo é a secção **"Phase 2 verification results"** no fim do ficheiro.
+>
+> **Fase 2 — DONE e verificada em 2026-08-29.** As 35 checkboxes por marcar são dívida cosmética, não trabalho em falta.
+
 **Goal:** Replace the `/banca` and `/depositos` placeholder routes with the real pages; add `payments.ts`, `formatMoney`/`formatBancaMoney`, `PAYMENT_METHODS`, the `useBanca`/`useCapitalAccount`/`useMovements` hooks, web versions of the 4 capital components, admin Receipts + Withdrawals tabs, and `canAccessBanca` on `useSubscription`.
 
 **Dependency order:** 2.1 (payments/format/plans) → 2.2 (adminApi) → 2.3 (hooks) → 2.4 (capital components) → 2.5 (Depositos) + 2.6 (Banca) → 2.7 (admin tabs) → 2.8 (verification).

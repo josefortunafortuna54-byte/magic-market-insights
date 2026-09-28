@@ -2,6 +2,10 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpawers:subagent-driven-development to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
+> **Estado real deste plano (reconciliado em 2026-09-28):** as checkboxes `- [ ]` / `- [x]` deste ficheiro **não foram mantidas** durante a execução e não são um indicador fiável de progresso. O registo autoritativo é a secção **"Phase 5 verification results"** no fim do ficheiro.
+>
+> **Fase 5 — DONE e verificada em 2026-08-31.** As 31 checkboxes por marcar são dívida cosmética, não trabalho em falta.
+
 **Goal:** Bring the remaining utility screens to the web at parity with mobile: `/suporte-ia` (AI assistant with quota), `/diario-trader` (trader journal calendar), `/definicoes-booms` (boom preferences, premium-gated), `/horarios` upgrade (boom-prefs filtering + `AlarmToggle` + economic calendar), and `/analises/:id/chart` (fullscreen TradingView chart with premium gating).
 
 **Architecture:** Port the client logic from `mobile/src/**` into web `src/**` following the existing web conventions (shadcn/ui, TanStack Query, react-router-dom, `@/` alias, hardcoded PT literals, commit per task on `master`). Data-logic ports only — never RN/Expo imports; AsyncStorage → `localStorage`, expo-notifications → web `Notification` API (interval-based scheduler, documented degraded parity), `Alert`/`Share`/`Modal` → shadcn Dialog/toast/download. No backend/schema/Edge Function edits; the `ai-support` and `economic-calendar` external APIs are called exactly like mobile.
