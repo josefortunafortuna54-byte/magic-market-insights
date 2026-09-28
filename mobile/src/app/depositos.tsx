@@ -25,6 +25,7 @@ import {
   planLabel,
   type Currency,
   type PaymentMethod,
+  type PaymentMethodInfo,
   type PlanId,
 } from '@/lib/plans';
 import { formatBancaMoney, formatMoney, formatShortDate } from '@/core/format';
@@ -68,6 +69,7 @@ export default function DepositosScreen() {
     PLANS.some((p) => p.id === params.plan) ? (params.plan as Exclude<PlanId, 'free'>) : 'basic',
   );
   const [currency, setCurrency] = useState<Currency>(params.currency === 'aoa' ? 'aoa' : 'usd');
+  const [activeMethod, setActiveMethod] = useState<PaymentMethod | null>(null);
 
   const [syncedParams, setSyncedParams] = useState<{ plan?: string; currency?: string; amount?: string }>({
     plan: params.plan,
@@ -98,7 +100,6 @@ export default function DepositosScreen() {
   const [depositModal, setDepositModal] = useState<{ method?: PaymentMethod; initialProof?: ReceiptFile | null } | null>(null);
   const [sending, setSending] = useState(false);
   const [showReceiptSuccess, setShowReceiptSuccess] = useState(false);
-  const [withdrawMethod, setWithdrawMethod] = useState<PaymentMethod | null>(null);
   const [withdrawAmount, setWithdrawAmount] = useState('');
   const [withdrawDetails, setWithdrawDetails] = useState('');
 
@@ -126,10 +127,16 @@ export default function DepositosScreen() {
     }).start();
   }, [activeTab, tabAnim]);
 
-  const availableMethods = useMemo(
+  const methodsForCurrency = useMemo(
     () => PAYMENT_METHODS.filter((m) => (currency === 'usd' ? m.usd : m.aoa)),
     [currency],
   );
+
+  const selectMethod = (m: PaymentMethodInfo) => {
+    setActiveMethod(m.id);
+    // Métodos de moeda única definem a moeda do depósito/levantamento.
+    if (m.usd !== m.aoa) setCurrency(m.usd ? 'usd' : 'aoa');
+  };
 
   const price = PRICES[currency][plan];
   const planPrice = PLAN_PRICES[currency][plan];
@@ -161,7 +168,7 @@ export default function DepositosScreen() {
       alertPendingDeposit();
       return;
     }
-    setDepositModal({});
+    setDepositModal({ method: activeMethod ?? undefined });
   };
 
   const confirmDeposit = async (proof: ReceiptFile | null, retries = 2) => {
@@ -261,14 +268,14 @@ export default function DepositosScreen() {
 
   const submitWithdrawal = async () => {
     const amount = parseFloat(withdrawAmount.replace(',', '.'));
-    if (!withdrawMethod || !isFinite(amount) || amount <= 0 || !withdrawDetails.trim()) {
+    if (!activeMethod || !isFinite(amount) || amount <= 0 || !withdrawDetails.trim()) {
       Alert.alert(t('depositos.invalidWithdraw'));
       return;
     }
     // Save server-side
     try {
       await submitWithdrawalRequest({
-        method: withdrawMethod,
+        method: activeMethod,
         amount,
         currency,
         details: withdrawDetails.trim(),
@@ -279,7 +286,7 @@ export default function DepositosScreen() {
     // Also save locally for instant UI
     void addMovement({
       type: 'withdrawal',
-      method: withdrawMethod,
+      method: activeMethod,
       amount,
       currency,
       status: 'pendente',
@@ -287,32 +294,69 @@ export default function DepositosScreen() {
     });
     setWithdrawAmount('');
     setWithdrawDetails('');
-    setWithdrawMethod(null);
     Alert.alert(t('depositos.confirmWithdrawOk'), t('depositos.confirmWithdrawMsg'), [{ text: 'OK' }]);
   };
 
-  const currencySegment = (
-    <View style={styles.segment}>
-      {(['usd', 'aoa'] as const).map((c) => {
-        const active = currency === c;
-        return (
-          <Pressable
-            key={c}
-            onPress={() => setCurrency(c)}
-            style={styles.segmentBtn}
-            accessibilityRole="button"
-            accessibilityState={{ selected: active }}>
-            {active ? <View style={styles.segmentPill} /> : null}
-            <AppText
-              variant="small"
-              style={{ color: active ? colors.bg : colors.textMuted, fontWeight: '700' }}>
-              {c === 'usd' ? t('planos.usd') : t('planos.aoa')}
-            </AppText>
-          </Pressable>
-        );
-      })}
-    </View>
-  );
+  const methodSegment = (() => {
+    const options = isCapitalDeposit ? methodsForCurrency : PAYMENT_METHODS;
+    const activeInfo = options.find((m) => m.id === activeMethod) ?? null;
+    const showCurrencyToggle = !isCapitalDeposit && activeInfo !== null && activeInfo.usd && activeInfo.aoa;
+    return (
+      <View style={styles.methodSection}>
+        <AppText variant="label" style={styles.fieldLabel}>{t('planos.chooseMethod')}</AppText>
+        <View style={styles.methodChips}>
+          {options.map((m) => {
+            const active = activeMethod === m.id;
+            const currencies = m.usd && m.aoa ? 'USD / AOA' : m.usd ? 'USD' : 'AOA';
+            return (
+              <Pressable
+                key={m.id}
+                onPress={() => selectMethod(m)}
+                style={[styles.methodBtn, active && styles.methodBtnActive]}
+                accessibilityRole="button"
+                accessibilityState={{ selected: active }}>
+                <Ionicons name={m.icon} size={16} color={active ? colors.bg : m.color} />
+                <View style={styles.methodBtnText}>
+                  <AppText
+                    variant="small"
+                    style={{ color: active ? colors.bg : colors.text, fontWeight: '700' }}>
+                    {m.label}
+                  </AppText>
+                  <AppText
+                    variant="small"
+                    style={{ fontSize: 10, color: active ? colors.bg : colors.textMuted, fontWeight: '600' }}>
+                    {currencies}
+                  </AppText>
+                </View>
+              </Pressable>
+            );
+          })}
+        </View>
+        {showCurrencyToggle ? (
+          <View style={styles.segment}>
+            {(['usd', 'aoa'] as const).map((c) => {
+              const active = currency === c;
+              return (
+                <Pressable
+                  key={c}
+                  onPress={() => setCurrency(c)}
+                  style={styles.segmentBtn}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: active }}>
+                  {active ? <View style={styles.segmentPill} /> : null}
+                  <AppText
+                    variant="small"
+                    style={{ color: active ? colors.bg : colors.textMuted, fontWeight: '700' }}>
+                    {c === 'usd' ? t('planos.usd') : t('planos.aoa')}
+                  </AppText>
+                </Pressable>
+              );
+            })}
+          </View>
+        ) : null}
+      </View>
+    );
+  })();
 
   const renderMovement = (m: WalletMovement, index: number) => {
     const isDeposit = m.type === 'deposit';
@@ -435,7 +479,7 @@ export default function DepositosScreen() {
         ]}>
         {activeTab === 'deposit' ? (
           <>
-            {!isCapitalDeposit ? currencySegment : null}
+            {methodSegment}
             {!isCapitalDeposit ? (
               <View style={styles.planChips}>
                 {PLANS.map((p) => (
@@ -482,7 +526,7 @@ export default function DepositosScreen() {
           </>
         ) : (
           <>
-            {currencySegment}
+            {methodSegment}
             <Card style={styles.withdrawCard}>
               <AppText variant="muted">{t('depositos.withdrawSubtitle')}</AppText>
 
@@ -495,28 +539,6 @@ export default function DepositosScreen() {
                 </AppText>
               </View>
 
-              <AppText variant="label" style={styles.fieldLabel}>{t('depositos.withdrawMethod')}</AppText>
-              <View style={styles.methodChips}>
-                {availableMethods.map((m) => {
-                  const active = withdrawMethod === m.id;
-                  return (
-                    <Pressable
-                      key={m.id}
-                      onPress={() => setWithdrawMethod(m.id)}
-                      style={[styles.methodBtn, active && styles.methodBtnActive]}
-                      accessibilityRole="button"
-                      accessibilityState={{ selected: active }}>
-                      <Ionicons name={m.icon} size={16} color={active ? colors.bg : m.color} />
-                      <AppText
-                        variant="small"
-                        style={{ color: active ? colors.bg : colors.text, fontWeight: '600' }}>
-                        {m.label}
-                      </AppText>
-                    </Pressable>
-                  );
-                })}
-              </View>
-
               <AppInput
                 label={t('depositos.withdrawAmount', { currency: currencySymbol })}
                 placeholder="0.00"
@@ -527,7 +549,7 @@ export default function DepositosScreen() {
               />
               <AppInput
                 label={t('depositos.withdrawDetails')}
-                placeholder={withdrawMethod ? PAYMENT_METHODS.find((m) => m.id === withdrawMethod)?.getDetails(t) : undefined}
+                placeholder={activeMethod ? PAYMENT_METHODS.find((m) => m.id === activeMethod)?.getDetails(t) : undefined}
                 value={withdrawDetails}
                 onChangeText={setWithdrawDetails}
                 multiline
@@ -567,7 +589,7 @@ export default function DepositosScreen() {
           onConfirm={confirmDeposit}
           method={depositModal.method}
           onMethodSelect={(m) => setDepositModal({ method: m, initialProof: depositModal.initialProof })}
-          availableMethods={availableMethods}
+          availableMethods={methodsForCurrency}
           initialProof={depositModal.initialProof ?? null}
           busy={sending}
         />
@@ -789,6 +811,9 @@ const makeStyles = (c: Palette) =>
     flexWrap: 'wrap',
     gap: Spacing.sm,
   },
+  methodSection: {
+    gap: Spacing.sm,
+  },
   methodBtn: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -799,6 +824,9 @@ const makeStyles = (c: Palette) =>
     borderWidth: 1,
     borderColor: c.border,
     backgroundColor: c.surfaceElevated,
+  },
+  methodBtnText: {
+    alignItems: 'flex-start',
   },
   methodBtnActive: {
     backgroundColor: c.accent,
