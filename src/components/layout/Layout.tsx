@@ -12,7 +12,7 @@ export function Layout({ children, noFooter = false, title }: LayoutProps) {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
-      <main className="flex-1 mt-20">
+      <main className="flex-1 mt-24">
         {title && (
           <div className="border-b border-border bg-card">
             <div className="mx-auto max-w-6xl px-4 py-4">

@@ -1,11 +1,13 @@
 import { useMemo } from "react";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { Sparkles, TrendingUp, Brain, Shield, Crown, ChevronRight, BarChart3, Zap, Target, Flame, Activity } from "lucide-react";
+import { Sparkles, TrendingUp, Brain, Shield, Crown, ChevronRight, BarChart3, Zap, Target, Flame, Activity, Calendar, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Layout } from "@/components/layout/Layout";
 import { SignalCard } from "@/components/signals/SignalCard";
+import { HeroSignalTerminal } from "@/components/home/HeroSignalTerminal";
+import { cn } from "@/lib/utils";
 import { useSignals } from "@/hooks/useSignals";
 import { useBoomHours } from "@/hooks/useBoomHours";
 import { useHistory } from "@/hooks/useHistory";
@@ -46,75 +48,106 @@ export default function Index() {
   }, [signals]);
 
   const displayStats = [
-    { value: winRate, label: t("inicio.statWinRate") },
-    { value: avgRR ?? "—", label: t("inicio.statAvgRR") },
-    { value: "24/7", label: t("inicio.statMonitoring") },
-    { value: totalPairs, label: t("inicio.statPairs") },
+    { Icon: Target, label: t("inicio.statWinRate"), value: winRate },
+    { Icon: BarChart3, label: t("inicio.statAvgRR"), value: avgRR ?? "—" },
+    { Icon: Calendar, label: t("inicio.statMonitoring"), value: "24/7" },
+    { Icon: Users, label: t("inicio.statPairs"), value: totalPairs },
   ];
+
+  const reduceMotion = useReducedMotion();
 
   return (
     <Layout>
       {/* Hero */}
-      <section className="relative min-h-[90vh] flex items-center overflow-hidden">
-        <div className="absolute inset-0" style={{
-  backgroundImage: "url('/magic-bg.svg')",
-  backgroundSize: "cover",
-  backgroundPosition: "center",
-  opacity: 0.6
-}} />
-<div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/50 to-background" />
-        <motion.div animate={{ y: [0, -20, 0] }} transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute top-1/4 right-1/4 w-64 h-64 bg-primary/10 rounded-full blur-3xl" />
-        <motion.div animate={{ y: [0, 20, 0] }} transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute bottom-1/4 left-1/4 w-96 h-96 bg-success/5 rounded-full blur-3xl" />
+      <section className="relative overflow-hidden border-b border-border/40">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(120%_80%_at_78%_-15%,rgba(34,197,94,0.10),transparent_60%)] dark:bg-[radial-gradient(120%_80%_at_78%_-15%,rgba(34,197,94,0.07),transparent_60%)]"
+        />
 
-        <div className="container mx-auto px-4 relative z-10">
-          <div className="max-w-4xl mx-auto text-center">
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-8">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-success" />
-              </span>
-              <span className="text-sm font-medium">{t("inicio.heroBadge")}</span>
-            </motion.div>
+        <div className="container mx-auto px-4 pt-28 pb-20 lg:pt-32 lg:pb-24 lg:flex lg:min-h-[86vh] lg:items-center">
+          <div className="w-full grid gap-12 lg:grid-cols-12 lg:gap-8">
+            <div className="lg:col-span-7">
+              <motion.div
+                initial={reduceMotion ? false : { opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={reduceMotion ? { duration: 0 } : { duration: 0.4 }}
+                className="inline-flex items-center gap-2.5 rounded-full border border-primary/20 bg-primary/10 px-4 py-2"
+              >
+                <span className="h-2 w-2 rounded-full bg-success ring-4 ring-success/15" />
+                <span className="text-sm font-medium">{t("inicio.heroBadge")}</span>
+              </motion.div>
 
-            <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}
-              className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-6">
-              {t("inicio.heroTitle1")}{" "}
-              <span className="gradient-shield">{t("inicio.heroTitle2")}</span>
-            </motion.h1>
+              <motion.h1
+                initial={reduceMotion ? false : { opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={reduceMotion ? { duration: 0 } : { duration: 0.4, delay: 0.06 }}
+                className="mt-6 font-display text-4xl font-bold tracking-tight sm:text-5xl lg:text-[3.5rem] lg:leading-[1.05]"
+              >
+                {t("inicio.heroTitle1")}{" "}
+                <span className="text-primary">{t("inicio.heroTitle2")}</span>
+              </motion.h1>
 
-            <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
-              className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-10">
-              {t("inicio.heroSubtitle")}
-            </motion.p>
+              <motion.p
+                initial={reduceMotion ? false : { opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={reduceMotion ? { duration: 0 } : { duration: 0.4, delay: 0.12 }}
+                className="mt-6 max-w-xl text-base text-muted-foreground sm:text-lg"
+              >
+                {t("inicio.heroSubtitle")}
+              </motion.p>
 
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
-              className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Link to="/analises">
-                <Button variant="hero" size="xl">
-                  <TrendingUp className="h-5 w-5" />
-                  {t("inicio.heroCtaLive")}
+              <motion.div
+                initial={reduceMotion ? false : { opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={reduceMotion ? { duration: 0 } : { duration: 0.4, delay: 0.18 }}
+                className="mt-8 flex flex-col gap-4 sm:flex-row"
+              >
+                <Button variant="default" size="xl" className="w-full sm:w-auto" asChild>
+                  <Link to="/analises">
+                    <TrendingUp />
+                    {t("inicio.heroCtaLive")}
+                  </Link>
                 </Button>
-              </Link>
-              <Link to="/planos">
-                <Button variant="outline" size="xl">
-                  {t("inicio.heroCtaPlans")}
-                  <ChevronRight className="h-5 w-5" />
+                <Button variant="outline" size="xl" className="w-full sm:w-auto" asChild>
+                  <Link to="/planos">
+                    {t("inicio.heroCtaPlans")}
+                    <ChevronRight />
+                  </Link>
                 </Button>
-              </Link>
-            </motion.div>
+              </motion.div>
+            </div>
 
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}
-              className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-16 pt-8 border-t border-border/50">
-              {displayStats.map((stat, i) => (
-                <div key={i} className="text-center">
-                  <p className="font-display text-2xl sm:text-3xl font-bold gradient-text">{stat.value}</p>
-                  <p className="text-sm text-muted-foreground mt-1">{stat.label}</p>
+            <motion.div
+              initial={reduceMotion ? false : { opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={reduceMotion ? { duration: 0 } : { duration: 0.4, delay: 0.3 }}
+              className="lg:col-span-5"
+            >
+              <HeroSignalTerminal />
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* Banda de stats (lod.png) */}
+      <section className="border-b border-border/40 bg-secondary/30">
+        <div className="container mx-auto px-4 py-8 sm:py-10">
+          <div className="grid grid-cols-2 gap-6 sm:grid-cols-4 sm:gap-0 sm:divide-x sm:divide-border/40">
+            {displayStats.map((stat, i) => (
+              <div
+                key={stat.label}
+                className={cn("flex items-start gap-3 sm:px-6", i === 0 && "sm:pl-0")}
+              >
+                <stat.Icon className="mt-0.5 h-5 w-5 shrink-0 text-primary" aria-hidden="true" />
+                <div className="min-w-0">
+                  <p className="text-sm text-muted-foreground">{stat.label}</p>
+                  <p className="font-display text-2xl font-bold tabular-nums sm:text-3xl">
+                    {stat.value}
+                  </p>
                 </div>
-              ))}
-            </motion.div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
