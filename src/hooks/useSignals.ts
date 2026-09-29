@@ -63,6 +63,8 @@ async function fetchSignals(): Promise<Signal[]> {
   }));
 }
 
+let signalsChannelSeq = 0;
+
 export function useSignals() {
   const queryClient = useQueryClient();
 
@@ -74,8 +76,11 @@ export function useSignals() {
   });
 
   useEffect(() => {
+    // Topico unico por subscritor: `channel()` devolve o canal ja existente
+    // quando o topico repete, e `on()` lanca se ja fizermos subscribe().
+    // Varios componentes usam este hook na mesma pagina (Index + HeroSignalTerminal).
     const channel = supabase
-      .channel("signals-realtime")
+      .channel(`signals-realtime-${++signalsChannelSeq}`)
       .on("postgres_changes", { event: "*", schema: "public", table: "signals" }, () => {
         queryClient.invalidateQueries({ queryKey: ["signals"] });
       })
