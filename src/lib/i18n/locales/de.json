@@ -508,7 +508,8 @@
     "capitalItem2": "Renditeziel mit automatischem Zinseszinseffekt",
     "capitalItem3": "Wöchentliche Gewinnabhebungen",
     "capitalItem4": "Leistungsberichte und Zielfortschritt",
-    "capitalCta": "Kapitalmanagement ansehen"
+    "capitalCta": "Kapitalmanagement ansehen",
+    "currency": "Währung"
   },
   "capital": {
     "title": "Kapitalverwaltung",

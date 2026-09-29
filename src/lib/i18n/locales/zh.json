@@ -508,7 +508,8 @@
     "capitalItem2": "收益目标支持自动复利",
     "capitalItem3": "每周提取利润",
     "capitalItem4": "业绩报告与目标进度跟踪",
-    "capitalCta": "查看资金管理"
+    "capitalCta": "查看资金管理",
+    "currency": "货币"
   },
   "banca": {
     "title": "资金管理",

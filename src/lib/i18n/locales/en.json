@@ -938,7 +938,8 @@
     "featureTimeframes": "{{count}} timeframes ({{list}})",
     "featureAlertsUnlimited": "Unlimited push alerts/day",
     "featureAlertsCount": "{{count}} push alerts/day",
-    "featureAnalysis": "Technical analysis"
+    "featureAnalysis": "Technical analysis",
+    "currency": "Currency"
   },
   "banca": {
     "title": "Bankroll Management",

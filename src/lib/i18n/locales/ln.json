@@ -553,7 +553,8 @@
     "capitalItem2": "Objectif ya retour na intérêts composés automatiques",
     "capitalItem3": "Kokanga mbongo ya mosolo weekele na weekele",
     "capitalItem4": "Ba rapports ya performance mpe progrès ya objectif",
-    "capitalCta": "Tala Gestion ya Capital"
+    "capitalCta": "Tala Gestion ya Capital",
+    "currency": "Mbongo"
   },
   "banca": {
     "title": "Gestion ya capital",

@@ -508,7 +508,8 @@
     "capitalItem2": "自動複利でリターン目標を達成",
     "capitalItem3": "週次で利益を出金可能",
     "capitalItem4": "パフォーマンスレポートと目標進捗",
-    "capitalCta": "資金管理を見る"
+    "capitalCta": "資金管理を見る",
+    "currency": "通貨"
   },
   "banca": {
     "title": "資金管理",

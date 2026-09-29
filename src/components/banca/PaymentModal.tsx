@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Check, Copy, ImagePlus, Loader2, X } from "lucide-react";
 import { toast } from "sonner";
@@ -12,10 +12,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { PAYMENT_METHODS, PAYMENT_METHOD_ICONS, planLabel, type Currency, type PaymentMethod, type PaymentMethodInfo, type PlanId } from "@/lib/plans";
 import { fileToReceipt, type ReceiptFile } from "@/lib/payments";
+import { cn } from "@/lib/utils";
 
 interface PaymentModalProps {
   plan: Exclude<PlanId, "free">;
   currency: Currency;
+  onCurrencyChange: (currency: Currency) => void;
   price: string;
   onClose: () => void;
   onConfirm: (proof: ReceiptFile | null) => void;
@@ -27,6 +29,8 @@ interface PaymentModalProps {
   titleText?: string;
 }
 
+const CURRENCIES: Currency[] = ["usd", "aoa"];
+
 function MethodIcon({ method, className }: { method: PaymentMethodInfo; className?: string }) {
   const Icon = PAYMENT_METHOD_ICONS[method.icon];
   if (!Icon) return null;
@@ -35,17 +39,23 @@ function MethodIcon({ method, className }: { method: PaymentMethodInfo; classNam
 
 export function PaymentModal({
   plan,
+  currency,
+  onCurrencyChange,
   price,
   onClose,
   onConfirm,
   method,
   onMethodSelect,
-  availableMethods = PAYMENT_METHODS,
   initialProof = null,
   busy = false,
   titleText,
 }: PaymentModalProps) {
   const { t } = useTranslation();
+  // os metodos dependem da moeda: cada provider so aceita uma ou outra
+  const availableMethods = useMemo(
+    () => PAYMENT_METHODS.filter((m) => (currency === "usd" ? m.usd : m.aoa)),
+    [currency],
+  );
   const selectedMethod = method ? availableMethods.find((m) => m.id === method) : null;
   const [proof, setProof] = useState<ReceiptFile | null>(initialProof);
   const [copied, setCopied] = useState(false);
@@ -125,29 +135,61 @@ export function PaymentModal({
         </DialogHeader>
 
         {!method ? (
-          <div className="py-2">
-            <p className="text-sm text-muted-foreground mb-3">{t("planos.chooseMethod")}</p>
-            <div className="grid grid-cols-2 gap-3">
-              {availableMethods.map((m) => {
-                return (
-                  <button
-                    key={m.id}
-                    onClick={() => onMethodSelect(m.id)}
-                    style={{ borderColor: m.color, borderWidth: 2 }}
-                    className="flex flex-col items-center gap-2 rounded-2xl bg-card p-4 hover:opacity-90 transition-opacity"
-                  >
-                    <div
-                      className="flex h-14 w-14 items-center justify-center rounded-xl"
-                      style={{ backgroundColor: `${m.color}1A`, color: m.color }}
+          <div className="py-2 space-y-4">
+            <div className="space-y-2">
+              <p className="text-sm text-muted-foreground">{t("planos.currency")}</p>
+              <div className="flex rounded-full bg-secondary/70 p-1">
+                {CURRENCIES.map((c) => {
+                  const active = currency === c;
+                  return (
+                    <button
+                      key={c}
+                      onClick={() => {
+                        if (c === currency) return;
+                        onCurrencyChange(c);
+                        // o metodo anterior pode nao existir na nova moeda
+                        onMethodSelect(undefined);
+                      }}
+                      className={cn(
+                        "relative flex-1 rounded-full py-2 text-sm font-bold transition-colors",
+                        active ? "text-background" : "text-muted-foreground",
+                      )}
                     >
-                      <MethodIcon method={m} className="h-7 w-7" />
-                    </div>
-                    <span className="text-sm font-bold" style={{ color: m.color }}>
-                      {m.label}
-                    </span>
-                  </button>
-                );
-              })}
+                      {active ? (
+                        <span className="absolute inset-0 rounded-full bg-accent shadow-lg shadow-accent/35" />
+                      ) : null}
+                      <span className="relative">
+                        {c === "usd" ? t("planos.usd") : t("planos.aoa")}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground mb-3">{t("planos.chooseMethod")}</p>
+              <div className="grid grid-cols-2 gap-3">
+                {availableMethods.map((m) => {
+                  return (
+                    <button
+                      key={m.id}
+                      onClick={() => onMethodSelect(m.id)}
+                      style={{ borderColor: m.color, borderWidth: 2 }}
+                      className="flex flex-col items-center gap-2 rounded-2xl bg-card p-4 hover:opacity-90 transition-opacity"
+                    >
+                      <div
+                        className="flex h-14 w-14 items-center justify-center rounded-xl"
+                        style={{ backgroundColor: `${m.color}1A`, color: m.color }}
+                      >
+                        <MethodIcon method={m} className="h-7 w-7" />
+                      </div>
+                      <span className="text-sm font-bold" style={{ color: m.color }}>
+                        {m.label}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </div>
         ) : (

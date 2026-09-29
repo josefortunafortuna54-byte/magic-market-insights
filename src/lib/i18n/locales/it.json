@@ -508,7 +508,8 @@
     "capitalItem2": "Obiettivo di rendimento con interessi composti automatici",
     "capitalItem3": "Prelievi settimanali dei profitti",
     "capitalItem4": "Report di prestazioni e avanzamento dell'obiettivo",
-    "capitalCta": "Vedi Gestione Capitale"
+    "capitalCta": "Vedi Gestione Capitale",
+    "currency": "Valuta"
   },
   "banca": {
     "title": "Gestione del Capitale",

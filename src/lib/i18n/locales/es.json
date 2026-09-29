@@ -509,7 +509,8 @@
     "capitalItem2": "Meta de retorno con interés compuesto automático",
     "capitalItem3": "Retiros semanales de ganancias",
     "capitalItem4": "Informes de rendimiento y progreso de la meta",
-    "capitalCta": "Ver Gestión de Capital"
+    "capitalCta": "Ver Gestión de Capital",
+    "currency": "Moneda"
   },
   "banca": {
     "title": "Gestión de Banca",

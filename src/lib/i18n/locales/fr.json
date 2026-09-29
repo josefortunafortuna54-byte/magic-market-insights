@@ -508,7 +508,8 @@
     "capitalItem2": "Objectif de rendement avec intérêts composés automatiques",
     "capitalItem3": "Retraits hebdomadaires des profits",
     "capitalItem4": "Rapports de performance et suivi de l'objectif",
-    "capitalCta": "Voir la Gestion de Capital"
+    "capitalCta": "Voir la Gestion de Capital",
+    "currency": "Devise"
   },
   "banca": {
     "title": "Gestion de Banca",

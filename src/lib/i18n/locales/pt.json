@@ -936,7 +936,8 @@
     "featureTimeframes": "{{count}} timeframes ({{list}})",
     "featureAlertsUnlimited": "Alertas push ilimitados/dia",
     "featureAlertsCount": "{{count}} alertas push/dia",
-    "featureAnalysis": "Análises técnicas"
+    "featureAnalysis": "Análises técnicas",
+    "currency": "Moeda"
   },
   "banca": {
     "title": "Gestão de Banca",

@@ -552,7 +552,8 @@
     "capitalItem2": "Rendementsdoel met automatisch samengestelde rente",
     "capitalItem3": "Wekelijkse winstopnames",
     "capitalItem4": "Prestatierapporten en voortgang van je doel",
-    "capitalCta": "Bekijk Kapitaalbeheer"
+    "capitalCta": "Bekijk Kapitaalbeheer",
+    "currency": "Valuta"
   },
   "banca": {
     "title": "Bankrollbeheer",

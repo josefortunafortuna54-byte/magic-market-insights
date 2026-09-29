@@ -469,7 +469,6 @@ export default function Depositos() {
         >
           {activeTab === "deposit" ? (
             <>
-              {!isCapitalDeposit ? segment : null}
               {!isCapitalDeposit ? (
                 <div className="flex flex-wrap gap-2">
                   {PLANS.map((p) => {
@@ -516,9 +515,20 @@ export default function Depositos() {
                           : t("depositos.amount")}
                       </p>
                     </div>
-                    <p className="text-xl font-extrabold tracking-tight">
-                      {isCapitalDeposit ? formatBancaMoney(customAmount ?? 0, currency) : price}
-                    </p>
+                    {isCapitalDeposit ? (
+                      <p className="text-xl font-extrabold tracking-tight">
+                        {formatBancaMoney(customAmount ?? 0, currency)}
+                      </p>
+                    ) : (
+                      <div className="text-right">
+                        <p className="text-xl font-extrabold leading-tight tracking-tight">
+                          {PRICES.usd[plan]}
+                        </p>
+                        <p className="text-xs font-semibold text-muted-foreground">
+                          {PRICES.aoa[plan]}
+                        </p>
+                      </div>
+                    )}
                   </div>
                   <Button
                     variant={isCapitalDeposit || plan === "pro" ? "premium" : "default"}
@@ -528,7 +538,7 @@ export default function Depositos() {
                     {t("depositos.depositCta", {
                       amount: isCapitalDeposit
                         ? formatBancaMoney(customAmount ?? 0, currency)
-                        : price,
+                        : PRICES.usd[plan],
                     })}
                   </Button>
                   <div className="flex items-center justify-center gap-1.5">
@@ -645,6 +655,7 @@ export default function Depositos() {
           <PaymentModal
             plan={plan}
             currency={currency}
+            onCurrencyChange={setCurrency}
             price={price}
             onClose={() => setDepositModal(null)}
             onConfirm={confirmDeposit}
@@ -652,7 +663,6 @@ export default function Depositos() {
             onMethodSelect={(m) =>
               setDepositModal({ method: m, initialProof: depositModal.initialProof })
             }
-            availableMethods={availableMethods}
             initialProof={depositModal.initialProof ?? null}
             busy={sending}
           />
