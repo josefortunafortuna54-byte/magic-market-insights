@@ -614,7 +614,9 @@
     "sendProofHint": "相册或文件",
     "proofAttached": "已附上凭证",
     "withdrawAvailable": "可提现余额",
-    "capitalAmount": "金额：{{amount}}"
+    "capitalAmount": "金额：{{amount}}",
+    "capitalRateNote": "1 USD = {{rate}} Kz",
+    "capitalPaidInAoa": "合约：{{usd}}（以宽扎支付）"
   },
   "notificacoes": {
     "title": "通知",

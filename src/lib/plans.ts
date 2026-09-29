@@ -79,6 +79,24 @@ export const PLAN_PRICES: Record<Currency, Record<Exclude<PlanId, "free">, numbe
   aoa: { basic: 10000, pro: 20000, premium: 35000 },
 };
 
+// Taxa fixa de referencia para converter o deposito de capital (contratado
+// em USD) para Kwanzas. Definida pela operacao, nao por um mercado: o
+// pagamento e conferido a mao pela equipa, e a taxa tem de ser a mesma no
+// momento em que o utilizador paga e no momento em que o pedido e aprovado.
+//
+// 1 USD = 1195 Kz. Para alterar, define VITE_AOA_PER_USD no ambiente do
+// Vercel. Variaveis VITE_ sao embutidas na build, por isso mudar a taxa
+// exige um novo deploy, nao um restart.
+const AOA_PER_USD = (() => {
+  const raw = Number(import.meta.env.VITE_AOA_PER_USD);
+  return isFinite(raw) && raw > 0 ? raw : 1195;
+})();
+
+export const USD_AOA_RATE = AOA_PER_USD;
+
+/** Converte um montante em USD para Kwanzas, arredondado ao Kwanza inteiro. */
+export const usdToAoa = (usd: number): number => Math.round(usd * AOA_PER_USD);
+
 export const planLabel = (plan: Exclude<PlanId, "free">): string =>
   plan === "basic" ? "Basic" : plan === "pro" ? "Pro" : "Premium";
 

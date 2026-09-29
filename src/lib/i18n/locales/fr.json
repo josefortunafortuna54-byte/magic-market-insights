@@ -614,7 +614,9 @@
     "sendProofHint": "Galerie ou fichiers",
     "proofAttached": "Justificatif joint",
     "withdrawAvailable": "Disponible au retrait",
-    "capitalAmount": "Montant : {{amount}}"
+    "capitalAmount": "Montant : {{amount}}",
+    "capitalRateNote": "1 USD = {{rate}} Kz",
+    "capitalPaidInAoa": "Contrat : {{usd}} (payé en Kwanzas)"
   },
   "notificacoes": {
     "title": "Notifications",

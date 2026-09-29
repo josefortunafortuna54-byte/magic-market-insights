@@ -614,7 +614,9 @@
     "sendProofHint": "Galerie oder Dateien",
     "proofAttached": "Beleg angehängt",
     "withdrawAvailable": "Auszahlbar",
-    "capitalAmount": "Betrag: {{amount}}"
+    "capitalAmount": "Betrag: {{amount}}",
+    "capitalRateNote": "1 USD = {{rate}} Kz",
+    "capitalPaidInAoa": "Vertrag: {{usd}} (in Kwanzas bezahlt)"
   },
   "notificacoes": {
     "title": "Benachrichtigungen",

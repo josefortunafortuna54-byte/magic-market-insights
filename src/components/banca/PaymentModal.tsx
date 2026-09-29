@@ -26,7 +26,7 @@ interface PaymentModalProps {
   availableMethods?: PaymentMethodInfo[];
   initialProof?: ReceiptFile | null;
   busy?: boolean;
-  lockCurrency?: boolean;
+  rateNote?: string;
   titleText?: string;
   amountText?: string;
 }
@@ -50,7 +50,7 @@ export function PaymentModal({
   onMethodSelect,
   initialProof = null,
   busy = false,
-  lockCurrency = false,
+  rateNote,
   titleText,
   amountText,
 }: PaymentModalProps) {
@@ -144,44 +144,38 @@ export function PaymentModal({
           <div className="py-2 space-y-4">
             <div className="space-y-2">
               <p className="text-sm text-muted-foreground">{t("planos.currency")}</p>
-              {lockCurrency ? (
-                // o valor e contratual em USD; mudar a moeda reinterpretaria o
-                // mesmo numero e alteraria o montante do deposito
-                <div className="flex rounded-full bg-secondary/70 p-1">
-                  <div className="relative flex-1 rounded-full py-2 text-center text-sm font-bold text-background">
-                    <span className="absolute inset-0 rounded-full bg-accent shadow-lg shadow-accent/35" />
-                    <span className="relative">{t("planos.usd")}</span>
-                  </div>
-                </div>
-              ) : (
-                <div className="flex rounded-full bg-secondary/70 p-1">
-                  {CURRENCIES.map((c) => {
-                    const active = currency === c;
-                    return (
-                      <button
-                        key={c}
-                        onClick={() => {
-                          if (c === currency) return;
-                          onCurrencyChange(c);
-                          // o metodo anterior pode nao existir na nova moeda
-                          onMethodSelect(undefined);
-                        }}
-                        className={cn(
-                          "relative flex-1 rounded-full py-2 text-sm font-bold transition-colors",
-                          active ? "text-background" : "text-muted-foreground",
-                        )}
-                      >
-                        {active ? (
-                          <span className="absolute inset-0 rounded-full bg-accent shadow-lg shadow-accent/35" />
-                        ) : null}
-                        <span className="relative">
-                          {c === "usd" ? t("planos.usd") : t("planos.aoa")}
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
+              <div className="flex rounded-full bg-secondary/70 p-1">
+                {CURRENCIES.map((c) => {
+                  const active = currency === c;
+                  return (
+                    <button
+                      key={c}
+                      onClick={() => {
+                        if (c === currency) return;
+                        onCurrencyChange(c);
+                        // o metodo anterior pode nao existir na nova moeda
+                        onMethodSelect(undefined);
+                      }}
+                      className={cn(
+                        "relative flex-1 rounded-full py-2 text-sm font-bold transition-colors",
+                        active ? "text-background" : "text-muted-foreground",
+                      )}
+                    >
+                      {active ? (
+                        <span className="absolute inset-0 rounded-full bg-accent shadow-lg shadow-accent/35" />
+                      ) : null}
+                      <span className="relative">
+                        {c === "usd" ? t("planos.usd") : t("planos.aoa")}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+              {/* No capital o preco em Kwanzas vem de uma conversao, nao de uma
+                  tabela. Sem mostrar a taxa, o valor em Kz parece arbitrario. */}
+              {rateNote && currency === "aoa" ? (
+                <p className="text-xs text-muted-foreground">{rateNote}</p>
+              ) : null}
             </div>
             <div>
               <p className="text-sm text-muted-foreground mb-3">{t("planos.chooseMethod")}</p>

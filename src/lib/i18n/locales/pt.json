@@ -1123,7 +1123,9 @@
     "deleteMovementTitle": "Apagar movimento?",
     "deleteMovementMsg": "Tem certeza que deseja apagar este movimento pendente?",
     "copyError": "Não foi possível copiar o número",
-    "capitalAmount": "Valor: {{amount}}"
+    "capitalAmount": "Valor: {{amount}}",
+    "capitalRateNote": "1 USD = {{rate}} Kz",
+    "capitalPaidInAoa": "Contrato: {{usd}} (pago em Kwanzas)"
   },
   "notificacoes": {
     "title": "Notificações",

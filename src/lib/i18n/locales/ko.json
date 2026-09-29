@@ -614,7 +614,9 @@
     "sendProofHint": "갤러리 또는 파일",
     "proofAttached": "영수증 첨부됨",
     "withdrawAvailable": "출금 가능",
-    "capitalAmount": "금액: {{amount}}"
+    "capitalAmount": "금액: {{amount}}",
+    "capitalRateNote": "1 USD = {{rate}} Kz",
+    "capitalPaidInAoa": "계약: {{usd}} (Kwanzas로 결제)"
   },
   "notificacoes": {
     "title": "알림",

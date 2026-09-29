@@ -614,7 +614,9 @@
     "sendProofHint": "Галерея или файлы",
     "proofAttached": "Чек прикреплён",
     "withdrawAvailable": "Доступно для вывода",
-    "capitalAmount": "Сумма: {{amount}}"
+    "capitalAmount": "Сумма: {{amount}}",
+    "capitalRateNote": "1 USD = {{rate}} Kz",
+    "capitalPaidInAoa": "Контракт: {{usd}} (оплачено в кванзах)"
   },
   "notificacoes": {
     "title": "Уведомления",

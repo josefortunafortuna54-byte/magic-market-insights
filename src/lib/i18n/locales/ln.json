@@ -614,7 +614,9 @@
     "sendProofHint": "Galerie to fisyé",
     "proofAttached": "Preuve etiké",
     "withdrawAvailable": "Eza oyo ekotambwisa",
-    "capitalAmount": "Montant: {{amount}}"
+    "capitalAmount": "Montant: {{amount}}",
+    "capitalRateNote": "1 USD = {{rate}} Kz",
+    "capitalPaidInAoa": "Kontract: {{usd}} (ekabolama na Kwanzas)"
   },
   "notificacoes": {
     "title": "Ba notificações",

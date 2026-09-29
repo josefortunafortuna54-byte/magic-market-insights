@@ -614,7 +614,9 @@
     "sendProofHint": "المعرض أو الملفات",
     "proofAttached": "تم إرفاق إثبات الدفع",
     "withdrawAvailable": "المتاح للسحب",
-    "capitalAmount": "المبلغ: {{amount}}"
+    "capitalAmount": "المبلغ: {{amount}}",
+    "capitalRateNote": "1 USD = {{rate}} Kz",
+    "capitalPaidInAoa": "العقد: {{usd}} (مدفوع بالكواني)"
   },
   "notificacoes": {
     "title": "الإشعارات",

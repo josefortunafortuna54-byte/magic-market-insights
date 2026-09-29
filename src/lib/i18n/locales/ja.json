@@ -614,7 +614,9 @@
     "sendProofHint": "ギャラリーまたはファイル",
     "proofAttached": "領収書を添付しました",
     "withdrawAvailable": "出金額",
-    "capitalAmount": "金額：{{amount}}"
+    "capitalAmount": "金額：{{amount}}",
+    "capitalRateNote": "1 USD = {{rate}} Kz",
+    "capitalPaidInAoa": "契約：{{usd}}（クワンザで支払）"
   },
   "notificacoes": {
     "title": "通知",

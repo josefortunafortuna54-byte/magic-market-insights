@@ -614,7 +614,9 @@
     "sendProofHint": "Galleria o file",
     "proofAttached": "Ricevuta allegata",
     "withdrawAvailable": "Disponibile per il prelievo",
-    "capitalAmount": "Importo: {{amount}}"
+    "capitalAmount": "Importo: {{amount}}",
+    "capitalRateNote": "1 USD = {{rate}} Kz",
+    "capitalPaidInAoa": "Contratto: {{usd}} (pagato in Kwanzas)"
   },
   "notificacoes": {
     "title": "Notifiche",

@@ -573,7 +573,9 @@
     "sendProofHint": "Galería o archivos",
     "proofAttached": "Comprobante adjuntado",
     "withdrawAvailable": "Disponible para retirar",
-    "capitalAmount": "Importe: {{amount}}"
+    "capitalAmount": "Importe: {{amount}}",
+    "capitalRateNote": "1 USD = {{rate}} Kz",
+    "capitalPaidInAoa": "Contrato: {{usd}} (pagado en Kwanzas)"
   },
   "notificacoes": {
     "title": "Notificaciones",

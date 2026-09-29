@@ -614,7 +614,9 @@
     "sendProofHint": "Picha au faili",
     "proofAttached": "Uthibitisho umeambatishwa",
     "withdrawAvailable": "Inapatikana kutoa",
-    "capitalAmount": "Kiasi: {{amount}}"
+    "capitalAmount": "Kiasi: {{amount}}",
+    "capitalRateNote": "1 USD = {{rate}} Kz",
+    "capitalPaidInAoa": "Mkataba: {{usd}} (kulipwa kwa Kwanzas)"
   },
   "notificacoes": {
     "title": "Arifa",

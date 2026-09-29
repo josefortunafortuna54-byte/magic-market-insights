@@ -35,6 +35,8 @@ import {
   PLAN_PRICES,
   PRICES,
   planLabel,
+  usdToAoa,
+  USD_AOA_RATE,
   type Currency,
   type PaymentMethod,
   type PlanId,
@@ -87,7 +89,7 @@ const formatMovementAmount = (amount: number, curr: Currency) =>
   curr === "usd" ? `$${formatMoney(amount)}` : `${formatMoney(amount)} Kz`;
 
 export default function Depositos() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { user } = useAuth();
   const { config: banca } = useBanca();
   const { movements, loading, addMovement, deleteMovement } = useMovements();
@@ -133,16 +135,18 @@ export default function Depositos() {
     isFinite(parsedCustomAmount) && parsedCustomAmount > 0 ? parsedCustomAmount : null;
   const isCapitalDeposit = customAmount !== null;
 
-  // O deposito de capital e contratado em USD (vem de Banca com ?currency=usd,
-  // minimo $50). Deixar o utilizador trocar a moeda reinterpretaria o mesmo
-  // numero em Kwanza e mudaria o valor do deposito sem qualquer aviso, por
-  // isso a moeda fica fixa em USD neste fluxo. Para aceitar capital em AOA
-  // e preciso de uma fonte de taxa de cambio, nao apenas de um selector.
-  const effectiveCurrency: Currency = isCapitalDeposit ? "usd" : currency;
+  // O deposito de capital e contratado em USD (vem de Banca com ?amount e
+  // ?currency=usd, minimo $50). Se o utilizador pagar em Kwanzas, e o mesmo
+  // contrato convertido a taxa fixa: o numero nao muda, muda a unidade. Por
+  // isso o preco em AOA de um plano NAO e o USD convertido -- vem da tabela
+  // de precos -- mas o capital tem de ser convertido, porque nao tem preco
+  // proprio em Kwanzas.
+  const capitalUsd = customAmount;
+  const capitalAoa = capitalUsd === null ? null : usdToAoa(capitalUsd);
 
-  const price = PRICES[effectiveCurrency][plan];
-  const planPrice = PLAN_PRICES[effectiveCurrency][plan];
-  const currencySymbol = effectiveCurrency === "usd" ? "USD" : "AOA";
+  const price = PRICES[currency][plan];
+  const planPrice = PLAN_PRICES[currency][plan];
+  const currencySymbol = currency === "usd" ? "USD" : "AOA";
   const selectedPlan = PLANS.find((p) => p.id === plan);
 
   const hasPendingDepositRequest = async (): Promise<boolean> => {
@@ -183,7 +187,15 @@ export default function Depositos() {
       return;
     }
     setSending(true);
-    const depositAmount = customAmount ?? planPrice;
+    // o que o utilizador paga de facto: em Kwanzas e o contrato em USD
+    // convertido, e o valor gravado e esse, para a equipa poder conferir
+    // contra o que entrou na conta
+    const depositAmount =
+      capitalUsd === null
+        ? planPrice
+        : currency === "aoa"
+          ? (capitalAoa as number)
+          : capitalUsd;
     let result: { url: string | null; error?: string } = { url: null };
     for (let attempt = 0; attempt <= retries; attempt++) {
       result = await uploadReceipt(user.id, proof);
@@ -201,13 +213,22 @@ export default function Depositos() {
       });
       return;
     }
+    // Quando o capital e pago em Kwanzas, o valor gravado e o Kwanza
+    // pago, mas o contrato continua a ser o USD. A nota preserva o alvo
+    // para a equipa nao ter de dividir pelo taxa.
+    const capitalNote =
+      isCapitalDeposit && currency === "aoa" && capitalUsd !== null
+        ? t("depositos.capitalPaidInAoa", { usd: formatBancaMoney(capitalUsd, "usd") })
+        : undefined;
+
     void addMovement({
       type: "deposit",
       method: depositModal.method,
       amount: depositAmount,
-      currency: effectiveCurrency,
+      currency,
       plan: isCapitalDeposit ? "capital" : plan,
       status: "pendente",
+      ...(capitalNote ? { notes: capitalNote } : {}),
     });
     if (user) {
       const payload = {
@@ -217,7 +238,7 @@ export default function Depositos() {
         plan: isCapitalDeposit ? "capital" : plan,
         method: depositModal.method,
         amount: depositAmount,
-        currency: effectiveCurrency,
+        currency,
       };
       // O upload já foi feito; agora regista-se a linha no servidor com retry.
       // Se um insert "falhou" mas o registo existe, considera-se sucesso.
@@ -261,7 +282,7 @@ export default function Depositos() {
         try {
           localStorage.setItem(
             "pending_plan_payment",
-            JSON.stringify({ plan, amount: depositAmount, currency: effectiveCurrency }),
+            JSON.stringify({ plan, amount: depositAmount, currency }),
           );
         } catch {
           /* ignore */
@@ -490,20 +511,21 @@ export default function Depositos() {
                           : t("depositos.amount")}
                       </p>
                     </div>
-                    {isCapitalDeposit ? (
-                      <p className="text-xl font-extrabold tracking-tight">
-                        {formatBancaMoney(customAmount ?? 0, effectiveCurrency)}
+                    {/* o contrato e sempre em USD; a linha de baixo e o
+                        equivalente em Kwanzas, para a decisao ficar a
+                        mesma para planos e para capital */}
+                    <div className="text-right">
+                      <p className="text-xl font-extrabold leading-tight tracking-tight">
+                        {isCapitalDeposit
+                          ? formatBancaMoney(capitalUsd ?? 0, "usd")
+                          : PRICES.usd[plan]}
                       </p>
-                    ) : (
-                      <div className="text-right">
-                        <p className="text-xl font-extrabold leading-tight tracking-tight">
-                          {PRICES.usd[plan]}
-                        </p>
-                        <p className="text-xs font-semibold text-muted-foreground">
-                          {PRICES.aoa[plan]}
-                        </p>
-                      </div>
-                    )}
+                      <p className="text-xs font-semibold text-muted-foreground">
+                        {isCapitalDeposit
+                          ? formatBancaMoney(capitalAoa ?? 0, "aoa")
+                          : PRICES.aoa[plan]}
+                      </p>
+                    </div>
                   </div>
                   <Button
                     variant={isCapitalDeposit || plan === "pro" ? "premium" : "default"}
@@ -512,7 +534,7 @@ export default function Depositos() {
                   >
                     {t("depositos.depositCta", {
                       amount: isCapitalDeposit
-                        ? formatBancaMoney(customAmount ?? 0, effectiveCurrency)
+                        ? formatBancaMoney(capitalUsd ?? 0, "usd")
                         : PRICES.usd[plan],
                     })}
                   </Button>
@@ -582,18 +604,28 @@ export default function Depositos() {
         {depositModal ? (
           <PaymentModal
             plan={plan}
-            currency={effectiveCurrency}
+            currency={currency}
             onCurrencyChange={setCurrency}
-            lockCurrency={isCapitalDeposit}
             price={price}
             // No capital o plano nao diz nada: sem ?plan a pagina assume
             // "basic" e o modal anunciava "Basic - 14.99/mes" num deposito de
-            // 500. O titulo e o valor passam a ser os do deposito de capital.
+            // 500. O titulo e o valor passam a ser os do deposito de capital,
+            // na moeda escolhida, ja convertida.
             titleText={isCapitalDeposit ? t("depositos.capitalDepositTitle") : undefined}
             amountText={
               isCapitalDeposit
                 ? t("depositos.capitalAmount", {
-                    amount: formatBancaMoney(customAmount, effectiveCurrency),
+                    amount: formatBancaMoney(
+                      currency === "aoa" ? (capitalAoa as number) : (capitalUsd as number),
+                      currency,
+                    ),
+                  })
+                : undefined
+            }
+            rateNote={
+              isCapitalDeposit
+                ? t("depositos.capitalRateNote", {
+                    rate: USD_AOA_RATE.toLocaleString(i18n.language),
                   })
                 : undefined
             }

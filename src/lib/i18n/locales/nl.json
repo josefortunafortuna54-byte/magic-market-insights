@@ -613,7 +613,9 @@
     "sendProofHint": "Galerij of bestanden",
     "proofAttached": "Bewijs toegevoegd",
     "withdrawAvailable": "Beschikbaar om op te nemen",
-    "capitalAmount": "Bedrag: {{amount}}"
+    "capitalAmount": "Bedrag: {{amount}}",
+    "capitalRateNote": "1 USD = {{rate}} Kz",
+    "capitalPaidInAoa": "Contract: {{usd}} (betaald in Kwanzas)"
   },
   "notificacoes": {
     "title": "Meldingen",
