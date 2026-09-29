@@ -36,4 +36,9 @@ supabase/.temp/
 # TypeScript incremental build info
 *.tsbuildinfo
 
+# Ficheiros de trabalho das traducoes: sao gerados por
+# scripts/make-i18n-todo.cjs e consumidos por scripts/merge-i18n.cjs.
+# Sao sempre reconstruiveis a partir de pt.json, nao vao para o git.
+scripts/_i18n-work/
+
 .env*

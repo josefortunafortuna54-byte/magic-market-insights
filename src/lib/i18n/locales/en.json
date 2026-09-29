@@ -407,7 +407,10 @@
     "nameEmpty": "Name cannot be empty",
     "nameSaveError": "Could not update your name. Please try again.",
     "nameSaved": "Name updated",
-    "memberSince": "Member since {{date}}"
+    "memberSince": "Member since {{date}}",
+    "adminArea": "Admin Area",
+    "adminBadge": "ADMIN",
+    "sectionAdmin": "ADMINISTRATION"
   },
   "language": {
     "title": "Language"
@@ -419,7 +422,7 @@
     "dark": "Dark"
   },
   "admin": {
-    "title": "Admin",
+    "title": "Title",
     "exportSignals": "Export signals",
     "exporting": "Exporting…",
     "noSignals": "No signals to export",
@@ -441,7 +444,8 @@
     "gateCodeLabel": "ACCESS CODE",
     "gateCta": "Enter",
     "gateWrong": "Wrong code. Try again.",
-    "loadingAdmin": "Loading admin…",    "restrictedTitle": "Restricted access",
+    "loadingAdmin": "Loading admin…",
+    "restrictedTitle": "Restricted access",
     "restrictedDesc": "This area is exclusive to administrators.",
     "statUsers": "Users",
     "statSignalsToday": "Signals Today",
@@ -672,7 +676,6 @@
     "pushSent": "Push sent! {{notified}} notifications to {{users}} users",
     "sendPush": "Send Push",
     "sendTo": "Send to:",
-    "title": "Title",
     "receiptSearchPlaceholder": "Search by email, plan or method...",
     "possibleDuplicate": "Possible duplicate",
     "receiptDeleted": "Receipt deleted",
@@ -723,7 +726,9 @@
     "setExpirationNone": "The subscription will no longer expire.",
     "setExpirationDaysMsg": "The subscription will expire in {{days}} days.",
     "idLabel": "ID",
-    "premiumBadge": "⭐ PREMIUM"
+    "premiumBadge": "⭐ PREMIUM",
+    "gateLockedDesc": "This area is protected by an access code.",
+    "gateLockedTitle": "Protected area"
   },
   "adminErrors": {
     "load": "Error loading signals",
@@ -839,7 +844,8 @@
     "agoHours": "{{count}}h ago",
     "statusTp": "✓ Take Profit",
     "statusSl": "✗ Stop Loss",
-    "statusActive": "● Active"
+    "statusActive": "● Active",
+    "smcSetup": "SMC Setup"
   },
   "planos": {
     "title": "Plans",
@@ -1051,13 +1057,32 @@
     "dayTitle": "{{date}}",
     "previousMonth": "Previous month",
     "nextMonth": "Next month",
-    "weekdays": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+    "weekdays": [
+      "Sun",
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri",
+      "Sat"
+    ],
     "noTrades": "No trades on this day",
     "noTradesHint": "Tap 'Log' to add your first trade of the day.",
     "tradesCount": "trades",
     "tradesCount_one": "operation",
     "tradesCount_other": "operations",
-    "csvColumns": ["Date", "Pair", "Direction", "Entry", "Exit", "Lots", "Result", "PnL (USD)", "Pips", "Notes"],
+    "csvColumns": [
+      "Date",
+      "Pair",
+      "Direction",
+      "Entry",
+      "Exit",
+      "Lots",
+      "Result",
+      "PnL (USD)",
+      "Pips",
+      "Notes"
+    ],
     "monthTrades": "Trades this month",
     "monthWinRate": "Win Rate",
     "monthPnl": "Monthly P&L",
@@ -1208,7 +1233,10 @@
     "expiry3Title": "Your subscription expires soon",
     "expiry3Body": "{{days}} days left until your Premium subscription ends. Renew now to keep your benefits.",
     "expiry1Title": "Your subscription expires tomorrow",
-    "expiry1Body": "Tomorrow is the last day of your Premium subscription. Renew now to avoid interruptions."
+    "expiry1Body": "Tomorrow is the last day of your Premium subscription. Renew now to avoid interruptions.",
+    "welcomeBody": "Thanks for joining! Explore the app and start receiving signals in real time.",
+    "welcomeChannelName": "Welcome",
+    "welcomeTitle": "Welcome to The Magic Trader"
   },
   "definicoesBooms": {
     "title": "Boom Settings",
