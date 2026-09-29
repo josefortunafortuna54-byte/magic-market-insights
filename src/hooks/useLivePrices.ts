@@ -29,22 +29,24 @@ interface RatesPayload {
 const VAZIO = { price: "—", change: 0 };
 
 /**
- * O bitcoin continua a ser buscado directamente ao coingecko, e nao pelo
- * proxy: o coingecko responde 403 a pedidos de servidor (deteccao de bot)
- * e so aceita a chamada vinda do browser. Nao havia problema nenhum
- * com este par, por isso nao se mexe.
+ * Recurso direto a Binance para o caso de o proxy nao devolver o preco
+ * do bitcoin. Nao e o caminho normal: quando o proxy responde, o preco
+ * vem dai e nao ha aqui nenhum pedido. Existe porque o preco do bitcoin
+ * e uma das coisas que os subscritores pagam para ver, e um proxy
+ * avariado nao pode deixar o numero em branco.
  */
-async function fetchBTC(): Promise<{ price: number; change: number } | null> {
+async function fetchBtcFallback(): Promise<{ price: number; change: number } | null> {
   const res = await fetch(
-    "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true",
+    "https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT",
   );
   if (!res.ok) return null;
   const json = (await res.json()) as {
-    bitcoin?: { usd?: number; usd_24h_change?: number };
+    lastPrice?: string;
+    priceChangePercent?: string;
   };
-  const price = Number(json?.bitcoin?.usd);
+  const price = Number(json?.lastPrice);
   if (!Number.isFinite(price) || price <= 0) return null;
-  const change = Number(json?.bitcoin?.usd_24h_change);
+  const change = Number(json?.priceChangePercent);
   return { price, change: Number.isFinite(change) ? change : 0 };
 }
 
@@ -58,14 +60,23 @@ export function useLivePrices(pairs: string[]) {
     const cambiais = pairs.filter((p) => p !== "BTC/USD");
     const querBtc = pairs.includes("BTC/USD");
 
-    const [taxas, btc] = await Promise.all([
-      // Um unico pedido, a partir da nossa origem. Antes eram 16
-      // (8 pares x 2 datas) e falhavam com ERR_FAILED.
-      fetch("/api/rates")
-        .then((r) => (r.ok ? (r.json() as Promise<RatesPayload>) : null))
-        .catch(() => null),
-      querBtc ? fetchBTC().catch(() => null) : Promise.resolve(null),
-    ]);
+    // Um unico pedido, a partir da nossa origem. Antes eram 16
+    // (8 pares x 2 datas) e falhavam com ERR_FAILED.
+    const taxas = await fetch("/api/rates")
+      .then((r) => (r.ok ? (r.json() as Promise<RatesPayload>) : null))
+      .catch(() => null);
+
+    // O preco do bitcoin vem no mesmo payload. O pedido directo a
+    // Binance so acontece se o proxy nao o trouxer, porque um proxy
+    // avariado nao pode deixar em branco um dos numeros que os
+    // subscritores pagam para ver.
+    const btcBruto = querBtc ? taxas?.pairs?.["BTC/USD"] : undefined;
+    const btc =
+      btcBruto && Number.isFinite(btcBruto.price)
+        ? btcBruto
+        : querBtc
+          ? await fetchBtcFallback().catch(() => null)
+          : null;
 
     const results: Record<string, PriceData> = {};
     for (const pair of cambiais) {

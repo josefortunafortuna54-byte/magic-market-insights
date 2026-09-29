@@ -12,13 +12,16 @@
  * a partir da propria origem (sem CORS) e sem depender da latencia do
  * upstream.
  *
- * O bitcoin nao passa por aqui: o coingecko responde 403 a pedidos de
- * servidor e so aceita a chamada vinda do browser. Ver useLivePrices.
+ * O bitcoin tambem passa por aqui, mas pela Binance: o preco do coingecko
+ * que se usava antes ja nao serve, passou a responder 403 por bloqueio
+ * do Cloudflare tanto a pedidos de servidor como de browser. Ver
+ * useLivePrices, que mantem um pedido directo como recurso.
  */
 
 export const config = { runtime: "edge" };
 
 const UPSTREAM = "https://api.frankfurter.app";
+const BINANCE = "https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT";
 
 // O upstream demora segundos. Corta antes de a funcao expirar, para
 // devolver o que houver em cache em vez de um 500.
@@ -89,13 +92,16 @@ function yesterday(): string {
 let memo: { at: number; data: Payload } | null = null;
 
 async function build(): Promise<Payload> {
-  // Apenas as series cambiais. O bitcoin nao passa por aqui: o
-  // coingecko responde 403 a pedidos de servidor (deteccao de bot por
-  // User-Agent) e so aceita a chamada vinda do browser, que e o
-  // caminho que ja funcionava.
-  const [hoje, ontem] = await Promise.all([
+  // Apenas as series cambiais vem do frankfurter. O bitcoin vem da
+  // Binance, e o preco do coingecko que se usava antes ja nao serve:
+  // passou a responder 403 por bloqueio do Cloudflare, tanto a
+  // pedido de servidor como a pedido de browser. A Binance e uma
+  // exchange, responde com CORS aberto e devolve o preco e a variacao
+  // de 24 h no mesmo pedido.
+  const [hoje, ontem, btc] = await Promise.all([
     getJson(`${UPSTREAM}/latest?from=USD`),
     getJson(`${UPSTREAM}/${yesterday()}?from=USD`),
+    getJson(BINANCE),
   ]);
 
   const rHoje = asRates(hoje);
@@ -115,9 +121,19 @@ async function build(): Promise<Payload> {
     };
   }
 
+  const btcLast = Number((btc as { lastPrice?: unknown } | null)?.lastPrice);
+  const btcPct = Number((btc as { priceChangePercent?: unknown } | null)?.priceChangePercent);
+  pairs["BTC/USD"] =
+    Number.isFinite(btcLast) && btcLast > 0
+      ? {
+          price: btcLast,
+          change: Number.isFinite(btcPct) ? Math.round(btcPct * 100) / 100 : 0,
+        }
+      : null;
+
   // Sem uma das duas series nao da para calcular a variacao, por isso o
   // payload e marcado como velho para o cliente saber que nao e fresco.
-  const semSerieCompleta = !rHoje || !rOntem;
+  const semSerieCompleta = !rHoje || !rOntem || !pairs["BTC/USD"];
   return {
     date: new Date().toISOString().slice(0, 10),
     pairs,
@@ -143,7 +159,9 @@ export default async function handler(): Promise<Response> {
   }
 
   // Nunca fazer cache de uma resposta sem dados, senao a falha gruda.
-  if (Object.keys(data.pairs).length) {
+  // `pairs` tem sempre uma chave por par conhecido, mesmo quando o valor
+  // e null, por isso conta-se quantos trouxeram preco.
+  if (Object.values(data.pairs).some(Boolean)) {
     memo = { at: now, data };
   }
   return json(data, 200);
