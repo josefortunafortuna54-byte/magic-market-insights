@@ -10,7 +10,7 @@
 
 **Spec:** `.superpawers/specs/2026-09-26-hero-redesign-design.md`
 
-**Referência visual:** `public/lod.png` (mockup confirmado pelo utilizador). Vence ambiguidades. O radial do fundo ancora no **topo-direita** (§4.1) e os stats saem do hero para uma **banda própria com ícones** (§4.4).
+**Referência visual:** `docs/design/lod.png` (mockup confirmado pelo utilizador). Vence ambiguidades. O radial do fundo ancora no **topo-direita** (§4.1) e os stats saem do hero para uma **banda própria com ícones** (§4.4).
 
 ---
 
@@ -773,7 +773,7 @@ Run: `npm run dev` (deixar em background)
 Depois, com Playwright, em `/`:
 1. `1440x900` tema dark — confirmar: sem orbes, sem `ping`, sem starfield; fundo com glow verde discreto ancorado ao **topo-direita** atrás do terminal; H1 branco com `heroTitle2` a verde sólido e sem gradiente; CTA primário verde sólido; terminal visível à direita com par, tag BUY/SELL, preço, barra de confiança, 3 linhas de níveis e footer com R:R + link.
 2. `1440x900` tema light — o mesmo, mais o fundo claro sem o radial verde escuro.
-3. Banda de stats por baixo do hero: 4 colunas com ícone verde + label em cima + valor grande em baixo, divisores verticais a partir de `sm`, fundo ligeiramente distinto (`bg-secondary/30`), comparar com `public/lod.png`.
+3. Banda de stats por baixo do hero: 4 colunas com ícone verde + label em cima + valor grande em baixo, divisores verticais a partir de `sm`, fundo ligeiramente distinto (`bg-secondary/30`), comparar com `docs/design/lod.png`.
 4. `390x844` (mobile) — as colunas empilham, sem scroll horizontal, o terminal aparece por baixo do texto; a banda de stats cai para 2 colunas sem divisores.
 5. Confirmar ausência de layout shift quando o skeleton troca para o painel.
 
@@ -781,7 +781,7 @@ Expected em todos: sem overflow horizontal, sem texto cortado, hierarquia legív
 
 - [x] **Step 6: Commit final**
 
-Executado como **um único commit consolidado** (2026-09-28), não cinco: os commits das Tasks 1-4 nunca chegaram a ser feitos, pelo que todo o trabalho do hero estava por commitar em conjunto. O `git add -A` do plano original foi substituído por `git add` explícito — o worktree tem alterações de **outros** trabalhos (mobile/, `supabase/migrations/20260922000000_boom_hours_full_schedule.sql`, `mobile/src/components/BoomAlarmAutoSync.tsx`, `public/lod.png`, `README.md`, `*.tsbuildinfo`) que não pertencem a este âmbito.
+Executado como **um único commit consolidado** (2026-09-28), não cinco: os commits das Tasks 1-4 nunca chegaram a ser feitos, pelo que todo o trabalho do hero estava por commitar em conjunto. O `git add -A` do plano original foi substituído por `git add` explícito — o worktree tem alterações de **outros** trabalhos (mobile/, `supabase/migrations/20260922000000_boom_hours_full_schedule.sql`, `mobile/src/components/BoomAlarmAutoSync.tsx`, `docs/design/lod.png`, `README.md`, `*.tsbuildinfo`) que não pertencem a este âmbito.
 
 **Resultados medidos em browser (2026-09-28, dev server em `:8080`):**
 

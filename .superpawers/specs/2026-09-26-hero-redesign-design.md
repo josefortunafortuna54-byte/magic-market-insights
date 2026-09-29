@@ -4,7 +4,7 @@
 - **Branch:** `feat/hero-redesign` (base: `feature/capital-management-v2`)
 - **Âmbito:** apenas o hero da página pública inicial (`/`). O resto do Home fica intacto.
 - **Brief de referência:** `docs/design/home-redesign-prompt.md` (secções 3, 4 e 5.2) — nunca implementado.
-- **Referência visual:** `public/lod.png` — mockup de página inteira do mesmo produto, confirmado pelo utilizador. Vence qualquer ambiguidade desta spec. As 6 chaves `inicio.hero*` e as 4 `inicio.stat*` do mockup correspondem 1:1 ao conteúdo actual de `pt.json`.
+- **Referência visual:** `docs/design/lod.png` — mockup de página inteira do mesmo produto, confirmado pelo utilizador. Vence qualquer ambiguidade desta spec. As 6 chaves `inicio.hero*` e as 4 `inicio.stat*` do mockup correspondem 1:1 ao conteúdo actual de `pt.json`.
 
 ## 1. Problema
 
