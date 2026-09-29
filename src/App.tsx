@@ -7,6 +7,7 @@ import { ThemeProvider } from "next-themes";
 import { AdminGuard } from "@/components/auth/AdminGuard";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { LanguageSync } from "@/components/LanguageSync";
+import { ScrollToTop } from "@/components/ScrollToTop";
 import { AiFab } from "@/components/AiFab";
 import { OnboardingTour } from "@/components/OnboardingTour";
 import { PremiumWelcomeModal } from "@/components/PremiumWelcomeModal";
@@ -58,6 +59,7 @@ const App = () => (
           <OnboardingTour />
           <PremiumWelcomeModal />
           <BrowserRouter>
+            <ScrollToTop />
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/analises" element={<Analises />} />
