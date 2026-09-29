@@ -226,9 +226,6 @@
     "loading": "Loading community…",
     "emptyTitle": "No booms",
     "emptyBody": "There are no booms to show yet.",
-    "weekendMarketClosed": "Market closed",
-    "weekendMarketClosedBody": "Forex signals return on Monday.",
-    "weekendCryptoAiBody": "On weekends, TMT AI generates BTC and ETH signals for all plans.",
     "errorTitle": "Error",
     "at": "at",
     "audio": "Audio",
@@ -300,9 +297,6 @@
     "noProfiles": "No users available.",
     "bot": "BOT",
     "loading": "Loading…",
-    "weekendMarketClosed": "Market closed",
-    "weekendMarketClosedBody": "Forex signals return on Monday.",
-    "weekendCryptoAiBody": "On weekends, TMT AI generates BTC and ETH signals for all plans.",
     "errorTitle": "Error",
     "messageActions": "Message",
     "edit": "Edit",
@@ -422,7 +416,7 @@
     "dark": "Dark"
   },
   "admin": {
-    "title": "Title",
+    "title": "Admin",
     "exportSignals": "Export signals",
     "exporting": "Exporting…",
     "noSignals": "No signals to export",
@@ -737,9 +731,6 @@
     "unknown": "Unknown error",
     "generate": "Error generating signals",
     "close": "Error closing signals",
-    "approve": "Failed to approve receipt",
-    "reject": "Failed to reject receipt",
-    "delete": "Failed to delete receipt",
     "markRead": "Error marking notification",
     "markAllRead": "Error marking notifications",
     "signalDelete": "Error deleting signals",
@@ -1264,9 +1255,6 @@
     "loading": "Loading settings…",
     "loadingBooms": "Loading booms…",
     "emptyTitle": "No booms",
-    "weekendMarketClosed": "Market closed",
-    "weekendMarketClosedBody": "Forex signals return on Monday.",
-    "weekendCryptoAiBody": "On weekends, TMT AI generates BTC and ETH signals for all plans.",
     "errorTitle": "Error"
   },
   "suporteIa": {
@@ -1523,19 +1511,6 @@
       "entry": "ENTRY",
       "stopLoss": "SL",
       "takeProfit": "TP"
-    },
-    "store": {
-      "title": "Store",
-      "subtitle": "Bots, mentorships and ebooks for your success",
-      "categoryAll": "All",
-      "categoryBots": "Bots",
-      "categoryMentorias": "Mentorships",
-      "categoryEbooks": "Ebooks",
-      "premium": "Premium",
-      "free": "Free",
-      "empty": "No items available",
-      "premiumRequired": "Premium Required",
-      "premiumMessage": "This item is exclusive to Premium members. Would you like to upgrade?"
     }
   },
   "store": {

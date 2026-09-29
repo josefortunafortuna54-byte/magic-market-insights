@@ -672,7 +672,6 @@
     "pushSent": "Push enviado! {{notified}} notificações para {{users}} utilizadores",
     "sendPush": "Enviar Push",
     "sendTo": "Enviar para:",
-    "title": "Título",
     "receiptSearchPlaceholder": "Pesquisar por email, plano ou método...",
     "possibleDuplicate": "Possível duplicado",
     "receiptDeleted": "Comprovativo eliminado",
@@ -1049,13 +1048,32 @@
     "dayTitle": "{{date}}",
     "previousMonth": "Mês anterior",
     "nextMonth": "Próximo mês",
-    "weekdays": ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"],
+    "weekdays": [
+      "Dom",
+      "Seg",
+      "Ter",
+      "Qua",
+      "Qui",
+      "Sex",
+      "Sáb"
+    ],
     "noTrades": "Sem operações neste dia",
     "noTradesHint": "Toca em 'Registar' para adicionar a primeira operação do dia.",
     "tradesCount": "operações",
     "tradesCount_one": "operação",
     "tradesCount_other": "operações",
-    "csvColumns": ["Data", "Par", "Direção", "Entrada", "Saída", "Lotes", "Resultado", "PnL (USD)", "Pips", "Notas"],
+    "csvColumns": [
+      "Data",
+      "Par",
+      "Direção",
+      "Entrada",
+      "Saída",
+      "Lotes",
+      "Resultado",
+      "PnL (USD)",
+      "Pips",
+      "Notas"
+    ],
     "monthTrades": "Operações no mês",
     "monthWinRate": "Win Rate",
     "monthPnl": "P&L do mês",
@@ -1493,19 +1511,6 @@
       "entry": "ENTRADA",
       "stopLoss": "SL",
       "takeProfit": "TP"
-    },
-    "store": {
-      "title": "Loja",
-      "subtitle": "Bots, mentorias e ebooks para o teu sucesso",
-      "categoryAll": "Todos",
-      "categoryBots": "Bots",
-      "categoryMentorias": "Mentorias",
-      "categoryEbooks": "Ebooks",
-      "premium": "Premium",
-      "free": "Grátis",
-      "empty": "Nenhum item disponível",
-      "premiumRequired": "Premium Necessário",
-      "premiumMessage": "Este item é exclusivo para membros Premium. Deseja fazer upgrade?"
     }
   },
   "store": {
