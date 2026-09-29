@@ -435,7 +435,6 @@
     "phoneLabel": "WHATSAPP-NUMMER",
     "phonePlaceholder": "+244 9xx xxx xxx",
     "invalidPhone": "Voer een geldig WhatsApp-nummer in met de landcode.",
-    "enterApp": "Inloggen in de app",
     "whatsappPrompt": "Voer je WhatsApp-nummer in. We sturen je een code.",
     "codeLabel": "VERIFICATIECODE",
     "codePlaceholder": "6-cijferige code",
@@ -443,7 +442,8 @@
     "sendCode": "Code verzenden",
     "verifyCode": "Verifiëren en inloggen",
     "codeSent": "We hebben een code naar {{phone}} gestuurd. Voer die hieronder in.",
-    "resendCode": "Code opnieuw verzenden"
+    "resendCode": "Code opnieuw verzenden",
+    "createAccount": "Account aanmaken"
   },
   "authErrors": {
     "googleStart": "Het was niet mogelijk om het inloggen met Google te starten.",

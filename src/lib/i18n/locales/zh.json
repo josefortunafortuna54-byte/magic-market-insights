@@ -391,7 +391,6 @@
     "phoneLabel": "WHATSAPP 号码",
     "phonePlaceholder": "+244 9xx xxx xxx",
     "invalidPhone": "请输入包含国家区号的有效 WhatsApp 号码。",
-    "enterApp": "进入应用",
     "whatsappPrompt": "输入你的 WhatsApp 号码，我们会发送一个验证码。",
     "codeLabel": "验证码",
     "codePlaceholder": "6位数字验证码",
@@ -399,7 +398,8 @@
     "sendCode": "发送验证码",
     "verifyCode": "验证并登录",
     "codeSent": "我们已向 {{phone}} 发送验证码，请在下方输入。",
-    "resendCode": "重新发送"
+    "resendCode": "重新发送",
+    "createAccount": "创建账户"
   },
   "authErrors": {
     "googleStart": "无法启动 Google 登录。",

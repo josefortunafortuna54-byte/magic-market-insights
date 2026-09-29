@@ -392,7 +392,6 @@
     "phoneLabel": "NÚMERO DE WHATSAPP",
     "phonePlaceholder": "+244 9xx xxx xxx",
     "invalidPhone": "Introduce un número de WhatsApp válido con el código del país.",
-    "enterApp": "Entrar en la app",
     "whatsappPrompt": "Introduce tu número de WhatsApp. Te enviaremos un código.",
     "codeLabel": "CÓDIGO DE VERIFICACIÓN",
     "codePlaceholder": "Código de 6 dígitos",
@@ -400,7 +399,8 @@
     "sendCode": "Enviar código",
     "verifyCode": "Verificar y entrar",
     "codeSent": "Te enviamos un código al {{phone}}. Introdúcelo abajo.",
-    "resendCode": "Reenviar código"
+    "resendCode": "Reenviar código",
+    "createAccount": "Crear cuenta"
   },
   "authErrors": {
     "googleStart": "No se pudo iniciar el login con Google.",

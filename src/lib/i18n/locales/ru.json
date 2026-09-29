@@ -391,7 +391,6 @@
     "phoneLabel": "НОМЕР WHATSAPP",
     "phonePlaceholder": "+244 9xx xxx xxx",
     "invalidPhone": "Введите корректный номер WhatsApp с кодом страны.",
-    "enterApp": "Войти в приложение",
     "whatsappPrompt": "Введите номер WhatsApp. Мы отправим вам код.",
     "codeLabel": "КОД ПОДТВЕРЖДЕНИЯ",
     "codePlaceholder": "Код из 6 цифр",
@@ -399,7 +398,8 @@
     "sendCode": "Отправить код",
     "verifyCode": "Проверить и войти",
     "codeSent": "Мы отправили код на {{phone}}. Введите его ниже.",
-    "resendCode": "Отправить код повторно"
+    "resendCode": "Отправить код повторно",
+    "createAccount": "Создать аккаунт"
   },
   "authErrors": {
     "googleStart": "Не удалось начать вход через Google.",

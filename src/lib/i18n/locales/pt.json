@@ -756,7 +756,6 @@
     "phoneLabel": "NÚMERO DE WHATSAPP",
     "phonePlaceholder": "+244 9xx xxx xxx",
     "invalidPhone": "Introduz um número de WhatsApp válido com o código do país.",
-    "enterApp": "Entrar na app",
     "whatsappPrompt": "Introduz o teu número de WhatsApp. Enviaremos um código.",
     "codeLabel": "CÓDIGO DE VERIFICAÇÃO",
     "codePlaceholder": "Código de 6 dígitos",

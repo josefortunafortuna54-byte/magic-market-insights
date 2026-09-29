@@ -391,7 +391,6 @@
     "phoneLabel": "رقم الواتساب",
     "phonePlaceholder": "+244 9xx xxx xxx",
     "invalidPhone": "أدخل رقم WhatsApp صالحاً مع رمز الدولة.",
-    "enterApp": "الدخول إلى التطبيق",
     "whatsappPrompt": "أدخل رقم واتساب الخاص بك. سنرسل لك رمزاً.",
     "codeLabel": "رمز التحقق",
     "codePlaceholder": "رمز من 6 أرقام",
@@ -399,7 +398,8 @@
     "sendCode": "إرسال الرمز",
     "verifyCode": "تحقق وسجّل الدخول",
     "codeSent": "أرسلنا رمزاً إلى {{phone}}. أدخله أدناه.",
-    "resendCode": "إعادة إرسال الرمز"
+    "resendCode": "إعادة إرسال الرمز",
+    "createAccount": "إنشاء حساب"
   },
   "authErrors": {
     "googleStart": "تعذر بدء تسجيل الدخول عبر Google.",

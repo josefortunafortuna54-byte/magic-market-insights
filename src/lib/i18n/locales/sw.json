@@ -391,7 +391,6 @@
     "phoneLabel": "NAMBA YA WHATSAPP",
     "phonePlaceholder": "+244 9xx xxx xxx",
     "invalidPhone": "Weka namba halali ya WhatsApp pamoja na msimbo wa nchi.",
-    "enterApp": "Ingia kwenye app",
     "whatsappPrompt": "Weka namba yako ya WhatsApp. Tutakutumia msimbo.",
     "codeLabel": "MSIMBO WA UTHIBITISHO",
     "codePlaceholder": "Msimbo wa tarakimu 6",
@@ -399,7 +398,8 @@
     "sendCode": "Tuma msimbo",
     "verifyCode": "Thibitisha na uingie",
     "codeSent": "Tumetuma msimbo kwa {{phone}}. Weka hapa chini.",
-    "resendCode": "Tuma msimbo tena"
+    "resendCode": "Tuma msimbo tena",
+    "createAccount": "Fungua akaunti"
   },
   "authErrors": {
     "googleStart": "Imeshindikana kuanza login ya Google.",

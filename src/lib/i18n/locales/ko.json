@@ -436,7 +436,6 @@
     "phoneLabel": "WhatsApp 번호",
     "phonePlaceholder": "+244 9xx xxx xxx",
     "invalidPhone": "국가 코드를 포함한 올바른 WhatsApp 번호를 입력하세요.",
-    "enterApp": "앱 시작하기",
     "whatsappPrompt": "WhatsApp 번호를 입력하세요. 코드를 보내드립니다.",
     "codeLabel": "인증 코드",
     "codePlaceholder": "6자리 코드",
@@ -444,7 +443,8 @@
     "sendCode": "코드 보내기",
     "verifyCode": "확인하고 로그인",
     "codeSent": "{{phone}}로 코드를 보냈습니다. 아래에 입력하세요.",
-    "resendCode": "코드 다시 보내기"
+    "resendCode": "코드 다시 보내기",
+    "createAccount": "계정 만들기"
   },
   "authErrors": {
     "googleStart": "Google 로그인을 시작할 수 없습니다.",
