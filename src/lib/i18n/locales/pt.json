@@ -1122,7 +1122,8 @@
     "deleteMovement": "Apagar",
     "deleteMovementTitle": "Apagar movimento?",
     "deleteMovementMsg": "Tem certeza que deseja apagar este movimento pendente?",
-    "copyError": "Não foi possível copiar o número"
+    "copyError": "Não foi possível copiar o número",
+    "capitalAmount": "Valor: {{amount}}"
   },
   "notificacoes": {
     "title": "Notificações",

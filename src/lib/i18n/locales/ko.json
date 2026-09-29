@@ -612,7 +612,9 @@
     "numberCopied": "복사됨",
     "sendProof": "영수증 첨부",
     "sendProofHint": "갤러리 또는 파일",
-    "proofAttached": "영수증 첨부됨"
+    "proofAttached": "영수증 첨부됨",
+    "withdrawAvailable": "출금 가능",
+    "capitalAmount": "금액: {{amount}}"
   },
   "notificacoes": {
     "title": "알림",

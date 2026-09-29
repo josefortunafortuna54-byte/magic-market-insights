@@ -612,7 +612,9 @@
     "numberCopied": "已复制",
     "sendProof": "附上凭证",
     "sendProofHint": "相册或文件",
-    "proofAttached": "已附上凭证"
+    "proofAttached": "已附上凭证",
+    "withdrawAvailable": "可提现余额",
+    "capitalAmount": "金额：{{amount}}"
   },
   "notificacoes": {
     "title": "通知",

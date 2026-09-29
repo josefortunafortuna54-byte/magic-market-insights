@@ -612,7 +612,9 @@
     "numberCopied": "コピーしました",
     "sendProof": "領収書を添付",
     "sendProofHint": "ギャラリーまたはファイル",
-    "proofAttached": "領収書を添付しました"
+    "proofAttached": "領収書を添付しました",
+    "withdrawAvailable": "出金額",
+    "capitalAmount": "金額：{{amount}}"
   },
   "notificacoes": {
     "title": "通知",

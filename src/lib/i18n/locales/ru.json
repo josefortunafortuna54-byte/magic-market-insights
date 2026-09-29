@@ -612,7 +612,9 @@
     "numberCopied": "Скопировано",
     "sendProof": "Прикрепить чек",
     "sendProofHint": "Галерея или файлы",
-    "proofAttached": "Чек прикреплён"
+    "proofAttached": "Чек прикреплён",
+    "withdrawAvailable": "Доступно для вывода",
+    "capitalAmount": "Сумма: {{amount}}"
   },
   "notificacoes": {
     "title": "Уведомления",

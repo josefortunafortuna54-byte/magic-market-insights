@@ -611,7 +611,9 @@
     "numberCopied": "Gekopieerd",
     "sendProof": "Bewijs toevoegen",
     "sendProofHint": "Galerij of bestanden",
-    "proofAttached": "Bewijs toegevoegd"
+    "proofAttached": "Bewijs toegevoegd",
+    "withdrawAvailable": "Beschikbaar om op te nemen",
+    "capitalAmount": "Bedrag: {{amount}}"
   },
   "notificacoes": {
     "title": "Meldingen",

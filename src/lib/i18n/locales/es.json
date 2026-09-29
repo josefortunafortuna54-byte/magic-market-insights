@@ -571,7 +571,9 @@
     "numberCopied": "Copiado",
     "sendProof": "Adjuntar comprobante",
     "sendProofHint": "Galería o archivos",
-    "proofAttached": "Comprobante adjuntado"
+    "proofAttached": "Comprobante adjuntado",
+    "withdrawAvailable": "Disponible para retirar",
+    "capitalAmount": "Importe: {{amount}}"
   },
   "notificacoes": {
     "title": "Notificaciones",

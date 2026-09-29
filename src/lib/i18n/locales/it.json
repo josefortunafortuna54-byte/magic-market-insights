@@ -612,7 +612,9 @@
     "numberCopied": "Copiato",
     "sendProof": "Allega ricevuta",
     "sendProofHint": "Galleria o file",
-    "proofAttached": "Ricevuta allegata"
+    "proofAttached": "Ricevuta allegata",
+    "withdrawAvailable": "Disponibile per il prelievo",
+    "capitalAmount": "Importo: {{amount}}"
   },
   "notificacoes": {
     "title": "Notifiche",

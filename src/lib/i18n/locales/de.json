@@ -612,7 +612,9 @@
     "numberCopied": "Kopiert",
     "sendProof": "Beleg anhängen",
     "sendProofHint": "Galerie oder Dateien",
-    "proofAttached": "Beleg angehängt"
+    "proofAttached": "Beleg angehängt",
+    "withdrawAvailable": "Auszahlbar",
+    "capitalAmount": "Betrag: {{amount}}"
   },
   "notificacoes": {
     "title": "Benachrichtigungen",

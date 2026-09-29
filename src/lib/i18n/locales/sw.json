@@ -612,7 +612,9 @@
     "numberCopied": "Imenakiliwa",
     "sendProof": "Ambatisha uthibitisho",
     "sendProofHint": "Picha au faili",
-    "proofAttached": "Uthibitisho umeambatishwa"
+    "proofAttached": "Uthibitisho umeambatishwa",
+    "withdrawAvailable": "Inapatikana kutoa",
+    "capitalAmount": "Kiasi: {{amount}}"
   },
   "notificacoes": {
     "title": "Arifa",

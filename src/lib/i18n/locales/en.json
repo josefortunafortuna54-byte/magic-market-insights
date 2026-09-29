@@ -1124,7 +1124,8 @@
     "deleteMovement": "Delete",
     "deleteMovementTitle": "Delete movement?",
     "deleteMovementMsg": "Are you sure you want to delete this pending movement?",
-    "copyError": "Couldn't copy the number"
+    "copyError": "Couldn't copy the number",
+    "capitalAmount": "Amount: {{amount}}"
   },
   "notificacoes": {
     "title": "Notifications",

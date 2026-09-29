@@ -612,7 +612,9 @@
     "numberCopied": "تم النسخ",
     "sendProof": "إرفاق إثبات الدفع",
     "sendProofHint": "المعرض أو الملفات",
-    "proofAttached": "تم إرفاق إثبات الدفع"
+    "proofAttached": "تم إرفاق إثبات الدفع",
+    "withdrawAvailable": "المتاح للسحب",
+    "capitalAmount": "المبلغ: {{amount}}"
   },
   "notificacoes": {
     "title": "الإشعارات",

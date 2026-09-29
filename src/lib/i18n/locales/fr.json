@@ -612,7 +612,9 @@
     "numberCopied": "Copié",
     "sendProof": "Joindre un justificatif",
     "sendProofHint": "Galerie ou fichiers",
-    "proofAttached": "Justificatif joint"
+    "proofAttached": "Justificatif joint",
+    "withdrawAvailable": "Disponible au retrait",
+    "capitalAmount": "Montant : {{amount}}"
   },
   "notificacoes": {
     "title": "Notifications",

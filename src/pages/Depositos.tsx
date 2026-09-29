@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -19,9 +19,8 @@ import { Layout } from "@/components/layout/Layout";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { PaymentModal } from "@/components/banca/PaymentModal";
+import { WithdrawModal } from "@/components/banca/WithdrawModal";
 import { ReceiptSuccessModal } from "@/components/banca/ReceiptSuccessModal";
 import { useAuth } from "@/contexts/AuthContext";
 import { useBanca } from "@/hooks/useBanca";
@@ -32,7 +31,6 @@ import { saveReceipt, submitWithdrawalRequest } from "@/lib/adminApi";
 import { notifyPlanRequestSubmitted } from "@/lib/planRequests";
 import {
   PAYMENT_METHODS,
-  PAYMENT_METHOD_ICONS,
   PLANS,
   PLAN_PRICES,
   PRICES,
@@ -114,9 +112,7 @@ export default function Depositos() {
   } | null>(null);
   const [sending, setSending] = useState(false);
   const [showReceiptSuccess, setShowReceiptSuccess] = useState(false);
-  const [withdrawMethod, setWithdrawMethod] = useState<PaymentMethod | null>(null);
-  const [withdrawAmount, setWithdrawAmount] = useState("");
-  const [withdrawDetails, setWithdrawDetails] = useState("");
+  const [withdrawOpen, setWithdrawOpen] = useState(false);
 
   useEffect(() => {
     const p = searchParams.get("plan");
@@ -137,14 +133,16 @@ export default function Depositos() {
     isFinite(parsedCustomAmount) && parsedCustomAmount > 0 ? parsedCustomAmount : null;
   const isCapitalDeposit = customAmount !== null;
 
-  const availableMethods = useMemo(
-    () => PAYMENT_METHODS.filter((m) => (currency === "usd" ? m.usd : m.aoa)),
-    [currency],
-  );
+  // O deposito de capital e contratado em USD (vem de Banca com ?currency=usd,
+  // minimo $50). Deixar o utilizador trocar a moeda reinterpretaria o mesmo
+  // numero em Kwanza e mudaria o valor do deposito sem qualquer aviso, por
+  // isso a moeda fica fixa em USD neste fluxo. Para aceitar capital em AOA
+  // e preciso de uma fonte de taxa de cambio, nao apenas de um selector.
+  const effectiveCurrency: Currency = isCapitalDeposit ? "usd" : currency;
 
-  const price = PRICES[currency][plan];
-  const planPrice = PLAN_PRICES[currency][plan];
-  const currencySymbol = currency === "usd" ? "USD" : "AOA";
+  const price = PRICES[effectiveCurrency][plan];
+  const planPrice = PLAN_PRICES[effectiveCurrency][plan];
+  const currencySymbol = effectiveCurrency === "usd" ? "USD" : "AOA";
   const selectedPlan = PLANS.find((p) => p.id === plan);
 
   const hasPendingDepositRequest = async (): Promise<boolean> => {
@@ -207,7 +205,7 @@ export default function Depositos() {
       type: "deposit",
       method: depositModal.method,
       amount: depositAmount,
-      currency,
+      currency: effectiveCurrency,
       plan: isCapitalDeposit ? "capital" : plan,
       status: "pendente",
     });
@@ -219,7 +217,7 @@ export default function Depositos() {
         plan: isCapitalDeposit ? "capital" : plan,
         method: depositModal.method,
         amount: depositAmount,
-        currency,
+        currency: effectiveCurrency,
       };
       // O upload já foi feito; agora regista-se a linha no servidor com retry.
       // Se um insert "falhou" mas o registo existe, considera-se sucesso.
@@ -263,7 +261,7 @@ export default function Depositos() {
         try {
           localStorage.setItem(
             "pending_plan_payment",
-            JSON.stringify({ plan, amount: depositAmount, currency }),
+            JSON.stringify({ plan, amount: depositAmount, currency: effectiveCurrency }),
           );
         } catch {
           /* ignore */
@@ -277,33 +275,31 @@ export default function Depositos() {
     setShowReceiptSuccess(true);
   };
 
-  const submitWithdrawal = async () => {
-    const amount = parseFloat(withdrawAmount.replace(",", "."));
-    if (!withdrawMethod || !isFinite(amount) || amount <= 0 || !withdrawDetails.trim()) {
-      toast.error(t("depositos.invalidWithdraw"));
-      return;
-    }
+  const submitWithdrawal = async (input: {
+    method: PaymentMethod;
+    amount: number;
+    details: string;
+    currency: Currency;
+  }) => {
     try {
       await submitWithdrawalRequest({
-        method: withdrawMethod,
-        amount,
-        currency,
-        details: withdrawDetails.trim(),
+        method: input.method,
+        amount: input.amount,
+        currency: input.currency,
+        details: input.details,
       });
     } catch {
       /* mantém apenas local */
     }
     void addMovement({
       type: "withdrawal",
-      method: withdrawMethod,
-      amount,
-      currency,
+      method: input.method,
+      amount: input.amount,
+      currency: input.currency,
       status: "pendente",
-      notes: withdrawDetails.trim(),
+      notes: input.details,
     });
-    setWithdrawAmount("");
-    setWithdrawDetails("");
-    setWithdrawMethod(null);
+    setWithdrawOpen(false);
     toast.success(t("depositos.confirmWithdrawOk"), {
       description: t("depositos.confirmWithdrawMsg"),
     });
@@ -387,27 +383,6 @@ export default function Depositos() {
       </div>
     );
   };
-
-  const segment = (
-    <div className="flex rounded-full bg-secondary/70 p-1">
-      {(["usd", "aoa"] as const).map((c) => {
-        const active = currency === c;
-        return (
-          <button
-            key={c}
-            onClick={() => setCurrency(c)}
-            className={cn(
-              "relative flex-1 rounded-full py-2 text-sm font-bold transition-colors",
-              active ? "text-background" : "text-muted-foreground",
-            )}
-          >
-            {active ? <span className="absolute inset-0 rounded-full bg-accent shadow-lg shadow-accent/35" /> : null}
-            <span className="relative">{c === "usd" ? t("planos.usd") : t("planos.aoa")}</span>
-          </button>
-        );
-      })}
-    </div>
-  );
 
   return (
     <Layout>
@@ -517,7 +492,7 @@ export default function Depositos() {
                     </div>
                     {isCapitalDeposit ? (
                       <p className="text-xl font-extrabold tracking-tight">
-                        {formatBancaMoney(customAmount ?? 0, currency)}
+                        {formatBancaMoney(customAmount ?? 0, effectiveCurrency)}
                       </p>
                     ) : (
                       <div className="text-right">
@@ -537,7 +512,7 @@ export default function Depositos() {
                   >
                     {t("depositos.depositCta", {
                       amount: isCapitalDeposit
-                        ? formatBancaMoney(customAmount ?? 0, currency)
+                        ? formatBancaMoney(customAmount ?? 0, effectiveCurrency)
                         : PRICES.usd[plan],
                     })}
                   </Button>
@@ -552,7 +527,6 @@ export default function Depositos() {
             </>
           ) : (
             <>
-              {segment}
               <Card>
                 <CardContent className="space-y-4 pt-6">
                   <p className="text-sm text-muted-foreground">
@@ -566,57 +540,11 @@ export default function Depositos() {
                       {formatBancaMoney(banca.achieved, banca.currency ?? "usd")}
                     </span>
                   </div>
-                  <p className="text-sm font-semibold text-muted-foreground">
-                    {t("depositos.withdrawMethod")}
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {availableMethods.map((m) => {
-                      const active = withdrawMethod === m.id;
-                      const Icon = PAYMENT_METHOD_ICONS[m.icon];
-                      return (
-                        <button
-                          key={m.id}
-                          onClick={() => setWithdrawMethod(m.id)}
-                          className={cn(
-                            "flex items-center gap-1.5 rounded-full border px-3.5 py-2 text-sm font-semibold transition-colors",
-                            active
-                              ? "border-accent bg-accent text-background"
-                              : "border-border bg-secondary/60 text-foreground",
-                          )}
-                        >
-                          {Icon ? <Icon className="h-4 w-4" /> : null}
-                          {m.label}
-                        </button>
-                      );
-                    })}
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="text-xs text-muted-foreground">
-                      {t("depositos.withdrawAmount", { currency: currencySymbol })}
-                    </label>
-                    <Input
-                      value={withdrawAmount}
-                      onChange={(e) => setWithdrawAmount(e.target.value)}
-                      placeholder="0.00"
-                      inputMode="decimal"
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="text-xs text-muted-foreground">
-                      {t("depositos.withdrawDetails")}
-                    </label>
-                    <Textarea
-                      value={withdrawDetails}
-                      onChange={(e) => setWithdrawDetails(e.target.value)}
-                      placeholder={
-                        withdrawMethod
-                          ? PAYMENT_METHODS.find((m) => m.id === withdrawMethod)?.getDetails()
-                          : undefined
-                      }
-                      rows={2}
-                    />
-                  </div>
-                  <Button variant="secondary" className="w-full h-[54px]" onClick={submitWithdrawal}>
+                  <Button
+                    variant="secondary"
+                    className="w-full h-[54px]"
+                    onClick={() => setWithdrawOpen(true)}
+                  >
                     {t("depositos.withdrawCta")}
                   </Button>
                 </CardContent>
@@ -654,9 +582,21 @@ export default function Depositos() {
         {depositModal ? (
           <PaymentModal
             plan={plan}
-            currency={currency}
+            currency={effectiveCurrency}
             onCurrencyChange={setCurrency}
+            lockCurrency={isCapitalDeposit}
             price={price}
+            // No capital o plano nao diz nada: sem ?plan a pagina assume
+            // "basic" e o modal anunciava "Basic - 14.99/mes" num deposito de
+            // 500. O titulo e o valor passam a ser os do deposito de capital.
+            titleText={isCapitalDeposit ? t("depositos.capitalDepositTitle") : undefined}
+            amountText={
+              isCapitalDeposit
+                ? t("depositos.capitalAmount", {
+                    amount: formatBancaMoney(customAmount, effectiveCurrency),
+                  })
+                : undefined
+            }
             onClose={() => setDepositModal(null)}
             onConfirm={confirmDeposit}
             method={depositModal.method}
@@ -665,6 +605,15 @@ export default function Depositos() {
             }
             initialProof={depositModal.initialProof ?? null}
             busy={sending}
+          />
+        ) : null}
+
+        {withdrawOpen ? (
+          <WithdrawModal
+            available={banca.achieved}
+            balanceCurrency={banca.currency ?? "usd"}
+            onClose={() => setWithdrawOpen(false)}
+            onSubmit={submitWithdrawal}
           />
         ) : null}
 

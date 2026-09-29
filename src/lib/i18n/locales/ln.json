@@ -612,7 +612,9 @@
     "numberCopied": "Ekópi",
     "sendProof": "Kotika preuve",
     "sendProofHint": "Galerie to fisyé",
-    "proofAttached": "Preuve etiké"
+    "proofAttached": "Preuve etiké",
+    "withdrawAvailable": "Eza oyo ekotambwisa",
+    "capitalAmount": "Montant: {{amount}}"
   },
   "notificacoes": {
     "title": "Ba notificações",
