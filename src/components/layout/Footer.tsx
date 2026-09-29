@@ -22,11 +22,12 @@ export function Footer() {
         <div className="grid gap-8 md:grid-cols-4">
           {/* Brand */}
           <div className="md:col-span-2">
-            <Link to="/" className="flex items-center gap-3 mb-4">
-              <img src="/logo.png" alt="The Magic Trader" className="h-10 w-10 object-contain logo-glow" />
-              <span className="font-display text-lg font-bold gradient-shield">
-                The Magic Trader
-              </span>
+            <Link to="/" className="flex items-center mb-4">
+              <img
+                src="/logo-txt.png"
+                alt="The Magic Trader"
+                className="h-20 w-auto object-contain logo-glow sm:h-24"
+              />
             </Link>
             <p className="text-sm text-muted-foreground max-w-md">
               {t("common.footerTagline")}

@@ -66,7 +66,7 @@ export function Navbar() {
             <img
               src="/logo-txt.png"
               alt="The Magic Trader"
-              className="h-20 w-auto object-contain logo-glow"
+              className="h-10 w-auto object-contain logo-glow sm:h-12"
             />
           </Link>
 
@@ -176,7 +176,7 @@ export function Navbar() {
                   </Button>
                 </Link>
                 <Link to="/registro">
-                  <Button variant="hero" size="sm">{t("auth.enterApp")}</Button>
+                  <Button variant="hero" size="sm">{t("auth.createAccount")}</Button>
                 </Link>
               </>
             )}
@@ -238,7 +238,7 @@ export function Navbar() {
                       <Button variant="outline" className="w-full">{t("perfil.signIn")}</Button>
                     </Link>
                     <Link to="/registro" onClick={() => setIsOpen(false)}>
-                      <Button variant="hero" className="w-full">{t("auth.enterApp")}</Button>
+                      <Button variant="hero" className="w-full">{t("auth.createAccount")}</Button>
                     </Link>
                   </>
                 )}
