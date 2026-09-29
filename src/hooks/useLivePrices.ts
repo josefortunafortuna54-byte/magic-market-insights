@@ -5,66 +5,47 @@ interface PriceData {
   change: number;
 }
 
-const PAIR_CONFIG: Record<string, { base?: string; quote?: string; coingecko?: string; decimals: number }> = {
-  "EUR/USD": { base: "EUR", quote: "USD", decimals: 5 },
-  "GBP/USD": { base: "GBP", quote: "USD", decimals: 5 },
-  "USD/JPY": { base: "USD", quote: "JPY", decimals: 3 },
-  "AUD/USD": { base: "AUD", quote: "USD", decimals: 5 },
-  "EUR/GBP": { base: "EUR", quote: "GBP", decimals: 5 },
-  "USD/CHF": { base: "USD", quote: "CHF", decimals: 5 },
-  "NZD/USD": { base: "NZD", quote: "USD", decimals: 5 },
-  "USD/CAD": { base: "USD", quote: "CAD", decimals: 5 },
-  "XAU/USD": { base: "XAU", quote: "USD", decimals: 2 },
-  "BTC/USD": { coingecko: "bitcoin", decimals: 2 },
+// Casas decimais por par, so para formatar. O preco vem ja calculado do
+// proxy em /api/rates.
+const DECIMALS: Record<string, number> = {
+  "EUR/USD": 5,
+  "GBP/USD": 5,
+  "USD/JPY": 3,
+  "AUD/USD": 5,
+  "EUR/GBP": 5,
+  "USD/CHF": 5,
+  "NZD/USD": 5,
+  "USD/CAD": 5,
+  "XAU/USD": 2,
+  "BTC/USD": 2,
 };
 
-async function fetchForexPrice(base: string, quote: string): Promise<{ price: number; change: number }> {
-  const res = await fetch(`https://api.frankfurter.app/latest?from=${base}&to=${quote}`);
-  const json = await res.json();
-  const price = Number(json?.rates?.[quote]);
-  if (!price || isNaN(price)) throw new Error("Invalid");
-
-  // Yesterday for change %
-  const yesterday = new Date();
-  yesterday.setDate(yesterday.getDate() - 1);
-  const yStr = yesterday.toISOString().split("T")[0];
-  const res2 = await fetch(`https://api.frankfurter.app/${yStr}?from=${base}&to=${quote}`);
-  const json2 = await res2.json();
-  const prevPrice = Number(json2?.rates?.[quote]);
-  const change = prevPrice ? ((price - prevPrice) / prevPrice) * 100 : 0;
-
-  return { price, change };
+interface RatesPayload {
+  date: string;
+  pairs: Record<string, { price: number; change: number } | null>;
+  stale: boolean;
 }
 
-async function fetchBTCPrice(): Promise<{ price: number; change: number }> {
-  const res = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true");
-  const json = await res.json();
+const VAZIO = { price: "—", change: 0 };
+
+/**
+ * O bitcoin continua a ser buscado directamente ao coingecko, e nao pelo
+ * proxy: o coingecko responde 403 a pedidos de servidor (deteccao de bot)
+ * e so aceita a chamada vinda do browser. Nao havia problema nenhum
+ * com este par, por isso nao se mexe.
+ */
+async function fetchBTC(): Promise<{ price: number; change: number } | null> {
+  const res = await fetch(
+    "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true",
+  );
+  if (!res.ok) return null;
+  const json = (await res.json()) as {
+    bitcoin?: { usd?: number; usd_24h_change?: number };
+  };
   const price = Number(json?.bitcoin?.usd);
+  if (!Number.isFinite(price) || price <= 0) return null;
   const change = Number(json?.bitcoin?.usd_24h_change);
-  if (!price || isNaN(price)) throw new Error("Invalid");
-  return { price, change: isNaN(change) ? 0 : change };
-}
-
-async function fetchPairPrice(pair: string): Promise<PriceData> {
-  const config = PAIR_CONFIG[pair];
-  if (!config) return { price: "—", change: 0 };
-
-  try {
-    let result: { price: number; change: number };
-
-    if (config.coingecko) {
-      result = await fetchBTCPrice();
-    } else if (config.base && config.quote) {
-      result = await fetchForexPrice(config.base, config.quote);
-    } else {
-      return { price: "—", change: 0 };
-    }
-
-    const formatted = result.price.toFixed(config.decimals);
-    return { price: formatted, change: Math.round(result.change * 100) / 100 };
-  } catch {
-    return { price: "—", change: 0 };
-  }
+  return { price, change: Number.isFinite(change) ? change : 0 };
 }
 
 export function useLivePrices(pairs: string[]) {
@@ -73,13 +54,45 @@ export function useLivePrices(pairs: string[]) {
 
   const fetchAll = async () => {
     setLoading(true);
+
+    const cambiais = pairs.filter((p) => p !== "BTC/USD");
+    const querBtc = pairs.includes("BTC/USD");
+
+    const [taxas, btc] = await Promise.all([
+      // Um unico pedido, a partir da nossa origem. Antes eram 16
+      // (8 pares x 2 datas) e falhavam com ERR_FAILED.
+      fetch("/api/rates")
+        .then((r) => (r.ok ? (r.json() as Promise<RatesPayload>) : null))
+        .catch(() => null),
+      querBtc ? fetchBTC().catch(() => null) : Promise.resolve(null),
+    ]);
+
     const results: Record<string, PriceData> = {};
-    await Promise.allSettled(
-      pairs.map(async (pair) => {
-        results[pair] = await fetchPairPrice(pair);
-      })
-    );
-    setPrices(results);
+    for (const pair of cambiais) {
+      const raw = taxas?.pairs?.[pair];
+      results[pair] =
+        raw && Number.isFinite(raw.price)
+          ? { price: raw.price.toFixed(DECIMALS[pair] ?? 2), change: raw.change }
+          : VAZIO;
+    }
+    if (querBtc) {
+      results["BTC/USD"] = btc
+        ? { price: btc.price.toFixed(2), change: Math.round(btc.change * 100) / 100 }
+        : VAZIO;
+    }
+
+    // Par a par: quando um par nao chega, mantem-se o ultimo valor
+    // conhecido so para esse par. Um preco de ha um minuto e melhor do
+    // que um espaco em branco, mas a falha de uma fonte nao pode
+    // apagar os valores frescos da outra.
+    setPrices((prev) => {
+      const next = { ...prev };
+      for (const pair of pairs) {
+        const anterior = prev[pair];
+        next[pair] = results[pair] === VAZIO && anterior ? anterior : results[pair];
+      }
+      return next;
+    });
     setLoading(false);
   };
 
