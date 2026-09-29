@@ -1,0 +1,30 @@
+node_modules
+mobile
+dist
+.git
+.github
+.playwright-mcp
+.superpawers
+.vscode
+.vercel
+
+# Ambiente e segredos (o build usa as vars configuradas no projeto Vercel)
+.env
+.env.*
+*.local
+
+# Build local e cache de tipos
+*.tsbuildinfo
+tsconfig.app.tsbuildinfo
+tsconfig.node.tsbuildinfo
+
+# Documentacao interna nao participa no build
+docs
+RESUMO
+RESUMO-PROJETO.md
+zeta-digest-banca-depositos.md
+README.md
+
+# Imagens de trabalho nao usadas pela app
+analises.png
+ChatGPT Image *.png
