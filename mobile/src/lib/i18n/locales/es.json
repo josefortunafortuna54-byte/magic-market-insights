@@ -952,7 +952,7 @@
     "simulatorProjected": "Retorno proyectado",
     "simulatorProfit": "Ganancia estimada: +{{value}}",
     "simulatorStrategy": "Estrategia: {{name}}",
-    "simulatorDepositCta": "Hacer el primer depósito",
+    "simulatorDepositCta": "Hacer el primer depósito"
   },
   "store": {
     "title": "Loja",

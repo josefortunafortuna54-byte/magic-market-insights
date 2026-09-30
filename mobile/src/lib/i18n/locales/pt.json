@@ -700,7 +700,7 @@
     "simulatorProjected": "Retorno projetado",
     "simulatorProfit": "Lucro estimado: +{{value}}",
     "simulatorStrategy": "Estratégia: {{name}}",
-    "simulatorDepositCta": "Fazer o primeiro depósito",
+    "simulatorDepositCta": "Fazer o primeiro depósito"
   },
   "diario": {
     "title": "Diário de Trader",

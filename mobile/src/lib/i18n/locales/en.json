@@ -696,7 +696,7 @@
     "simulatorProjected": "Projected return",
     "simulatorProfit": "Estimated profit: +{{value}}",
     "simulatorStrategy": "Strategy: {{name}}",
-    "simulatorDepositCta": "Make your first deposit",
+    "simulatorDepositCta": "Make your first deposit"
   },
   "diario": {
     "title": "Trader's Journal",
