@@ -41,4 +41,8 @@ supabase/.temp/
 # Sao sempre reconstruiveis a partir de pt.json, nao vao para o git.
 scripts/_i18n-work/
 
+# Estado local do plugin de agente: guarda o ficheiro de continuacao de
+# sessao. E especifico da maquina e nao faz parte do codigo do produto.
+.omo/
+
 .env*
