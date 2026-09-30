@@ -8,10 +8,11 @@
 //
 // uso: node scripts/merge-i18n.cjs <loc>.<onda>        (ex. es.a)
 //      node scripts/merge-i18n.cjs --check              (so diagnostico)
+//      node scripts/merge-i18n.cjs --mobile <loc>.<onda>  (locales do mobile)
 const fs = require("fs");
 const path = require("path");
 
-const dir = path.join("src", "lib", "i18n", "locales");
+let dir = path.join("src", "lib", "i18n", "locales");
 const work = path.join("scripts", "_i18n-work");
 
 function flatten(o, pre = "", acc = {}) {
@@ -163,7 +164,10 @@ function fundir(loc, onda) {
   return rel;
 }
 
-const args = process.argv.slice(2);
+const args0 = process.argv.slice(2);
+const mobile = args0.includes("--mobile");
+if (mobile) dir = path.join("mobile", "src", "lib", "i18n", "locales");
+const args = args0.filter((a) => a !== "--mobile");
 const soCheck = args[0] === "--check";
 const alvos = soCheck
   ? fs.readdirSync(work).filter((f) => f.endsWith(".done.json")).map((f) => f.replace(".done.json", ""))
