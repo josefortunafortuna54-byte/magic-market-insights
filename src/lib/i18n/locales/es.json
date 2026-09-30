@@ -641,7 +641,7 @@
     "pairRoomsCount": "Salas de Pares ({{count}})",
     "pairTimeRequired": "¡Par y hora obligatorios!",
     "payments": "Pagamentos",
-    "pendingCount_one": "{{count}} pendente",
+    "pendingCount_one": "{{count}} pendiente",
     "pendingCount_other": "{{count}} pendientes",
     "pendingReceipts": "Comprobantes Pendentes",
     "pendingWithdrawals": "Retiros Pendentes",
@@ -672,8 +672,8 @@
     "receiptDeleted": "Comprobante eliminado",
     "receiptDeleteTitle": "Eliminar comprobante",
     "receiptMethod": "Método",
-    "receiptPending": "Pendente",
-    "receiptPlan": "Plano",
+    "receiptPending": "Pendiente",
+    "receiptPlan": "Plan",
     "receiptReject": "Rechazar",
     "receiptRejectConfirm": "Rechazar pago",
     "receiptRejected": "Rechazado",
@@ -732,7 +732,7 @@
     "statsVolume": "Volumen",
     "statusActive": "Activo",
     "statusLabel": "Estado",
-    "statusPending": "Pendente",
+    "statusPending": "Pendiente",
     "statusSl": "✗ SL",
     "statusTp": "✓ TP",
     "subscriptionExpires": "La suscripción expira el",
@@ -878,7 +878,7 @@
     "takeProfit": "Take Profit"
   },
   "planos": {
-    "title": "Planos",
+    "title": "Planes",
     "heroTitle": "Elige tu plan",
     "heroSubtitle": "Empieza gratis o desbloquea análisis completos con un plan de pago.",
     "premiumUntil": "Premium activo hasta {{date}}",
@@ -1382,7 +1382,7 @@
       "perMonth": "/mes"
     },
     "premiumLock": {
-      "viewPlans": "Ver Planos"
+      "viewPlans": "Ver Planes"
     },
     "signalCard": {
       "waiting": "ESPERAR",
