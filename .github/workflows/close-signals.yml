@@ -9,11 +9,39 @@ jobs:
   close-signals:
     runs-on: ubuntu-latest
     steps:
-      - name: Invocar close-signals (Supabase edge function)
+      # Sem esta guarda, um secret em falta produz um URL vazio, o curl falha
+      # e o workflow marcava verde na mesma. Falha aqui, e falla com mensagem.
+      - name: Verificar secrets
+        env:
+          SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          SERVICE_ROLE_KEY: ${{ secrets.SERVICE_ROLE_KEY }}
         run: |
-          curl -sS -X POST \
-            "${{ secrets.VITE_SUPABASE_URL }}/functions/v1/close-signals" \
-            -H "Authorization: Bearer ${{ secrets.SERVICE_ROLE_KEY }}" \
-            -H "apikey: ${{ secrets.SERVICE_ROLE_KEY }}" \
+          if [ -z "$SUPABASE_URL" ]; then
+            echo "::error::Secret VITE_SUPABASE_URL por definir no repositorio"
+            exit 1
+          fi
+          if [ -z "$SERVICE_ROLE_KEY" ]; then
+            echo "::error::Secret SERVICE_ROLE_KEY por definir no repositorio"
+            exit 1
+          fi
+
+      - name: Invocar close-signals (Supabase edge function)
+        env:
+          SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          SERVICE_ROLE_KEY: ${{ secrets.SERVICE_ROLE_KEY }}
+        run: |
+          # -f faz o curl sair != 0 num 4xx/5xx, -w devolve o status e
+          # -o guarda o corpo para se ver o que a funcao respondeu. Antes disto
+          # um 401 ou 404 dava workflow verde e nenhum sinal fechado.
+          status=$(curl -sS -f -o resposta.json -w '%{http_code}' -X POST \
+            "$SUPABASE_URL/functions/v1/close-signals" \
+            -H "Authorization: Bearer $SERVICE_ROLE_KEY" \
+            -H "apikey: $SERVICE_ROLE_KEY" \
             -H "Content-Type: application/json" \
-            -d "{}"
+            -d '{}') || {
+              echo "::error::close-signals falhou (HTTP $status)"
+              cat resposta.json 2>/dev/null || echo "(sem corpo de resposta)"
+              exit 1
+            }
+          echo "HTTP $status"
+          cat resposta.json
