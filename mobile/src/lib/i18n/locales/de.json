@@ -13,7 +13,8 @@
     "trader": "Trader",
     "waiting": "WARTEN",
     "permission": "Permission",
-    "notNow": "Nicht jetzt"
+    "notNow": "Nicht jetzt",
+    "error": "Fehler"
   },
   "tabs": {
     "inicio": "Start",
@@ -36,7 +37,10 @@
     "newsLoading": "Nachrichten werden geladen…",
     "bestSignalTitle": "Bestes Signal",
     "channelSignalsTitle": "Kanal-Signale",
-    "channelSignalsSubtitle": "Bestes aktives Signal pro Kanal"
+    "channelSignalsSubtitle": "Bestes aktives Signal pro Kanal",
+    "activeBoomsSubtitle": "Alle aktiven BOOMs von heute",
+    "liveSection": "Laufende BOOMs",
+    "upcomingSection": "Heute geplant"
   },
   "analises": {
     "title": "Analysen",
@@ -65,7 +69,13 @@
     "filterSmc": "SMC Setup",
     "upsellPoint1": "Alle Paare & Timeframes",
     "upsellPoint2": "Unbegrenzte Signale pro Tag",
-    "upsellPoint3": "Push-Benachrichtigungen in Echtzeit"
+    "upsellPoint3": "Push-Benachrichtigungen in Echtzeit",
+    "generateBtn": "Jetzt Signale generieren",
+    "generating": "Markt wird mit KI analysiert…",
+    "generateSuccess": "{{count}} Signal(e) erfolgreich generiert!",
+    "generateNoSignals": "Keine Signale gefunden. Der Markt ist gerade ruhig.",
+    "generateError": "Fehler beim Generieren der Signale. Versuche es erneut.",
+    "filterPairs": "PAARE"
   },
   "historico": {
     "allPairs": "Alle Paare",
@@ -83,7 +93,8 @@
     "slHit": "❌ STOP LOSS",
     "loading": "Verlauf wird geladen…",
     "emptyTitle": "Keine geschlossenen Signale",
-    "emptyBody": "Geschlossene Signale erscheinen hier."
+    "emptyBody": "Geschlossene Signale erscheinen hier.",
+    "expired": "Abgelaufen"
   },
   "horarios": {
     "watAngola": "WAT · ANGOLA",
@@ -196,7 +207,10 @@
     "emptyChannelsHintCreator": "Erstelle den ersten Kanal der Community.",
     "emptyPairRoomsHint": "Räume öffnen sich automatisch mit der Handelssession.",
     "emptyDmsHint": "Finde Trader über die Suche und starte Gespräche.",
-    "emptyDmsHintPremium": "Tippe oben auf +, um ein Gespräch zu starten."
+    "emptyDmsHintPremium": "Tippe oben auf +, um ein Gespräch zu starten.",
+    "reportMessage": "Melden",
+    "reportSent": "Meldung gesendet.",
+    "reportFailed": "Senden fehlgeschlagen."
   },
   "userProfile": {
     "title": "Profil",
@@ -246,7 +260,10 @@
     "nameEmpty": "Der Name darf nicht leer sein",
     "nameSaveError": "Der Name konnte nicht aktualisiert werden. Versuche es erneut.",
     "nameSaved": "Name aktualisiert",
-    "memberSince": "Mitglied seit {{date}}"
+    "memberSince": "Mitglied seit {{date}}",
+    "sectionAdmin": "VERWALTUNG",
+    "adminArea": "Admin-Bereich",
+    "adminBadge": "ADMIN"
   },
   "diario": {
     "title": "Trader-Tagebuch",
@@ -371,7 +388,84 @@
     "noUsersTitle": "Keine Daten",
     "noUsersDesc": "Die Benutzer konnten nicht geladen werden.",
     "registeredAt": "Registriert: {{date}}",
-    "userRole": "Benutzer"
+    "userRole": "Benutzer",
+    "tabWithdrawals": "Auszahlungen",
+    "tabMessaging": "Nachrichten",
+    "tabReports": "Meldungen",
+    "tabChannels": "Kanäle",
+    "tabAnnouncements": "Ankündigungen",
+    "gateTitle": "Admin-Bereich",
+    "gateSubtitle": "Gib den Zugangscode ein, um den Admin-Bereich zu betreten.",
+    "gateCodeLabel": "ZUGANGSCODE",
+    "gateCta": "Anmelden",
+    "gateWrong": "Falscher Code. Versuche es erneut.",
+    "gateLockedTitle": "Geschützter Bereich",
+    "gateLockedDesc": "Dieser Bereich ist durch einen Zugangscode geschützt.",
+    "quickPairs": "SCHNELLE PAARE",
+    "volatility": "VOLATILITÄT",
+    "presetSessions": "SCHNELLE SESSIONS",
+    "presetTokyo": "🇯🇵 Tokio",
+    "presetLondon": "🇬🇧 London",
+    "presetNewYork": "🇺🇸 New York",
+    "autoGmt": "GMT automatisch berechnet",
+    "badgeSelect": "ICON",
+    "tabReceipts": "Belege",
+    "receiptsList": "BELEGE ({{count}})",
+    "noReceipts": "Keine Belege",
+    "noReceiptsDesc": "Wenn Benutzer Belege senden, erscheinen sie hier.",
+    "receiptPending": "Ausstehend",
+    "receiptApproved": "Genehmigt",
+    "receiptRejected": "Abgelehnt",
+    "receiptUser": "Benutzer",
+    "receiptDate": "Datum",
+    "receiptAmount": "Betrag",
+    "receiptPlan": "Plan",
+    "receiptMethod": "Methode",
+    "receiptViewProof": "Beleg ansehen",
+    "receiptApprove": "Genehmigen",
+    "receiptReject": "Ablehnen",
+    "receiptApproveConfirm": "Zahlung genehmigen",
+    "receiptApproveMsg": "Möchtest du diese Zahlung genehmigen? Der Plan des Benutzers wird aktiviert.",
+    "receiptRejectConfirm": "Zahlung ablehnen",
+    "receiptRejectMsg": "Möchtest du diesen Beleg wirklich ablehnen?",
+    "receiptApprovedOk": "Zahlung genehmigt",
+    "receiptApprovedMsg": "Der Plan des Benutzers wurde erfolgreich aktiviert.",
+    "receiptRejectedOk": "Beleg abgelehnt",
+    "receiptRejectedMsg": "Der Beleg wurde abgelehnt.",
+    "receiptDeleteTitle": "Beleg löschen",
+    "receiptDeleteConfirm": "Möchtest du diesen Eintrag wirklich löschen?",
+    "search": "Suchen...",
+    "filter": "Filtern",
+    "clearFilters": "Filter zurücksetzen",
+    "export": "Exportieren",
+    "selectAll": "Alle auswählen",
+    "deselectAll": "Alle abwählen",
+    "deleteSelected": "Auswahl löschen",
+    "selectedCount": "{{count}} ausgewählt",
+    "confirmDelete": "{{count}} Elemente wirklich löschen?",
+    "notifications": "Benachrichtigungen",
+    "markAllRead": "Alle als gelesen markieren",
+    "noNotifications": "Keine Benachrichtigungen",
+    "banUser": "Benutzer sperren",
+    "unbanUser": "Benutzer entsperren",
+    "makePremium": "Premium vergeben",
+    "removePremium": "Premium entfernen",
+    "editExpiration": "Ablauf bearbeiten",
+    "subscriptionExpires": "Abo läuft ab am",
+    "expiringSoon": "Läuft bald ab",
+    "pendingReceipts": "Ausstehende Belege",
+    "userDetails": "Benutzerdetails",
+    "registrationDate": "Registrierungsdatum",
+    "currentPlan": "Aktueller Plan",
+    "daysUntilExpiry": "Noch {{days}} Tage bis zum Ablauf",
+    "expired": "Abgelaufen",
+    "never": "Nie",
+    "userBanned": "Benutzer erfolgreich gesperrt",
+    "userUnbanned": "Benutzer erfolgreich entsperrt",
+    "roleUpdated": "Benutzerrolle aktualisiert",
+    "expiryUpdated": "Ablauf des Abonnements aktualisiert",
+    "statExpiring": "Läuft bald ab",
+    "statPendingReceipts": "Ausstehende Belege"
   },
   "adminErrors": {
     "load": "Fehler beim Laden der Signale",
@@ -399,7 +493,11 @@
     "sendCode": "Code senden",
     "verifyCode": "Prüfen & anmelden",
     "codeSent": "Wir haben einen Code an {{phone}} gesendet. Gib ihn unten ein.",
-    "resendCode": "Code erneut senden"
+    "resendCode": "Code erneut senden",
+    "or": "oder",
+    "value1": "Signale in Echtzeit",
+    "value2": "Benachrichtigungen aufs Handy",
+    "value3": "Bankroll-Verwaltung"
   },
   "authErrors": {
     "googleStart": "Der Google-Login konnte nicht gestartet werden.",
@@ -419,7 +517,8 @@
     "rr": "RR",
     "technical": "TECHNISCHE ANALYSE",
     "noReasons": "Keine Begründungen",
-    "riskWarning": "Risikohinweis: Diese Analyse dient nur zu Bildungszwecken…"
+    "riskWarning": "Risikohinweis: Diese Analyse dient nur zu Bildungszwecken…",
+    "smcSetup": "SMC Setup"
   },
   "planos": {
     "title": "Pläne",
@@ -508,7 +607,11 @@
     "capitalItem2": "Renditeziel mit automatischem Zinseszinseffekt",
     "capitalItem3": "Wöchentliche Gewinnabhebungen",
     "capitalItem4": "Leistungsberichte und Zielfortschritt",
-    "capitalCta": "Kapitalmanagement ansehen"
+    "capitalCta": "Kapitalmanagement ansehen",
+    "receiptHint": "Das Team prüft deine Zahlung und bestätigt sie in Kürze.",
+    "ok": "Verstanden",
+    "retryMessage": "Prüfe deine Verbindung und versuche es erneut.",
+    "tryAgain": "Erneut versuchen"
   },
   "capital": {
     "title": "Kapitalverwaltung",
@@ -553,7 +656,15 @@
     "simulatorAmount": "Zu investierender Betrag ({{currency}})",
     "simulatorInvested": "Investierter Betrag",
     "simulatorProjected": "Projizierte Rendite",
-    "simulatorProfit": "Geschätzter Gewinn: +{{value}}"
+    "simulatorProfit": "Geschätzter Gewinn: +{{value}}",
+    "withdrawAmount": "Auszahlungsbetrag",
+    "withdrawDetails": "Zahlungsdaten (NIF/IBAN)",
+    "withdrawableValue": "Verfügbar: {{value}}",
+    "withdrawErrorTitle": "Fehler bei der Auszahlungsanfrage",
+    "withdrawErrorMsg": "Wir konnten deine Anfrage nicht registrieren. Versuche es erneut.",
+    "targetValue": "Ziel: {{value}}",
+    "simulatorStrategy": "Strategie: {{name}}",
+    "simulatorDepositCta": "Erste Einzahlung tätigen"
   },
   "banca": {
     "title": "Bankroll-Verwaltung",
@@ -580,7 +691,36 @@
     "inputRisk": "RISIKO PRO TRADE (%)",
     "weekly": "Wöchentlich",
     "monthly": "Monatlich",
-    "total": "Gesamt"
+    "total": "Gesamt",
+    "addTrade": "Trade hinzufügen",
+    "tradePair": "Paar",
+    "tradeDirection": "Richtung",
+    "tradeEntry": "Einstiegspreis",
+    "tradeExit": "Ausstiegspreis",
+    "tradeLot": "Lot",
+    "tradePips": "Pips",
+    "tradeProfit": "Gewinn (USD)",
+    "tradeResult": "Ergebnis",
+    "tradeNotes": "Notizen",
+    "tradeNotesPlaceholder": "z.B. Boom Hour Signal gefolgt...",
+    "cancel": "Abbrechen",
+    "noTrades": "Keine Trades erfasst",
+    "noTradesHint": "Füge deinen ersten Trade hinzu, um Statistiken zu sehen",
+    "todayPnl": "Heute",
+    "weekPnl": "Diese Woche",
+    "winRate": "Win Rate",
+    "totalPnl": "P&L gesamt",
+    "trades": "Trades",
+    "profitFactor": "Profit-Faktor",
+    "wins": "Gewinne",
+    "losses": "Verluste",
+    "breakevens": "Break-Even",
+    "recentTrades": "Letzte Trades",
+    "showLess": "Weniger anzeigen",
+    "showAll": "Alle anzeigen ({{count}})",
+    "deleteTrade": "Trade löschen",
+    "deleteTradeConfirm": "Möchtest du diesen Trade wirklich löschen?",
+    "delete": "Löschen"
   },
   "depositos": {
     "title": "Einzahlungen & Auszahlungen",
@@ -611,7 +751,19 @@
     "numberCopied": "Kopiert",
     "sendProof": "Beleg anhängen",
     "sendProofHint": "Galerie oder Dateien",
-    "proofAttached": "Beleg angehängt"
+    "proofAttached": "Beleg angehängt",
+    "tabDeposit": "Einzahlen",
+    "tabWithdraw": "Auszahlen",
+    "choosePlan": "Wähle deinen Plan",
+    "secureNote": "Sichere Zahlungen · Vom Team verarbeitet",
+    "withdrawAvailable": "Auszahlbar",
+    "movementCapital": "Kapitaleinzahlung",
+    "capitalDepositTitle": "Kapitaleinzahlung",
+    "capitalDepositSubtitle": "Bankroll-Verwaltung — im Renditerechner festgelegter Betrag",
+    "receiptSaveError": "Beleg gesendet, konnte aber nicht auf dem Server gespeichert werden. Kontaktiere den Support.",
+    "deleteMovement": "Löschen",
+    "deleteMovementTitle": "Transaktion löschen?",
+    "deleteMovementMsg": "Möchtest du diese ausstehende Transaktion wirklich löschen?"
   },
   "notificacoes": {
     "title": "Benachrichtigungen",
@@ -626,7 +778,23 @@
     "manageAlerts": "Alarme verwalten",
     "clearAll": "Alle löschen",
     "planProcessing": "In Prüfung",
-    "planPending": "Ausstehend"
+    "planPending": "Ausstehend",
+    "summaryTitle": "Posteingang",
+    "unreadCount_one": "{{count}} ungelesen",
+    "unreadCount_other": "{{count}} ungelesen",
+    "allRead": "Alle gelesen",
+    "today": "Heute",
+    "thisWeek": "Diese Woche",
+    "earlier": "Frühere",
+    "justNow": "Gerade eben",
+    "minAgo_one": "vor {{count}} Min.",
+    "minAgo_other": "vor {{count}} Min.",
+    "hoursAgo_one": "vor {{count}} Std.",
+    "hoursAgo_other": "vor {{count}} Std.",
+    "daysAgo_one": "vor {{count}} T",
+    "daysAgo_other": "vor {{count}} T",
+    "scheduledFor": "Geplant für {{time}}",
+    "refresh": "Aktualisieren"
   },
   "tour": {
     "skip": "Überspringen",
@@ -674,7 +842,10 @@
     "expiry3Title": "Dein Abo läuft bald ab",
     "expiry3Body": "Noch {{days}} Tage bis zum Ende deines Premium-Abos. Verlängere jetzt, um deine Vorteile zu behalten.",
     "expiry1Title": "Dein Abo läuft morgen ab",
-    "expiry1Body": "Morgen ist der letzte Tag deines Premium-Abos. Verlängere jetzt, um Unterbrechungen zu vermeiden."
+    "expiry1Body": "Morgen ist der letzte Tag deines Premium-Abos. Verlängere jetzt, um Unterbrechungen zu vermeiden.",
+    "welcomeChannelName": "Willkommen",
+    "welcomeTitle": "Willkommen bei The Magic Trader",
+    "welcomeBody": "Danke, dass du dabei bist! Erkunde die App und erhalte Signale in Echtzeit."
   },
   "definicoesBooms": {
     "title": "Boom-Einstellungen",
@@ -946,20 +1117,33 @@
       "entry": "EINSTIEG",
       "stopLoss": "SL",
       "takeProfit": "TP"
+    },
+    "store": {
+      "title": "Shop",
+      "subtitle": "Bots, Mentoring und E-Books für deinen Erfolg",
+      "categoryAll": "Alle",
+      "categoryBots": "Bots",
+      "categoryMentorias": "Mentoring",
+      "categoryEbooks": "E-Books",
+      "premium": "Premium",
+      "free": "Kostenlos",
+      "empty": "Keine Artikel verfügbar",
+      "premiumRequired": "Premium erforderlich",
+      "premiumMessage": "Dieser Artikel ist nur für Premium-Mitglieder verfügbar. Möchtest du upgraden?"
     }
   },
   "store": {
-    "title": "Loja",
-    "subtitle": "Bots, mentorias e ebooks para o teu sucesso",
-    "categoryAll": "Todos",
+    "title": "Shop",
+    "subtitle": "Bots, Mentoring und E-Books für deinen Erfolg",
+    "categoryAll": "Alle",
     "categoryBots": "Bots",
-    "categoryMentorias": "Mentorias",
-    "categoryEbooks": "Ebooks",
+    "categoryMentorias": "Mentoring",
+    "categoryEbooks": "E-Books",
     "premium": "Premium",
-    "free": "Grátis",
-    "empty": "Nenhum item disponível",
-    "premiumRequired": "Premium Necessário",
-    "premiumMessage": "Este item é exclusivo para membros Premium. Deseja fazer upgrade?",
+    "free": "Kostenlos",
+    "empty": "Keine Artikel verfügbar",
+    "premiumRequired": "Premium erforderlich",
+    "premiumMessage": "Dieser Artikel ist nur für Premium-Mitglieder verfügbar. Möchtest du upgraden?",
     "statsProducts": "Produkte",
     "statsFree": "Kostenlos",
     "statsRating": "Bewertung",
@@ -978,5 +1162,23 @@
     "incEbook1": "Sofortiger Zugriff",
     "incEbook2": "Praxisbeispiele",
     "incEbook3": "Kostenlose Updates"
+  },
+  "premiumWelcome": {
+    "title": "Willkommen bei Premium!",
+    "body": "Dein Plan ist aktiv. Jetzt hast du das komplette TMT in den Händen.",
+    "perkBank": "Bankroll mit Zielen und Zinseszins",
+    "perkSignals": "Völlig unbegrenzte Signale",
+    "perkChannels": "Exklusive Community-Kanäle",
+    "perkStore": "Exklusiver Shop für Mitglieder",
+    "ctaBank": "Meine Bankroll aktivieren",
+    "ctaExplore": "Signale entdecken"
+  },
+  "premiumBanner": {
+    "expiringTitle_one": "{{count}} Tag verbleibend in deinem Plan",
+    "expiringTitle_other": "{{count}} Tage verbleibend in deinem Plan",
+    "expiringSub": "Verlängere jetzt, um deine Vorteile nicht zu verlieren.",
+    "expiredTitle": "Dein Premium-Plan ist abgelaufen",
+    "expiredSub": "Am {{date}} abgelaufen. Verlängere, um den vollen Zugang wiederherzustellen.",
+    "renew": "Verlängern"
   }
 }

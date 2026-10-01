@@ -278,7 +278,10 @@
     "nameEmpty": "Name cannot be empty",
     "nameSaveError": "Could not update your name. Please try again.",
     "nameSaved": "Name updated",
-    "memberSince": "Member since {{date}}"
+    "memberSince": "Member since {{date}}",
+    "sectionAdmin": "ADMINISTRATION",
+    "adminArea": "Admin Area",
+    "adminBadge": "ADMIN"
   },
   "language": {
     "title": "Language"
@@ -439,7 +442,16 @@
     "userBanned": "User banned successfully",
     "userUnbanned": "User unbanned successfully",
     "roleUpdated": "User role updated",
-    "expiryUpdated": "Subscription expiry updated"
+    "expiryUpdated": "Subscription expiry updated",
+    "gateTitle": "Admin area",
+    "gateSubtitle": "Enter the access code to access the admin area.",
+    "gateCodeLabel": "ACCESS CODE",
+    "gateCta": "Enter",
+    "gateWrong": "Wrong code. Try again.",
+    "gateLockedTitle": "Protected area",
+    "gateLockedDesc": "This area is protected by an access code.",
+    "statExpiring": "Expiring Soon",
+    "statPendingReceipts": "Pending Receipts"
   },
   "adminErrors": {
     "load": "Error loading signals",
@@ -494,7 +506,8 @@
     "rr": "RR",
     "technical": "TECHNICAL ANALYSIS",
     "noReasons": "No justifications",
-    "riskWarning": "Risk warning: this analysis is for educational purposes…"
+    "riskWarning": "Risk warning: this analysis is for educational purposes…",
+    "smcSetup": "SMC Setup"
   },
   "planos": {
     "title": "Plans",
@@ -850,7 +863,10 @@
     "expiry3Title": "Your subscription expires soon",
     "expiry3Body": "{{days}} days left until your Premium subscription ends. Renew now to keep your benefits.",
     "expiry1Title": "Your subscription expires tomorrow",
-    "expiry1Body": "Tomorrow is the last day of your Premium subscription. Renew now to avoid interruptions."
+    "expiry1Body": "Tomorrow is the last day of your Premium subscription. Renew now to avoid interruptions.",
+    "welcomeChannelName": "Welcome",
+    "welcomeTitle": "Welcome to The Magic Trader",
+    "welcomeBody": "Thanks for joining! Explore the app and start receiving signals in real time."
   },
   "definicoesBooms": {
     "title": "Boom Settings",

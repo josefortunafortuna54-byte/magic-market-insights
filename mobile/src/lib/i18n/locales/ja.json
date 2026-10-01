@@ -13,7 +13,8 @@
     "trader": "トレーダー",
     "waiting": "待機中",
     "permission": "Permission",
-    "notNow": "今はしない"
+    "notNow": "今はしない",
+    "error": "エラー"
   },
   "tabs": {
     "inicio": "ホーム",
@@ -36,7 +37,10 @@
     "newsLoading": "ニュースを読み込み中…",
     "bestSignalTitle": "最高のシグナル",
     "channelSignalsTitle": "チャンネルのシグナル",
-    "channelSignalsSubtitle": "チャンネルごとの最高アクティブシグナル"
+    "channelSignalsSubtitle": "チャンネルごとの最高アクティブシグナル",
+    "activeBoomsSubtitle": "今日のアクティブなBOOMすべて",
+    "liveSection": "進行中のBOOM",
+    "upcomingSection": "今日の予定"
   },
   "analises": {
     "title": "分析",
@@ -65,7 +69,13 @@
     "filterSmc": "SMC セットアップ",
     "upsellPoint1": "すべてのペアと時間足",
     "upsellPoint2": "1日のシグナル無制限",
-    "upsellPoint3": "リアルタイムのプッシュ通知"
+    "upsellPoint3": "リアルタイムのプッシュ通知",
+    "generateBtn": "今すぐシグナルを生成",
+    "generating": "AIで市場を分析中…",
+    "generateSuccess": "{{count}}件のシグナルを生成しました！",
+    "generateNoSignals": "シグナルが見つかりません。現在は市場が静穏です。",
+    "generateError": "シグナルの生成中にエラーが発生しました。もう一度お試しください。",
+    "filterPairs": "通貨ペア"
   },
   "historico": {
     "allPairs": "全ペア",
@@ -83,7 +93,8 @@
     "slHit": "❌ ストップロス到達",
     "loading": "履歴を読み込み中…",
     "emptyTitle": "クローズ済みシグナルなし",
-    "emptyBody": "クローズ済みのシグナルはここに表示されます。"
+    "emptyBody": "クローズ済みのシグナルはここに表示されます。",
+    "expired": "期限切れ"
   },
   "horarios": {
     "watAngola": "WAT · アンゴラ",
@@ -196,7 +207,10 @@
     "emptyChannelsHintCreator": "コミュニティの最初のチャンネルを作成しましょう。",
     "emptyPairRoomsHint": "ルームはマーケットセッションで自動的に開きます。",
     "emptyDmsHint": "検索でトレーダーを見つけて会話を始めましょう。",
-    "emptyDmsHintPremium": "上部の + をタップして会話を始めましょう。"
+    "emptyDmsHintPremium": "上部の + をタップして会話を始めましょう。",
+    "reportMessage": "報告",
+    "reportSent": "報告を送信しました。",
+    "reportFailed": "送信できませんでした。"
   },
   "userProfile": {
     "title": "プロフィール",
@@ -246,7 +260,10 @@
     "nameEmpty": "名前を空にすることはできません",
     "nameSaveError": "名前を更新できませんでした。もう一度お試しください。",
     "nameSaved": "名前を更新しました",
-    "memberSince": "{{date}} からメンバー"
+    "memberSince": "{{date}} からメンバー",
+    "sectionAdmin": "管理",
+    "adminArea": "管理エリア",
+    "adminBadge": "ADMIN"
   },
   "diario": {
     "title": "トレーダー日記",
@@ -371,7 +388,84 @@
     "noUsersTitle": "データなし",
     "noUsersDesc": "ユーザーを読み込めませんでした。",
     "registeredAt": "登録日: {{date}}",
-    "userRole": "ユーザー"
+    "userRole": "ユーザー",
+    "tabWithdrawals": "出金",
+    "tabMessaging": "メッセージ",
+    "tabReports": "報告",
+    "tabChannels": "チャンネル",
+    "tabAnnouncements": "お知らせ",
+    "gateTitle": "管理エリア",
+    "gateSubtitle": "管理エリアに入るにはアクセスコードを入力してください。",
+    "gateCodeLabel": "アクセスコード",
+    "gateCta": "ログイン",
+    "gateWrong": "コードが正しくありません。もう一度お試しください。",
+    "gateLockedTitle": "保護されたエリア",
+    "gateLockedDesc": "このエリアはアクセスコードで保護されています。",
+    "quickPairs": "クイックペア",
+    "volatility": "ボラティリティ",
+    "presetSessions": "クイックセッション",
+    "presetTokyo": "🇯🇵 東京",
+    "presetLondon": "🇬🇧 ロンドン",
+    "presetNewYork": "🇺🇸 ニューヨーク",
+    "autoGmt": "GMTは自動計算されます",
+    "badgeSelect": "アイコン",
+    "tabReceipts": "領収書",
+    "receiptsList": "領収書 ({{count}})",
+    "noReceipts": "領収書なし",
+    "noReceiptsDesc": "ユーザーが領収書を送信すると、ここに表示されます。",
+    "receiptPending": "保留中",
+    "receiptApproved": "承認済み",
+    "receiptRejected": "拒否済み",
+    "receiptUser": "ユーザー",
+    "receiptDate": "日付",
+    "receiptAmount": "金額",
+    "receiptPlan": "プラン",
+    "receiptMethod": "方法",
+    "receiptViewProof": "領収書を表示",
+    "receiptApprove": "承認",
+    "receiptReject": "拒否",
+    "receiptApproveConfirm": "支払いを承認",
+    "receiptApproveMsg": "この支払いを承認してもよろしいですか？ユーザーのプランが有効になります。",
+    "receiptRejectConfirm": "支払いを拒否",
+    "receiptRejectMsg": "この領収書を拒否してもよろしいですか？",
+    "receiptApprovedOk": "支払いを承認しました",
+    "receiptApprovedMsg": "ユーザーのプランが有効になりました。",
+    "receiptRejectedOk": "領収書を拒否しました",
+    "receiptRejectedMsg": "領収書は拒否されました。",
+    "receiptDeleteTitle": "領収書を削除",
+    "receiptDeleteConfirm": "この記録を削除してもよろしいですか？",
+    "search": "検索...",
+    "filter": "絞り込み",
+    "clearFilters": "フィルターをクリア",
+    "export": "エクスポート",
+    "selectAll": "すべて選択",
+    "deselectAll": "すべて選択解除",
+    "deleteSelected": "選択項目を削除",
+    "selectedCount": "{{count}}件選択中",
+    "confirmDelete": "{{count}}件を削除してもよろしいですか？",
+    "notifications": "通知",
+    "markAllRead": "すべて既読",
+    "noNotifications": "通知なし",
+    "banUser": "ユーザーをBAN",
+    "unbanUser": "BANを解除",
+    "makePremium": "Premiumにする",
+    "removePremium": "Premiumを解除",
+    "editExpiration": "有効期限を編集",
+    "subscriptionExpires": "サブスクリプションの有効期限",
+    "expiringSoon": "まもなく期限切れ",
+    "pendingReceipts": "保留中の領収書",
+    "userDetails": "ユーザー詳細",
+    "registrationDate": "登録日",
+    "currentPlan": "現在のプラン",
+    "daysUntilExpiry": "期限まで{{days}}日",
+    "expired": "期限切れ",
+    "never": "なし",
+    "userBanned": "ユーザーをBANしました",
+    "userUnbanned": "ユーザーのBANを解除しました",
+    "roleUpdated": "ユーザーの権限を更新しました",
+    "expiryUpdated": "サブスクリプションの有効期限を更新しました",
+    "statExpiring": "まもなく期限切れ",
+    "statPendingReceipts": "保留中の領収書"
   },
   "adminErrors": {
     "load": "シグナルの読み込みエラー",
@@ -399,7 +493,11 @@
     "sendCode": "コードを送信",
     "verifyCode": "確認してログイン",
     "codeSent": "{{phone}} にコードを送信しました。下に入力してください。",
-    "resendCode": "コードを再送信"
+    "resendCode": "コードを再送信",
+    "or": "または",
+    "value1": "リアルタイムシグナル",
+    "value2": "スマホへの通知",
+    "value3": "資金管理"
   },
   "authErrors": {
     "googleStart": "Googleログインを開始できませんでした。",
@@ -419,7 +517,8 @@
     "rr": "RR",
     "technical": "テクニカル分析",
     "noReasons": "理由なし",
-    "riskWarning": "リスク警告: この分析は教育目的です…"
+    "riskWarning": "リスク警告: この分析は教育目的です…",
+    "smcSetup": "SMCセットアップ"
   },
   "planos": {
     "title": "プラン",
@@ -508,7 +607,11 @@
     "capitalItem2": "自動複利でリターン目標を達成",
     "capitalItem3": "週次で利益を出金可能",
     "capitalItem4": "パフォーマンスレポートと目標進捗",
-    "capitalCta": "資金管理を見る"
+    "capitalCta": "資金管理を見る",
+    "receiptHint": "チームが支払い内容を確認し、まもなく承認します。",
+    "ok": "わかりました",
+    "retryMessage": "接続を確認して、もう一度お試しください。",
+    "tryAgain": "もう一度試す"
   },
   "banca": {
     "title": "資金管理",
@@ -535,7 +638,36 @@
     "inputRisk": "1取引あたりのリスク (%)",
     "weekly": "週間",
     "monthly": "月間",
-    "total": "合計"
+    "total": "合計",
+    "addTrade": "取引を追加",
+    "tradePair": "ペア",
+    "tradeDirection": "方向",
+    "tradeEntry": "エントリー価格",
+    "tradeExit": "エグジット価格",
+    "tradeLot": "ロット",
+    "tradePips": "ピップス",
+    "tradeProfit": "利益 (USD)",
+    "tradeResult": "結果",
+    "tradeNotes": "メモ",
+    "tradeNotesPlaceholder": "例: ブームアワーのシグナルに従った…",
+    "cancel": "キャンセル",
+    "noTrades": "記録された取引はありません",
+    "noTradesHint": "最初の取引を追加すると統計が表示されます",
+    "todayPnl": "今日",
+    "weekPnl": "今週",
+    "winRate": "勝率",
+    "totalPnl": "合計損益",
+    "trades": "取引",
+    "profitFactor": "プロフィットファクター",
+    "wins": "勝ち",
+    "losses": "負け",
+    "breakevens": "損益分岐",
+    "recentTrades": "最近の取引",
+    "showLess": "表示を減らす",
+    "showAll": "すべて見る（{{count}}）",
+    "deleteTrade": "取引を削除",
+    "deleteTradeConfirm": "この取引を削除してもよろしいですか？",
+    "delete": "削除"
   },
   "capital": {
     "title": "資本管理",
@@ -580,7 +712,15 @@
     "simulatorAmount": "投資額（{{currency}}）",
     "simulatorInvested": "投資金額",
     "simulatorProjected": "予想リターン",
-    "simulatorProfit": "予想利益：+{{value}}"
+    "simulatorProfit": "予想利益：+{{value}}",
+    "withdrawAmount": "出金額",
+    "withdrawDetails": "支払い情報 (NIF/IBAN)",
+    "withdrawableValue": "利用可能: {{value}}",
+    "withdrawErrorTitle": "出金リクエストに失敗しました",
+    "withdrawErrorMsg": "リクエストを記録できませんでした。もう一度お試しください。",
+    "targetValue": "目標: {{value}}",
+    "simulatorStrategy": "戦略: {{name}}",
+    "simulatorDepositCta": "初回入金をする"
   },
   "depositos": {
     "title": "入金と出金",
@@ -611,7 +751,19 @@
     "numberCopied": "コピーしました",
     "sendProof": "領収書を添付",
     "sendProofHint": "ギャラリーまたはファイル",
-    "proofAttached": "領収書を添付しました"
+    "proofAttached": "領収書を添付しました",
+    "tabDeposit": "入金",
+    "tabWithdraw": "出金",
+    "choosePlan": "プランを選択してください",
+    "secureNote": "安全な決済 · チームが処理します",
+    "withdrawAvailable": "出金額",
+    "movementCapital": "資本の入金",
+    "capitalDepositTitle": "資本の入金",
+    "capitalDepositSubtitle": "資金管理 — シミュレーターで設定した金額",
+    "receiptSaveError": "領収書は送信されましたが、サーバーへの登録に失敗しました。サポートにお問い合わせください。",
+    "deleteMovement": "削除",
+    "deleteMovementTitle": "履歴を削除しますか？",
+    "deleteMovementMsg": "この保留中の履歴を削除してもよろしいですか？"
   },
   "notificacoes": {
     "title": "通知",
@@ -626,7 +778,23 @@
     "manageAlerts": "アラートを管理",
     "clearAll": "すべてクリア",
     "planProcessing": "審査中",
-    "planPending": "保留中"
+    "planPending": "保留中",
+    "summaryTitle": "受信トレイ",
+    "unreadCount_one": "未読 {{count}}件",
+    "unreadCount_other": "未読 {{count}}件",
+    "allRead": "すべて既読",
+    "today": "今日",
+    "thisWeek": "今週",
+    "earlier": "それ以前",
+    "justNow": "たった今",
+    "minAgo_one": "{{count}}分前",
+    "minAgo_other": "{{count}}分前",
+    "hoursAgo_one": "{{count}}時間前",
+    "hoursAgo_other": "{{count}}時間前",
+    "daysAgo_one": "{{count}}日前",
+    "daysAgo_other": "{{count}}日前",
+    "scheduledFor": "配信予定: {{time}}",
+    "refresh": "更新"
   },
   "tour": {
     "skip": "スキップ",
@@ -674,7 +842,10 @@
     "expiry3Title": "プレミアムの期限が近づいています",
     "expiry3Body": "プレミアムサブスクリプションの終了まであと{{days}}日です。特典を維持するには今すぐ更新しましょう。",
     "expiry1Title": "プレミアムの期限は明日です",
-    "expiry1Body": "明日はプレミアムサブスクリプションの最終日です。中断されないよう今すぐ更新してください。"
+    "expiry1Body": "明日はプレミアムサブスクリプションの最終日です。中断されないよう今すぐ更新してください。",
+    "welcomeChannelName": "ようこそ",
+    "welcomeTitle": "The Magic Traderへようこそ",
+    "welcomeBody": "ご参加ありがとうございます！アプリを探索して、リアルタイムのシグナルを受け取りましょう。"
   },
   "definicoesBooms": {
     "title": "ブーム設定",
@@ -946,20 +1117,33 @@
       "entry": "エントリー",
       "stopLoss": "SL",
       "takeProfit": "TP"
+    },
+    "store": {
+      "title": "ストア",
+      "subtitle": "成功へと導くBots・メンターシップ・Ebooks",
+      "categoryAll": "すべて",
+      "categoryBots": "Bots",
+      "categoryMentorias": "メンターシップ",
+      "categoryEbooks": "Ebooks",
+      "premium": "Premium",
+      "free": "無料",
+      "empty": "商品はまだありません",
+      "premiumRequired": "Premium必須",
+      "premiumMessage": "この商品はPremium会員専用です。アップグレードしますか？"
     }
   },
   "store": {
-    "title": "Loja",
-    "subtitle": "Bots, mentorias e ebooks para o teu sucesso",
-    "categoryAll": "Todos",
+    "title": "ストア",
+    "subtitle": "成功へと導くBots・メンターシップ・Ebooks",
+    "categoryAll": "すべて",
     "categoryBots": "Bots",
-    "categoryMentorias": "Mentorias",
+    "categoryMentorias": "メンターシップ",
     "categoryEbooks": "Ebooks",
     "premium": "Premium",
-    "free": "Grátis",
-    "empty": "Nenhum item disponível",
-    "premiumRequired": "Premium Necessário",
-    "premiumMessage": "Este item é exclusivo para membros Premium. Deseja fazer upgrade?",
+    "free": "無料",
+    "empty": "商品はまだありません",
+    "premiumRequired": "Premium必須",
+    "premiumMessage": "この商品はPremium会員専用です。アップグレードしますか？",
     "statsProducts": "商品",
     "statsFree": "無料",
     "statsRating": "評価",
@@ -978,5 +1162,23 @@
     "incEbook1": "すぐにアクセス",
     "incEbook2": "実践的な例",
     "incEbook3": "無料アップデート"
+  },
+  "premiumWelcome": {
+    "title": "Premiumへようこそ！",
+    "body": "プランが有効になりました。これでTMTのすべてをお使いいただけます。",
+    "perkBank": "目標と複利を備えた資金管理",
+    "perkSignals": "完全無制限のシグナル",
+    "perkChannels": "コミュニティ限定チャンネル",
+    "perkStore": "会員限定ストア",
+    "ctaBank": "資金管理を有効にする",
+    "ctaExplore": "シグナルを見る"
+  },
+  "premiumBanner": {
+    "expiringTitle_one": "プランの有効期限まで残り{{count}}日",
+    "expiringTitle_other": "プランの有効期限まで残り{{count}}日",
+    "expiringSub": "特典を失わないように今すぐ更新しましょう。",
+    "expiredTitle": "Premiumプランの有効期限が切れました",
+    "expiredSub": "{{date}}に期限切れになりました。更新するとすべてのアクセスが復活します。",
+    "renew": "更新"
   }
 }

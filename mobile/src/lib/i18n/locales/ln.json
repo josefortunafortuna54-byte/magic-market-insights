@@ -13,7 +13,8 @@
     "trader": "Trader",
     "waiting": "KOZELA",
     "permission": "Permission",
-    "notNow": "Sika te"
+    "notNow": "Sika te",
+    "error": "Libunga"
   },
   "tabs": {
     "inicio": "Ebandeli",
@@ -36,7 +37,10 @@
     "newsLoading": "Kozwa bansoya…",
     "bestSignalTitle": "Signal ya malamu mpenza",
     "channelSignalsTitle": "Signale ya bibanga",
-    "channelSignalsSubtitle": "Signal malamu na mokolo na mokolo"
+    "channelSignalsSubtitle": "Signal malamu na mokolo na mokolo",
+    "activeBoomsSubtitle": "BOOMs nionso oyo bazali aktif lelo",
+    "liveSection": "BOOMs oyo ekweli",
+    "upcomingSection": "Oyo ezali koya lelo"
   },
   "analises": {
     "title": "Analyse",
@@ -65,7 +69,13 @@
     "filterSmc": "Setup SMC",
     "upsellPoint1": "Ba pairs nyonso na ba timeframes",
     "upsellPoint2": "Ba signaux sans limite par jour",
-    "upsellPoint3": "Ba notifications en temps réel"
+    "upsellPoint3": "Ba notifications en temps réel",
+    "generateBtn": "Kokela Signaux Sikoyo",
+    "generating": "Eza kosala analyse ya marché na IA…",
+    "generateSuccess": "{{count}} signal oyo ekomamaka mpenza!",
+    "generateNoSignals": "Signal te oyo ekomamaka. Marché ezali kimwemwe sikoyo.",
+    "generateError": "Libunga na kokela ba signaux. Meka lisusu.",
+    "filterPairs": "BAPAIRES"
   },
   "historico": {
     "allPairs": "Bapaires nyonso",
@@ -83,7 +93,8 @@
     "slHit": "❌ STOP LOSS",
     "loading": "Eza kotia lisapo…",
     "emptyTitle": "Ba signaux ya kokangama te",
-    "emptyBody": "Ba signaux oyo bakangami bamonanaka awa."
+    "emptyBody": "Ba signaux oyo bakangami bamonanaka awa.",
+    "expired": "Esilisi"
   },
   "horarios": {
     "watAngola": "WAT · ANGOLA",
@@ -196,7 +207,10 @@
     "emptyChannelsHintCreator": "Salá chaîne ya yambo ya communauté.",
     "emptyPairRoomsHint": "Ba salons efungwaka na ndenge ya moko na session ya marché.",
     "emptyDmsHint": "Luka ba traders na recherche mpe bandá conversation.",
-    "emptyDmsHintPremium": "Salela + na likolo mpo na kobanda conversation."
+    "emptyDmsHintPremium": "Salela + na likolo mpo na kobanda conversation.",
+    "reportMessage": "Rapport",
+    "reportSent": "Rapport etindami.",
+    "reportFailed": "Ekomi te kotinda."
   },
   "userProfile": {
     "title": "Profil",
@@ -246,7 +260,10 @@
     "nameEmpty": "Nkombo ekoki te kozala mpamba",
     "nameSaveError": "Esengelaki te kobongola nkombo. Joka lisusu.",
     "nameSaved": "Nkombo ebongisami",
-    "memberSince": "Membre uta {{date}}"
+    "memberSince": "Membre uta {{date}}",
+    "sectionAdmin": "ADMINISTRATION",
+    "adminArea": "Zone ya Administration",
+    "adminBadge": "ADMIN"
   },
   "diario": {
     "title": "Journal ya Mfanyabiashara",
@@ -323,7 +340,15 @@
     "simulatorAmount": "Montant ya ko invester ({{currency}})",
     "simulatorInvested": "Montant oyo etiami",
     "simulatorProjected": "Retour oyo ezali kolanda",
-    "simulatorProfit": "Mbongo ya kosengisa: +{{value}}"
+    "simulatorProfit": "Mbongo ya kosengisa: +{{value}}",
+    "withdrawAmount": "Mbongo ya kobimisa",
+    "withdrawDetails": "Biloko ya kofuta (NIF/IBAN)",
+    "withdrawableValue": "Eza: {{value}}",
+    "withdrawErrorTitle": "Libunga na koyanda retrait",
+    "withdrawErrorMsg": "Tokokala te kosala demande na yo. Meka lisusu.",
+    "targetValue": "Metá: {{value}}",
+    "simulatorStrategy": "Stratégie: {{name}}",
+    "simulatorDepositCta": "Kozalisa Depósita ya Liboso"
   },
   "language": {
     "title": "Lokótá"
@@ -416,7 +441,84 @@
     "noUsersTitle": "Ba données te",
     "noUsersDesc": "Ekoki te kotia bautilisateur.",
     "registeredAt": "Enregistrement: {{date}}",
-    "userRole": "Utilisateur"
+    "userRole": "Utilisateur",
+    "tabWithdrawals": "Ba bobimisi",
+    "tabMessaging": "Ba messages",
+    "tabReports": "Ba rapports",
+    "tabChannels": "Ba chaînes",
+    "tabAnnouncements": "Bobati",
+    "gateTitle": "Zone ya Administration",
+    "gateSubtitle": "Koma code ya koketa mpo na kokota na zone ya administration.",
+    "gateCodeLabel": "CODE YA KOKETA",
+    "gateCta": "Kokota",
+    "gateWrong": "Code ya malingi te. Meka lisusu.",
+    "gateLockedTitle": "Ebandeli Ekangami",
+    "gateLockedDesc": "Ebandeli oyo ekangami na code ya koketa.",
+    "quickPairs": "BAPAIRES YA MOKE",
+    "volatility": "VOLATILITÉ",
+    "presetSessions": "BA SESSIONS YA MOKE",
+    "presetTokyo": "🇯🇵 Tokyo",
+    "presetLondon": "🇬🇧 Londres",
+    "presetNewYork": "🇺🇸 New York",
+    "autoGmt": "GMT ekaloulaka na nyonso",
+    "badgeSelect": "IKONE",
+    "tabReceipts": "Ba preuves",
+    "receiptsList": "BA PREUVES ({{count}})",
+    "noReceipts": "Ba preuves te",
+    "noReceiptsDesc": "Soki ba utilisateurs batinda ba preuves, ekayeba awa.",
+    "receiptPending": "Ekozela",
+    "receiptApproved": "Ekondimami",
+    "receiptRejected": "Ekandimami",
+    "receiptUser": "Utilisateur",
+    "receiptDate": "Date",
+    "receiptAmount": "Motuya",
+    "receiptPlan": "Plan",
+    "receiptMethod": "Nzela",
+    "receiptViewProof": "Tala preuve",
+    "receiptApprove": "Kokondima",
+    "receiptReject": "Kokandima",
+    "receiptApproveConfirm": "Kokondima paiement",
+    "receiptApproveMsg": "Okondimelaka ete tolekondima paiement oyo? Plan ya utilisateur ekofungolami.",
+    "receiptRejectConfirm": "Kokandima paiement",
+    "receiptRejectMsg": "Okondimelaka ete tokandima preuve oyo?",
+    "receiptApprovedOk": "Paiement ekondimami",
+    "receiptApprovedMsg": "Plan ya utilisateur ekofungolami mpenza.",
+    "receiptRejectedOk": "Preuve ekandimami",
+    "receiptRejectedMsg": "Preuve ekandimami.",
+    "receiptDeleteTitle": "Kolongola preuve",
+    "receiptDeleteConfirm": "Okondimelaka ete tolingola rekordi oyo?",
+    "search": "Koluka...",
+    "filter": "Kofiltri",
+    "clearFilters": "Longola bafiltre",
+    "export": "Kobimisa",
+    "selectAll": "Zimbala nyonso",
+    "deselectAll": "Bimbala te nyonso",
+    "deleteSelected": "Kolongola bazolalwa",
+    "selectedCount": "{{count}} mosalwa",
+    "confirmDelete": "Okondimelaka ete tolingola {{count}} biloko?",
+    "notifications": "Ba notificações",
+    "markAllRead": "Kokembwa nyonso ebomami",
+    "noNotifications": "Ba notificações te",
+    "banUser": "Kobanza Utilisateur",
+    "unbanUser": "Kokotisha Utilisateur",
+    "makePremium": "Kokala Premium",
+    "removePremium": "Longola Premium",
+    "editExpiration": "Kobongola Ekosila",
+    "subscriptionExpires": "Souscription ekosila na",
+    "expiringSoon": "Ekosila Mbale",
+    "pendingReceipts": "Ba Preuves Ezali Kolikya",
+    "userDetails": "Details ya Utilisateur",
+    "registrationDate": "Date yaasekiso",
+    "currentPlan": "Plan ya sikoyo",
+    "daysUntilExpiry": "{{days}} mikolo kino ekosila",
+    "expired": "Esilisi",
+    "never": "Kala nyonso te",
+    "userBanned": "Utilisateur ekabanzami mpenza",
+    "userUnbanned": "Utilisateur ekotoyami mpenza",
+    "roleUpdated": "Rol ya utilisateur ebongwami",
+    "expiryUpdated": "Ekosila ya souscription ebongwami",
+    "statExpiring": "Ekosila Mbale",
+    "statPendingReceipts": "Ba Preuves Ezali Kolikya"
   },
   "adminErrors": {
     "load": "Libunga ya kotia ba signaux",
@@ -444,7 +546,11 @@
     "sendCode": "Tinda code",
     "verifyCode": "Tikasa mpe kokota",
     "codeSent": "Totindeli yo code na {{phone}}. Komá na se.",
-    "resendCode": "Tinda code lisusu"
+    "resendCode": "Tinda code lisusu",
+    "or": "to",
+    "value1": "Signaux en temps réel",
+    "value2": "Alertes na téléphone na yo",
+    "value3": "Gestion ya capital"
   },
   "authErrors": {
     "googleStart": "Ekoki te kobanda login na Google.",
@@ -464,7 +570,8 @@
     "rr": "RR",
     "technical": "ANALYSE TECHNIQUE",
     "noReasons": "Ba ntina te",
-    "riskWarning": "Aviso ya risque: analyse oyo ezali mpo na kelasi kaka…"
+    "riskWarning": "Aviso ya risque: analyse oyo ezali mpo na kelasi kaka…",
+    "smcSetup": "Setup SMC"
   },
   "planos": {
     "title": "Baplan",
@@ -553,7 +660,11 @@
     "capitalItem2": "Objectif ya retour na intérêts composés automatiques",
     "capitalItem3": "Kokanga mbongo ya mosolo weekele na weekele",
     "capitalItem4": "Ba rapports ya performance mpe progrès ya objectif",
-    "capitalCta": "Tala Gestion ya Capital"
+    "capitalCta": "Tala Gestion ya Capital",
+    "receiptHint": "Équipe ekotala payment na yo mpe ekokondima yango mbale.",
+    "ok": "Tali",
+    "retryMessage": "Tala connexion na yo mpe meka lisusu.",
+    "tryAgain": "Meka lisusu"
   },
   "banca": {
     "title": "Gestion ya capital",
@@ -580,7 +691,36 @@
     "inputRisk": "RISQUE NA OPÉRATION (%)",
     "weekly": "Mpokwa na mpokwa",
     "monthly": "Sanza na sanza",
-    "total": "Total"
+    "total": "Total",
+    "addTrade": "Kobakisa Opération",
+    "tradePair": "Paire",
+    "tradeDirection": "Direction",
+    "tradeEntry": "Prix ya Entrée",
+    "tradeExit": "Prix ya Sortie",
+    "tradeLot": "Lot",
+    "tradePips": "Pips",
+    "tradeProfit": "Profit (USD)",
+    "tradeResult": "Resulta",
+    "tradeNotes": "Notes",
+    "tradeNotesPlaceholder": "Ex: Nalandaki signal ya boom hour...",
+    "cancel": "Kokeba",
+    "noTrades": "Ba opérations oyo babakisa te",
+    "noTradesHint": "Bakisa opération na yo ya liboso mpo na komona ba statistiques",
+    "todayPnl": "Lelo",
+    "weekPnl": "Mpokwa Oyo",
+    "winRate": "Win Rate",
+    "totalPnl": "P&L Nyonso",
+    "trades": "Opérations",
+    "profitFactor": "Profit Factor",
+    "wins": "Wins",
+    "losses": "Losses",
+    "breakevens": "Break Even",
+    "recentTrades": "Operações ya Sika",
+    "showLess": "Tala moke",
+    "showAll": "Tala nyonso ({{count}})",
+    "deleteTrade": "Kolongola operación",
+    "deleteTradeConfirm": "Okondimelaka ete tolingola opération oyo?",
+    "delete": "Kolongola"
   },
   "depositos": {
     "title": "Bazaleli mpe Bobimisi",
@@ -611,7 +751,19 @@
     "numberCopied": "Ekópi",
     "sendProof": "Kotika preuve",
     "sendProofHint": "Galerie to fisyé",
-    "proofAttached": "Preuve etiké"
+    "proofAttached": "Preuve etiké",
+    "tabDeposit": "Kozalisa",
+    "tabWithdraw": "Kobimisa",
+    "choosePlan": "Pona plan na yo",
+    "secureNote": "Ba paiement ya libateli · Ekomelwa na équipe",
+    "withdrawAvailable": "Eza oyo ekotambwisa",
+    "movementCapital": "Bozaleli ya capital",
+    "capitalDepositTitle": "Bozaleli ya Capital",
+    "capitalDepositSubtitle": "Gestion ya capital — valeur oyo epone na simulateur",
+    "receiptSaveError": "Preuve etindami kasi ekomi te kozala na serveur. Sandá support.",
+    "deleteMovement": "Kolongola",
+    "deleteMovementTitle": "Kolongola mouvement?",
+    "deleteMovementMsg": "Okondimelaka ete olingola mouvement oyo ekozela?"
   },
   "notificacoes": {
     "title": "Ba notificações",
@@ -626,7 +778,23 @@
     "manageAlerts": "Kamba ba alertes",
     "clearAll": "Kolongola nyonso",
     "planProcessing": "Ezali kotalelama",
-    "planPending": "Ezali kolikya"
+    "planPending": "Ezali kolikya",
+    "summaryTitle": "Boîte ya kokota",
+    "unreadCount_one": "{{count}} ya kolengwa",
+    "unreadCount_other": "{{count}} ya kolengwa",
+    "allRead": "Nyonso ekomamaka",
+    "today": "Lelo",
+    "thisWeek": "Mpokwa Oyo",
+    "earlier": "Oyo elalaka",
+    "justNow": "Sikoyo anu",
+    "minAgo_one": "kala {{count}} min",
+    "minAgo_other": "kala {{count}} min",
+    "hoursAgo_one": "kala {{count}} h",
+    "hoursAgo_other": "kala {{count}} h",
+    "daysAgo_one": "kala {{count}} d",
+    "daysAgo_other": "kala {{count}} d",
+    "scheduledFor": "Bakokwisi na {{time}}",
+    "refresh": "Bongisa"
   },
   "tour": {
     "skip": "Kangisa",
@@ -674,7 +842,10 @@
     "expiry3Title": "Kombolelo na yo ekosila mbala moke",
     "expiry3Body": "Mikolo {{days}} etikalaka liboso ya kombolelo na yo ya Premium ekosila. Renouvelle mpo na kobatela malamu nayo.",
     "expiry1Title": "Kombolelo na yo ekosila lobi",
-    "expiry1Body": "Lobi ezali mokolo ya suka ya kombolelo na yo ya Premium. Renouvelle sikoyo mpo na kokanga kopɛkɛsama."
+    "expiry1Body": "Lobi ezali mokolo ya suka ya kombolelo na yo ya Premium. Renouvelle sikoyo mpo na kokanga kopɛkɛsama.",
+    "welcomeChannelName": "Boyei lisusu",
+    "welcomeTitle": "Boyei lisusu na The Magic Trader",
+    "welcomeBody": "Matondi na bojongi! Yekola app mpe banda kozwa signaux en temps réel."
   },
   "definicoesBooms": {
     "title": "Ba définitions ya Boom",
@@ -946,20 +1117,33 @@
       "entry": "ENTRÉE",
       "stopLoss": "SL",
       "takeProfit": "TP"
+    },
+    "store": {
+      "title": "Boutique",
+      "subtitle": "Bots, mentorat mpe ebooks oyo ebatusa nyonso na yo",
+      "categoryAll": "Nionso",
+      "categoryBots": "Bots",
+      "categoryMentorias": "Mentorat",
+      "categoryEbooks": "Ebooks",
+      "premium": "Premium",
+      "free": "Gratis",
+      "empty": "Eloko te oyo ezali kati",
+      "premiumRequired": "Premium Esengeli",
+      "premiumMessage": "Eloko oyo ezali ya membre Premium kaka. Ozali kondima kozalisa plan ya likoló?"
     }
   },
   "store": {
-    "title": "Loja",
-    "subtitle": "Bots, mentorias e ebooks para o teu sucesso",
-    "categoryAll": "Todos",
+    "title": "Boutique",
+    "subtitle": "Bots, mentorat mpe ebooks oyo ebatusa nyonso na yo",
+    "categoryAll": "Nionso",
     "categoryBots": "Bots",
-    "categoryMentorias": "Mentorias",
+    "categoryMentorias": "Mentorat",
     "categoryEbooks": "Ebooks",
     "premium": "Premium",
-    "free": "Grátis",
-    "empty": "Nenhum item disponível",
-    "premiumRequired": "Premium Necessário",
-    "premiumMessage": "Este item é exclusivo para membros Premium. Deseja fazer upgrade?",
+    "free": "Gratis",
+    "empty": "Eloko te oyo ezali kati",
+    "premiumRequired": "Premium Esengeli",
+    "premiumMessage": "Eloko oyo ezali ya membre Premium kaka. Ozali kondima kozalisa plan ya likoló?",
     "statsProducts": "Bilamba",
     "statsFree": "Ya libanda",
     "statsRating": "Nota",
@@ -978,5 +1162,23 @@
     "incEbook1": "Kokota mbala moko",
     "incEbook2": "Bandakisa ya concret",
     "incEbook3": "Misalisu ya libanda"
+  },
+  "premiumWelcome": {
+    "title": "Boyei lisusu na Premium!",
+    "body": "Plan na yo ezali mosala. Sikoyo ozali na TMT mobimba na boko na yo.",
+    "perkBank": "Gestion ya capital na ba metas mpe intérêts composés",
+    "perkSignals": "Ba signaux nionso sans limite",
+    "perkChannels": "Ba chaînes exclusifs ya lisanga",
+    "perkStore": "Boutique ya membre kaka",
+    "ctaBank": "Fungola Capital Na Ngai",
+    "ctaExplore": "Yekola Ba Signaux"
+  },
+  "premiumBanner": {
+    "expiringTitle_one": "{{count}} mokolo oyo esili na plan na yo",
+    "expiringTitle_other": "{{count}} mikolo oyo esili na plan na yo",
+    "expiringSub": "Sunga sikoyo mpo na kozanga ba avantages na yo te.",
+    "expiredTitle": "Plan Premium na yo ekozinga",
+    "expiredSub": "Ekosila na {{date}}. Sunga mpo na kobuka accès nyonso.",
+    "renew": "Sunga"
   }
 }

@@ -13,7 +13,8 @@
     "trader": "Трейдер",
     "waiting": "ЖДАТЬ",
     "permission": "Permission",
-    "notNow": "Не сейчас"
+    "notNow": "Не сейчас",
+    "error": "Ошибка"
   },
   "tabs": {
     "inicio": "Главная",
@@ -36,7 +37,10 @@
     "newsLoading": "Загрузка новостей…",
     "bestSignalTitle": "Лучший сигнал",
     "channelSignalsTitle": "Сигналы каналов",
-    "channelSignalsSubtitle": "Лучший активный сигнал по каналам"
+    "channelSignalsSubtitle": "Лучший активный сигнал по каналам",
+    "activeBoomsSubtitle": "Все активные BOOM за сегодня",
+    "liveSection": "Активные BOOM",
+    "upcomingSection": "Ближайшие сегодня"
   },
   "analises": {
     "title": "Анализы",
@@ -65,7 +69,13 @@
     "filterSmc": "SMC сетап",
     "upsellPoint1": "Все пары и таймфреймы",
     "upsellPoint2": "Неограниченные сигналы в день",
-    "upsellPoint3": "Push-уведомления в реальном времени"
+    "upsellPoint3": "Push-уведомления в реальном времени",
+    "generateBtn": "Создать сигналы сейчас",
+    "generating": "ИИ анализирует рынок…",
+    "generateSuccess": "Успешно создано сигналов: {{count}}",
+    "generateNoSignals": "Сигналов нет. Сейчас рынок спокойный.",
+    "generateError": "Не удалось создать сигналы. Попробуйте снова.",
+    "filterPairs": "ПАРЫ"
   },
   "historico": {
     "allPairs": "Все пары",
@@ -83,7 +93,8 @@
     "slHit": "❌ СТОП-ЛОСС",
     "loading": "Загрузка истории…",
     "emptyTitle": "Нет закрытых сигналов",
-    "emptyBody": "Закрытые сигналы появятся здесь."
+    "emptyBody": "Закрытые сигналы появятся здесь.",
+    "expired": "Истёк"
   },
   "horarios": {
     "watAngola": "WAT · АНГОЛА",
@@ -196,7 +207,10 @@
     "emptyChannelsHintCreator": "Создайте первый канал сообщества.",
     "emptyPairRoomsHint": "Комнаты открываются автоматически с торговой сессией.",
     "emptyDmsHint": "Найдите трейдеров в поиске и начните общение.",
-    "emptyDmsHintPremium": "Нажмите + выше, чтобы начать беседу."
+    "emptyDmsHintPremium": "Нажмите + выше, чтобы начать беседу.",
+    "reportMessage": "Пожаловаться",
+    "reportSent": "Жалоба отправлена.",
+    "reportFailed": "Не удалось отправить."
   },
   "userProfile": {
     "title": "Профиль",
@@ -246,7 +260,10 @@
     "nameEmpty": "Имя не может быть пустым",
     "nameSaveError": "Не удалось обновить имя. Попробуйте ещё раз.",
     "nameSaved": "Имя обновлено",
-    "memberSince": "Участник с {{date}}"
+    "memberSince": "Участник с {{date}}",
+    "sectionAdmin": "АДМИНИСТРИРОВАНИЕ",
+    "adminArea": "Раздел администратора",
+    "adminBadge": "АДМИН"
   },
   "diario": {
     "title": "Дневник трейдера",
@@ -371,7 +388,84 @@
     "noUsersTitle": "Нет данных",
     "noUsersDesc": "Не удалось загрузить пользователей.",
     "registeredAt": "Регистрация: {{date}}",
-    "userRole": "Пользователь"
+    "userRole": "Пользователь",
+    "tabWithdrawals": "Выводы",
+    "tabMessaging": "Сообщения",
+    "tabReports": "Жалобы",
+    "tabChannels": "Каналы",
+    "tabAnnouncements": "Объявления",
+    "gateTitle": "Раздел администратора",
+    "gateSubtitle": "Введите код доступа, чтобы войти в раздел администратора.",
+    "gateCodeLabel": "КОД ДОСТУПА",
+    "gateCta": "Войти",
+    "gateWrong": "Неверный код. Попробуйте снова.",
+    "gateLockedTitle": "Защищённая область",
+    "gateLockedDesc": "Эта область защищена кодом доступа.",
+    "quickPairs": "БЫСТРЫЕ ПАРЫ",
+    "volatility": "ВОЛАТИЛЬНОСТЬ",
+    "presetSessions": "БЫСТРЫЕ СЕССИИ",
+    "presetTokyo": "🇯🇵 Токио",
+    "presetLondon": "🇬🇧 Лондон",
+    "presetNewYork": "🇺🇸 Нью-Йорк",
+    "autoGmt": "GMT рассчитывается автоматически",
+    "badgeSelect": "ИКОНКА",
+    "tabReceipts": "Чеки",
+    "receiptsList": "ЧЕКИ ({{count}})",
+    "noReceipts": "Нет чеков",
+    "noReceiptsDesc": "Когда пользователи пришлют чеки, они появятся здесь.",
+    "receiptPending": "В ожидании",
+    "receiptApproved": "Одобрено",
+    "receiptRejected": "Отклонено",
+    "receiptUser": "Пользователь",
+    "receiptDate": "Дата",
+    "receiptAmount": "Сумма",
+    "receiptPlan": "Тариф",
+    "receiptMethod": "Способ",
+    "receiptViewProof": "Показать чек",
+    "receiptApprove": "Одобрить",
+    "receiptReject": "Отклонить",
+    "receiptApproveConfirm": "Одобрить платёж",
+    "receiptApproveMsg": "Одобрить этот платёж? Тариф пользователя будет активирован.",
+    "receiptRejectConfirm": "Отклонить платёж",
+    "receiptRejectMsg": "Отклонить этот чек?",
+    "receiptApprovedOk": "Платёж одобрен",
+    "receiptApprovedMsg": "Тариф пользователя успешно активирован.",
+    "receiptRejectedOk": "Чек отклонён",
+    "receiptRejectedMsg": "Чек отклонён.",
+    "receiptDeleteTitle": "Удалить чек",
+    "receiptDeleteConfirm": "Удалить эту запись?",
+    "search": "Поиск...",
+    "filter": "Фильтр",
+    "clearFilters": "Сбросить фильтры",
+    "export": "Экспорт",
+    "selectAll": "Выбрать все",
+    "deselectAll": "Снять выделение",
+    "deleteSelected": "Удалить выбранные",
+    "selectedCount": "Выбрано: {{count}}",
+    "confirmDelete": "Удалить элементов: {{count}}?",
+    "notifications": "Уведомления",
+    "markAllRead": "Отметить все как прочитанные",
+    "noNotifications": "Нет уведомлений",
+    "banUser": "Заблокировать пользователя",
+    "unbanUser": "Разблокировать пользователя",
+    "makePremium": "Выдать Premium",
+    "removePremium": "Снять Premium",
+    "editExpiration": "Изменить срок",
+    "subscriptionExpires": "Подписка истекает",
+    "expiringSoon": "Скоро истекает",
+    "pendingReceipts": "Чеки в ожидании",
+    "userDetails": "Данные пользователя",
+    "registrationDate": "Дата регистрации",
+    "currentPlan": "Текущий тариф",
+    "daysUntilExpiry": "До истечения {{days}} дн.",
+    "expired": "Истёк",
+    "never": "Никогда",
+    "userBanned": "Пользователь заблокирован",
+    "userUnbanned": "Пользователь разблокирован",
+    "roleUpdated": "Роль пользователя обновлена",
+    "expiryUpdated": "Срок подписки обновлён",
+    "statExpiring": "Скоро истекает",
+    "statPendingReceipts": "Чеки в ожидании"
   },
   "adminErrors": {
     "load": "Ошибка загрузки сигналов",
@@ -399,7 +493,11 @@
     "sendCode": "Отправить код",
     "verifyCode": "Проверить и войти",
     "codeSent": "Мы отправили код на {{phone}}. Введите его ниже.",
-    "resendCode": "Отправить код повторно"
+    "resendCode": "Отправить код повторно",
+    "or": "или",
+    "value1": "Сигналы в реальном времени",
+    "value2": "Оповещения на телефон",
+    "value3": "Управление капиталом"
   },
   "authErrors": {
     "googleStart": "Не удалось начать вход через Google.",
@@ -419,7 +517,8 @@
     "rr": "RR",
     "technical": "ТЕХНИЧЕСКИЙ АНАЛИЗ",
     "noReasons": "Нет обоснований",
-    "riskWarning": "Предупреждение о риске: этот анализ носит образовательный характер…"
+    "riskWarning": "Предупреждение о риске: этот анализ носит образовательный характер…",
+    "smcSetup": "SMC сетап"
   },
   "planos": {
     "title": "Тарифы",
@@ -508,7 +607,11 @@
     "capitalItem2": "Цель доходности с автоматическим сложным процентом",
     "capitalItem3": "Еженедельный вывод прибыли",
     "capitalItem4": "Отчёты о результатах и прогрессе к цели",
-    "capitalCta": "Открыть управление капиталом"
+    "capitalCta": "Открыть управление капиталом",
+    "receiptHint": "Наша команда скоро проверит и подтвердит ваш платёж.",
+    "ok": "Понятно",
+    "retryMessage": "Проверьте соединение и попробуйте снова.",
+    "tryAgain": "Попробовать снова"
   },
   "banca": {
     "title": "Управление банкроллом",
@@ -535,7 +638,36 @@
     "inputRisk": "РИСК НА СДЕЛКУ (%)",
     "weekly": "Еженедельно",
     "monthly": "Ежемесячно",
-    "total": "Итого"
+    "total": "Итого",
+    "addTrade": "Добавить сделку",
+    "tradePair": "Пара",
+    "tradeDirection": "Направление",
+    "tradeEntry": "Цена входа",
+    "tradeExit": "Цена выхода",
+    "tradeLot": "Лот",
+    "tradePips": "Пипсы",
+    "tradeProfit": "Прибыль (USD)",
+    "tradeResult": "Результат",
+    "tradeNotes": "Заметки",
+    "tradeNotesPlaceholder": "Напр.: следовал сигналу в бум-час...",
+    "cancel": "Отмена",
+    "noTrades": "Сделок нет",
+    "noTradesHint": "Добавьте первую сделку, чтобы увидеть статистику",
+    "todayPnl": "Сегодня",
+    "weekPnl": "На этой неделе",
+    "winRate": "Доля прибыльных",
+    "totalPnl": "Итого P&L",
+    "trades": "Сделки",
+    "profitFactor": "Коэффициент прибыли",
+    "wins": "Прибыльные",
+    "losses": "Убытки",
+    "breakevens": "Безубыток",
+    "recentTrades": "Последние сделки",
+    "showLess": "Показать меньше",
+    "showAll": "Показать все ({{count}})",
+    "deleteTrade": "Удалить сделку",
+    "deleteTradeConfirm": "Вы уверены, что хотите удалить эту сделку?",
+    "delete": "Удалить"
   },
   "capital": {
     "title": "Управление капиталом",
@@ -580,7 +712,15 @@
     "simulatorAmount": "Сумма для инвестирования ({{currency}})",
     "simulatorInvested": "Инвестированная сумма",
     "simulatorProjected": "Прогнозируемый возврат",
-    "simulatorProfit": "Ожидаемая прибыль: +{{value}}"
+    "simulatorProfit": "Ожидаемая прибыль: +{{value}}",
+    "withdrawAmount": "Сумма вывода",
+    "withdrawDetails": "Платёжные данные (NIF/IBAN)",
+    "withdrawableValue": "Доступно: {{value}}",
+    "withdrawErrorTitle": "Ошибка запроса на вывод",
+    "withdrawErrorMsg": "Не удалось зарегистрировать ваш запрос. Попробуйте снова.",
+    "targetValue": "Цель: {{value}}",
+    "simulatorStrategy": "Стратегия: {{name}}",
+    "simulatorDepositCta": "Внести первый депозит"
   },
   "depositos": {
     "title": "Депозиты и вывод средств",
@@ -611,7 +751,19 @@
     "numberCopied": "Скопировано",
     "sendProof": "Прикрепить чек",
     "sendProofHint": "Галерея или файлы",
-    "proofAttached": "Чек прикреплён"
+    "proofAttached": "Чек прикреплён",
+    "tabDeposit": "Пополнить",
+    "tabWithdraw": "Вывести",
+    "choosePlan": "Выберите тариф",
+    "secureNote": "Безопасные платежи · Обрабатывает наша команда",
+    "withdrawAvailable": "Доступно для вывода",
+    "movementCapital": "Пополнение капитала",
+    "capitalDepositTitle": "Пополнение капитала",
+    "capitalDepositSubtitle": "Управление капиталом — сумма задана в симуляторе",
+    "receiptSaveError": "Чек отправлен, но не удалось сохранить его на сервере. Свяжитесь с поддержкой.",
+    "deleteMovement": "Удалить",
+    "deleteMovementTitle": "Удалить операцию?",
+    "deleteMovementMsg": "Вы уверены, что хотите удалить эту операцию в ожидании?"
   },
   "notificacoes": {
     "title": "Уведомления",
@@ -626,7 +778,23 @@
     "manageAlerts": "Управление оповещениями",
     "clearAll": "Очистить всё",
     "planProcessing": "На рассмотрении",
-    "planPending": "Ожидание"
+    "planPending": "Ожидание",
+    "summaryTitle": "Входящие",
+    "unreadCount_one": "{{count}} непрочитанное",
+    "unreadCount_other": "{{count}} непрочитанных",
+    "allRead": "Все прочитано",
+    "today": "Сегодня",
+    "thisWeek": "На этой неделе",
+    "earlier": "Более ранние",
+    "justNow": "Только что",
+    "minAgo_one": "{{count}} мин назад",
+    "minAgo_other": "{{count}} мин назад",
+    "hoursAgo_one": "{{count}} ч назад",
+    "hoursAgo_other": "{{count}} ч назад",
+    "daysAgo_one": "{{count}} дн. назад",
+    "daysAgo_other": "{{count}} дн. назад",
+    "scheduledFor": "Запланировано на {{time}}",
+    "refresh": "Обновить"
   },
   "tour": {
     "skip": "Пропустить",
@@ -674,7 +842,10 @@
     "expiry3Title": "Ваша подписка скоро истечёт",
     "expiry3Body": "До конца вашей Premium-подписки осталось {{days}} дн. Продлите, чтобы сохранить преимущества.",
     "expiry1Title": "Ваша подписка истекает завтра",
-    "expiry1Body": "Завтра последний день вашей Premium-подписки. Продлите сейчас, чтобы избежать перерывов."
+    "expiry1Body": "Завтра последний день вашей Premium-подписки. Продлите сейчас, чтобы избежать перерывов.",
+    "welcomeChannelName": "Добро пожаловать",
+    "welcomeTitle": "Добро пожаловать в The Magic Trader",
+    "welcomeBody": "Спасибо, что присоединились! Изучите приложение и начните получать сигналы в реальном времени."
   },
   "definicoesBooms": {
     "title": "Настройки Boom",
@@ -946,20 +1117,33 @@
       "entry": "ВХОД",
       "stopLoss": "SL",
       "takeProfit": "TP"
+    },
+    "store": {
+      "title": "Магазин",
+      "subtitle": "Боты, менторство и электронные книги для вашего успеха",
+      "categoryAll": "Все",
+      "categoryBots": "Bots",
+      "categoryMentorias": "Менторство",
+      "categoryEbooks": "Ebooks",
+      "premium": "Premium",
+      "free": "Бесплатно",
+      "empty": "Нет доступных товаров",
+      "premiumRequired": "Требуется Premium",
+      "premiumMessage": "Этот товар доступен только участникам Premium. Хотите оформить апгрейд?"
     }
   },
   "store": {
-    "title": "Loja",
-    "subtitle": "Bots, mentorias e ebooks para o teu sucesso",
-    "categoryAll": "Todos",
+    "title": "Магазин",
+    "subtitle": "Боты, менторство и электронные книги для вашего успеха",
+    "categoryAll": "Все",
     "categoryBots": "Bots",
-    "categoryMentorias": "Mentorias",
+    "categoryMentorias": "Менторство",
     "categoryEbooks": "Ebooks",
     "premium": "Premium",
-    "free": "Grátis",
-    "empty": "Nenhum item disponível",
-    "premiumRequired": "Premium Necessário",
-    "premiumMessage": "Este item é exclusivo para membros Premium. Deseja fazer upgrade?",
+    "free": "Бесплатно",
+    "empty": "Нет доступных товаров",
+    "premiumRequired": "Требуется Premium",
+    "premiumMessage": "Этот товар доступен только участникам Premium. Хотите оформить апгрейд?",
     "statsProducts": "Продукты",
     "statsFree": "Бесплатно",
     "statsRating": "Рейтинг",
@@ -978,5 +1162,23 @@
     "incEbook1": "Мгновенный доступ",
     "incEbook2": "Практические примеры",
     "incEbook3": "Бесплатные обновления"
+  },
+  "premiumWelcome": {
+    "title": "Добро пожаловать в Premium!",
+    "body": "Ваш тариф активен. Теперь у вас в руках весь TMT.",
+    "perkBank": "Капитал с целями и сложным процентом",
+    "perkSignals": "Полностью безлимитные сигналы",
+    "perkChannels": "Эксклюзивные каналы сообщества",
+    "perkStore": "Эксклюзивный магазин для участников",
+    "ctaBank": "Активировать мой капитал",
+    "ctaExplore": "Изучить сигналы"
+  },
+  "premiumBanner": {
+    "expiringTitle_one": "Остался {{count}} день до конца тарифа",
+    "expiringTitle_other": "Осталось {{count}} дней до конца тарифа",
+    "expiringSub": "Продлите сейчас, чтобы не потерять преимущества.",
+    "expiredTitle": "Ваш тариф Premium истёк",
+    "expiredSub": "Истёк {{date}}. Продлите, чтобы вернуть полный доступ.",
+    "renew": "Продлить"
   }
 }

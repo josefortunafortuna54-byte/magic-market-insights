@@ -13,7 +13,8 @@
     "trader": "Trader",
     "waiting": "SUBIRI",
     "permission": "Permission",
-    "notNow": "Sio sasa"
+    "notNow": "Sio sasa",
+    "error": "Hitilafu"
   },
   "tabs": {
     "inicio": "Mwanzo",
@@ -36,7 +37,10 @@
     "newsLoading": "Inapakia habari…",
     "bestSignalTitle": "Sinyali bora zaidi",
     "channelSignalsTitle": "Sinyali za chaneli",
-    "channelSignalsSubtitle": "Sinyali bora hai kwa kila chaneli"
+    "channelSignalsSubtitle": "Sinyali bora hai kwa kila chaneli",
+    "activeBoomsSubtitle": "BOOM zote zinazoendelea leo",
+    "liveSection": "BOOM Zinazoendelea",
+    "upcomingSection": "Zinazokuja leo"
   },
   "analises": {
     "title": "Uchambuzi",
@@ -65,7 +69,13 @@
     "filterSmc": "Mpangilio SMC",
     "upsellPoint1": "Pair zote na timeframes",
     "upsellPoint2": "Ishara zisizo na kikomo kwa siku",
-    "upsellPoint3": "Taarifa za papo hapo"
+    "upsellPoint3": "Taarifa za papo hapo",
+    "generateBtn": "Tengeneza Ishara Sasa",
+    "generating": "AI inachambuli soko…",
+    "generateSuccess": "Ishara {{count}} zimetengenezwa kwa mafanikio!",
+    "generateNoSignals": "Hakuna ishara zilizopatikana. Soko ni tulivu sasa.",
+    "generateError": "Hitilafu wakati wa kutengeneza ishara. Jaribu tena.",
+    "filterPairs": "JOZI"
   },
   "historico": {
     "allPairs": "Jozi zote",
@@ -83,7 +93,8 @@
     "slHit": "❌ STOP LOSS",
     "loading": "Inapakia historia…",
     "emptyTitle": "Hakuna ishara zilizofungwa",
-    "emptyBody": "Ishara zilizofungwa zinaonekana hapa."
+    "emptyBody": "Ishara zilizofungwa zinaonekana hapa.",
+    "expired": "Imekwisha"
   },
   "horarios": {
     "watAngola": "WAT · ANGOLA",
@@ -196,7 +207,10 @@
     "emptyChannelsHintCreator": "Unda chaneli ya kwanza ya jumuiya.",
     "emptyPairRoomsHint": "Vyumba hufunguka kiotomatiki na kipindi cha soko.",
     "emptyDmsHint": "Tafuta wafanyabiashara kuanza mazungumzo.",
-    "emptyDmsHintPremium": "Gusa + hapo juu kuanza mazungumzo."
+    "emptyDmsHintPremium": "Gusa + hapo juu kuanza mazungumzo.",
+    "reportMessage": "Ripoti",
+    "reportSent": "Ripoti imetumwa.",
+    "reportFailed": "Imeshindikana kutuma."
   },
   "userProfile": {
     "title": "Wasifu",
@@ -246,7 +260,10 @@
     "nameEmpty": "Jina haliwezi kuwa tupu",
     "nameSaveError": "Haikuweza kusasisha jina. Jaribu tena.",
     "nameSaved": "Jina limesasishwa",
-    "memberSince": "Mwanachama tangu {{date}}"
+    "memberSince": "Mwanachama tangu {{date}}",
+    "sectionAdmin": "USIMAMIZI",
+    "adminArea": "Eneo la Msimamizi",
+    "adminBadge": "ADMIN"
   },
   "diario": {
     "title": "Diari ya Mchuuzi",
@@ -371,7 +388,84 @@
     "noUsersTitle": "Hakuna data",
     "noUsersDesc": "Imeshindikana kupakia watumiaji.",
     "registeredAt": "Usajili: {{date}}",
-    "userRole": "Mtumiaji"
+    "userRole": "Mtumiaji",
+    "tabWithdrawals": "Uondoaji",
+    "tabMessaging": "Ujumbe",
+    "tabReports": "Ripoti",
+    "tabChannels": "Chaneli",
+    "tabAnnouncements": "Tangazo",
+    "gateTitle": "Eneo la Msimamizi",
+    "gateSubtitle": "Weka msimbo wa ufikiaji ili uingie katika eneo la usimamizi.",
+    "gateCodeLabel": "MSIMBO WA UFIKIAJI",
+    "gateCta": "Ingia",
+    "gateWrong": "Msimbo si sahihi. Jaribu tena.",
+    "gateLockedTitle": "Eneo limekingwa",
+    "gateLockedDesc": "Eneo hili limekingwa kwa msimbo wa ufikiaji.",
+    "quickPairs": "JOZI ZA HARAKA",
+    "volatility": "UBADILIKAJI",
+    "presetSessions": "MIFUMO YA HARAKA",
+    "presetTokyo": "🇯🇵 Tokyo",
+    "presetLondon": "🇬🇧 Londo",
+    "presetNewYork": "🇺🇸 New York",
+    "autoGmt": "GMT inahesabiwa kiotomatiki",
+    "badgeSelect": "AIKONI",
+    "tabReceipts": "Risiti",
+    "receiptsList": "RISITI ({{count}})",
+    "noReceipts": "Hakuna risiti",
+    "noReceiptsDesc": "Wakati watumiaji watapotuma risiti, zitaonekana hapa.",
+    "receiptPending": "Inasubiri",
+    "receiptApproved": "Imeidhinishwa",
+    "receiptRejected": "Imekataa",
+    "receiptUser": "Mtumiaji",
+    "receiptDate": "Tarehe",
+    "receiptAmount": "Kiasi",
+    "receiptPlan": "Mpango",
+    "receiptMethod": "Njia",
+    "receiptViewProof": "Ona risiti",
+    "receiptApprove": "Idhinisha",
+    "receiptReject": "Kataa",
+    "receiptApproveConfirm": "Idhinisha malipo",
+    "receiptApproveMsg": "Una uhakika unataka kuidhinisha malipo haya? Mpango wa mtumiaji utawashwa.",
+    "receiptRejectConfirm": "Kataa malipo",
+    "receiptRejectMsg": "Una uhakika unataka kukataa risiti hii?",
+    "receiptApprovedOk": "Malipo yameidhinishwa",
+    "receiptApprovedMsg": "Mpango wa mtumiaji umewashwa kwa mafanikio.",
+    "receiptRejectedOk": "Risiti imekatwa",
+    "receiptRejectedMsg": "Risiti imekatwa.",
+    "receiptDeleteTitle": "Futa risiti",
+    "receiptDeleteConfirm": "Una uhakika unataka kufuta kumbukumbu hii?",
+    "search": "Tafuta...",
+    "filter": "Chuja",
+    "clearFilters": "Futa vichujio",
+    "export": "Hamisha",
+    "selectAll": "Chagua zote",
+    "deselectAll": "Ondoa uteuzi wote",
+    "deleteSelected": "Futa zilizochaguliwa",
+    "selectedCount": "{{count}} zilizochaguliwa",
+    "confirmDelete": "Una uhakika unataka kufuta vitu {{count}}?",
+    "notifications": "Arifa",
+    "markAllRead": "Weka alama zote zimeisomwa",
+    "noNotifications": "Hakuna arifa",
+    "banUser": "Zuia Mtumiaji",
+    "unbanUser": "Ondoa Zuizi",
+    "makePremium": "Fanya Premium",
+    "removePremium": "Ondoa Premium",
+    "editExpiration": "Hariri Mwisho",
+    "subscriptionExpires": "Usajili unaisha",
+    "expiringSoon": "Inaisha Karibuni",
+    "pendingReceipts": "Risiti Zinazosubiri",
+    "userDetails": "Maelezo ya Mtumiaji",
+    "registrationDate": "Tarehe ya usajili",
+    "currentPlan": "Mpango wa Sasa",
+    "daysUntilExpiry": "Zimebaki siku {{days}}",
+    "expired": "Imekwisha",
+    "never": "Kamwe",
+    "userBanned": "Mtumiaji amezuiwa kwa mafanikio",
+    "userUnbanned": "Zuizi la mtumiaji limeondolewa kwa mafanikio",
+    "roleUpdated": "Jukumo la mtumiaji limeasasishwa",
+    "expiryUpdated": "Mwisho wa usajili umeasasishwa",
+    "statExpiring": "Inaisha Karibuni",
+    "statPendingReceipts": "Risiti Zinazosubiri"
   },
   "adminErrors": {
     "load": "Hitilafu wakati wa kupakia ishara",
@@ -399,7 +493,11 @@
     "sendCode": "Tuma msimbo",
     "verifyCode": "Thibitisha na uingie",
     "codeSent": "Tumetuma msimbo kwa {{phone}}. Weka hapa chini.",
-    "resendCode": "Tuma msimbo tena"
+    "resendCode": "Tuma msimbo tena",
+    "or": "au",
+    "value1": "Ishara za wakati halisi",
+    "value2": "Tahadhari kwenye simu",
+    "value3": "Usimamizi wa mtaji"
   },
   "authErrors": {
     "googleStart": "Imeshindikana kuanza login ya Google.",
@@ -419,7 +517,8 @@
     "rr": "RR",
     "technical": "UCHAMBUZI WA KIUFUNDI",
     "noReasons": "Hakuna sababu",
-    "riskWarning": "Onyo la hatari: uchambuzi huu una madhumuni ya kielimu…"
+    "riskWarning": "Onyo la hatari: uchambuzi huu una madhumuni ya kielimu…",
+    "smcSetup": "Setup ya SMC"
   },
   "planos": {
     "title": "Mipango",
@@ -508,7 +607,11 @@
     "capitalItem2": "Lengo la marejesho kwa riba tata ya kiotomatiki",
     "capitalItem3": "Kutoa faida kila wiki",
     "capitalItem4": "Ripoti za utendaji na maendeleo ya lengo",
-    "capitalCta": "Ona Usimamizi wa Mtaji"
+    "capitalCta": "Ona Usimamizi wa Mtaji",
+    "receiptHint": "Timu yetu itapitia na kuidhinisha malipo yako baadaye.",
+    "ok": "Nimeelewa",
+    "retryMessage": "Angalia muunganisho wako na jaribu tena.",
+    "tryAgain": "Jaribu tena"
   },
   "capital": {
     "title": "Usimamizi wa Mtaji",
@@ -553,7 +656,15 @@
     "simulatorAmount": "Kiasi cha kuwekeza ({{currency}})",
     "simulatorInvested": "Kiasi kilichowekwa",
     "simulatorProjected": "Mapato yaliyotabiriwa",
-    "simulatorProfit": "Faida iliyokadiriwa: +{{value}}"
+    "simulatorProfit": "Faida iliyokadiriwa: +{{value}}",
+    "withdrawAmount": "Kiasi cha kutoa",
+    "withdrawDetails": "Maelezo ya malipo (NIF/IBAN)",
+    "withdrawableValue": "Inapatikana: {{value}}",
+    "withdrawErrorTitle": "Hitilafu wakati wa kuomba kuondoa",
+    "withdrawErrorMsg": "Hatukuweza kurekodi ombi lako. Jaribu tena.",
+    "targetValue": "Lengo: {{value}}",
+    "simulatorStrategy": "Mkakati: {{name}}",
+    "simulatorDepositCta": "Fanya amana yako ya kwanza"
   },
   "banca": {
     "title": "Usimamizi wa Mtaji",
@@ -580,7 +691,36 @@
     "inputRisk": "HATARI KWA OPERESHENI (%)",
     "weekly": "Kila wiki",
     "monthly": "Kila mwezi",
-    "total": "Jumla"
+    "total": "Jumla",
+    "addTrade": "Ongeza Biashara",
+    "tradePair": "Jozi",
+    "tradeDirection": "Mwelekeo",
+    "tradeEntry": "Bei ya Kuingia",
+    "tradeExit": "Bei ya Kutoka",
+    "tradeLot": "Loti",
+    "tradePips": "Pips",
+    "tradeProfit": "Faida (USD)",
+    "tradeResult": "Matokeo",
+    "tradeNotes": "Maelezo",
+    "tradeNotesPlaceholder": "Mfano: Nimefuata ishara ya saa ya boom...",
+    "cancel": "Ghairi",
+    "noTrades": "Hakuna biashara zilizorekodiwa",
+    "noTradesHint": "Ongeza biashara yako ya kwanza ili kuona takwimu",
+    "todayPnl": "Leo",
+    "weekPnl": "Wiki Hii",
+    "winRate": "Win Rate",
+    "totalPnl": "Jumla ya P&L",
+    "trades": "Biashara",
+    "profitFactor": "Profit Factor",
+    "wins": "Ushindi",
+    "losses": "Hasara",
+    "breakevens": "Break Even",
+    "recentTrades": "Biashara za Karibuni",
+    "showLess": "Ona kidogo",
+    "showAll": "Ona zote ({{count}})",
+    "deleteTrade": "Futa biashara",
+    "deleteTradeConfirm": "Una uhakika unataka kufuta biashara hii?",
+    "delete": "Futa"
   },
   "depositos": {
     "title": "Amana na Uondoaji",
@@ -611,7 +751,19 @@
     "numberCopied": "Imenakiliwa",
     "sendProof": "Ambatisha uthibitisho",
     "sendProofHint": "Picha au faili",
-    "proofAttached": "Uthibitisho umeambatishwa"
+    "proofAttached": "Uthibitisho umeambatishwa",
+    "tabDeposit": "Weka amana",
+    "tabWithdraw": "Ondoa",
+    "choosePlan": "Chagua mpango wako",
+    "secureNote": "Malipo salama · Inashughulikiwa na timu",
+    "withdrawAvailable": "Inapatikana kutoa",
+    "movementCapital": "Amana ya Mtaji",
+    "capitalDepositTitle": "Amana ya Mtaji",
+    "capitalDepositSubtitle": "Usimamizi wa Mtaji — kiasi kilichowekwa kwenye kihisi",
+    "receiptSaveError": "Risihi imetumwa lakini imeshindikana kurekodiwa kwenye seva. Wasiliana na msaada.",
+    "deleteMovement": "Futa",
+    "deleteMovementTitle": "Futa muamali?",
+    "deleteMovementMsg": "Una uhakika unataka kufuta muamali huu ulio subiri?"
   },
   "notificacoes": {
     "title": "Arifa",
@@ -626,7 +778,23 @@
     "manageAlerts": "Dhibiti Tahadhari",
     "clearAll": "Futa yote",
     "planProcessing": "Inachakatwa",
-    "planPending": "Inasubiri"
+    "planPending": "Inasubiri",
+    "summaryTitle": "Skasimu ya kupokea",
+    "unreadCount_one": "{{count}} zisizosomeka",
+    "unreadCount_other": "{{count}} zisizosomeka",
+    "allRead": "Zimeisomwa zote",
+    "today": "Leo",
+    "thisWeek": "Wiki hii",
+    "earlier": "Za awali",
+    "justNow": "Sasa hivi",
+    "minAgo_one": "{{count}}dk zilizopita",
+    "minAgo_other": "{{count}}dk zilizopita",
+    "hoursAgo_one": "{{count}}saa zilizopita",
+    "hoursAgo_other": "{{count}}saa zilizopita",
+    "daysAgo_one": "{{count}}siku zilizopita",
+    "daysAgo_other": "{{count}}siku zilizopita",
+    "scheduledFor": "Imepangwa kwa {{time}}",
+    "refresh": "Onyesha upya"
   },
   "tour": {
     "skip": "Ruka",
@@ -674,7 +842,10 @@
     "expiry3Title": "Usajili wako unaisha hivi karibuni",
     "expiry3Body": "Zimebaki siku {{days}} kabla ya usajili wako wa Premium kuisha. Renew sasa ili uhifadhi manufaa yako.",
     "expiry1Title": "Usajili wako unaisha kesho",
-    "expiry1Body": "Kesho ni siku ya mwisho ya usajili wako wa Premium. Renew sasa ili uepuke kukatizwa."
+    "expiry1Body": "Kesho ni siku ya mwisho ya usajili wako wa Premium. Renew sasa ili uepuke kukatizwa.",
+    "welcomeChannelName": "Karibu",
+    "welcomeTitle": "Karibu The Magic Trader",
+    "welcomeBody": "Asante kwa kujiunga! Chunguza programu na anza kupokea ishara za moja kwa moja."
   },
   "definicoesBooms": {
     "title": "Mipangilio ya Boom",
@@ -946,20 +1117,33 @@
       "entry": "ENTRY",
       "stopLoss": "SL",
       "takeProfit": "TP"
+    },
+    "store": {
+      "title": "Duka",
+      "subtitle": "Bots, mentorias na ebooks kwa mafanikio yako",
+      "categoryAll": "Zote",
+      "categoryBots": "Bots",
+      "categoryMentorias": "Mentoria",
+      "categoryEbooks": "Ebooks",
+      "premium": "Premium",
+      "free": "Bure",
+      "empty": "Hakuna bidhaa zinazopatikana",
+      "premiumRequired": "Premium Inahitajika",
+      "premiumMessage": "Bidhaa hii ni kwa wanachama wa Premium tu. Unataka kubadilisha?"
     }
   },
   "store": {
-    "title": "Loja",
-    "subtitle": "Bots, mentorias e ebooks para o teu sucesso",
-    "categoryAll": "Todos",
+    "title": "Duka",
+    "subtitle": "Bots, mentorias na ebooks kwa mafanikio yako",
+    "categoryAll": "Zote",
     "categoryBots": "Bots",
-    "categoryMentorias": "Mentorias",
+    "categoryMentorias": "Mentoria",
     "categoryEbooks": "Ebooks",
     "premium": "Premium",
-    "free": "Grátis",
-    "empty": "Nenhum item disponível",
-    "premiumRequired": "Premium Necessário",
-    "premiumMessage": "Este item é exclusivo para membros Premium. Deseja fazer upgrade?",
+    "free": "Bure",
+    "empty": "Hakuna bidhaa zinazopatikana",
+    "premiumRequired": "Premium Inahitajika",
+    "premiumMessage": "Bidhaa hii ni kwa wanachama wa Premium tu. Unataka kubadilisha?",
     "statsProducts": "Bidhaa",
     "statsFree": "Bure",
     "statsRating": "Kadirio",
@@ -978,5 +1162,23 @@
     "incEbook1": "Ufikiaji wa papo hapo",
     "incEbook2": "Mifano ya vitendo",
     "incEbook3": "Sasisho za bure"
+  },
+  "premiumWelcome": {
+    "title": "Karibu Premium!",
+    "body": "Mpango wako unaanza kufanya kazi. Sasa TMT kamili iko mkononi mwako.",
+    "perkBank": "Usimamizi wa mtaji wenye malengo na riba iliyounganishwa",
+    "perkSignals": "Ishara hazioni mipaka",
+    "perkChannels": "Kanneli za pekee za jamii",
+    "perkStore": "Duka la pekee kwa wanachama",
+    "ctaBank": "Washa Usimamizi wa Mtaji Wangu",
+    "ctaExplore": "Chunguza ishara"
+  },
+  "premiumBanner": {
+    "expiringTitle_one": "Siku {{count}} imebaki kwenye mpango wako",
+    "expiringTitle_other": "Siku {{count}} zimebaki kwenye mpango wako",
+    "expiringSub": "Endeleza sasa ili usipoteze manufaa yako.",
+    "expiredTitle": "Mpango wako wa Premium umeisha",
+    "expiredSub": "Imekwisha tarehe {{date}}. Endeleza ili kupata ufikiaji kamili.",
+    "renew": "Endeleza"
   }
 }

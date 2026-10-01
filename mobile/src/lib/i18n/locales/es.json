@@ -13,7 +13,8 @@
     "trader": "Trader",
     "waiting": "ESPERAR",
     "permission": "Permission",
-    "notNow": "Ahora no"
+    "notNow": "Ahora no",
+    "error": "Error"
   },
   "tabs": {
     "inicio": "Inicio",
@@ -36,7 +37,10 @@
     "newsLoading": "Cargando noticias…",
     "bestSignalTitle": "Mejor señal",
     "channelSignalsTitle": "Señales de los canales",
-    "channelSignalsSubtitle": "Mejor señal activa por canal"
+    "channelSignalsSubtitle": "Mejor señal activa por canal",
+    "activeBoomsSubtitle": "Todos los BOOMs activos de hoy",
+    "liveSection": "BOOMs en curso",
+    "upcomingSection": "Próximos hoy"
   },
   "analises": {
     "title": "Análisis",
@@ -66,7 +70,12 @@
     "filterSmc": "Setup SMC",
     "upsellPoint1": "Todos los pares y timeframes",
     "upsellPoint2": "Señales ilimitadas al día",
-    "upsellPoint3": "Alertas push en tiempo real"
+    "upsellPoint3": "Alertas push en tiempo real",
+    "generateBtn": "Generar Señales Ahora",
+    "generating": "Analizando el mercado con IA…",
+    "generateSuccess": "¡{{count}} señal(es) generada(s) con éxito!",
+    "generateNoSignals": "Ninguna señal encontrada. Mercado tranquilo ahora.",
+    "generateError": "Error al generar señales. Inténtalo de nuevo."
   },
   "historico": {
     "allPairs": "Todos los pares",
@@ -84,7 +93,8 @@
     "slHit": "❌ STOP LOSS",
     "loading": "Cargando historial…",
     "emptyTitle": "Sin señales cerradas",
-    "emptyBody": "Las señales cerradas aparecen aquí."
+    "emptyBody": "Las señales cerradas aparecen aquí.",
+    "expired": "Expirado"
   },
   "horarios": {
     "watAngola": "WAT · ANGOLA",
@@ -197,7 +207,10 @@
     "emptyChannelsHintCreator": "Crea el primer canal de la comunidad.",
     "emptyPairRoomsHint": "Las salas se abren automáticamente con la sesión de mercado.",
     "emptyDmsHint": "Encuentra traders en la búsqueda para iniciar conversaciones.",
-    "emptyDmsHintPremium": "Usa el + arriba para iniciar una conversación."
+    "emptyDmsHintPremium": "Usa el + arriba para iniciar una conversación.",
+    "reportMessage": "Reportar",
+    "reportSent": "Reporte enviado.",
+    "reportFailed": "No se pudo enviar."
   },
   "userProfile": {
     "title": "Perfil",
@@ -247,7 +260,10 @@
     "nameEmpty": "El nombre no puede estar vacío",
     "nameSaveError": "No se pudo actualizar el nombre. Inténtalo de nuevo.",
     "nameSaved": "Nombre actualizado",
-    "memberSince": "Miembro desde {{date}}"
+    "memberSince": "Miembro desde {{date}}",
+    "sectionAdmin": "ADMINISTRACIÓN",
+    "adminArea": "Área de Administración",
+    "adminBadge": "ADMIN"
   },
   "diario": {
     "title": "Diario del Trader",
@@ -372,7 +388,84 @@
     "noUsersTitle": "Sin datos",
     "noUsersDesc": "No se pudieron cargar los usuarios.",
     "registeredAt": "Registro: {{date}}",
-    "userRole": "Usuario"
+    "userRole": "Usuario",
+    "tabWithdrawals": "Retiros",
+    "tabMessaging": "Mensajes",
+    "tabReports": "Reportes",
+    "tabChannels": "Canales",
+    "tabAnnouncements": "Anuncios",
+    "gateTitle": "Área de Administración",
+    "gateSubtitle": "Introduce el código de acceso para entrar en el área de administración.",
+    "gateCodeLabel": "CÓDIGO DE ACCESO",
+    "gateCta": "Entrar",
+    "gateWrong": "Código incorrecto. Inténtalo de nuevo.",
+    "gateLockedTitle": "Área protegida",
+    "gateLockedDesc": "Esta área está protegida por un código de acceso.",
+    "quickPairs": "PARES RÁPIDOS",
+    "volatility": "VOLATILIDAD",
+    "presetSessions": "SESSÕES RÁPIDAS",
+    "presetTokyo": "🇯🇵 Tokyo",
+    "presetLondon": "🇬🇧 Londres",
+    "presetNewYork": "🇺🇸 Nueva York",
+    "autoGmt": "GMT calculado automáticamente",
+    "badgeSelect": "ICONO",
+    "tabReceipts": "Comprobantes",
+    "receiptsList": "COMPROVANTES ({{count}})",
+    "noReceipts": "Sin comprobantes",
+    "noReceiptsDesc": "Cuando los usuarios envíen comprobantes, aparecerán aquí.",
+    "receiptPending": "Pendiente",
+    "receiptApproved": "Aprobado",
+    "receiptRejected": "Rechazado",
+    "receiptUser": "Usuario",
+    "receiptDate": "Fecha",
+    "receiptAmount": "Valor",
+    "receiptPlan": "Plan",
+    "receiptMethod": "Método",
+    "receiptViewProof": "Ver comprobante",
+    "receiptApprove": "Aprovar",
+    "receiptReject": "Rechazar",
+    "receiptApproveConfirm": "Aprovar pago",
+    "receiptApproveMsg": "¿Seguro que quieres aprobar este pago? Se activará el plan del usuario.",
+    "receiptRejectConfirm": "Rechazar pago",
+    "receiptRejectMsg": "¿Seguro que quieres rechazar este comprobante?",
+    "receiptApprovedOk": "Pago aprobado",
+    "receiptApprovedMsg": "El plan del usuario se ha activado con éxito.",
+    "receiptRejectedOk": "Comprobante rechazado",
+    "receiptRejectedMsg": "El comprobante ha sido rechazado.",
+    "receiptDeleteTitle": "Eliminar comprobante",
+    "receiptDeleteConfirm": "¿Seguro que quieres eliminar este registro?",
+    "search": "Buscar...",
+    "filter": "Filtrar",
+    "clearFilters": "Limpiar filtros",
+    "export": "Exportar",
+    "selectAll": "Seleccionar todo",
+    "deselectAll": "Deseleccionar todo",
+    "deleteSelected": "Eliminar seleccionados",
+    "selectedCount": "{{count}} seleccionados",
+    "confirmDelete": "¿Seguro que quieres eliminar {{count}} elementos?",
+    "notifications": "Notificaciones",
+    "markAllRead": "Marcar todas como leídas",
+    "noNotifications": "Sin notificaciones",
+    "banUser": "Banear Usuario",
+    "unbanUser": "Desbanear Usuario",
+    "makePremium": "Activar Premium",
+    "removePremium": "Quitar Premium",
+    "editExpiration": "Editar Expiración",
+    "subscriptionExpires": "La suscripción expira el",
+    "expiringSoon": "Expira Pronto",
+    "pendingReceipts": "Comprobantes Pendentes",
+    "userDetails": "Detalles del Usuario",
+    "registrationDate": "Fecha de registro",
+    "currentPlan": "Plan actual",
+    "daysUntilExpiry": "{{days}} días hasta expirar",
+    "expired": "Expirado",
+    "never": "Nunca",
+    "userBanned": "Usuario baneado con éxito",
+    "userUnbanned": "Usuario desbaneado con éxito",
+    "roleUpdated": "Rol del usuario actualizado",
+    "expiryUpdated": "Expiración de la suscripción actualizada",
+    "statExpiring": "Expira Pronto",
+    "statPendingReceipts": "Comprobantes Pendentes"
   },
   "adminErrors": {
     "load": "Error al cargar señales",
@@ -400,7 +493,11 @@
     "sendCode": "Enviar código",
     "verifyCode": "Verificar y entrar",
     "codeSent": "Te enviamos un código al {{phone}}. Introdúcelo abajo.",
-    "resendCode": "Reenviar código"
+    "resendCode": "Reenviar código",
+    "or": "o",
+    "value1": "Señales en tiempo real",
+    "value2": "Alertas en el móvil",
+    "value3": "Gestión de banca"
   },
   "authErrors": {
     "googleStart": "No se pudo iniciar el login con Google.",
@@ -420,7 +517,8 @@
     "rr": "RR",
     "technical": "ANÁLISIS TÉCNICO",
     "noReasons": "Sin justificaciones",
-    "riskWarning": "Aviso de riesgo: este análisis tiene fines educativos…"
+    "riskWarning": "Aviso de riesgo: este análisis tiene fines educativos…",
+    "smcSetup": "Setup SMC"
   },
   "planos": {
     "title": "Planos",
@@ -509,7 +607,11 @@
     "capitalItem2": "Meta de retorno con interés compuesto automático",
     "capitalItem3": "Retiros semanales de ganancias",
     "capitalItem4": "Informes de rendimiento y progreso de la meta",
-    "capitalCta": "Ver Gestión de Capital"
+    "capitalCta": "Ver Gestión de Capital",
+    "receiptHint": "El equipo analizará y aprobará tu pago en breve.",
+    "ok": "Entendido",
+    "retryMessage": "Verifica tu conexión e inténtalo de nuevo.",
+    "tryAgain": "Intentar de nuevo"
   },
   "banca": {
     "title": "Gestión de Banca",
@@ -536,7 +638,36 @@
     "inputRisk": "RIESGO POR OPERACIÓN (%)",
     "weekly": "Semanal",
     "monthly": "Mensual",
-    "total": "Total"
+    "total": "Total",
+    "addTrade": "Añadir Operación",
+    "tradePair": "Par",
+    "tradeDirection": "Dirección",
+    "tradeEntry": "Precio de Entrada",
+    "tradeExit": "Precio de Salida",
+    "tradeLot": "Lote",
+    "tradePips": "Pips",
+    "tradeProfit": "Beneficio (USD)",
+    "tradeResult": "Resultado",
+    "tradeNotes": "Notas",
+    "tradeNotesPlaceholder": "Ej: Seguí la señal de la hora del boom…",
+    "cancel": "Cancelar",
+    "noTrades": "Sin operaciones registradas",
+    "noTradesHint": "Añade tu primera operación para ver estadísticas",
+    "todayPnl": "Hoy",
+    "weekPnl": "Esta Semana",
+    "winRate": "Win Rate",
+    "totalPnl": "Total P&L",
+    "trades": "Operaciones",
+    "profitFactor": "Factor de beneficio",
+    "wins": "Aciertos",
+    "losses": "Pérdidas",
+    "breakevens": "Break Even",
+    "recentTrades": "Operaciones Recientes",
+    "showLess": "Mostrar menos",
+    "showAll": "Ver todas ({{count}})",
+    "deleteTrade": "Eliminar operación",
+    "deleteTradeConfirm": "¿Seguro que quieres eliminar esta operación?",
+    "delete": "Eliminar"
   },
   "depositos": {
     "title": "Depósitos y Retiros",
@@ -570,7 +701,16 @@
     "numberCopied": "Copiado",
     "sendProof": "Adjuntar comprobante",
     "sendProofHint": "Galería o archivos",
-    "proofAttached": "Comprobante adjuntado"
+    "proofAttached": "Comprobante adjuntado",
+    "tabDeposit": "Depositar",
+    "tabWithdraw": "Retirar",
+    "choosePlan": "Elige tu plan",
+    "secureNote": "Pagos seguros · Procesados por el equipo",
+    "withdrawAvailable": "Disponible para retirar",
+    "receiptSaveError": "Comprobante enviado pero no se pudo registrar en el servidor. Contacta con el soporte.",
+    "deleteMovement": "Eliminar",
+    "deleteMovementTitle": "¿Eliminar movimiento?",
+    "deleteMovementMsg": "¿Seguro que quieres eliminar este movimiento pendiente?"
   },
   "notificacoes": {
     "title": "Notificaciones",
@@ -585,7 +725,23 @@
     "manageAlerts": "Gestionar Alertas",
     "clearAll": "Limpiar todo",
     "planProcessing": "En revisión",
-    "planPending": "Pendiente"
+    "planPending": "Pendiente",
+    "summaryTitle": "Bandeja de entrada",
+    "unreadCount_one": "{{count}} por leer",
+    "unreadCount_other": "{{count}} por leer",
+    "allRead": "Todo leído",
+    "today": "Hoy",
+    "thisWeek": "Esta semana",
+    "earlier": "Anteriores",
+    "justNow": "Ahora mismo",
+    "minAgo_one": "hace {{count}} min",
+    "minAgo_other": "hace {{count}} min",
+    "hoursAgo_one": "hace {{count}} h",
+    "hoursAgo_other": "hace {{count}} h",
+    "daysAgo_one": "hace {{count}} d",
+    "daysAgo_other": "hace {{count}} d",
+    "scheduledFor": "Programado para {{time}}",
+    "refresh": "Actualizar"
   },
   "tour": {
     "skip": "Omitir",
@@ -633,7 +789,10 @@
     "expiry3Title": "Tu suscripción expira pronto",
     "expiry3Body": "Quedan {{days}} días para que termine tu suscripción Premium. Renuévala para no perder tus beneficios.",
     "expiry1Title": "Tu suscripción expira mañana",
-    "expiry1Body": "Mañana es el último día de tu suscripción Premium. Renuévala ahora para evitar interrupciones."
+    "expiry1Body": "Mañana es el último día de tu suscripción Premium. Renuévala ahora para evitar interrupciones.",
+    "welcomeChannelName": "Bienvenida",
+    "welcomeTitle": "Bienvenido a The Magic Trader",
+    "welcomeBody": "¡Gracias por unirte! Explora la app y empieza a recibir señales en tiempo real."
   },
   "definicoesBooms": {
     "title": "Ajustes del Boom",
@@ -905,6 +1064,19 @@
       "entry": "ENTRADA",
       "stopLoss": "SL",
       "takeProfit": "TP"
+    },
+    "store": {
+      "title": "Tienda",
+      "subtitle": "Bots, mentorías e ebooks para tu éxito",
+      "categoryAll": "Todos",
+      "categoryBots": "Bots",
+      "categoryMentorias": "Mentorías",
+      "categoryEbooks": "Ebooks",
+      "premium": "Premium",
+      "free": "Gratis",
+      "empty": "Ningún artículo disponible",
+      "premiumRequired": "Premium Necesario",
+      "premiumMessage": "Este artículo es exclusivo para miembros Premium. ¿Quieres hacer upgrade?"
     }
   },
   "capital": {
@@ -952,20 +1124,26 @@
     "simulatorProjected": "Retorno proyectado",
     "simulatorProfit": "Ganancia estimada: +{{value}}",
     "simulatorStrategy": "Estrategia: {{name}}",
-    "simulatorDepositCta": "Hacer el primer depósito"
+    "simulatorDepositCta": "Hacer el primer depósito",
+    "withdrawAmount": "Importe a retirar",
+    "withdrawDetails": "Datos de pago (NIF/IBAN)",
+    "withdrawableValue": "Disponible: {{value}}",
+    "withdrawErrorTitle": "Error al solicitar el retiro",
+    "withdrawErrorMsg": "No pudimos registrar tu solicitud. Inténtalo de nuevo.",
+    "targetValue": "Meta: {{value}}"
   },
   "store": {
-    "title": "Loja",
-    "subtitle": "Bots, mentorias e ebooks para o teu sucesso",
+    "title": "Tienda",
+    "subtitle": "Bots, mentorías e ebooks para tu éxito",
     "categoryAll": "Todos",
     "categoryBots": "Bots",
-    "categoryMentorias": "Mentorias",
+    "categoryMentorias": "Mentorías",
     "categoryEbooks": "Ebooks",
     "premium": "Premium",
-    "free": "Grátis",
-    "empty": "Nenhum item disponível",
-    "premiumRequired": "Premium Necessário",
-    "premiumMessage": "Este item é exclusivo para membros Premium. Deseja fazer upgrade?",
+    "free": "Gratis",
+    "empty": "Ningún artículo disponible",
+    "premiumRequired": "Premium Necesario",
+    "premiumMessage": "Este artículo es exclusivo para miembros Premium. ¿Quieres hacer upgrade?",
     "statsProducts": "Productos",
     "statsFree": "Gratis",
     "statsRating": "Valoración",
@@ -984,5 +1162,23 @@
     "incEbook1": "Acceso instantáneo",
     "incEbook2": "Ejemplos prácticos",
     "incEbook3": "Actualizaciones gratis"
+  },
+  "premiumWelcome": {
+    "title": "¡Bienvenido al Premium!",
+    "body": "Tu plan está activo. Ahora tienes el TMT completo en tus manos.",
+    "perkBank": "Banca con metas e intereses compuestos",
+    "perkSignals": "Señales totalmente ilimitadas",
+    "perkChannels": "Canales exclusivos de la comunidad",
+    "perkStore": "Tienda exclusiva para miembros",
+    "ctaBank": "Activar mi Banca",
+    "ctaExplore": "Explorar señales"
+  },
+  "premiumBanner": {
+    "expiringTitle_one": "{{count}} día restante en tu plan",
+    "expiringTitle_other": "{{count}} días restantes en tu plan",
+    "expiringSub": "Renueva ahora para no perder tus beneficios.",
+    "expiredTitle": "Tu plan Premium ha expirado",
+    "expiredSub": "Expiró el {{date}}. Renueva para recuperar el acceso total.",
+    "renew": "Renovar"
   }
 }

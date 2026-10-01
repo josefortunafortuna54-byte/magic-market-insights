@@ -13,7 +13,8 @@
     "trader": "متداوِل",
     "waiting": "انتظار",
     "permission": "Permission",
-    "notNow": "ليس الآن"
+    "notNow": "ليس الآن",
+    "error": "خطأ"
   },
   "tabs": {
     "inicio": "الرئيسية",
@@ -36,7 +37,10 @@
     "newsLoading": "جار تحميل الأخبار…",
     "bestSignalTitle": "أفضل إشارة",
     "channelSignalsTitle": "إشارات القنوات",
-    "channelSignalsSubtitle": "أفضل إشارة نشطة لكل قناة"
+    "channelSignalsSubtitle": "أفضل إشارة نشطة لكل قناة",
+    "activeBoomsSubtitle": "جميع الـ BOOMs النشطة اليوم",
+    "liveSection": "الـ BOOMs الجارية",
+    "upcomingSection": "القادمة اليوم"
   },
   "analises": {
     "title": "التحليلات",
@@ -65,7 +69,13 @@
     "filterSmc": "إعداد SMC",
     "upsellPoint1": "جميع الأزواج والأطر الزمنية",
     "upsellPoint2": "إشارات غير محدودة يوميًا",
-    "upsellPoint3": "تنبيهات فورية في الوقت الحقيقي"
+    "upsellPoint3": "تنبيهات فورية في الوقت الحقيقي",
+    "generateBtn": "توليد الإشارات الآن",
+    "generating": "جارٍ تحليل السوق بالذكاء الاصطناعي…",
+    "generateSuccess": "تم توليد {{count}} إشارة بنجاح!",
+    "generateNoSignals": "لم يتم العثور على إشارات. السوق هادئ الآن.",
+    "generateError": "خطأ في توليد الإشارات. حاول مرة أخرى.",
+    "filterPairs": "الأزواج"
   },
   "historico": {
     "allPairs": "جميع الأزواج",
@@ -83,7 +93,8 @@
     "slHit": "❌ وقف الخسارة",
     "loading": "جارٍ تحميل السجل…",
     "emptyTitle": "لا توجد إشارات مغلقة",
-    "emptyBody": "ستظهر الإشارات المغلقة هنا."
+    "emptyBody": "ستظهر الإشارات المغلقة هنا.",
+    "expired": "منتهٍ"
   },
   "horarios": {
     "watAngola": "WAT · أنغولا",
@@ -196,7 +207,10 @@
     "emptyChannelsHintCreator": "أنشئ أول قناة للمجتمع.",
     "emptyPairRoomsHint": "تفتح الغرف تلقائياً مع جلسة السوق.",
     "emptyDmsHint": "ابحث عن متداولين لبدء المحادثات.",
-    "emptyDmsHintPremium": "اضغط + في الأعلى لبدء محادثة."
+    "emptyDmsHintPremium": "اضغط + في الأعلى لبدء محادثة.",
+    "reportMessage": "إبلاغ",
+    "reportSent": "تم إرسال البلاغ.",
+    "reportFailed": "تعذّر الإرسال."
   },
   "userProfile": {
     "title": "الملف الشخصي",
@@ -246,7 +260,10 @@
     "nameEmpty": "لا يمكن أن يكون الاسم فارغًا",
     "nameSaveError": "تعذر تحديث الاسم. حاول مرة أخرى.",
     "nameSaved": "تم تحديث الاسم",
-    "memberSince": "عضو منذ {{date}}"
+    "memberSince": "عضو منذ {{date}}",
+    "sectionAdmin": "الإدارة",
+    "adminArea": "منطقة الإدارة",
+    "adminBadge": "مدير"
   },
   "diario": {
     "title": "يوميات المتداول",
@@ -371,7 +388,84 @@
     "noUsersTitle": "لا توجد بيانات",
     "noUsersDesc": "تعذر تحميل المستخدمين.",
     "registeredAt": "التسجيل: {{date}}",
-    "userRole": "مستخدم"
+    "userRole": "مستخدم",
+    "tabWithdrawals": "السحوبات",
+    "tabMessaging": "الرسائل",
+    "tabReports": "البلاغات",
+    "tabChannels": "القنوات",
+    "tabAnnouncements": "الإعلانات",
+    "gateTitle": "منطقة الإدارة",
+    "gateSubtitle": "أدخل رمز الدخول للدخول إلى منطقة الإدارة.",
+    "gateCodeLabel": "رمز الدخول",
+    "gateCta": "دخول",
+    "gateWrong": "رمز غير صحيح. حاول مرة أخرى.",
+    "gateLockedTitle": "منطقة محمية",
+    "gateLockedDesc": "هذه المنطقة محمية برمز دخول.",
+    "quickPairs": "أزواج سريعة",
+    "volatility": "التقلب",
+    "presetSessions": "جلسات سريعة",
+    "presetTokyo": "🇯🇵 طوكيو",
+    "presetLondon": "🇬🇧 لندن",
+    "presetNewYork": "🇺🇸 نيويورك",
+    "autoGmt": "يُحسب GMT تلقائياً",
+    "badgeSelect": "أيقونة",
+    "tabReceipts": "إثباتات الدفع",
+    "receiptsList": "إثباتات الدفع ({{count}})",
+    "noReceipts": "لا توجد إثباتات دفع",
+    "noReceiptsDesc": "ستظهر هنا إثباتات الدفع عند إرسالها من المستخدمين.",
+    "receiptPending": "قيد الانتظار",
+    "receiptApproved": "موافق عليه",
+    "receiptRejected": "مرفوض",
+    "receiptUser": "المستخدم",
+    "receiptDate": "التاريخ",
+    "receiptAmount": "المبلغ",
+    "receiptPlan": "الخطة",
+    "receiptMethod": "الطريقة",
+    "receiptViewProof": "عرض الإثبات",
+    "receiptApprove": "موافقة",
+    "receiptReject": "رفض",
+    "receiptApproveConfirm": "الموافقة على الدفع",
+    "receiptApproveMsg": "هل أنت متأكد من الموافقة على هذا الدفع؟ سيتم تفعيل خطة المستخدم.",
+    "receiptRejectConfirm": "رفض الدفع",
+    "receiptRejectMsg": "هل أنت متأكد من رفض إثبات الدفع هذا؟",
+    "receiptApprovedOk": "تمت الموافقة على الدفع",
+    "receiptApprovedMsg": "تم تفعيل خطة المستخدم بنجاح.",
+    "receiptRejectedOk": "تم رفض إثبات الدفع",
+    "receiptRejectedMsg": "تم رفض إثبات الدفع.",
+    "receiptDeleteTitle": "حذف إثبات الدفع",
+    "receiptDeleteConfirm": "هل أنت متأكد من حذف هذا السجل؟",
+    "search": "بحث...",
+    "filter": "تصفية",
+    "clearFilters": "مسح الفلاتر",
+    "export": "تصدير",
+    "selectAll": "تحديد الكل",
+    "deselectAll": "إلغاء تحديد الكل",
+    "deleteSelected": "حذف المحدد",
+    "selectedCount": "تم تحديد {{count}}",
+    "confirmDelete": "هل أنت متأكد من حذف {{count}} عنصر؟",
+    "notifications": "الإشعارات",
+    "markAllRead": "تعليم الكل كمقروء",
+    "noNotifications": "لا توجد إشعارات",
+    "banUser": "حظر المستخدم",
+    "unbanUser": "إلغاء حظر المستخدم",
+    "makePremium": "تحويل إلى Premium",
+    "removePremium": "إزالة Premium",
+    "editExpiration": "تعديل الانتهاء",
+    "subscriptionExpires": "ينتهي الاشتراك في",
+    "expiringSoon": "ينتهي قريباً",
+    "pendingReceipts": "إثباتات الدفع المعلقة",
+    "userDetails": "تفاصيل المستخدم",
+    "registrationDate": "تاريخ التسجيل",
+    "currentPlan": "الخطة الحالية",
+    "daysUntilExpiry": "{{days}} يوماً حتى الانتهاء",
+    "expired": "منتهٍ",
+    "never": "أبداً",
+    "userBanned": "تم حظر المستخدم بنجاح",
+    "userUnbanned": "تم إلغاء حظر المستخدم بنجاح",
+    "roleUpdated": "تم تحديث دور المستخدم",
+    "expiryUpdated": "تم تحديث انتهاء الاشتراك",
+    "statExpiring": "ينتهي قريباً",
+    "statPendingReceipts": "إثباتات الدفع المعلقة"
   },
   "adminErrors": {
     "load": "خطأ في تحميل الإشارات",
@@ -399,7 +493,11 @@
     "sendCode": "إرسال الرمز",
     "verifyCode": "تحقق وسجّل الدخول",
     "codeSent": "أرسلنا رمزاً إلى {{phone}}. أدخله أدناه.",
-    "resendCode": "إعادة إرسال الرمز"
+    "resendCode": "إعادة إرسال الرمز",
+    "or": "أو",
+    "value1": "إشارات في الوقت الفعلي",
+    "value2": "تنبيهات على الهاتف",
+    "value3": "إدارة رأس المال"
   },
   "authErrors": {
     "googleStart": "تعذر بدء تسجيل الدخول عبر Google.",
@@ -419,7 +517,8 @@
     "rr": "RR",
     "technical": "التحليل الفني",
     "noReasons": "لا توجد مبررات",
-    "riskWarning": "تنبيه المخاطر: هذا التحليل لأغراض تعليمية…"
+    "riskWarning": "تنبيه المخاطر: هذا التحليل لأغراض تعليمية…",
+    "smcSetup": "إعداد SMC"
   },
   "planos": {
     "title": "الخطط",
@@ -508,7 +607,11 @@
     "capitalItem2": "هدف العائد مع فوائد مركبة تلقائية",
     "capitalItem3": "سحب الأرباح أسبوعياً",
     "capitalItem4": "تقارير الأداء ومتابعة تقدم الهدف",
-    "capitalCta": "عرض إدارة رأس المال"
+    "capitalCta": "عرض إدارة رأس المال",
+    "receiptHint": "سيراجع فريقنا دفعك ويوافق عليه قريباً.",
+    "ok": "فهمت",
+    "retryMessage": "تحقّق من اتصالك وحاول مرة أخرى.",
+    "tryAgain": "حاول مرة أخرى"
   },
   "banca": {
     "title": "إدارة رأس المال",
@@ -535,7 +638,36 @@
     "inputRisk": "المخاطر لكل صفقة (%)",
     "weekly": "أسبوعي",
     "monthly": "شهري",
-    "total": "الإجمالي"
+    "total": "الإجمالي",
+    "addTrade": "إضافة صفقة",
+    "tradePair": "الزوج",
+    "tradeDirection": "الاتجاه",
+    "tradeEntry": "سعر الدخول",
+    "tradeExit": "سعر الخروج",
+    "tradeLot": "اللوت",
+    "tradePips": "نقاط",
+    "tradeProfit": "الربح (USD)",
+    "tradeResult": "النتيجة",
+    "tradeNotes": "ملاحظات",
+    "tradeNotesPlaceholder": "مثال: تبعت إشارة ساعة البوم…",
+    "cancel": "إلغاء",
+    "noTrades": "لا توجد صفقات مسجّلة",
+    "noTradesHint": "أضف صفقتك الأولى لعرض الإحصائيات",
+    "todayPnl": "اليوم",
+    "weekPnl": "هذا الأسبوع",
+    "winRate": "نسبة النجاح",
+    "totalPnl": "إجمالي الربح/الخسارة",
+    "trades": "الصفقات",
+    "profitFactor": "معامل الربح",
+    "wins": "أرباح",
+    "losses": "خسائر",
+    "breakevens": "تعادل",
+    "recentTrades": "الصفقات الأخيرة",
+    "showLess": "عرض أقل",
+    "showAll": "عرض الكل ({{count}})",
+    "deleteTrade": "حذف الصفقة",
+    "deleteTradeConfirm": "هل أنت متأكد من حذف هذه الصفقة؟",
+    "delete": "حذف"
   },
   "capital": {
     "title": "إدارة رأس المال",
@@ -580,7 +712,15 @@
     "simulatorAmount": "المبلغ المراد استثماره ({{currency}})",
     "simulatorInvested": "المبلغ المستثمر",
     "simulatorProjected": "العائد المتوقع",
-    "simulatorProfit": "الربح المتوقع: +{{value}}"
+    "simulatorProfit": "الربح المتوقع: +{{value}}",
+    "withdrawAmount": "مبلغ السحب",
+    "withdrawDetails": "بيانات الدفع (NIF/IBAN)",
+    "withdrawableValue": "المتاح: {{value}}",
+    "withdrawErrorTitle": "خطأ في طلب السحب",
+    "withdrawErrorMsg": "تعذّر تسجيل طلبك. حاول مرة أخرى.",
+    "targetValue": "الهدف: {{value}}",
+    "simulatorStrategy": "الاستراتيجية: {{name}}",
+    "simulatorDepositCta": "أجرِ أول إيداع"
   },
   "depositos": {
     "title": "الإيداعات والسحوبات",
@@ -611,7 +751,19 @@
     "numberCopied": "تم النسخ",
     "sendProof": "إرفاق إثبات الدفع",
     "sendProofHint": "المعرض أو الملفات",
-    "proofAttached": "تم إرفاق إثبات الدفع"
+    "proofAttached": "تم إرفاق إثبات الدفع",
+    "tabDeposit": "إيداع",
+    "tabWithdraw": "سحب",
+    "choosePlan": "اختر خطتك",
+    "secureNote": "مدفوعات آمنة · يعالجها الفريق",
+    "withdrawAvailable": "المتاح للسحب",
+    "movementCapital": "إيداع رأس المال",
+    "capitalDepositTitle": "إيداع رأس المال",
+    "capitalDepositSubtitle": "إدارة رأس المال — القيمة تُحدَّد في الحاسبة",
+    "receiptSaveError": "تم إرسال الإثبات، لكن تعذّر تسجيله في الخادم. تواصل مع الدعم.",
+    "deleteMovement": "حذف",
+    "deleteMovementTitle": "حذف الحركة؟",
+    "deleteMovementMsg": "هل أنت متأكد من حذف هذه الحركة قيد الانتظار؟"
   },
   "notificacoes": {
     "title": "الإشعارات",
@@ -626,7 +778,23 @@
     "manageAlerts": "إدارة التنبيهات",
     "clearAll": "مسح الكل",
     "planProcessing": "قيد المراجعة",
-    "planPending": "قيد الانتظار"
+    "planPending": "قيد الانتظار",
+    "summaryTitle": "صندوق الوارد",
+    "unreadCount_one": "{{count}} غير مقروءة",
+    "unreadCount_other": "{{count}} غير مقروءة",
+    "allRead": "تمت قراءة الكل",
+    "today": "اليوم",
+    "thisWeek": "هذا الأسبوع",
+    "earlier": "أقدم",
+    "justNow": "الآن",
+    "minAgo_one": "قبل {{count}} دقيقة",
+    "minAgo_other": "قبل {{count}} دقيقة",
+    "hoursAgo_one": "قبل {{count}} ساعة",
+    "hoursAgo_other": "قبل {{count}} ساعة",
+    "daysAgo_one": "قبل {{count}} يوم",
+    "daysAgo_other": "قبل {{count}} يوم",
+    "scheduledFor": "مجدول في {{time}}",
+    "refresh": "تحديث"
   },
   "tour": {
     "skip": "تخطي",
@@ -674,7 +842,10 @@
     "expiry3Title": "ينتهي اشتراكك قريبًا",
     "expiry3Body": "تبقى {{days}} أيام حتى نهاية اشتراكك المميز. جدّد الآن للحفاظ على مزاياك.",
     "expiry1Title": "ينتهي اشتراكك غدًا",
-    "expiry1Body": "الغد هو اليوم الأخير لاشتراكك المميز. جدّد الآن لتجنب الانقطاع."
+    "expiry1Body": "الغد هو اليوم الأخير لاشتراكك المميز. جدّد الآن لتجنب الانقطاع.",
+    "welcomeChannelName": "ترحيب",
+    "welcomeTitle": "مرحباً بك في The Magic Trader",
+    "welcomeBody": "شكراً لانضمامك! استكشف التطبيق وابدأ في استقبال الإشارات في الوقت الفعلي."
   },
   "definicoesBooms": {
     "title": "إعدادات الـ Boom",
@@ -946,20 +1117,33 @@
       "entry": "الدخول",
       "stopLoss": "SL",
       "takeProfit": "TP"
+    },
+    "store": {
+      "title": "المتجر",
+      "subtitle": "بوتات وإرشادات وكتب إلكترونية لنجاحك",
+      "categoryAll": "الكل",
+      "categoryBots": "Bots",
+      "categoryMentorias": "إرشاد",
+      "categoryEbooks": "Ebooks",
+      "premium": "Premium",
+      "free": "مجاني",
+      "empty": "لا توجد عناصر متاحة",
+      "premiumRequired": "يتطلب Premium",
+      "premiumMessage": "هذا العنصر مخصص حصرياً لأعضاء Premium. هل ترغب في الترقية؟"
     }
   },
   "store": {
-    "title": "Loja",
-    "subtitle": "Bots, mentorias e ebooks para o teu sucesso",
-    "categoryAll": "Todos",
+    "title": "المتجر",
+    "subtitle": "بوتات وإرشادات وكتب إلكترونية لنجاحك",
+    "categoryAll": "الكل",
     "categoryBots": "Bots",
-    "categoryMentorias": "Mentorias",
+    "categoryMentorias": "إرشاد",
     "categoryEbooks": "Ebooks",
     "premium": "Premium",
-    "free": "Grátis",
-    "empty": "Nenhum item disponível",
-    "premiumRequired": "Premium Necessário",
-    "premiumMessage": "Este item é exclusivo para membros Premium. Deseja fazer upgrade?",
+    "free": "مجاني",
+    "empty": "لا توجد عناصر متاحة",
+    "premiumRequired": "يتطلب Premium",
+    "premiumMessage": "هذا العنصر مخصص حصرياً لأعضاء Premium. هل ترغب في الترقية؟",
     "statsProducts": "المنتجات",
     "statsFree": "مجاني",
     "statsRating": "التقييم",
@@ -978,5 +1162,23 @@
     "incEbook1": "وصول فوري",
     "incEbook2": "أمثلة عملية",
     "incEbook3": "تحديثات مجانية"
+  },
+  "premiumWelcome": {
+    "title": "مرحباً بك في Premium!",
+    "body": "خطتك نشطة. الآن بين يديك TMT كاملاً.",
+    "perkBank": "إدارة رأس مال بأهداف وفوائد مركبة",
+    "perkSignals": "إشارات غير محدودة تماماً",
+    "perkChannels": "قنوات حصرية للمجتمع",
+    "perkStore": "متجر حصري للأعضاء",
+    "ctaBank": "تفعيل إدارة رأس المال",
+    "ctaExplore": "استكشاف الإشارات"
+  },
+  "premiumBanner": {
+    "expiringTitle_one": "{{count}} يوم متبقٍ في خطتك",
+    "expiringTitle_other": "{{count}} أيام متبقية في خطتك",
+    "expiringSub": "جدّد الآن حتى لا تفقد مزاياك.",
+    "expiredTitle": "انتهت صلاحية خطة Premium",
+    "expiredSub": "انتهت في {{date}}. جدّد لاستعادة الوصول الكامل.",
+    "renew": "تجديد"
   }
 }

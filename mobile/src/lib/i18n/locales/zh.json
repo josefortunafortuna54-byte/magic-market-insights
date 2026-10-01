@@ -13,7 +13,8 @@
     "trader": "交易员",
     "waiting": "等待中",
     "permission": "Permission",
-    "notNow": "暂不"
+    "notNow": "暂不",
+    "error": "错误"
   },
   "tabs": {
     "inicio": "首页",
@@ -36,7 +37,10 @@
     "newsLoading": "正在加载新闻…",
     "bestSignalTitle": "最佳信号",
     "channelSignalsTitle": "频道信号",
-    "channelSignalsSubtitle": "每个频道的最佳有效信号"
+    "channelSignalsSubtitle": "每个频道的最佳有效信号",
+    "activeBoomsSubtitle": "今日所有活跃的 BOOM 时段",
+    "liveSection": "正在进行的 BOOM",
+    "upcomingSection": "今日即将到来"
   },
   "analises": {
     "title": "分析",
@@ -65,7 +69,13 @@
     "filterSmc": "SMC 设置",
     "upsellPoint1": "所有交易对与时间周期",
     "upsellPoint2": "每日无限信号",
-    "upsellPoint3": "实时推送提醒"
+    "upsellPoint3": "实时推送提醒",
+    "generateBtn": "立即生成信号",
+    "generating": "AI 正在分析市场…",
+    "generateSuccess": "成功生成 {{count}} 个信号！",
+    "generateNoSignals": "未找到信号。目前市场较为平静。",
+    "generateError": "生成信号时出错。请重试。",
+    "filterPairs": "货币对"
   },
   "historico": {
     "allPairs": "所有货币对",
@@ -83,7 +93,8 @@
     "slHit": "❌ 止损",
     "loading": "正在加载历史…",
     "emptyTitle": "暂无已平仓信号",
-    "emptyBody": "已平仓信号会显示在这里。"
+    "emptyBody": "已平仓信号会显示在这里。",
+    "expired": "已过期"
   },
   "horarios": {
     "watAngola": "WAT · 安哥拉",
@@ -196,7 +207,10 @@
     "emptyChannelsHintCreator": "创建社区的第一个频道。",
     "emptyPairRoomsHint": "房间会随市场时段自动开放。",
     "emptyDmsHint": "在搜索中找到交易者开始对话。",
-    "emptyDmsHintPremium": "点击上方 + 开始对话。"
+    "emptyDmsHintPremium": "点击上方 + 开始对话。",
+    "reportMessage": "举报",
+    "reportSent": "举报已提交。",
+    "reportFailed": "无法发送。"
   },
   "userProfile": {
     "title": "个人资料",
@@ -246,7 +260,10 @@
     "nameEmpty": "名称不能为空",
     "nameSaveError": "无法更新名称。请重试。",
     "nameSaved": "名称已更新",
-    "memberSince": "自 {{date}} 起成为会员"
+    "memberSince": "自 {{date}} 起成为会员",
+    "sectionAdmin": "管理",
+    "adminArea": "管理后台",
+    "adminBadge": "管理员"
   },
   "diario": {
     "title": "交易日记",
@@ -371,7 +388,84 @@
     "noUsersTitle": "暂无数据",
     "noUsersDesc": "无法加载用户。",
     "registeredAt": "注册时间：{{date}}",
-    "userRole": "用户"
+    "userRole": "用户",
+    "tabWithdrawals": "提款",
+    "tabMessaging": "消息",
+    "tabReports": "举报",
+    "tabChannels": "频道",
+    "tabAnnouncements": "公告",
+    "gateTitle": "管理后台",
+    "gateSubtitle": "输入访问密码以进入管理后台。",
+    "gateCodeLabel": "访问密码",
+    "gateCta": "进入",
+    "gateWrong": "密码错误。请重试。",
+    "gateLockedTitle": "受保护区域",
+    "gateLockedDesc": "此区域受访问密码保护。",
+    "quickPairs": "快捷货币对",
+    "volatility": "波动率",
+    "presetSessions": "快捷交易时段",
+    "presetTokyo": "🇯🇵 东京",
+    "presetLondon": "🇬🇧 伦敦",
+    "presetNewYork": "🇺🇸 纽约",
+    "autoGmt": "GMT 自动计算",
+    "badgeSelect": "图标",
+    "tabReceipts": "凭证",
+    "receiptsList": "凭证 ({{count}})",
+    "noReceipts": "暂无凭证",
+    "noReceiptsDesc": "当用户提交付款凭证时，将显示在此处。",
+    "receiptPending": "待审核",
+    "receiptApproved": "已通过",
+    "receiptRejected": "已拒绝",
+    "receiptUser": "用户",
+    "receiptDate": "日期",
+    "receiptAmount": "金额",
+    "receiptPlan": "订阅套餐",
+    "receiptMethod": "付款方式",
+    "receiptViewProof": "查看凭证",
+    "receiptApprove": "通过",
+    "receiptReject": "拒绝",
+    "receiptApproveConfirm": "确认通过",
+    "receiptApproveMsg": "确定通过此笔付款吗？用户的订阅套餐将被激活。",
+    "receiptRejectConfirm": "确认拒绝",
+    "receiptRejectMsg": "确定拒绝此凭证吗？",
+    "receiptApprovedOk": "付款已通过",
+    "receiptApprovedMsg": "用户订阅套餐已成功激活。",
+    "receiptRejectedOk": "凭证已拒绝",
+    "receiptRejectedMsg": "凭证已被拒绝。",
+    "receiptDeleteTitle": "删除凭证",
+    "receiptDeleteConfirm": "确定要删除此记录吗？",
+    "search": "搜索...",
+    "filter": "筛选",
+    "clearFilters": "清除筛选",
+    "export": "导出",
+    "selectAll": "全选",
+    "deselectAll": "取消全选",
+    "deleteSelected": "删除选中项",
+    "selectedCount": "已选中 {{count}} 项",
+    "confirmDelete": "确定要删除 {{count}} 项吗？",
+    "notifications": "通知",
+    "markAllRead": "全部标记为已读",
+    "noNotifications": "暂无通知",
+    "banUser": "封禁用户",
+    "unbanUser": "解除封禁",
+    "makePremium": "设为 Premium",
+    "removePremium": "移除 Premium",
+    "editExpiration": "修改到期时间",
+    "subscriptionExpires": "订阅到期时间",
+    "expiringSoon": "即将到期",
+    "pendingReceipts": "待审核凭证",
+    "userDetails": "用户详情",
+    "registrationDate": "注册日期",
+    "currentPlan": "当前套餐",
+    "daysUntilExpiry": "剩余 {{days}} 天到期",
+    "expired": "已过期",
+    "never": "从未",
+    "userBanned": "用户已封禁",
+    "userUnbanned": "已解除封禁",
+    "roleUpdated": "用户角色已更新",
+    "expiryUpdated": "订阅到期时间已更新",
+    "statExpiring": "即将到期",
+    "statPendingReceipts": "待审核凭证"
   },
   "adminErrors": {
     "load": "加载信号出错",
@@ -399,7 +493,11 @@
     "sendCode": "发送验证码",
     "verifyCode": "验证并登录",
     "codeSent": "我们已向 {{phone}} 发送验证码，请在下方输入。",
-    "resendCode": "重新发送"
+    "resendCode": "重新发送",
+    "or": "或",
+    "value1": "实时交易信号",
+    "value2": "手机端通知提醒",
+    "value3": "资金管理"
   },
   "authErrors": {
     "googleStart": "无法启动 Google 登录。",
@@ -419,7 +517,8 @@
     "rr": "RR",
     "technical": "技术分析",
     "noReasons": "暂无理由",
-    "riskWarning": "风险提示：本分析仅供参考教育用途…"
+    "riskWarning": "风险提示：本分析仅供参考教育用途…",
+    "smcSetup": "SMC 设置"
   },
   "planos": {
     "title": "套餐",
@@ -508,7 +607,11 @@
     "capitalItem2": "收益目标支持自动复利",
     "capitalItem3": "每周提取利润",
     "capitalItem4": "业绩报告与目标进度跟踪",
-    "capitalCta": "查看资金管理"
+    "capitalCta": "查看资金管理",
+    "receiptHint": "我们团队将尽快审核并确认您的付款。",
+    "ok": "知道了",
+    "retryMessage": "请检查您的网络连接后重试。",
+    "tryAgain": "重试"
   },
   "banca": {
     "title": "资金管理",
@@ -535,7 +638,36 @@
     "inputRisk": "单笔风险 (%)",
     "weekly": "每周",
     "monthly": "每月",
-    "total": "总计"
+    "total": "总计",
+    "addTrade": "添加交易",
+    "tradePair": "货币对",
+    "tradeDirection": "方向",
+    "tradeEntry": "入场价",
+    "tradeExit": "出场价",
+    "tradeLot": "手数",
+    "tradePips": "点数",
+    "tradeProfit": "盈利 (USD)",
+    "tradeResult": "结果",
+    "tradeNotes": "备注",
+    "tradeNotesPlaceholder": "例如：跟随 Boom Hour 信号...",
+    "cancel": "取消",
+    "noTrades": "暂无交易记录",
+    "noTradesHint": "添加第一笔交易后即可查看统计数据",
+    "todayPnl": "今日",
+    "weekPnl": "本周",
+    "winRate": "胜率",
+    "totalPnl": "总盈亏",
+    "trades": "交易笔数",
+    "profitFactor": "盈利因子",
+    "wins": "盈利",
+    "losses": "亏损",
+    "breakevens": "平本",
+    "recentTrades": "近期交易",
+    "showLess": "收起",
+    "showAll": "查看全部 ({{count}})",
+    "deleteTrade": "删除交易",
+    "deleteTradeConfirm": "确定要删除这笔交易吗？",
+    "delete": "删除"
   },
   "capital": {
     "title": "资金管理",
@@ -580,7 +712,15 @@
     "simulatorAmount": "投资金额（{{currency}}）",
     "simulatorInvested": "投资金额",
     "simulatorProjected": "预期回报",
-    "simulatorProfit": "预计收益：+{{value}}"
+    "simulatorProfit": "预计收益：+{{value}}",
+    "withdrawAmount": "提款金额",
+    "withdrawDetails": "支付信息 (NIF/IBAN)",
+    "withdrawableValue": "可提款：{{value}}",
+    "withdrawErrorTitle": "提款申请失败",
+    "withdrawErrorMsg": "无法记录您的提款申请。请重试。",
+    "targetValue": "目标：{{value}}",
+    "simulatorStrategy": "策略：{{name}}",
+    "simulatorDepositCta": "首次存款"
   },
   "depositos": {
     "title": "存款与提现",
@@ -611,7 +751,19 @@
     "numberCopied": "已复制",
     "sendProof": "附上凭证",
     "sendProofHint": "相册或文件",
-    "proofAttached": "已附上凭证"
+    "proofAttached": "已附上凭证",
+    "tabDeposit": "存款",
+    "tabWithdraw": "提款",
+    "choosePlan": "选择您的订阅套餐",
+    "secureNote": "安全支付 · 由团队处理",
+    "withdrawAvailable": "可提款金额",
+    "movementCapital": "资金存款",
+    "capitalDepositTitle": "资金存款",
+    "capitalDepositSubtitle": "资金管理 — 模拟器中设置的金额",
+    "receiptSaveError": "付款凭证已发送，但无法保存到服务器。请联系支持团队。",
+    "deleteMovement": "删除",
+    "deleteMovementTitle": "删除记录？",
+    "deleteMovementMsg": "确定要删除此待处理记录吗？"
   },
   "notificacoes": {
     "title": "通知",
@@ -626,7 +778,23 @@
     "manageAlerts": "管理提醒",
     "clearAll": "全部清除",
     "planProcessing": "审核中",
-    "planPending": "待处理"
+    "planPending": "待处理",
+    "summaryTitle": "收件箱",
+    "unreadCount_one": "{{count}} 条未读",
+    "unreadCount_other": "{{count}} 条未读",
+    "allRead": "全部标记为已读",
+    "today": "今天",
+    "thisWeek": "本周",
+    "earlier": "更早",
+    "justNow": "刚刚",
+    "minAgo_one": "{{count}} 分钟前",
+    "minAgo_other": "{{count}} 分钟前",
+    "hoursAgo_one": "{{count}} 小时前",
+    "hoursAgo_other": "{{count}} 小时前",
+    "daysAgo_one": "{{count}} 天前",
+    "daysAgo_other": "{{count}} 天前",
+    "scheduledFor": "定时发送：{{time}}",
+    "refresh": "刷新"
   },
   "tour": {
     "skip": "跳过",
@@ -674,7 +842,10 @@
     "expiry3Title": "您的订阅即将到期",
     "expiry3Body": "距Premium订阅结束还有{{days}}天。立即续订以保留您的权益。",
     "expiry1Title": "您的订阅明天到期",
-    "expiry1Body": "明天是您Premium订阅的最后一天。请立即续订以免中断。"
+    "expiry1Body": "明天是您Premium订阅的最后一天。请立即续订以免中断。",
+    "welcomeChannelName": "欢迎",
+    "welcomeTitle": "欢迎来到 The Magic Trader",
+    "welcomeBody": "感谢您的加入！快来探索应用，开始接收实时交易信号吧。"
   },
   "definicoesBooms": {
     "title": "Boom 设置",
@@ -946,20 +1117,33 @@
       "entry": "入场",
       "stopLoss": "SL",
       "takeProfit": "TP"
+    },
+    "store": {
+      "title": "商店",
+      "subtitle": "助您成功的机器人、辅导课程和电子书",
+      "categoryAll": "全部",
+      "categoryBots": "机器人",
+      "categoryMentorias": "辅导课程",
+      "categoryEbooks": "电子书",
+      "premium": "Premium",
+      "free": "免费",
+      "empty": "暂无商品",
+      "premiumRequired": "需要 Premium",
+      "premiumMessage": "此商品仅限 Premium 会员。是否升级？"
     }
   },
   "store": {
-    "title": "Loja",
-    "subtitle": "Bots, mentorias e ebooks para o teu sucesso",
-    "categoryAll": "Todos",
-    "categoryBots": "Bots",
-    "categoryMentorias": "Mentorias",
-    "categoryEbooks": "Ebooks",
+    "title": "商店",
+    "subtitle": "助您成功的机器人、辅导课程和电子书",
+    "categoryAll": "全部",
+    "categoryBots": "机器人",
+    "categoryMentorias": "辅导课程",
+    "categoryEbooks": "电子书",
     "premium": "Premium",
-    "free": "Grátis",
-    "empty": "Nenhum item disponível",
-    "premiumRequired": "Premium Necessário",
-    "premiumMessage": "Este item é exclusivo para membros Premium. Deseja fazer upgrade?",
+    "free": "免费",
+    "empty": "暂无商品",
+    "premiumRequired": "需要 Premium",
+    "premiumMessage": "此商品仅限 Premium 会员。是否升级？",
     "statsProducts": "产品",
     "statsFree": "免费",
     "statsRating": "评分",
@@ -978,5 +1162,23 @@
     "incEbook1": "即时访问",
     "incEbook2": "实用示例",
     "incEbook3": "免费更新"
+  },
+  "premiumWelcome": {
+    "title": "欢迎使用 Premium！",
+    "body": "您的订阅已激活。现在您可以完整体验 TMT。",
+    "perkBank": "具备目标和复利的资金管理",
+    "perkSignals": "完全无限的交易信号",
+    "perkChannels": "社区专属频道",
+    "perkStore": "会员专属商店",
+    "ctaBank": "启用资金管理",
+    "ctaExplore": "浏览信号"
+  },
+  "premiumBanner": {
+    "expiringTitle_one": "您的订阅还剩 {{count}} 天到期",
+    "expiringTitle_other": "您的订阅还剩 {{count}} 天到期",
+    "expiringSub": "立即续订，免失去专属权益。",
+    "expiredTitle": "您的 Premium 订阅已过期",
+    "expiredSub": "已于 {{date}} 过期。续订即可恢复完整访问权限。",
+    "renew": "续订"
   }
 }

@@ -13,7 +13,8 @@
     "trader": "Trader",
     "waiting": "WACHTEN",
     "permission": "Permission",
-    "notNow": "Niet nu"
+    "notNow": "Niet nu",
+    "error": "Fout"
   },
   "tabs": {
     "inicio": "Home",
@@ -36,7 +37,10 @@
     "newsLoading": "Nieuws laden…",
     "bestSignalTitle": "Beste signaal",
     "channelSignalsTitle": "Kanaalsignalen",
-    "channelSignalsSubtitle": "Beste actieve signaal per kanaal"
+    "channelSignalsSubtitle": "Beste actieve signaal per kanaal",
+    "activeBoomsSubtitle": "Alle actieve BOOMs van vandaag",
+    "liveSection": "Lopende BOOMs",
+    "upcomingSection": "Vandaag nog"
   },
   "analises": {
     "title": "Analyses",
@@ -65,7 +69,13 @@
     "filterSmc": "SMC Setup",
     "upsellPoint1": "Alle paren & timeframes",
     "upsellPoint2": "Onbeperkte signalen per dag",
-    "upsellPoint3": "Realtime pushmeldingen"
+    "upsellPoint3": "Realtime pushmeldingen",
+    "generateBtn": "Nu signalen genereren",
+    "generating": "Markt wordt met AI geanalyseerd…",
+    "generateSuccess": "{{count}} signaal(len) succesvol gegenereerd!",
+    "generateNoSignals": "Geen signalen gevonden. De markt is nu rustig.",
+    "generateError": "Fout bij het genereren van signalen. Probeer het opnieuw.",
+    "filterPairs": "PAREN"
   },
   "historico": {
     "allPairs": "Alle paren",
@@ -83,7 +93,8 @@
     "slHit": "❌ STOP LOSS",
     "loading": "Geschiedenis laden…",
     "emptyTitle": "Geen gesloten signalen",
-    "emptyBody": "Gesloten signalen verschijnen hier."
+    "emptyBody": "Gesloten signalen verschijnen hier.",
+    "expired": "Verlopen"
   },
   "horarios": {
     "watAngola": "WAT · ANGOLA",
@@ -196,7 +207,10 @@
     "emptyChannelsHintCreator": "Maak het eerste kanaal van de community.",
     "emptyPairRoomsHint": "Kamers openen automatisch met de marktsessie.",
     "emptyDmsHint": "Vind traders via zoeken om gesprekken te starten.",
-    "emptyDmsHintPremium": "Tik hierboven op + om een gesprek te starten."
+    "emptyDmsHintPremium": "Tik hierboven op + om een gesprek te starten.",
+    "reportMessage": "Melden",
+    "reportSent": "Melding verzonden.",
+    "reportFailed": "Verzenden niet gelukt."
   },
   "userProfile": {
     "title": "Profiel",
@@ -245,7 +259,11 @@
     "nameEmpty": "De naam mag niet leeg zijn",
     "nameSaveError": "De naam kon niet worden bijgewerkt. Probeer het opnieuw.",
     "nameSaved": "Naam bijgewerkt",
-    "memberSince": "Lid sinds {{date}}"
+    "memberSince": "Lid sinds {{date}}",
+    "diario": "Traderdagboek",
+    "sectionAdmin": "BEHEER",
+    "adminArea": "Beheerarea",
+    "adminBadge": "ADMIN"
   },
   "diario": {
     "title": "Handelaren Dagboek",
@@ -256,7 +274,7 @@
     "noTradesHint": "Tik op 'Registreren' om je eerste trade van de dag toe te voegen.",
     "tradesCount": "trades",
     "monthTrades": "Trades deze maand",
-    "monthWinRate": "Win Rate",
+    "monthWinRate": "Winstpercentage",
     "monthPnl": "Maandelijks P&L",
     "tradePair": "Pair",
     "tradeDirection": "Richting",
@@ -322,7 +340,15 @@
     "simulatorAmount": "Te investeren bedrag ({{currency}})",
     "simulatorInvested": "Geïnvesteerd bedrag",
     "simulatorProjected": "Verwacht rendement",
-    "simulatorProfit": "Geschatte winst: +{{value}}"
+    "simulatorProfit": "Geschatte winst: +{{value}}",
+    "withdrawAmount": "Opnamebedrag",
+    "withdrawDetails": "Betalingsgegevens (NIF/IBAN)",
+    "withdrawableValue": "Beschikbaar: {{value}}",
+    "withdrawErrorTitle": "Fout bij het aanvragen van een opname",
+    "withdrawErrorMsg": "We konden je aanvraag niet registreren. Probeer het opnieuw.",
+    "targetValue": "Doel: {{value}}",
+    "simulatorStrategy": "Strategie: {{name}}",
+    "simulatorDepositCta": "Doe je eerste storting"
   },
   "language": {
     "title": "Taal"
@@ -415,7 +441,84 @@
     "noUsersTitle": "Geen gegevens",
     "noUsersDesc": "De gebruikers konden niet worden geladen.",
     "registeredAt": "Geregistreerd: {{date}}",
-    "userRole": "Gebruiker"
+    "userRole": "Gebruiker",
+    "tabWithdrawals": "Opnames",
+    "tabMessaging": "Berichten",
+    "tabReports": "Meldingen",
+    "tabChannels": "Kanalen",
+    "tabAnnouncements": "Aankondigingen",
+    "gateTitle": "Beheergebied",
+    "gateSubtitle": "Voer de toegangscode in om toegang te krijgen tot het beheergebied.",
+    "gateCodeLabel": "TOEGANGSCODE",
+    "gateCta": "Inloggen",
+    "gateWrong": "Onjuiste code. Probeer het opnieuw.",
+    "gateLockedTitle": "Beveiligd gebied",
+    "gateLockedDesc": "Dit gebied is beschermd met een toegangscode.",
+    "quickPairs": "SNELLE PAREN",
+    "volatility": "VOLATILITEIT",
+    "presetSessions": "SNELLE SESSIES",
+    "presetTokyo": "🇯🇵 Tokio",
+    "presetLondon": "🇬🇧 Londen",
+    "presetNewYork": "🇺🇸 New York",
+    "autoGmt": "GMT automatisch berekend",
+    "badgeSelect": "ICOON",
+    "tabReceipts": "Betalingsbewijzen",
+    "receiptsList": "BETALINGSBEWIJZEN ({{count}})",
+    "noReceipts": "Geen betalingsbewijzen",
+    "noReceiptsDesc": "Wanneer gebruikers betalingsbewijzen verzenden, verschijnen ze hier.",
+    "receiptPending": "In behandeling",
+    "receiptApproved": "Goedgekeurd",
+    "receiptRejected": "Afgewezen",
+    "receiptUser": "Gebruiker",
+    "receiptDate": "Datum",
+    "receiptAmount": "Bedrag",
+    "receiptPlan": "Abonnement",
+    "receiptMethod": "Methode",
+    "receiptViewProof": "Betalingsbewijs bekijken",
+    "receiptApprove": "Goedkeuren",
+    "receiptReject": "Afwijzen",
+    "receiptApproveConfirm": "Betaling goedkeuren",
+    "receiptApproveMsg": "Weet je zeker dat je deze betaling wilt goedkeuren? Het abonnement van de gebruiker wordt geactiveerd.",
+    "receiptRejectConfirm": "Betaling afwijzen",
+    "receiptRejectMsg": "Weet je zeker dat je dit betalingsbewijs wilt afwijzen?",
+    "receiptApprovedOk": "Betaling goedgekeurd",
+    "receiptApprovedMsg": "Het abonnement van de gebruiker is succesvol geactiveerd.",
+    "receiptRejectedOk": "Betalingsbewijs afgewezen",
+    "receiptRejectedMsg": "Het betalingsbewijs is afgewezen.",
+    "receiptDeleteTitle": "Betalingsbewijs verwijderen",
+    "receiptDeleteConfirm": "Weet je zeker dat je dit record wilt verwijderen?",
+    "search": "Zoeken...",
+    "filter": "Filteren",
+    "clearFilters": "Filters wissen",
+    "export": "Exporteren",
+    "selectAll": "Alles selecteren",
+    "deselectAll": "Alles deselecteren",
+    "deleteSelected": "Geselecteerde items verwijderen",
+    "selectedCount": "{{count}} geselecteerd",
+    "confirmDelete": "Weet je zeker dat je {{count}} items wilt verwijderen?",
+    "notifications": "Meldingen",
+    "markAllRead": "Alles als gelezen markeren",
+    "noNotifications": "Geen meldingen",
+    "banUser": "Gebruiker blokkeren",
+    "unbanUser": "Gebruiker deblokkeren",
+    "makePremium": "Premium toekennen",
+    "removePremium": "Premium verwijderen",
+    "editExpiration": "Vervaldatum bewerken",
+    "subscriptionExpires": "Abonnement vervalt op",
+    "expiringSoon": "Vervalt binnenkort",
+    "pendingReceipts": "Betalingsbewijzen in behandeling",
+    "userDetails": "Gebruikersdetails",
+    "registrationDate": "Registratiedatum",
+    "currentPlan": "Huidig abonnement",
+    "daysUntilExpiry": "{{days}} dagen tot vervaldatum",
+    "expired": "Verlopen",
+    "never": "Nooit",
+    "userBanned": "Gebruiker succesvol geblokkeerd",
+    "userUnbanned": "Gebruiker succesvol gedeblokkeerd",
+    "roleUpdated": "Rol van gebruiker bijgewerkt",
+    "expiryUpdated": "Vervaldatum abonnement bijgewerkt",
+    "statExpiring": "Vervalt binnenkort",
+    "statPendingReceipts": "Betalingsbewijzen in behandeling"
   },
   "adminErrors": {
     "load": "Fout bij het laden van signalen",
@@ -443,7 +546,11 @@
     "sendCode": "Code verzenden",
     "verifyCode": "Verifiëren en inloggen",
     "codeSent": "We hebben een code naar {{phone}} gestuurd. Voer die hieronder in.",
-    "resendCode": "Code opnieuw verzenden"
+    "resendCode": "Code opnieuw verzenden",
+    "or": "of",
+    "value1": "Realtime signalen",
+    "value2": "Alerts op je mobiel",
+    "value3": "Bankrollbeheer"
   },
   "authErrors": {
     "googleStart": "Het was niet mogelijk om het inloggen met Google te starten.",
@@ -463,7 +570,8 @@
     "rr": "RR",
     "technical": "TECHNISCHE ANALYSE",
     "noReasons": "Geen redenen",
-    "riskWarning": "Risicowaarschuwing: deze analyse heeft uitsluitend een educatief doel…"
+    "riskWarning": "Risicowaarschuwing: deze analyse heeft uitsluitend een educatief doel…",
+    "smcSetup": "SMC-setup"
   },
   "planos": {
     "title": "Abonnementen",
@@ -552,7 +660,11 @@
     "capitalItem2": "Rendementsdoel met automatisch samengestelde rente",
     "capitalItem3": "Wekelijkse winstopnames",
     "capitalItem4": "Prestatierapporten en voortgang van je doel",
-    "capitalCta": "Bekijk Kapitaalbeheer"
+    "capitalCta": "Bekijk Kapitaalbeheer",
+    "receiptHint": "Ons team bekijkt en keurt je betaling binnenkort goed.",
+    "ok": "Begrepen",
+    "retryMessage": "Controleer je verbinding en probeer het opnieuw.",
+    "tryAgain": "Opnieuw proberen"
   },
   "banca": {
     "title": "Bankrollbeheer",
@@ -579,7 +691,36 @@
     "inputRisk": "RISICO PER TRANSACTIE (%)",
     "weekly": "Wekelijks",
     "monthly": "Maandelijks",
-    "total": "Totaal"
+    "total": "Totaal",
+    "addTrade": "Transactie toevoegen",
+    "tradePair": "Paar",
+    "tradeDirection": "Richting",
+    "tradeEntry": "Entry-prijs",
+    "tradeExit": "Exit-prijs",
+    "tradeLot": "Lot",
+    "tradePips": "Pips",
+    "tradeProfit": "Winst (USD)",
+    "tradeResult": "Resultaat",
+    "tradeNotes": "Notities",
+    "tradeNotesPlaceholder": "Bijv.: signaal uit het boom uur gevolgd...",
+    "cancel": "Annuleren",
+    "noTrades": "Geen transacties geregistreerd",
+    "noTradesHint": "Voeg je eerste transactie toe om statistieken te zien",
+    "todayPnl": "Vandaag",
+    "weekPnl": "Deze week",
+    "winRate": "Winstpercentage",
+    "totalPnl": "Totaal P&L",
+    "trades": "Transacties",
+    "profitFactor": "Profitfactor",
+    "wins": "Winsten",
+    "losses": "Verliezen",
+    "breakevens": "Break-even",
+    "recentTrades": "Recente transacties",
+    "showLess": "Minder tonen",
+    "showAll": "Alle bekijken ({{count}})",
+    "deleteTrade": "Transactie verwijderen",
+    "deleteTradeConfirm": "Weet je zeker dat je deze transactie wilt verwijderen?",
+    "delete": "Verwijderen"
   },
   "depositos": {
     "title": "Stortingen & Opnames",
@@ -610,7 +751,19 @@
     "numberCopied": "Gekopieerd",
     "sendProof": "Bewijs toevoegen",
     "sendProofHint": "Galerij of bestanden",
-    "proofAttached": "Bewijs toegevoegd"
+    "proofAttached": "Bewijs toegevoegd",
+    "tabDeposit": "Storten",
+    "tabWithdraw": "Opnemen",
+    "choosePlan": "Kies je abonnement",
+    "secureNote": "Veilige betalingen · Verwerkt door ons team",
+    "withdrawAvailable": "Beschikbaar om op te nemen",
+    "movementCapital": "Kapitaalstorting",
+    "capitalDepositTitle": "Kapitaalstorting",
+    "capitalDepositSubtitle": "Bankrollbeheer — bedrag ingesteld in de simulator",
+    "receiptSaveError": "Betalingsbewijs verzonden maar kon niet op de server worden opgeslagen. Neem contact op met de support.",
+    "deleteMovement": "Verwijderen",
+    "deleteMovementTitle": "Beweging verwijderen?",
+    "deleteMovementMsg": "Weet je zeker dat je deze openstaande beweging wilt verwijderen?"
   },
   "notificacoes": {
     "title": "Meldingen",
@@ -625,7 +778,23 @@
     "manageAlerts": "Alerts beheren",
     "clearAll": "Alles wissen",
     "planProcessing": "Wordt beoordeeld",
-    "planPending": "In behandeling"
+    "planPending": "In behandeling",
+    "summaryTitle": "Postvak in",
+    "unreadCount_one": "{{count}} ongelezen",
+    "unreadCount_other": "{{count}} ongelezen",
+    "allRead": "Alles gelezen",
+    "today": "Vandaag",
+    "thisWeek": "Deze week",
+    "earlier": "Eerdere",
+    "justNow": "Net nu",
+    "minAgo_one": "{{count}} min geleden",
+    "minAgo_other": "{{count}} min geleden",
+    "hoursAgo_one": "{{count}} u geleden",
+    "hoursAgo_other": "{{count}} u geleden",
+    "daysAgo_one": "{{count}} d geleden",
+    "daysAgo_other": "{{count}} d geleden",
+    "scheduledFor": "Gepland op {{time}}",
+    "refresh": "Vernieuwen"
   },
   "tour": {
     "skip": "Overslaan",
@@ -673,7 +842,10 @@
     "expiry3Title": "Je abonnement verloopt binnenkort",
     "expiry3Body": "Nog {{days}} dagen tot je Premium-abonnement afloopt. Vernieuw om je voordelen te behouden.",
     "expiry1Title": "Je abonnement verloopt morgen",
-    "expiry1Body": "Morgen is de laatste dag van je Premium-abonnement. Vernieuw nu om onderbrekingen te voorkomen."
+    "expiry1Body": "Morgen is de laatste dag van je Premium-abonnement. Vernieuw nu om onderbrekingen te voorkomen.",
+    "welcomeChannelName": "Welkom",
+    "welcomeTitle": "Welkom bij The Magic Trader",
+    "welcomeBody": "Bedankt dat je erbij bent! Verken de app en begin realtime signalen te ontvangen."
   },
   "definicoesBooms": {
     "title": "Boom-instellingen",
@@ -945,20 +1117,33 @@
       "entry": "ENTRY",
       "stopLoss": "SL",
       "takeProfit": "TP"
+    },
+    "store": {
+      "title": "Winkel",
+      "subtitle": "Bots, mentoring en ebooks voor jouw succes",
+      "categoryAll": "Alle",
+      "categoryBots": "Bots",
+      "categoryMentorias": "Mentoring",
+      "categoryEbooks": "Ebooks",
+      "premium": "Premium",
+      "free": "Gratis",
+      "empty": "Geen artikelen beschikbaar",
+      "premiumRequired": "Premium vereist",
+      "premiumMessage": "Dit artikel is exclusief voor Premium-leden. Wil je upgraden?"
     }
   },
   "store": {
-    "title": "Loja",
-    "subtitle": "Bots, mentorias e ebooks para o teu sucesso",
-    "categoryAll": "Todos",
+    "title": "Winkel",
+    "subtitle": "Bots, mentoring en ebooks voor jouw succes",
+    "categoryAll": "Alle",
     "categoryBots": "Bots",
-    "categoryMentorias": "Mentorias",
+    "categoryMentorias": "Mentoring",
     "categoryEbooks": "Ebooks",
     "premium": "Premium",
-    "free": "Grátis",
-    "empty": "Nenhum item disponível",
-    "premiumRequired": "Premium Necessário",
-    "premiumMessage": "Este item é exclusivo para membros Premium. Deseja fazer upgrade?",
+    "free": "Gratis",
+    "empty": "Geen artikelen beschikbaar",
+    "premiumRequired": "Premium vereist",
+    "premiumMessage": "Dit artikel is exclusief voor Premium-leden. Wil je upgraden?",
     "statsProducts": "Producten",
     "statsFree": "Gratis",
     "statsRating": "Beoordeling",
@@ -977,5 +1162,23 @@
     "incEbook1": "Directe toegang",
     "incEbook2": "Praktische voorbeelden",
     "incEbook3": "Gratis updates"
+  },
+  "premiumWelcome": {
+    "title": "Welkom bij Premium!",
+    "body": "Je plan is actief. Nu heb je de volledige TMT in handen.",
+    "perkBank": "Bankroll met doelen en samengestelde rente",
+    "perkSignals": "Volledig onbeperkte signalen",
+    "perkChannels": "Exclusieve communitykanalen",
+    "perkStore": "Exclusieve winkel voor leden",
+    "ctaBank": "Mijn bankroll activeren",
+    "ctaExplore": "Signalen verkennen"
+  },
+  "premiumBanner": {
+    "expiringTitle_one": "{{count}} dag resterend op je plan",
+    "expiringTitle_other": "{{count}} dagen resterend op je plan",
+    "expiringSub": "Vernieuw nu om je voordelen niet te verliezen.",
+    "expiredTitle": "Je Premium-abonnement is verlopen",
+    "expiredSub": "Verlopen op {{date}}. Vernieuw om je volledige toegang terug te krijgen.",
+    "renew": "Vernieuwen"
   }
 }
