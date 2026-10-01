@@ -36,6 +36,7 @@ async function fetchSignals(): Promise<Signal[]> {
   const { data, error } = await supabase
     .from("signals")
     .select("*")
+    .in("status", ["active", "pending", "tp", "sl"])
     .order("created_at", { ascending: false })
     .limit(50);
 

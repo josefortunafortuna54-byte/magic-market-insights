@@ -18,6 +18,7 @@ const SIGNAL_QUALITY = {
 function determineStatus(status: string | null, confidence: number): SignalStatus {
   if (status === 'tp') return 'tp';
   if (status === 'sl') return 'sl';
+  if (status === 'expired') return 'expired';
   if (status === 'active') return 'active';
   if (status === 'pending') return 'pending';
   // Sinais da IA já vêm com status 'active' — manter
@@ -80,7 +81,9 @@ async function fetchSignals(userTier: SignalTier = 'free'): Promise<Signal[]> {
     };
   });
 
-  let qualityFiltered = mapped.filter((s) => passesQualityFilter(s.confidence, s.riskReward));
+  let qualityFiltered = mapped
+    .filter((s) => s.status !== 'expired')
+    .filter((s) => passesQualityFilter(s.confidence, s.riskReward));
 
   // Weekend: only crypto
   const weekend = isWeekendUtc();
