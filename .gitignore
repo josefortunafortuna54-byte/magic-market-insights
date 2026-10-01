@@ -46,3 +46,9 @@ scripts/_i18n-work/
 .omo/
 
 .env*
+
+# Os modelos de ambiente nao tem segredos: sao a documentacao das chaves que
+# cada aplicacao espera. Nao podem ficar de fora senao ninguem sabe o que
+# preencher no setup.
+!.env.example
+!**/.env.example
