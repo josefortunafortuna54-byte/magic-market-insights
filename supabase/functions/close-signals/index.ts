@@ -59,6 +59,7 @@ serve(async (req) => {
     }
 
     const results = [];
+    const skipped: { symbol: string; id: string; motivo: string }[] = [];
 
     for (const signal of activeSignals) {
       const symbol = signal.symbol.replace("/", "");
@@ -82,13 +83,15 @@ serve(async (req) => {
           currentPrice = Number(json?.rates?.[quote]);
         }
         if (!currentPrice || isNaN(currentPrice)) throw new Error("Invalid price");
-      } catch {
-        const fallback: Record<string, number> = {
-          EURUSD: 1.155, GBPUSD: 1.271, USDJPY: 148.5,
-          AUDUSD: 0.634, EURGBP: 0.859, USDCHF: 0.897,
-          NZDUSD: 0.578, USDCAD: 1.362, XAUUSD: 3350, BTCUSD: 111500,
-        };
-        currentPrice = fallback[symbol] || 1.0;
+      } catch (err) {
+        // Nao reintroduzir um fallback de preco fixo: comparar o sinal contra
+        // um preco de 2024 fabricava resultados falsos. Sem preco, nao ha fecho.
+        skipped.push({
+          symbol,
+          id: signal.id,
+          motivo: err instanceof Error ? err.message : "falha ao obter preco",
+        });
+        continue;
       }
 
       const entry = Number(signal.entry_price);
@@ -110,7 +113,9 @@ serve(async (req) => {
       const hoursOld = (Date.now() - createdAt.getTime()) / (1000 * 60 * 60);
 
       if (hoursOld < 2) continue;
-      if (hoursOld > 48 && !newStatus) newStatus = "sl";
+      // 'expired' e nao 'sl': um sinal que nao tocou no TP em 48h nao perdeu.
+      // O useHistory filtra IN ('tp','sl'), por isso expired sai da taxa.
+      if (!newStatus && hoursOld > 48) newStatus = "expired";
 
       if (newStatus) {
         await supabase
@@ -121,7 +126,13 @@ serve(async (req) => {
       }
     }
 
-    return new Response(JSON.stringify({ success: true, closed: results.length, results }), {
+    return new Response(JSON.stringify({
+      success: true,
+      closed: results.length,
+      results,
+      skipped: skipped.length,
+      skippedDetalhe: skipped,
+    }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
 
