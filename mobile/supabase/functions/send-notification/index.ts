@@ -73,19 +73,25 @@ serve(async (req) => {
   const recipientIds = new Set<string>();
 
   if (message.conversation_id) {
-    const { data: members } = await supabase
+    const { data: members, error: membersErr } = await supabase
       .from('conversation_members')
       .select('user_id')
       .eq('conversation_id', message.conversation_id);
+    // Sem o erro, uma falha de leitura deixava members nulo e o loop nao
+    // corria: a mensagem aparecia na conversa e ninguem recebia push. O
+    // mesmo vale para as mencoes logo abaixo -- quem foi @$mencionado perdia
+    // a notificacao em silencio, sem rasto de erro em lado nenhum.
+    if (membersErr) return errorJson(membersErr.message, 500);
     for (const m of members ?? []) {
       if (m.user_id !== message.user_id) recipientIds.add(m.user_id);
     }
   }
 
-  const { data: mentions } = await supabase
+  const { data: mentions, error: mentionsErr } = await supabase
     .from('message_mentions')
     .select('user_id')
     .eq('message_id', messageId);
+  if (mentionsErr) return errorJson(mentionsErr.message, 500);
   for (const m of mentions ?? []) {
     if (m.user_id !== message.user_id) recipientIds.add(m.user_id);
   }
@@ -99,11 +105,15 @@ serve(async (req) => {
     .maybeSingle();
   const senderName = sender?.display_name || 'TMT';
 
-  const { data: tokens } = await supabase
+  const { data: tokens, error: tokensErr } = await supabase
     .from('push_tokens')
     .select('user_id, token')
     .in('user_id', [...recipientIds]);
 
+  // `notified: 0` e resposta de sucesso, e o chamador nao tem como distinguir
+  // "ninguem tem token registado" de "a leitura dos tokens falhou". A segunda
+  // situacao e um erro, nao um zero.
+  if (tokensErr) return errorJson(tokensErr.message, 500);
   if (!tokens || tokens.length === 0) return json({ notified: 0 });
 
   const url = message.conversation_id
