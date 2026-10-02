@@ -143,6 +143,15 @@ export default function LoginScreen() {
                 <Ionicons name="logo-whatsapp" size={20} color={WA_GREEN} />
                 <AppText style={styles.waBtnText}>{t('auth.enterWhatsapp')}</AppText>
               </Pressable>
+
+              <Pressable
+                onPress={() => router.push('/(auth)/username')}
+                accessibilityRole="button"
+                accessibilityLabel={t('auth.enterUsername')}
+                style={({ pressed }) => [styles.usernameBtn, pressed && { opacity: 0.85 }]}>
+                <Ionicons name="person-circle-outline" size={20} color={colors.primary} />
+                <AppText style={styles.usernameBtnText}>{t('auth.enterUsername')}</AppText>
+              </Pressable>
             </Animated.View>
 
             <Animated.View style={[styles.pointsRow, fadeSlide(propsAnim)]}>
@@ -276,6 +285,22 @@ const makeStyles = (c: Palette) =>
   },
   waBtnText: {
     color: WA_GREEN,
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  usernameBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+    minHeight: 54,
+    borderRadius: Radius.lg,
+    backgroundColor: c.surface,
+    borderWidth: 1,
+    borderColor: c.border,
+  },
+  usernameBtnText: {
+    color: c.primary,
     fontSize: 16,
     fontWeight: '700',
   },

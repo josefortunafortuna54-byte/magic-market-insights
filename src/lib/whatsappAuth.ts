@@ -1,8 +1,8 @@
-import { supabase } from './supabase';
-import { SUPABASE_ANON_KEY, SUPABASE_URL } from './env';
-import { i18n } from '@/lib/i18n';
+import { supabase } from './supabaseClient';
 
-const WHATSAPP_FN = `${SUPABASE_URL}/functions/v1/whatsapp-auth`;
+const WHATSAPP_FN = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/whatsapp-auth`;
+
+const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 async function call(
   action: 'request' | 'verify',
@@ -12,21 +12,21 @@ async function call(
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      apikey: SUPABASE_ANON_KEY,
-      Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+      apikey: anonKey,
+      Authorization: `Bearer ${anonKey}`,
     },
     body: JSON.stringify({ action, ...payload }),
   });
 
   const data = await res.json().catch(() => ({}));
   if (!res.ok || data.error) {
-    throw new Error(data.error ?? i18n.t('authErrors.whatsappUnknown'));
+    throw new Error(data.error ?? 'Erro desconhecido ao iniciar sessão.');
   }
   return data;
 }
 
 function message(err: unknown): string {
-  return err instanceof Error ? err.message : i18n.t('authErrors.whatsappError');
+  return err instanceof Error ? err.message : 'Ocorreu um erro ao iniciar sessão.';
 }
 
 export async function requestWhatsAppCode(phone: string): Promise<{ error: string | null }> {
@@ -46,7 +46,7 @@ export async function verifyWhatsAppCode(phone: string, code: string): Promise<{
     // verifyOtp é o que troca esse token por uma sessão real no cliente. O type
     // tem de bater certo com o link gerado no servidor ('magiclink').
     const tokenHash = typeof data.token_hash === 'string' ? data.token_hash : '';
-    if (!tokenHash) return { error: i18n.t('authErrors.whatsappInvalidCode') };
+    if (!tokenHash) return { error: 'Código inválido. Tenta novamente.' };
 
     const { error } = await supabase.auth.verifyOtp({
       token_hash: tokenHash,

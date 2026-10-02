@@ -107,20 +107,23 @@ async function findUserByPhone(phone: string) {
   return data ?? null;
 }
 
-async function upsertAuthUser(phone: string, code: string): Promise<string> {
-  const email = syntheticEmail(phone);
+// NUNCA escrever a password de um utilizador que ja existe.
+//
+// A versao anterior fazia updateUserById(existing.id, { password: code }) a cada
+// login por WhatsApp. Isso destruia a senha de qualquer conta que tivesse o
+// telefone ligado -- contas Google, e contas NomeUnico + senha -- trocando-a pelo
+// OTP de 6 digitos. O utilizador ficava bloqueado do seu proprio username.
+//
+// Em vez disso, so se cria a conta quando ela nao existe. Para abrir a sessao de
+// uma conta que ja existe, emitimos um token de uso unico (generateLink) que o
+// cliente troca por sessao com verifyOtp -- igual ao username-auth. O token
+// precisa de senha real nao-destruida, porque e o unico caminho valido.
+async function resolveWhatsAppUser(phone: string, code: string): Promise<void> {
   const existing = await findUserByPhone(phone);
-
-  if (existing) {
-    const { error } = await supabase.auth.admin.updateUserById(existing.id, {
-      password: code,
-    });
-    if (error) throw error;
-    return email;
-  }
+  if (existing) return;
 
   const { error } = await supabase.auth.admin.createUser({
-    email,
+    email: syntheticEmail(phone),
     password: code,
     phone,
     phone_confirm: true,
@@ -128,7 +131,36 @@ async function upsertAuthUser(phone: string, code: string): Promise<string> {
     user_metadata: { phone, auth_provider: 'whatsapp' },
   });
   if (error) throw error;
-  return email;
+}
+
+// Token de sessao de uso unico, sem password. generateLink nao envia email nenhum --
+// devolve o token ao caller, que o entrega directamente ao verifyOtp do cliente.
+//
+// O email e obrigatorio: generateLink resolve o utilizador por email, nao por id. Sem
+// ele a chamada falha e o utilizador fica sem sessao. Passamos o email da conta para
+// dentro da funcao e devolvemos apenas o token, para que o email real nao saia daqui.
+async function issueSessionToken(user: { id: string; email: string | null }): Promise<string> {
+  if (!user.email) {
+    throw new Error('Não foi possível emitir a sessão.');
+  }
+
+  const { data, error } = await supabase.auth.admin.generateLink({
+    type: 'magiclink',
+    email: user.email,
+    options: { redirectTo: `${supabaseUrl}/` },
+  });
+  if (error) throw error;
+
+  const tokenHash = data?.properties?.hashed_token;
+  if (typeof tokenHash !== 'string' || !tokenHash) {
+    throw new Error('Não foi possível emitir a sessão.');
+  }
+  // generateLink resolve por email, por isso o token pode pertencer a outra conta se o
+  // email acima nao for o da conta que estamos a autenticar. Confirmamos o id.
+  if (data?.user?.id !== user.id) {
+    throw new Error('Conta não corresponde ao número.');
+  }
+  return tokenHash;
 }
 
 serve(async (req) => {
@@ -196,10 +228,22 @@ serve(async (req) => {
         return errorJson('Código incorreto. Tenta novamente.');
       }
 
-      await supabase.from('whatsapp_otp').update({ used_at: new Date().toISOString() }).eq('id', row.id);
+      await resolveWhatsAppUser(phone, code);
+      const existing = await findUserByPhone(phone);
+      if (!existing) throw new Error('Não foi possível associar o número a uma conta.');
 
-      const email = await upsertAuthUser(phone, code);
-      return json({ ok: true, email });
+      const tokenHash = await issueSessionToken(existing);
+
+      // O OTP so e consumido depois de a sessao estar emitida. Marcar antes media
+      // que uma falha na emissao do token gastava o codigo, e o utilizador ficava
+      // sem sessao e sem poder repetir o login com o mesmo codigo.
+      const { error: consumeError } = await supabase
+        .from('whatsapp_otp')
+        .update({ used_at: new Date().toISOString() })
+        .eq('id', row.id);
+      if (consumeError) throw consumeError;
+
+      return json({ ok: true, token_hash: tokenHash });
     }
 
     return errorJson('Ação desconhecida.');

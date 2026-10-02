@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
-import { Sparkles, Mail, Lock, Eye, EyeOff, AlertCircle } from "lucide-react";
+import { Sparkles, Mail, Lock, Eye, EyeOff, AlertCircle, MessageCircle, UserCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Layout } from "@/components/layout/Layout";
+import { UsernameDialog } from "@/components/auth/UsernameDialog";
+import { WhatsAppDialog } from "@/components/auth/WhatsAppDialog";
 import { supabase } from "@/lib/supabaseClient";
 import { useTranslation } from "react-i18next";
 
@@ -18,6 +20,8 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState("");
+  const [usernameOpen, setUsernameOpen] = useState(false);
+  const [whatsappOpen, setWhatsappOpen] = useState(false);
   const [rememberMe, setRememberMe] = useState(() => localStorage.getItem("rememberMe") === "true");
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -92,6 +96,26 @@ export default function Login() {
                 {googleLoading ? t('auth.redirecting') : t('auth.continueGoogle')}
               </button>
 
+              {/* Botão WhatsApp */}
+              <button
+                onClick={() => { setError(""); setWhatsappOpen(true); }}
+                disabled={whatsappOpen}
+                className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-xl border border-border/60 hover:bg-secondary/40 transition-all text-sm font-medium mb-3 disabled:opacity-50"
+              >
+                <MessageCircle className="h-4 w-4 text-[#25D366]" />
+                {t('auth.enterWhatsapp')}
+              </button>
+
+              {/* Botão NomeUnico */}
+              <button
+                onClick={() => { setError(""); setUsernameOpen(true); }}
+                disabled={usernameOpen}
+                className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-xl border border-border/60 hover:bg-secondary/40 transition-all text-sm font-medium mb-6 disabled:opacity-50"
+              >
+                <UserCircle className="h-4 w-4 text-primary" />
+                {t('auth.enterUsername')}
+              </button>
+
               {/* Divider */}
               <div className="flex items-center gap-3 mb-6">
                 <div className="flex-1 h-px bg-border/50" />
@@ -156,6 +180,17 @@ export default function Login() {
             </div>
           </motion.div>
         </div>
+
+        <WhatsAppDialog
+          open={whatsappOpen}
+          onOpenChange={setWhatsappOpen}
+          onSuccess={() => navigate("/analises")}
+        />
+        <UsernameDialog
+          open={usernameOpen}
+          onOpenChange={setUsernameOpen}
+          onSuccess={() => navigate("/analises")}
+        />
       </section>
     </Layout>
   );
