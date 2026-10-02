@@ -48,7 +48,7 @@ tipadas.
 
 ```sh
 cd mobile
-npm test                  # 9 suites, 71 testes
+npm test                  # 10 suites, 81 testes
 ```
 
 ### Outros comandos
