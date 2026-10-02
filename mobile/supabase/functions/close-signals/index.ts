@@ -159,7 +159,10 @@ serve(async (req) => {
 
   let closed = 0;
   let activated = 0;
-  const updates: Promise<{ error: unknown }>[] = [];
+  // PromiseLike e nao Promise: o query builder do supabase-js e thenable, mas
+  // nao implementa `catch`/`finally`. `Promise.all` aceita qualquer
+  // `Iterable<PromiseLike>`, por isso o consumo na linha 289 nao muda.
+  const updates: PromiseLike<{ error: unknown }>[] = [];
 
   for (const signal of signals) {
     const price = await fetchCurrentPrice(signal.symbol);

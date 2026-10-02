@@ -60,7 +60,6 @@ export function AiFab() {
     const newY = y.value + e.changeY;
     const min = 80;
     const max = SCREEN_HEIGHT - FAB_SIZE - FAB_MARGIN - 80;
-    // eslint-disable-next-line react-hooks/immutability -- sharedValue.value = e a API documentada do Reanimated
     y.value = Math.min(max, Math.max(min, newY));
   };
 

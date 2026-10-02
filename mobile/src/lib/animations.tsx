@@ -69,17 +69,13 @@ export function AnimatedPressable({ children, scaleTo = 0.97, style, ...props }:
 
   const onPressIn = useCallback(() => {
     'worklet';
-    // eslint-disable-next-line react-hooks/immutability -- sharedValue.value = e a API documentada do Reanimated
     scale.value = withSpring(scaleTo, SPRING.snappy);
-    // eslint-disable-next-line react-hooks/immutability -- sharedValue.value = e a API documentada do Reanimated
     opacity.value = withTiming(0.85, TIMING.fast);
   }, [scaleTo]);
 
   const onPressOut = useCallback(() => {
     'worklet';
-    // eslint-disable-next-line react-hooks/immutability -- sharedValue.value = e a API documentada do Reanimated
     scale.value = withSpring(1, SPRING.gentle);
-    // eslint-disable-next-line react-hooks/immutability -- sharedValue.value = e a API documentada do Reanimated
     opacity.value = withTiming(1, TIMING.fast);
   }, []);
 
@@ -114,7 +110,6 @@ export function Pulse({ children, speed = 1200, minOpacity = 0.5 }: PulseProps) 
 
   const startPulse = useCallback(() => {
     'worklet';
-    // eslint-disable-next-line react-hooks/immutability -- sharedValue.value = e a API documentada do Reanimated
     opacity.value = withRepeat(
       withSequence(
         withTiming(minOpacity, { duration: speed / 2, easing: Easing.inOut(Easing.ease) }),
@@ -153,7 +148,6 @@ export function Shimmer({ children, duration = 2000 }: ShimmerProps) {
 
   const startShimmer = useCallback(() => {
     'worklet';
-    // eslint-disable-next-line react-hooks/immutability -- sharedValue.value = e a API documentada do Reanimated
     translateX.value = withRepeat(
       withTiming(300, { duration, easing: Easing.inOut(Easing.ease) }),
       -1,
@@ -193,7 +187,6 @@ export function ScaleBounce({ children, trigger }: ScaleBounceProps) {
 
   const animate = useCallback(() => {
     'worklet';
-    // eslint-disable-next-line react-hooks/immutability -- sharedValue.value = e a API documentada do Reanimated
     scale.value = withSequence(
       withSpring(1.15, SPRING.bouncy),
       withSpring(1, SPRING.gentle),

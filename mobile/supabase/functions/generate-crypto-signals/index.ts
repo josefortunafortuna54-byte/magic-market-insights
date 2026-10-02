@@ -466,7 +466,7 @@ function validateSignalTechnical(
   const fvgs = findFVGs(candles);
   const orderBlocks = findOrderBlocks(candles, swings);
   if (fvgs.some((f) => Math.abs(entry - (f.high + f.low) / 2) / entry < 0.002)) { score += 5; r.reasons.push('Entrada proxima a FVG'); }
-  if (orderBlocks.some((o) => entry >= o.low && entry <= o.h)) { score += 5; r.reasons.push('Entrada em Order Block'); }
+  if (orderBlocks.some((o) => entry >= o.low && entry <= o.high)) { score += 5; r.reasons.push('Entrada em Order Block'); }
 
   r.score = Math.min(100, score);
   r.valid = r.score >= 45;

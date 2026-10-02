@@ -57,6 +57,8 @@ function ExpiryCountdown({ expiresAt }: { expiresAt: string }) {
     return () => clearInterval(interval);
   }, [target]);
 
+  const { t } = useTranslation();
+
   if (!isFinite(target) || remaining <= 0) return null;
 
   const totalSeconds = Math.floor(remaining / 1000);
@@ -64,8 +66,6 @@ function ExpiryCountdown({ expiresAt }: { expiresAt: string }) {
   const minutes = Math.floor((totalSeconds % 3600) / 60);
   const seconds = totalSeconds % 60;
   const isClose = remaining < 30 * 60 * 1000;
-
-  const { t } = useTranslation();
 
   return (
     <span className={`inline-flex items-center gap-1 text-xs ${isClose ? "text-warning" : "text-muted-foreground"}`}>

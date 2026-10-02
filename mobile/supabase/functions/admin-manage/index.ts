@@ -3,7 +3,7 @@
 // Verifica se o email está na lista ADMIN_EMAILS (env var).
 // Usa service_role para todas as operações de BD (bypassa RLS).
 
-import { createClient } from 'jsr:@supabase/supabase-js@2';
+import { createClient, type User } from 'jsr:@supabase/supabase-js@2';
 import { serve } from 'https://deno.land/std@0.224.0/http/server.ts';
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
@@ -35,7 +35,13 @@ function errorJson(message: string, status = 400): Response {
   return json({ error: message }, status);
 }
 
-async function verifyAdmin(req: Request) {
+// A uniao discriminada por `error` e o que permite ao caller estreitar `user`
+// para `User`. Desestruturar o resultado (`const { user } = ...`) quebra essa
+// correlacao e o TypeScript passa a dizer 'user is possibly null' em todos os
+// usos seguintes, mesmo depois de um `if (error) return`.
+type AdminAuth = { user: null; error: string } | { user: User; error: null };
+
+async function verifyAdmin(req: Request): Promise<AdminAuth> {
   const authHeader = req.headers.get('Authorization') ?? '';
   const jwt = authHeader.replace(/^Bearer\s+/i, '');
   if (!jwt) return { user: null, error: 'Não autenticado.' };
@@ -715,8 +721,9 @@ serve(async (req) => {
   }
   if (req.method !== 'POST') return errorJson('Método não permitido.', 405);
 
-  const { user, error: authError } = await verifyAdmin(req);
-  if (authError) return errorJson(authError, 401);
+  const auth = await verifyAdmin(req);
+  if (auth.error !== null) return errorJson(auth.error, 401);
+  const user = auth.user;
 
   let body: Record<string, unknown>;
   try {
@@ -775,7 +782,10 @@ serve(async (req) => {
     case 'send_push':
       return handleSendPush(body);
     case 'list_notifications': {
-      const { limit = 50 } = body;
+      // `body` e Record<string, unknown>, portanto o default so cobre
+      // `undefined`: um `limit: "50"` ou `limit: 0` chegava ao .limit() tal
+      // como estava. O teto de 200 impede que um cliente peça a tabela inteira.
+      const limit = Math.min(Math.max(Number(body.limit) || 50, 1), 200);
       const { data, error } = await supabase
         .from('admin_notifications')
         .select('*')
@@ -969,7 +979,7 @@ serve(async (req) => {
       return json({ reports: data });
     }
     case 'ban_user': {
-      const { user_id } = body;
+      const user_id = typeof body.user_id === 'string' ? body.user_id : null;
       if (!user_id) return errorJson('user_id em falta.');
       const { error } = await supabase.auth.admin.updateUserById(user_id, {
         user_metadata: { banned: true },
@@ -978,7 +988,8 @@ serve(async (req) => {
       return json({ banned: true });
     }
     case 'update_user_role': {
-      const { user_id, role } = body;
+      const user_id = typeof body.user_id === 'string' ? body.user_id : null;
+      const role = typeof body.role === 'string' ? body.role : null;
       if (!user_id || !role) return errorJson('user_id e role em falta.');
       const { error } = await supabase.auth.admin.updateUserById(user_id, {
         user_metadata: { role },

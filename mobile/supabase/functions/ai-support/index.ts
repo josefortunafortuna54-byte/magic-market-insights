@@ -191,7 +191,7 @@ serve(async (req) => {
   const rawMessages = Array.isArray(body.messages) ? body.messages : [];
   const imageData = body.image as { data: string; mimeType: string } | undefined;
 
-  let contents = rawMessages
+  const contents = rawMessages
     .filter(
       (m): m is { role: unknown; text: string } =>
         !!m && typeof m === 'object' && typeof m.text === 'string' && m.text.trim().length > 0,
