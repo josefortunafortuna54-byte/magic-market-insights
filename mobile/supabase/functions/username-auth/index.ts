@@ -240,6 +240,74 @@ async function signIn(
   return { tokenHash, error: null, status: 200 };
 }
 
+// CLAIM: um utilizador que entrou por outra via (Google, WhatsApp) reserva um
+// NomeUnico para o perfil e para as mencoes.
+//
+// NAO define senha, e a ausencia nao e uma limitacao da implementacao. Com senha,
+// esta conta passaria a ter duas vias de entrada e a via NomeUnico+senha
+// entraria sem o segundo factor do Google -- um caminho mais fraco do que aquele
+// que o utilizador escolheu ao entrar com Google. A decisao e de produto, e a BD
+// garante-a sem depender de disciplina nesta funcao: verify_user_password
+// devolve false para contas sem encrypted_password, portanto um username
+// reservado nunca se torna uma segunda porta de entrada. Verificado contra um
+// Postgres real com uma conta Google sem senha.
+//
+// Tambem nao permite trocar um username ja reservado. Mudar de nome permitiria
+// reescrever a autoria de mensagens antigas que ja citavam o nome antigo.
+async function claimUsername(
+  userId: string,
+  username: string,
+): Promise<{ error: string | null; status: number }> {
+  const { data: profile, error: profileError } = await supabase
+    .from('user_profiles')
+    .select('username')
+    .eq('user_id', userId)
+    .maybeSingle();
+  if (profileError) return { error: 'Não foi possível reservar o nome.', status: 500 };
+  if (profile?.username) return { error: 'Já tens um NomeUnico reservado.', status: 409 };
+
+  const { data: taken, error: takenError } = await supabase
+    .from('user_profiles')
+    .select('user_id')
+    .eq('username', username)
+    .maybeSingle();
+  if (takenError) return { error: 'Não foi possível reservar o nome.', status: 500 };
+
+  if (taken) {
+    // A distincao e a mesma do 'create' e pelo mesmo motivo: o nome precisa de
+    // estar visivel para se poder dizer que esta ocupado. Nao revela se a conta
+    // existe. Conta como tentativa, porque e uma sondagem a que um utilizador
+    // autenticado poderia recorrer para ocupar nomes por ordem.
+    const state = await registerFailure(userId);
+    if (state.locked) {
+      return {
+        error: `Demasiadas tentativas. Tente novamente em ${state.retryAfterMinutes || LOCK_MINUTES} minutos.`,
+        status: 429,
+      };
+    }
+    return { error: USERNAME_TAKEN, status: 409 };
+  }
+
+  // service_role e o unico papel que o trigger de 20261002000000 deixa escrever
+  // a coluna username.
+  const { data: written, error: writeError } = await supabase
+    .from('user_profiles')
+    .update({ username })
+    .eq('user_id', userId)
+    .select('username')
+    .maybeSingle();
+  if (writeError) return { error: 'Não foi possível reservar o nome.', status: 500 };
+  // `written` nulo significa que nao existe linha de profile para este
+  // utilizador. Um update que nao afeta nenhuma linhas e um sucesso aparente:
+  // o cliente receberia ok e o username nunca ficaria reservado. A coluna e
+  // unica, portanto a corrida entre dois pedidos simultaneos aparece aqui como
+  // writeError e nao como sucesso silencioso.
+  if (!written) return { error: 'Não foi possível reservar o nome.', status: 500 };
+
+  await clearFailures(userId);
+  return { error: null, status: 200 };
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   if (req.method !== 'POST') return errorJson('Método não permitido.', 405);
@@ -297,6 +365,33 @@ serve(async (req) => {
       const result = await signIn(username, password);
       if (result.error) return errorJson(result.error, result.status);
       return json({ ok: true, token_hash: result.tokenHash }, result.status);
+    }
+
+    if (action === 'claim') {
+      const authHeader = req.headers.get('Authorization') ?? '';
+      const jwt = authHeader.replace(/^Bearer\s+/i, '').trim();
+      if (!jwt) return errorJson('Inicia sessão para reservar um NomeUnico.', 401);
+
+      // O service_role valida o JWT do utilizador e devolve o id de quem o
+      // apresenta. O user_id nunca vem do corpo: um parametro aceito aqui
+      // permitiria a um atacante reservar um nome em nome de outra pessoa.
+      const { data: caller, error: callerError } = await supabase.auth.getUser(jwt);
+      if (callerError) return errorJson('Sessão inválida.', 401);
+      const userId = caller.user?.id;
+      if (!userId) return errorJson('Sessão inválida.', 401);
+
+      // Limite por utilizador, e nao por nome. A RPC e a mesma que o login usa,
+      // com o id como chave: o que interessa e a linha exclusiva, nao o
+      // conteudo da coluna. Um limite por nome nao serviria para nada aqui --
+      // quem procura um nome livre experimentaria nomes novos, cada um com a sua
+      // propria linha e o seu proprio contador.
+      if (await isLocked(userId)) {
+        return errorJson(`Demasiadas tentativas. Tente novamente em ${LOCK_MINUTES} minutos.`, 429);
+      }
+
+      const result = await claimUsername(userId, username);
+      if (result.error) return errorJson(result.error, result.status);
+      return json({ ok: true, username }, result.status);
     }
 
     return errorJson('Ação desconhecida.');
