@@ -52,83 +52,52 @@ function isValidUsername(value: string): boolean {
 
 type AttemptState = {
   locked: boolean;
-  exhausted: boolean;
-  remaining: number;
+  retryAfterMinutes: number;
 };
 
+// Toda a logica do contador vive em SQL (migration 20261004000000). A leitura,
+// a decisao e a escrita acontecem ai dentro de uma transaccao com FOR UPDATE.
+// Em JavaScript era read-then-write, e N pedidos simultaneos liam o mesmo
+// contador e escreviam o mesmo valor seguinte: o contador subia 1 em vez de N e
+// o bloqueio nunca disparava.
 async function registerFailure(username: string): Promise<AttemptState> {
-  const now = Date.now();
-  const { data, error: readError } = await supabase
-    .from('username_auth_attempts')
-    .select('attempts, window_started_at, locked_until')
-    .eq('username', username)
-    .maybeSingle();
-  if (readError) throw readError;
+  const { data, error } = await supabase.rpc('username_auth_record_attempt', {
+    p_username: username,
+    p_success: false,
+    p_max_attempts: MAX_ATTEMPTS,
+    p_window_minutes: WINDOW_MINUTES,
+    p_lock_minutes: LOCK_MINUTES,
+  });
+  if (error) throw error;
 
-  const windowMs = WINDOW_MINUTES * 60_000;
-  const lockMs = LOCK_MINUTES * 60_000;
-
-  if (!data) {
-    const { error: insertError } = await supabase
-      .from('username_auth_attempts')
-      .insert({ username, attempts: 1 });
-    if (insertError) throw insertError;
-    return { locked: false, exhausted: false, remaining: MAX_ATTEMPTS - 1 };
-  }
-
-  const lockedUntil = data.locked_until ? new Date(data.locked_until).getTime() : 0;
-  if (lockedUntil > now) {
-    return { locked: true, exhausted: true, remaining: 0 };
-  }
-
-  const windowStarted = new Date(data.window_started_at).getTime();
-  const withinWindow = now - windowStarted < windowMs;
-  const attempts = (withinWindow ? data.attempts : 0) + 1;
-
-  // Um contador que nao sobe e um rate limit que nao existe. Se a escrita
-  // falhar, devolvemos 500 em vez de fingir que a tentativa foi registada --
-  // caso contrario o atacante que discoversse a falha ganharia tentativas
-  // ilimitadas sem nunca bloquear a conta.
-  if (attempts >= MAX_ATTEMPTS) {
-    const { error: lockError } = await supabase
-      .from('username_auth_attempts')
-      .update({
-        attempts,
-        locked_until: new Date(now + lockMs).toISOString(),
-        window_started_at: new Date(now).toISOString(),
-      })
-      .eq('username', username);
-    if (lockError) throw lockError;
-    return { locked: true, exhausted: true, remaining: 0 };
-  }
-
-  const { error: updateError } = await supabase
-    .from('username_auth_attempts')
-    .update({ attempts, window_started_at: new Date(now).toISOString(), locked_until: null })
-    .eq('username', username);
-  if (updateError) throw updateError;
-
-  return { locked: false, exhausted: false, remaining: MAX_ATTEMPTS - attempts };
+  const row = Array.isArray(data) ? data[0] : data;
+  return {
+    locked: Boolean(row?.locked),
+    retryAfterMinutes: Number(row?.retry_after_minutes ?? 0),
+  };
 }
 
 async function clearFailures(username: string): Promise<void> {
-  // Unico erro de escrita que aceitamos ignorar: a conta ja esta autenticada
-  // quando isto corre, e um contador por expirar nao impede ninguem de entrar.
-  await supabase.from('username_auth_attempts').delete().eq('username', username);
+  // Unico erro que aceitamos ignorar, e deliberadamente ignorado: esta chamada
+  // corre depois do token ja emitido, e a conta esta autenticada. Lancar aqui
+  // devolveria 500 a um login que ja foi bem-sucedido, e o utilizador ficaria
+  // sem sessao apesar de a senha estar certa. No peor caso o contador velho
+  // expira sozinho.
+  await supabase.rpc('username_auth_record_attempt', {
+    p_username: username,
+    p_success: true,
+  });
 }
 
 async function isLocked(username: string): Promise<boolean> {
-  const { data, error } = await supabase
-    .from('username_auth_attempts')
-    .select('locked_until')
-    .eq('username', username)
-    .maybeSingle();
+  const { data, error } = await supabase.rpc('username_auth_is_locked', {
+    p_username: username,
+  });
   // Falha aqui nao significa "nao bloqueado": significa que o contador nao
   // respondeu. Devolver false deixava passar o pedido e abria o rate limit,
   // que e exactamente o que o bloqueio existe para impedir.
   if (error) throw error;
-  if (!data?.locked_until) return false;
-  return new Date(data.locked_until).getTime() > Date.now();
+  return data !== null && data !== undefined;
 }
 
 // Um username livre, com o email sintetico derivado. Nao devolve o email ao
@@ -243,7 +212,7 @@ async function signIn(
     if (state.locked) {
       return {
         tokenHash: null,
-        error: `Demasiadas tentativas. Tente novamente em ${LOCK_MINUTES} minutos.`,
+        error: `Demasiadas tentativas. Tente novamente em ${state.retryAfterMinutes || LOCK_MINUTES} minutos.`,
         status: 429,
       };
     }
