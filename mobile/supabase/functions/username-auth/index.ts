@@ -34,6 +34,7 @@ function errorJson(message: string, status = 400): Response {
 // diferente transformaria este endpoint num enumerador de contas. A UI trata
 // os dois casos com "NomeUnico ou senha invalidos".
 const GENERIC_CREDENTIALS = 'NomeUnico ou senha inválidos.';
+const USERNAME_TAKEN = 'Este NomeUnico já está a ser usado.';
 
 function normalizeUsername(raw: unknown): string {
   return String(raw ?? '').trim().toLowerCase();
@@ -57,17 +58,21 @@ type AttemptState = {
 
 async function registerFailure(username: string): Promise<AttemptState> {
   const now = Date.now();
-  const { data } = await supabase
+  const { data, error: readError } = await supabase
     .from('username_auth_attempts')
     .select('attempts, window_started_at, locked_until')
     .eq('username', username)
     .maybeSingle();
+  if (readError) throw readError;
 
   const windowMs = WINDOW_MINUTES * 60_000;
   const lockMs = LOCK_MINUTES * 60_000;
 
   if (!data) {
-    await supabase.from('username_auth_attempts').insert({ username, attempts: 1 });
+    const { error: insertError } = await supabase
+      .from('username_auth_attempts')
+      .insert({ username, attempts: 1 });
+    if (insertError) throw insertError;
     return { locked: false, exhausted: false, remaining: MAX_ATTEMPTS - 1 };
   }
 
@@ -80,8 +85,12 @@ async function registerFailure(username: string): Promise<AttemptState> {
   const withinWindow = now - windowStarted < windowMs;
   const attempts = (withinWindow ? data.attempts : 0) + 1;
 
+  // Um contador que nao sobe e um rate limit que nao existe. Se a escrita
+  // falhar, devolvemos 500 em vez de fingir que a tentativa foi registada --
+  // caso contrario o atacante que discoversse a falha ganharia tentativas
+  // ilimitadas sem nunca bloquear a conta.
   if (attempts >= MAX_ATTEMPTS) {
-    await supabase
+    const { error: lockError } = await supabase
       .from('username_auth_attempts')
       .update({
         attempts,
@@ -89,27 +98,35 @@ async function registerFailure(username: string): Promise<AttemptState> {
         window_started_at: new Date(now).toISOString(),
       })
       .eq('username', username);
+    if (lockError) throw lockError;
     return { locked: true, exhausted: true, remaining: 0 };
   }
 
-  await supabase
+  const { error: updateError } = await supabase
     .from('username_auth_attempts')
     .update({ attempts, window_started_at: new Date(now).toISOString(), locked_until: null })
     .eq('username', username);
+  if (updateError) throw updateError;
 
   return { locked: false, exhausted: false, remaining: MAX_ATTEMPTS - attempts };
 }
 
 async function clearFailures(username: string): Promise<void> {
+  // Unico erro de escrita que aceitamos ignorar: a conta ja esta autenticada
+  // quando isto corre, e um contador por expirar nao impede ninguem de entrar.
   await supabase.from('username_auth_attempts').delete().eq('username', username);
 }
 
 async function isLocked(username: string): Promise<boolean> {
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('username_auth_attempts')
     .select('locked_until')
     .eq('username', username)
     .maybeSingle();
+  // Falha aqui nao significa "nao bloqueado": significa que o contador nao
+  // respondeu. Devolver false deixava passar o pedido e abria o rate limit,
+  // que e exactamente o que o bloqueio existe para impedir.
+  if (error) throw error;
   if (!data?.locked_until) return false;
   return new Date(data.locked_until).getTime() > Date.now();
 }
@@ -131,10 +148,17 @@ async function createAccount(
   });
 
   if (createError) {
-    // 'User already registered' significaria uma colisao de email sintetico --
-    // so possivel se o username violar a reserva wa<digitos>. Nao damos a
-    // distinction ao cliente.
-    return { tokenHash: null, error: GENERIC_CREDENTIALS, status: 409 };
+    // So uma colisao de email sintetico justifica 409, e so ela e possivel se o
+    // username violar a reserva wa<digitos>. Qualquer outro erro e de
+    // infraestrutura: devolvia 409 e o cliente traduzia isso por "nome ocupado",
+    // dizendo ao utilizador para escolher outro nome quando o problema foi a base
+    // de dados -- e o username dele ficava de qualquer forma reservado.
+    const collision = /already registered|already exists/i.test(createError.message);
+    return {
+      tokenHash: null,
+      error: collision ? USERNAME_TAKEN : 'Não foi possível criar a conta.',
+      status: collision ? 409 : 500,
+    };
   }
 
   // As outras rotas (Google, WhatsApp) criam a linha de profile por backfill ou
@@ -157,6 +181,10 @@ async function createAccount(
   });
   const tokenHash = link?.properties?.hashed_token ?? null;
   if (linkError || !tokenHash) {
+    // A conta existe no auth mas ninguem consegue entrar nela. Sem apagar, o
+    // utilizador leva 500, carrega "criar" outra vez, e apanha 409 "nome ocupado"
+    // com o username que ele proprio acabou de escolher -- sem forma de entrar.
+    await supabase.auth.admin.deleteUser(created.user.id);
     return { tokenHash: null, error: 'Não foi possível iniciar a sessão.', status: 500 };
   }
 
@@ -167,11 +195,18 @@ async function signIn(
   username: string,
   password: string,
 ): Promise<{ tokenHash: string | null; error: string | null; status: number }> {
-  const { data: profile } = await supabase
+  const { data: profile, error: profileError } = await supabase
     .from('user_profiles')
     .select('user_id')
     .eq('username', username)
     .maybeSingle();
+  // Uma falha aqui e um 500, nao "nao existe". Deixando passar, o username
+  // chegava como null a verify_user_password, que devolvia false, e o login
+  // acabava como 401 "senha errada" a contar uma tentativa -- exatamente o mesmo
+  // caminho que levava getUserById a bloquear contas legitimas.
+  if (profileError) {
+    return { tokenHash: null, error: 'Não foi possível iniciar a sessão.', status: 500 };
+  }
 
   // A comparacao acontece na base de dados (verify_user_password, migration
   // 20261003000000): o hash nunca sai de auth.users, nem para ca, nem para o
@@ -188,9 +223,15 @@ async function signIn(
 
   // getUserById so para o estado da conta. banned_until existe no interface User
   // (contraste com password_hash, que nao existe e nunca existiu no output).
-  const { data: userRow } = userId
+  const { data: userRow, error: userError } = userId
     ? await supabase.auth.admin.getUserById(userId)
-    : { data: { user: null } };
+    : { data: { user: null }, error: null };
+  // Sem este erro verificado, uma falha de rede no auth-admin chegava aqui como
+  // userRow null, caia no "senha errada" e contava uma tentativa. Cinco falhas
+  // de rede sucessivas bloqueavam um utilizador legitimo com 429.
+  if (userError) {
+    return { tokenHash: null, error: 'Não foi possível iniciar a sessão.', status: 500 };
+  }
 
   const authUser = userRow?.user ?? null;
   if (authUser?.banned_until && new Date(authUser.banned_until).getTime() > Date.now()) {
@@ -209,16 +250,23 @@ async function signIn(
     return { tokenHash: null, error: GENERIC_CREDENTIALS, status: 401 };
   }
 
-  await clearFailures(username);
+  if (!authUser.email) {
+    return { tokenHash: null, error: 'Não foi possível iniciar a sessão.', status: 500 };
+  }
 
+  // A conta foi autenticada, por isso a partir daqui nenhum erro deve impedir a
+  // sessao: limpamos o contador depois de emitir o token, e uma falha aqui
+  // apenas deixa um contador velho por expirar.
   const { data: link, error: linkError } = await supabase.auth.admin.generateLink({
     type: 'magiclink',
-    email: authUser.email!,
+    email: authUser.email,
   });
   const tokenHash = link?.properties?.hashed_token ?? null;
   if (linkError || !tokenHash) {
     return { tokenHash: null, error: 'Não foi possível iniciar a sessão.', status: 500 };
   }
+
+  await clearFailures(username);
 
   return { tokenHash, error: null, status: 200 };
 }
@@ -253,17 +301,18 @@ serve(async (req) => {
         return errorJson(`Demasiadas tentativas. Tente novamente em ${LOCK_MINUTES} minutos.`, 429);
       }
 
-      const { data: taken } = await supabase
+      const { data: taken, error: takenError } = await supabase
         .from('user_profiles')
         .select('user_id')
         .eq('username', username)
         .maybeSingle();
+      if (takenError) throw takenError;
       if (taken) {
         // Username ocupado. Aqui a distincao e aceitavel e necessaria: o
         // utilizador precisa de saber que o nome nao esta livre para escolher
         // outro. Nao revela se a conta existe, so que o nome foi tomado -- e o
         // username ja e visivel na comunidade de qualquer forma.
-        return errorJson('Este NomeUnico já está a ser usado.', 409);
+        return errorJson(USERNAME_TAKEN, 409);
       }
 
       const result = await createAccount(username, password);
