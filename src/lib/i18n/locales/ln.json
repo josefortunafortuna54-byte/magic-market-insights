@@ -879,7 +879,18 @@
     "sendRecoveryLink": "Tinda link ya kobonga motuya ya password",
     "value1": "Signaux en temps réel",
     "value2": "Alertes na téléphone na yo",
-    "value3": "Gestion ya capital"
+    "value3": "Gestion ya capital",
+    "enterUsername": "Kota mot Username",
+    "usernameLabel": "MOT NOM",
+    "usernamePlaceholder": "nom-yo",
+    "usernamePrompt": "Kota na mot username na motanga oyo. Soki osalaka te koyoko compte, tokotisa yo.",
+    "usernameInvalid": "Mot username esalaka 3 kati 30 ba-character: minúsculas, mbale, point, underscore na tiret.",
+    "usernameHasAccount": "Already azalaka compte? Kota",
+    "usernameNoAccount": "Stil te ozalaka compte? Sala",
+    "signInWithUsername": "Kota",
+    "createWithUsername": "Sala compte",
+    "usernameCreateTitle": "Sala compte",
+    "usernameSignInTitle": "Kota"
   },
   "authErrors": {
     "googleStart": "Ekoki te kobanda login na Google.",
@@ -887,7 +898,9 @@
     "googleError": "Libunga moko ekomi na kokota na Google.",
     "whatsappUnknown": "Libunga oyo eyebani te na kokota.",
     "whatsappError": "Libunga moko ekomi na kokota.",
-    "whatsappInvalidCode": "Code oyo ezali ya soló te. Meka lisusu."
+    "whatsappInvalidCode": "Code oyo ezali ya soló te. Meka lisusu.",
+    "passwordTooShort": "Motanga oyo esalaka minimum 8 ba-letter.",
+    "usernameGeneric": "Mot username na motanga oyo ebebala te."
   },
   "sinal": {
     "title": "Analyse ya mobimba",

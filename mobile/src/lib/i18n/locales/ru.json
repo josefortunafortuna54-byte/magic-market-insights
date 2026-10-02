@@ -497,7 +497,18 @@
     "or": "или",
     "value1": "Сигналы в реальном времени",
     "value2": "Оповещения на телефон",
-    "value3": "Управление капиталом"
+    "value3": "Управление капиталом",
+    "enterUsername": "Войти по имени пользователя",
+    "usernameLabel": "ИМЯ ПОЛЬЗОВАТЕЛЯ",
+    "usernamePlaceholder": "ваше-имя",
+    "usernamePrompt": "Войдите с именем пользователя и паролем. Если у вас ещё нет аккаунта, мы его создадим.",
+    "usernameInvalid": "Имя пользователя — от 3 до 30 символов: строчные буквы, цифры, точка, подчёркивание или дефис.",
+    "usernameHasAccount": "Уже есть аккаунт? Войти",
+    "usernameNoAccount": "Нет аккаунта? Создать",
+    "signInWithUsername": "Войти",
+    "createWithUsername": "Создать аккаунт",
+    "usernameCreateTitle": "Создать аккаунт",
+    "usernameSignInTitle": "Войти"
   },
   "authErrors": {
     "googleStart": "Не удалось начать вход через Google.",
@@ -505,7 +516,9 @@
     "googleError": "Произошла ошибка при входе через Google.",
     "whatsappUnknown": "Неизвестная ошибка при входе.",
     "whatsappError": "Произошла ошибка при входе.",
-    "whatsappInvalidCode": "Неверный код. Попробуйте ещё раз."
+    "whatsappInvalidCode": "Неверный код. Попробуйте ещё раз.",
+    "passwordTooShort": "Пароль должен содержать не менее 8 символов.",
+    "usernameGeneric": "Неверное имя пользователя или пароль."
   },
   "sinal": {
     "title": "Полный анализ",

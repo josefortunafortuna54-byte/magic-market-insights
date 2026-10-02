@@ -497,7 +497,18 @@
     "or": "または",
     "value1": "リアルタイムシグナル",
     "value2": "スマホへの通知",
-    "value3": "資金管理"
+    "value3": "資金管理",
+    "enterUsername": "ユーザー名でログイン",
+    "usernameLabel": "ユーザー名",
+    "usernamePlaceholder": "your-name",
+    "usernamePrompt": "ユーザー名とパスワードでログインします。アカウントがない場合は作成します。",
+    "usernameInvalid": "ユーザー名は3〜30文字で入力してください（小文字・数字・ドット・アンダースコア・ハイフン）。",
+    "usernameHasAccount": "アカウントをお持ちですか？ログイン",
+    "usernameNoAccount": "アカウントがありませんか？作成",
+    "signInWithUsername": "ログイン",
+    "createWithUsername": "アカウント作成",
+    "usernameCreateTitle": "アカウント作成",
+    "usernameSignInTitle": "ログイン"
   },
   "authErrors": {
     "googleStart": "Googleログインを開始できませんでした。",
@@ -505,7 +516,9 @@
     "googleError": "Googleでログイン中にエラーが発生しました。",
     "whatsappUnknown": "ログイン中に不明なエラーが発生しました。",
     "whatsappError": "ログイン中にエラーが発生しました。",
-    "whatsappInvalidCode": "コードが無効です。もう一度お試しください。"
+    "whatsappInvalidCode": "コードが無効です。もう一度お試しください。",
+    "passwordTooShort": "パスワードは8文字以上必要です。",
+    "usernameGeneric": "ユーザー名またはパスワードが正しくありません。"
   },
   "sinal": {
     "title": "完全分析",

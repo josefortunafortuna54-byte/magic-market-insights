@@ -763,6 +763,17 @@
     "verifyCode": "Verificar e entrar",
     "codeSent": "Enviámos um código para {{phone}}. Introduz abaixo.",
     "resendCode": "Reenviar código",
+    "enterUsername": "Entrar com NomeÚnico",
+    "usernameLabel": "NOMEÚNICO",
+    "usernamePlaceholder": "o-teu-nome",
+    "usernamePrompt": "Entra com o teu NomeÚnico e senha. Se ainda não tens conta, criamos uma.",
+    "usernameInvalid": "O NomeÚnico precisa de 3 a 30 caracteres: minúsculas, letras, números, ponto, underscore ou hífen.",
+    "usernameHasAccount": "Já tens conta? Entrar",
+    "usernameNoAccount": "Ainda não tens conta? Criar",
+    "signInWithUsername": "Entrar",
+    "createWithUsername": "Criar conta",
+    "usernameCreateTitle": "Criar conta",
+    "usernameSignInTitle": "Entrar",
     "email": "Email",
     "password": "Senha",
     "emailPlaceholder": "seu@email.com",
@@ -801,7 +812,9 @@
     "googleError": "Ocorreu um erro ao iniciar sessão com o Google.",
     "whatsappUnknown": "Erro desconhecido ao iniciar sessão.",
     "whatsappError": "Ocorreu um erro ao iniciar sessão.",
-    "whatsappInvalidCode": "Código inválido. Tenta novamente."
+    "whatsappInvalidCode": "Código inválido. Tenta novamente.",
+    "usernameGeneric": "NomeÚnico ou senha inválidos.",
+    "passwordTooShort": "A senha deve ter pelo menos 8 caracteres."
   },
   "sinal": {
     "title": "Análise Completa",

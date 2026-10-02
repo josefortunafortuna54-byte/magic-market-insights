@@ -832,7 +832,18 @@
     "sendRecoveryLink": "发送重置链接",
     "value1": "实时信号",
     "value2": "手机提醒",
-    "value3": "资金管理"
+    "value3": "资金管理",
+    "enterUsername": "使用用户名登录",
+    "usernameLabel": "用户名",
+    "usernamePlaceholder": "your-name",
+    "usernamePrompt": "使用用户名和密码登录。如果你还没有账号，我们会为你创建一个。",
+    "usernameInvalid": "用户名需要 3 到 30 个字符：小写字母、数字、点、下划线或连字符。",
+    "usernameHasAccount": "已有账号？去登录",
+    "usernameNoAccount": "还没有账号？去注册",
+    "signInWithUsername": "登录",
+    "createWithUsername": "创建账号",
+    "usernameCreateTitle": "创建账号",
+    "usernameSignInTitle": "登录"
   },
   "authErrors": {
     "googleStart": "无法启动 Google 登录。",
@@ -840,7 +851,9 @@
     "googleError": "使用 Google 登录时发生错误。",
     "whatsappUnknown": "登录时发生未知错误。",
     "whatsappError": "登录时发生错误。",
-    "whatsappInvalidCode": "验证码无效。请重试。"
+    "whatsappInvalidCode": "验证码无效。请重试。",
+    "passwordTooShort": "密码至少需要 8 个字符。",
+    "usernameGeneric": "用户名或密码无效。"
   },
   "sinal": {
     "title": "完整分析",

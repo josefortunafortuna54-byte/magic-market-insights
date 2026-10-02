@@ -879,7 +879,18 @@
     "sendRecoveryLink": "Herstellink versturen",
     "value1": "Realtime signalen",
     "value2": "Alerts op je mobiel",
-    "value3": "Bankrollbeheer"
+    "value3": "Bankrollbeheer",
+    "enterUsername": "Inloggen met gebruikersnaam",
+    "usernameLabel": "GEBRUIKERSNAAM",
+    "usernamePlaceholder": "jouw-naam",
+    "usernamePrompt": "Log in met je gebruikersnaam en wachtwoord. Heb je nog geen account? Dan maken we er een.",
+    "usernameInvalid": "De gebruikersnaam moet 3 tot 30 tekens hebben: kleine letters, cijfers, punt, underscore of streepje.",
+    "usernameHasAccount": "Al een account? Inloggen",
+    "usernameNoAccount": "Nog geen account? Aanmaken",
+    "signInWithUsername": "Inloggen",
+    "createWithUsername": "Account aanmaken",
+    "usernameCreateTitle": "Account aanmaken",
+    "usernameSignInTitle": "Inloggen"
   },
   "authErrors": {
     "googleStart": "Het was niet mogelijk om het inloggen met Google te starten.",
@@ -887,7 +898,9 @@
     "googleError": "Er is een fout opgetreden bij het inloggen met Google.",
     "whatsappUnknown": "Onbekende fout bij het inloggen.",
     "whatsappError": "Er is een fout opgetreden bij het inloggen.",
-    "whatsappInvalidCode": "Ongeldige code. Probeer opnieuw."
+    "whatsappInvalidCode": "Ongeldige code. Probeer opnieuw.",
+    "passwordTooShort": "Het wachtwoord moet minstens 8 tekens lang zijn.",
+    "usernameGeneric": "Ongeldige gebruikersnaam of wachtwoord."
   },
   "sinal": {
     "title": "Volledige Analyse",

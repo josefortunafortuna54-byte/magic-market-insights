@@ -832,7 +832,18 @@
     "sendRecoveryLink": "إرسال رابط الاستعادة",
     "value1": "إشارات في الوقت الفعلي",
     "value2": "تنبيهات على الهاتف",
-    "value3": "إدارة رأس المال"
+    "value3": "إدارة رأس المال",
+    "enterUsername": "الدخول باسم المستخدم",
+    "usernameLabel": "اسم المستخدم",
+    "usernamePlaceholder": "اسم-المستخدم",
+    "usernamePrompt": "ادخل باسم المستخدم وكلمة المرور. إذا لم يكن لديك حساب، ننشئ لك واحداً.",
+    "usernameInvalid": "اسم المستخدم يحتاج من 3 إلى 30 حرفاً: أحرف صغيرة، أرقام، نقطة، شرطة سفلية أو شرطة.",
+    "usernameHasAccount": "لديك حساب؟ ادخل",
+    "usernameNoAccount": "ليس لديك حساب؟ أنشئ",
+    "signInWithUsername": "دخول",
+    "createWithUsername": "إنشاء حساب",
+    "usernameCreateTitle": "إنشاء حساب",
+    "usernameSignInTitle": "تسجيل الدخول"
   },
   "authErrors": {
     "googleStart": "تعذر بدء تسجيل الدخول عبر Google.",
@@ -840,7 +851,9 @@
     "googleError": "حدث خطأ أثناء تسجيل الدخول عبر Google.",
     "whatsappUnknown": "خطأ غير معروف أثناء تسجيل الدخول.",
     "whatsappError": "حدث خطأ أثناء تسجيل الدخول.",
-    "whatsappInvalidCode": "رمز غير صالح. حاول مرة أخرى."
+    "whatsappInvalidCode": "رمز غير صالح. حاول مرة أخرى.",
+    "passwordTooShort": "يجب أن تكون كلمة المرور 8 أحرف على الأقل.",
+    "usernameGeneric": "اسم المستخدم أو كلمة المرور غير صحيحة."
   },
   "sinal": {
     "title": "تحليل كامل",

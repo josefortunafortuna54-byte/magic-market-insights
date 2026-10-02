@@ -497,7 +497,18 @@
     "or": "oppure",
     "value1": "Segnali in tempo reale",
     "value2": "Avvisi sul telefono",
-    "value3": "Gestione del capitale"
+    "value3": "Gestione del capitale",
+    "enterUsername": "Accedi con nome utente",
+    "usernameLabel": "NOME UTENTE",
+    "usernamePlaceholder": "il-tuo-nome",
+    "usernamePrompt": "Accedi con il tuo nome utente e la tua password. Se non hai ancora un account, te lo creiamo noi.",
+    "usernameInvalid": "Il nome utente richiede da 3 a 30 caratteri: lettere minuscole, numeri, punto, underscore o trattino.",
+    "usernameHasAccount": "Hai già un account? Accedi",
+    "usernameNoAccount": "Non hai ancora un account? Crealo",
+    "signInWithUsername": "Accedi",
+    "createWithUsername": "Crea account",
+    "usernameCreateTitle": "Crea account",
+    "usernameSignInTitle": "Accedi"
   },
   "authErrors": {
     "googleStart": "Impossibile avviare l'accesso con Google.",
@@ -505,7 +516,9 @@
     "googleError": "Si è verificato un errore durante l'accesso con Google.",
     "whatsappUnknown": "Errore sconosciuto durante l'accesso.",
     "whatsappError": "Si è verificato un errore durante l'accesso.",
-    "whatsappInvalidCode": "Codice non valido. Riprova."
+    "whatsappInvalidCode": "Codice non valido. Riprova.",
+    "passwordTooShort": "La password deve avere almeno 8 caratteri.",
+    "usernameGeneric": "Nome utente o password non validi."
   },
   "sinal": {
     "title": "Analisi Completa",

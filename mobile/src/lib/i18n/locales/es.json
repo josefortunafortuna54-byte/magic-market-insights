@@ -497,7 +497,18 @@
     "or": "o",
     "value1": "Señales en tiempo real",
     "value2": "Alertas en el móvil",
-    "value3": "Gestión de banca"
+    "value3": "Gestión de banca",
+    "enterUsername": "Entrar con nombre de usuario",
+    "usernameLabel": "NOMBRE DE USUARIO",
+    "usernamePlaceholder": "tu-nombre",
+    "usernamePrompt": "Entra con tu nombre de usuario y contraseña. Si aún no tienes cuenta, te creamos una.",
+    "usernameInvalid": "El nombre de usuario necesita entre 3 y 30 caracteres: minúsculas, letras, números, punto, guion bajo o guion.",
+    "usernameHasAccount": "¿Ya tienes cuenta? Entrar",
+    "usernameNoAccount": "¿Aún no tienes cuenta? Crear",
+    "signInWithUsername": "Entrar",
+    "createWithUsername": "Crear cuenta",
+    "usernameCreateTitle": "Crear cuenta",
+    "usernameSignInTitle": "Entrar"
   },
   "authErrors": {
     "googleStart": "No se pudo iniciar el login con Google.",
@@ -505,7 +516,9 @@
     "googleError": "Ocurrió un error al iniciar sesión con Google.",
     "whatsappUnknown": "Error desconocido al iniciar sesión.",
     "whatsappError": "Ocurrió un error al iniciar sesión.",
-    "whatsappInvalidCode": "Código inválido. Inténtalo de nuevo."
+    "whatsappInvalidCode": "Código inválido. Inténtalo de nuevo.",
+    "passwordTooShort": "La contraseña debe tener al menos 8 caracteres.",
+    "usernameGeneric": "Nombre de usuario o contraseña incorrectos."
   },
   "sinal": {
     "title": "Análisis Completo",

@@ -832,7 +832,18 @@
     "sendRecoveryLink": "Tuma kiungo cha kurejesha",
     "value1": "Ishara za wakati halisi",
     "value2": "Tahadhari kwenye simu",
-    "value3": "Usimamizi wa mtaji"
+    "value3": "Usimamizi wa mtaji",
+    "enterUsername": "Ingia kwa jina la mtumiaji",
+    "usernameLabel": "JINA LA MTUMIAJI",
+    "usernamePlaceholder": "jina-lako",
+    "usernamePrompt": "Ingia kwa jina la mtumiaji na nenosiri. Ikiwa huna akaunti yako, tutakutengeneza.",
+    "usernameInvalid": "Jina la mtumiaji linahitaji heringe 3 hadi 30: herufi ndogo, nambari, nukta, alaisi au kistari.",
+    "usernameHasAccount": "Una akaunti tayari? Ingia",
+    "usernameNoAccount": "Huna akaunti bado? Tengeneza",
+    "signInWithUsername": "Ingia",
+    "createWithUsername": "Tengeneza akaunti",
+    "usernameCreateTitle": "Tengeneza akaunti",
+    "usernameSignInTitle": "Ingia"
   },
   "authErrors": {
     "googleStart": "Imeshindikana kuanza login ya Google.",
@@ -840,7 +851,9 @@
     "googleError": "Hitilafu imetokea wakati wa kuingia kwa Google.",
     "whatsappUnknown": "Hitilafu isiyojulikana wakati wa kuingia.",
     "whatsappError": "Hitilafu imetokea wakati wa kuingia.",
-    "whatsappInvalidCode": "Msimbo si sahihi. Jaribu tena."
+    "whatsappInvalidCode": "Msimbo si sahihi. Jaribu tena.",
+    "passwordTooShort": "Nenosiri lazima liwe na herufi 8 au zaidi.",
+    "usernameGeneric": "Jina la mtumiaji au nenosiri si sahihi."
   },
   "sinal": {
     "title": "Uchambuzi Kamili",

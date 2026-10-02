@@ -793,7 +793,18 @@
     "sendRecoveryLink": "Send recovery link",
     "emailSent": "Email sent!",
     "checkEmailRecover": "Check your inbox and follow the instructions to reset your password.",
-    "backToLogin": "Back to login"
+    "backToLogin": "Back to login",
+    "enterUsername": "Sign in with Username",
+    "usernameLabel": "USERNAME",
+    "usernamePlaceholder": "your-name",
+    "usernamePrompt": "Sign in with your username and password. If you do not have an account yet, we will create one.",
+    "usernameInvalid": "The username needs 3 to 30 characters: lowercase letters, numbers, dot, underscore or hyphen.",
+    "usernameHasAccount": "Already have an account? Sign in",
+    "usernameNoAccount": "No account yet? Create one",
+    "signInWithUsername": "Sign in",
+    "createWithUsername": "Create account",
+    "usernameCreateTitle": "Create account",
+    "usernameSignInTitle": "Sign in"
   },
   "authErrors": {
     "googleStart": "Unable to start the Google sign-in.",
@@ -801,7 +812,9 @@
     "googleError": "An error occurred while signing in with Google.",
     "whatsappUnknown": "Unknown error while signing in.",
     "whatsappError": "An error occurred while signing in.",
-    "whatsappInvalidCode": "Invalid code. Try again."
+    "whatsappInvalidCode": "Invalid code. Try again.",
+    "passwordTooShort": "The password must be at least 8 characters.",
+    "usernameGeneric": "Invalid username or password."
   },
   "sinal": {
     "title": "Full Analysis",
