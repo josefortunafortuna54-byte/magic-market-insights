@@ -386,7 +386,13 @@
     "adminArea": "管理エリア",
     "adminBadge": "ADMIN",
     "sectionAdmin": "管理",
-    "signInSubtitle": "アカウントにログインすると、プロフィールと資本管理が表示されます。"
+    "signInSubtitle": "アカウントにログインすると、プロフィールと資本管理が表示されます。",
+    "usernameClaimError": "ネームユニットを予約できませんでした。",
+    "usernameClaimOk": "ネームユニットを予約しました。",
+    "usernameHint": "プロフィールとメンション用の固有ハンドル。ログインには使いません。",
+    "usernameReserve": "ネームユニットを予約する",
+    "usernameReserved": "予約済み：@{{username}}",
+    "usernameSection": "ネームユニット"
   },
   "diario": {
     "title": "トレーダー日記",

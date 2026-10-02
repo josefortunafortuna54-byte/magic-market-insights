@@ -263,7 +263,13 @@
     "memberSince": "Membre depuis {{date}}",
     "sectionAdmin": "ADMINISTRATION",
     "adminArea": "Zone d'Administration",
-    "adminBadge": "ADMIN"
+    "adminBadge": "ADMIN",
+    "usernameClaimError": "Impossible de réserver le NomUtilisateur.",
+    "usernameClaimOk": "NomUtilisateur réservé.",
+    "usernameHint": "Un identifiant unique pour votre profil et les mentions. Il ne sert pas à vous connecter.",
+    "usernameReserve": "Réserver le NomUtilisateur",
+    "usernameReserved": "Réservé : @{{username}}",
+    "usernameSection": "NomUtilisateur"
   },
   "diario": {
     "title": "Journal du Trader",

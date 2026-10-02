@@ -386,7 +386,13 @@
     "adminArea": "管理后台",
     "adminBadge": "管理员",
     "sectionAdmin": "管理",
-    "signInSubtitle": "登录你的账户，查看个人资料和资金管理。"
+    "signInSubtitle": "登录你的账户，查看个人资料和资金管理。",
+    "usernameClaimError": "无法保留该唯一名称。",
+    "usernameClaimOk": "唯一名称已保留。",
+    "usernameHint": "用于个人资料和提及的唯一别名，不用于登录。",
+    "usernameReserve": "保留唯一名称",
+    "usernameReserved": "已保留：@{{username}}",
+    "usernameSection": "唯一名称"
   },
   "diario": {
     "title": "交易日记",

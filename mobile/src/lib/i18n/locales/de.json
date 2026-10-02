@@ -263,7 +263,13 @@
     "memberSince": "Mitglied seit {{date}}",
     "sectionAdmin": "VERWALTUNG",
     "adminArea": "Admin-Bereich",
-    "adminBadge": "ADMIN"
+    "adminBadge": "ADMIN",
+    "usernameClaimError": "Der Nutzername konnte nicht reserviert werden.",
+    "usernameClaimOk": "Nutzername reserviert.",
+    "usernameHint": "Ein eindeutiges Handle für dein Profil und Erwähnungen. Damit loggst du dich nicht ein.",
+    "usernameReserve": "Nutzername reservieren",
+    "usernameReserved": "Reserviert: @{{username}}",
+    "usernameSection": "Nutzername"
   },
   "diario": {
     "title": "Trader-Tagebuch",

@@ -12,11 +12,13 @@ import { Spacing, type Palette } from '@/core/theme';
 import { useTheme } from '@/hooks/useTheme';
 import { useAuth } from '@/hooks/useAuth';
 import { useBanca } from '@/hooks/useBanca';
+import { useProfiles } from '@/hooks/useProfiles';
 import { useSubscription } from '@/hooks/useSubscription';
 import { useTourTarget } from '@/components/tour/registry';
 import { useTranslation } from 'react-i18next';
 import { i18n } from '@/lib/i18n';
 import { isAdminEmail } from '@/lib/supabase';
+import { claimUsername } from '@/lib/usernameAuth';
 
 function MenuRow({
   icon,
@@ -60,6 +62,7 @@ export default function PerfilScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const { user, signOut, updateProfile } = useAuth();
+  const { profiles, refresh: refreshProfiles } = useProfiles();
   const { isPremium, planTier, canAccessBanca, subscription, loading: subLoading } = useSubscription();
   const { config: banca } = useBanca();
   const walletRef = useTourTarget('tour:perfil-wallet');
@@ -70,6 +73,9 @@ export default function PerfilScreen() {
   const [nameInput, setNameInput] = useState('');
   const [savingName, setSavingName] = useState(false);
   const [signOutVisible, setSignOutVisible] = useState(false);
+  const [usernameInput, setUsernameInput] = useState('');
+  const [claiming, setClaiming] = useState(false);
+  const [claimError, setClaimError] = useState('');
 
   const periodEnd = subscription?.current_period_end
     ? new Date(subscription.current_period_end).toLocaleDateString(i18n.language)
@@ -101,6 +107,30 @@ export default function PerfilScreen() {
 
   const confirmSignOut = () => {
     setSignOutVisible(true);
+  };
+
+  // O username vem do perfil, nao do user: e a unica linha que o guarda, e o
+  // trigger da base de dados so deixa o edge function escrever nela.
+  const reserved = user ? profiles[user.id]?.username ?? null : null;
+
+  const commitUsername = async () => {
+    const name = usernameInput.trim().toLowerCase();
+    if (!name) {
+      Alert.alert(t('perfil.usernameClaimError'));
+      return;
+    }
+    setClaimError('');
+    setClaiming(true);
+    const { error } = await claimUsername(name);
+    setClaiming(false);
+    if (error) {
+      setClaimError(error);
+      Alert.alert(error);
+      return;
+    }
+    setUsernameInput('');
+    await refreshProfiles();
+    Alert.alert(t('perfil.usernameClaimOk'));
   };
 
   return (
@@ -173,6 +203,44 @@ export default function PerfilScreen() {
                   <Badge color={colors.textMuted} bg={`${colors.textMuted}20`}>{t('perfil.freePlan')}</Badge>
                 )}
               </View>
+
+              {reserved ? (
+                <View style={styles.usernameBox}>
+                  <AppText variant="small" style={styles.usernameLabel}>
+                    {t('perfil.usernameSection')}
+                  </AppText>
+                  <AppText>{t('perfil.usernameReserved', { username: reserved })}</AppText>
+                </View>
+              ) : user ? (
+                <View style={styles.usernameBox}>
+                  <AppText variant="small" style={styles.usernameLabel}>
+                    {t('perfil.usernameSection')}
+                  </AppText>
+                  <AppText variant="small" style={styles.usernameHint}>
+                    {t('perfil.usernameHint')}
+                  </AppText>
+                  <AppInput
+                    label={t('auth.usernameLabel')}
+                    value={usernameInput}
+                    onChangeText={setUsernameInput}
+                    placeholder={t('auth.usernamePlaceholder')}
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    returnKeyType="done"
+                    onSubmitEditing={commitUsername}
+                  />
+                  {claimError ? (
+                    <AppText variant="small" style={{ color: colors.destructive }}>
+                      {claimError}
+                    </AppText>
+                  ) : null}
+                  <AppButton
+                    title={t('perfil.usernameReserve')}
+                    loading={claiming}
+                    onPress={commitUsername}
+                  />
+                </View>
+              ) : null}
             </>
           )}
         </GradientCard>
@@ -371,6 +439,19 @@ const makeStyles = (c: Palette) =>
     },
     editActionBtn: { flex: 1 },
     badgeWrap: { marginTop: Spacing.sm },
+    usernameBox: {
+      alignSelf: 'stretch',
+      marginTop: Spacing.md,
+      gap: Spacing.xs,
+    },
+    usernameLabel: {
+      color: c.textFaint,
+      letterSpacing: 0.5,
+    },
+    usernameHint: {
+      color: c.textMuted,
+      marginBottom: Spacing.xs,
+    },
     section: { marginBottom: Spacing.lg },
     sectionLabel: {
       color: c.textFaint,

@@ -386,7 +386,13 @@
     "adminArea": "Eneo la Msimamizi",
     "adminBadge": "ADMIN",
     "sectionAdmin": "USIMAMIZI",
-    "signInSubtitle": "Ingia kwenye akaunti yako ili kuona wasifu na usimamizi wa mtaji."
+    "signInSubtitle": "Ingia kwenye akaunti yako ili kuona wasifu na usimamizi wa mtaji.",
+    "usernameClaimError": "Imeshindwa kufunga jina la mtumiaji.",
+    "usernameClaimOk": "Jina la mtumiaji limefungwa.",
+    "usernameHint": "Kitambulisho kimoja cha wasifu na majukumu. Hakihitajiki kwa kuingia.",
+    "usernameReserve": "Funga Jina la Mtumiaji",
+    "usernameReserved": "Imefungwa: @{{username}}",
+    "usernameSection": "Jina la Mtumiaji"
   },
   "diario": {
     "title": "Diari ya Mchuuzi",

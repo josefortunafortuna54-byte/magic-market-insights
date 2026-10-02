@@ -386,7 +386,13 @@
     "adminArea": "Zone ya Administration",
     "adminBadge": "ADMIN",
     "sectionAdmin": "ADMINISTRATION",
-    "signInSubtitle": "Kota na akaunti na yo mpo na komona profil na yo mpe gestion ya capital na yo."
+    "signInSubtitle": "Kota na akaunti na yo mpo na komona profil na yo mpe gestion ya capital na yo.",
+    "usernameClaimError": "Komona esalisa te koba bokola nom ya mosalisi.",
+    "usernameClaimOk": "Nom ya mosalisi ebokami.",
+    "usernameHint": "Nom unique oyo ekotambwisa profil na minomisi. Ekesalisa te koba.",
+    "usernameReserve": "Boka nom ya mosalisi",
+    "usernameReserved": "Ebookami: @{{username}}",
+    "usernameSection": "Nom ya mosalisi"
   },
   "diario": {
     "title": "Journal ya Mfanyabiashara",

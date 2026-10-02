@@ -404,7 +404,13 @@
     "nameEmpty": "O nome não pode ficar vazio",
     "nameSaveError": "Não foi possível atualizar o nome. Tenta novamente.",
     "nameSaved": "Nome atualizado",
-    "memberSince": "Membro desde {{date}}"
+    "memberSince": "Membro desde {{date}}",
+    "usernameSection": "NomeÚnico",
+    "usernameHint": "Apelido único para o teu perfil e para as menções. Não serve para entrar na conta.",
+    "usernameReserved": "Reservado: @{{username}}",
+    "usernameReserve": "Reservar NomeÚnico",
+    "usernameClaimOk": "NomeÚnico reservado.",
+    "usernameClaimError": "Não foi possível reservar o NomeÚnico."
   },
   "language": {
     "title": "Idioma"

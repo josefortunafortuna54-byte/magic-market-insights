@@ -386,7 +386,13 @@
     "adminArea": "Área de Administración",
     "adminBadge": "ADMIN",
     "sectionAdmin": "ADMINISTRACIÓN",
-    "signInSubtitle": "Entra en tu cuenta para ver tu perfil y la gestión de capital."
+    "signInSubtitle": "Entra en tu cuenta para ver tu perfil y la gestión de capital.",
+    "usernameClaimError": "No se ha podido reservar el NomeÚnico.",
+    "usernameClaimOk": "NomeÚnico reservado.",
+    "usernameHint": "Un alias único para tu perfil y las menciones. No sirve para iniciar sesión.",
+    "usernameReserve": "Reservar NomeÚnico",
+    "usernameReserved": "Reservado: @{{username}}",
+    "usernameSection": "NomeÚnico"
   },
   "diario": {
     "title": "Diario del Trader",

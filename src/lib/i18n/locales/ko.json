@@ -386,7 +386,13 @@
     "adminArea": "관리자 영역",
     "adminBadge": "ADMIN",
     "sectionAdmin": "관리자",
-    "signInSubtitle": "계정에 로그인해 프로필과 자금 관리를 확인하세요."
+    "signInSubtitle": "계정에 로그인해 프로필과 자금 관리를 확인하세요.",
+    "usernameClaimError": "고유 이름을 예약할 수 없습니다.",
+    "usernameClaimOk": "고유 이름을 예약했습니다.",
+    "usernameHint": "프로필과 멘션을 위한 고유 별명입니다. 로그인에는 사용되지 않습니다.",
+    "usernameReserve": "고유 이름 예약",
+    "usernameReserved": "예약됨: @{{username}}",
+    "usernameSection": "고유 이름"
   },
   "diario": {
     "title": "트레이더 일지",

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   Wallet,
@@ -12,13 +13,18 @@ import {
   ChevronRight,
   LogOut,
   LogIn,
+  AtSign,
 } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSubscription } from "@/hooks/useSubscription";
+import { useProfiles } from "@/hooks/useProfiles";
 import { isAdminEmail } from "@/lib/admin";
+import { claimUsername } from "@/lib/usernameAuth";
 import { planLabel, type PlanId } from "@/lib/plans";
 import { useTranslation } from "react-i18next";
 
@@ -43,8 +49,13 @@ interface MenuRow {
 export default function Perfil() {
   const { user, signOut } = useAuth();
   const { tier } = useSubscription();
+  const { profiles, refresh } = useProfiles();
   const navigate = useNavigate();
   const { t } = useTranslation();
+
+  const [usernameInput, setUsernameInput] = useState("");
+  const [claiming, setClaiming] = useState(false);
+  const [claimError, setClaimError] = useState("");
 
   if (!user) {
     return (
@@ -84,6 +95,25 @@ export default function Perfil() {
   const displayName = fullName || user.email?.split("@")[0] || "Utilizador";
   const initial = ProfileInitial(user.email, fullName);
   const isPremium = tier !== "free";
+
+  // O username vem do perfil, nao do user: e a unica linha que o guarda, e o
+  // trigger da base de dados so deixa o edge function escrever nela.
+  const reserved = profiles[user.id]?.username ?? null;
+
+  const handleClaim = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const normalized = usernameInput.trim().toLowerCase();
+    setClaimError("");
+    setClaiming(true);
+    const { error } = await claimUsername(normalized);
+    setClaiming(false);
+    if (error) {
+      setClaimError(error);
+      return;
+    }
+    setUsernameInput("");
+    await refresh();
+  };
 
   const menuRows: MenuRow[] = [
     { href: "/banca", label: t("perfil.banca"), icon: Wallet },
@@ -126,6 +156,48 @@ export default function Perfil() {
                 >
                   {PLAN_BADGE_LABEL[tier as string] ?? planLabel(tier as Exclude<PlanId, "free">).toUpperCase()}
                 </span>
+              )}
+
+              {reserved ? (
+                <div className="mt-4 w-full text-left">
+                  <p className="text-xs text-muted-foreground mb-1">
+                    {t("perfil.usernameSection")}
+                  </p>
+                  <p className="text-sm font-medium">{t("perfil.usernameReserved", { username: reserved })}</p>
+                </div>
+              ) : (
+                <form onSubmit={handleClaim} className="mt-4 w-full text-left space-y-3">
+                  <div>
+                    <p className="text-xs text-muted-foreground mb-1">
+                      {t("perfil.usernameSection")}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {t("perfil.usernameHint")}
+                    </p>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="claim-username" className="sr-only">
+                      {t("auth.usernameLabel")}
+                    </Label>
+                    <div className="relative">
+                      <AtSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        id="claim-username"
+                        value={usernameInput}
+                        onChange={(e) => setUsernameInput(e.target.value)}
+                        placeholder={t("auth.usernamePlaceholder")}
+                        className="pl-10"
+                        autoCapitalize="none"
+                        autoCorrect="false"
+                        autoComplete="off"
+                      />
+                    </div>
+                  </div>
+                  {claimError && <p className="text-sm text-destructive">{claimError}</p>}
+                  <Button type="submit" variant="hero" className="w-full" disabled={claiming}>
+                    {claiming ? t("auth.loggingIn") : t("perfil.usernameReserve")}
+                  </Button>
+                </form>
               )}
             </CardContent>
           </Card>

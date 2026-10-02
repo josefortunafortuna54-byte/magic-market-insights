@@ -386,7 +386,13 @@
     "adminArea": "Area di Amministrazione",
     "adminBadge": "ADMIN",
     "sectionAdmin": "AMMINISTRAZIONE",
-    "signInSubtitle": "Accedi al tuo account per vedere il tuo profilo e la gestione del capitale."
+    "signInSubtitle": "Accedi al tuo account per vedere il tuo profilo e la gestione del capitale.",
+    "usernameClaimError": "Impossibile riservare il NomeUtente.",
+    "usernameClaimOk": "NomeUtente riservato.",
+    "usernameHint": "Un identificatore unico per il tuo profilo e le menzioni. Non serve per accedere.",
+    "usernameReserve": "Riserva NomeUtente",
+    "usernameReserved": "Riservato: @{{username}}",
+    "usernameSection": "NomeUtente"
   },
   "diario": {
     "title": "Diario del Trader",

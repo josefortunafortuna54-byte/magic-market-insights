@@ -386,7 +386,13 @@
     "adminArea": "Zone d'Administration",
     "adminBadge": "ADMIN",
     "sectionAdmin": "ADMINISTRATION",
-    "signInSubtitle": "Connecte-toi à ton compte pour voir ton profil et la gestion de capital."
+    "signInSubtitle": "Connecte-toi à ton compte pour voir ton profil et la gestion de capital.",
+    "usernameClaimError": "Impossible de réserver le NomUtilisateur.",
+    "usernameClaimOk": "NomUtilisateur réservé.",
+    "usernameHint": "Un identifiant unique pour votre profil et les mentions. Il ne sert pas à vous connecter.",
+    "usernameReserve": "Réserver le NomUtilisateur",
+    "usernameReserved": "Réservé : @{{username}}",
+    "usernameSection": "NomUtilisateur"
   },
   "diario": {
     "title": "Journal du Trader",

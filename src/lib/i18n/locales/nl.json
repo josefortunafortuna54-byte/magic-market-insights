@@ -386,7 +386,13 @@
     "adminBadge": "ADMIN",
     "diario": "Traderdagboek",
     "sectionAdmin": "BEHEER",
-    "signInSubtitle": "Log in op je account om je profiel en kapitaalbeheer te zien."
+    "signInSubtitle": "Log in op je account om je profiel en kapitaalbeheer te zien.",
+    "usernameClaimError": "Kon de gebruikersnaam niet reserveren.",
+    "usernameClaimOk": "Gebruikersnaam gereserveerd.",
+    "usernameHint": "Een unieke naam voor je profiel en vermeldingen. Hiermee log je niet in.",
+    "usernameReserve": "Gebruikersnaam reserveren",
+    "usernameReserved": "Gereserveerd: @{{username}}",
+    "usernameSection": "Gebruikersnaam"
   },
   "diario": {
     "title": "Handelaren Dagboek",

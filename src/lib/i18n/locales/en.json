@@ -404,7 +404,13 @@
     "memberSince": "Member since {{date}}",
     "adminArea": "Admin Area",
     "adminBadge": "ADMIN",
-    "sectionAdmin": "ADMINISTRATION"
+    "sectionAdmin": "ADMINISTRATION",
+    "usernameClaimError": "Could not reserve the NomeÚnico.",
+    "usernameClaimOk": "NomeÚnico reserved.",
+    "usernameHint": "A unique handle for your profile and mentions. It is not used to sign in.",
+    "usernameReserve": "Reserve NomeÚnico",
+    "usernameReserved": "Reserved: @{{username}}",
+    "usernameSection": "NomeÚnico"
   },
   "language": {
     "title": "Language"

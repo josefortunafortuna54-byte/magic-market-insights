@@ -263,7 +263,13 @@
     "memberSince": "Участник с {{date}}",
     "sectionAdmin": "АДМИНИСТРИРОВАНИЕ",
     "adminArea": "Раздел администратора",
-    "adminBadge": "АДМИН"
+    "adminBadge": "АДМИН",
+    "usernameClaimError": "Не удалось зарезервировать имя пользователя.",
+    "usernameClaimOk": "Имя пользователя зарезервировано.",
+    "usernameHint": "Уникальный псевдоним для профиля и упоминаний. Он не нужен для входа.",
+    "usernameReserve": "Зарезервировать имя",
+    "usernameReserved": "Зарезервировано: @{{username}}",
+    "usernameSection": "Имя пользователя"
   },
   "diario": {
     "title": "Дневник трейдера",

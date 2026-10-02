@@ -230,6 +230,7 @@ export interface ConversationMember {
 export interface UserProfile {
   user_id: string;
   display_name: string;
+  username: string | null;
   avatar_url: string | null;
   role: 'admin' | 'member';
   status: string;

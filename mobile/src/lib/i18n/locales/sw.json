@@ -263,7 +263,13 @@
     "memberSince": "Mwanachama tangu {{date}}",
     "sectionAdmin": "USIMAMIZI",
     "adminArea": "Eneo la Msimamizi",
-    "adminBadge": "ADMIN"
+    "adminBadge": "ADMIN",
+    "usernameClaimError": "Imeshindwa kufunga jina la mtumiaji.",
+    "usernameClaimOk": "Jina la mtumiaji limefungwa.",
+    "usernameHint": "Kitambulisho kimoja cha wasifu na majukumu. Hakihitajiki kwa kuingia.",
+    "usernameReserve": "Funga Jina la Mtumiaji",
+    "usernameReserved": "Imefungwa: @{{username}}",
+    "usernameSection": "Jina la Mtumiaji"
   },
   "diario": {
     "title": "Diari ya Mchuuzi",

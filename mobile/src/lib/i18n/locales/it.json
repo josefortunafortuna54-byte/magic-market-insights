@@ -263,7 +263,13 @@
     "memberSince": "Membro dal {{date}}",
     "sectionAdmin": "AMMINISTRAZIONE",
     "adminArea": "Area di Amministrazione",
-    "adminBadge": "ADMIN"
+    "adminBadge": "ADMIN",
+    "usernameClaimError": "Impossibile riservare il NomeUtente.",
+    "usernameClaimOk": "NomeUtente riservato.",
+    "usernameHint": "Un identificatore unico per il tuo profilo e le menzioni. Non serve per accedere.",
+    "usernameReserve": "Riserva NomeUtente",
+    "usernameReserved": "Riservato: @{{username}}",
+    "usernameSection": "NomeUtente"
   },
   "diario": {
     "title": "Diario del Trader",

@@ -386,7 +386,13 @@
     "adminArea": "منطقة الإدارة",
     "adminBadge": "ADMIN",
     "sectionAdmin": "الإدارة",
-    "signInSubtitle": "ادخل إلى حسابك لعرض ملفك الشخصي وإدارة رأس المال."
+    "signInSubtitle": "ادخل إلى حسابك لعرض ملفك الشخصي وإدارة رأس المال.",
+    "usernameClaimError": "تعذّر حجز الاسم الفريد.",
+    "usernameClaimOk": "تم حجز الاسم الفريد.",
+    "usernameHint": "اسم فريد لملفك والإشارات إليه. لا يُستخدم لتسجيل الدخول.",
+    "usernameReserve": "حجز الاسم الفريد",
+    "usernameReserved": "محجوز: @{{username}}",
+    "usernameSection": "الاسم الفريد"
   },
   "diario": {
     "title": "يوميات المتداول",
