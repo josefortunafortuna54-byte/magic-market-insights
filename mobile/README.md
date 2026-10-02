@@ -25,7 +25,7 @@ O `start` dá development build, emulador Android, simulador iOS, ou Expo Go. A 
 |---|---|
 | `npx expo start` | Servidor de desenvolvimento |
 | `npx expo run:android` / `run:ios` | Build nativo de desenvolvimento |
-| `npm test` | Jest — 10 suites, 96 testes |
+| `npm test` | Jest — 11 suites, 103 testes |
 | `npx tsc --noEmit` | Typecheck |
 | `npm run lint` | `expo lint` |
 
