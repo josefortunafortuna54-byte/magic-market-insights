@@ -57,3 +57,33 @@ export async function createAccountWithUsername(
 ): Promise<{ error: string | null }> {
   return call('create', normalizeUsername(username), password);
 }
+
+// O claim nao passa por `call`, e por dois motivos que nenhum dos outros action
+// tem: o Authorization tem de ser o JWT do utilizador e nao a anon key -- e o JWT
+// que diz ao servidor quem esta a reservar o nome, uma anon key seria recusada
+// com 401 -- e a resposta nao traz token_hash, porque nao ha sessao para abrir.
+// O utilizador ja esta autenticado quando reserva o nome.
+export async function claimUsername(
+  username: string,
+): Promise<{ error: string | null }> {
+  const { data: sessionData } = await supabase.auth.getSession();
+  const accessToken = sessionData.session?.access_token;
+  if (!accessToken) return { error: i18n.t('authErrors.usernameGeneric') };
+
+  const res = await fetch(USERNAME_FN, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      apikey: SUPABASE_ANON_KEY,
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: JSON.stringify({ action: 'claim', username: normalizeUsername(username) }),
+  });
+
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok || data.error) {
+    return { error: data.error ?? i18n.t('authErrors.usernameGeneric') };
+  }
+
+  return { error: null };
+}
