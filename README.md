@@ -148,7 +148,7 @@ divergirem, **o código ganha** — reconfirma antes de decidir.
 3. **Cobertura de i18n desigual** — a web não tem chaves em falta, mas ainda tem valores
    por traduzir (56 a 293 por idioma).
 4. **A documentação em `RESUMO/` ficou atrás** o que descreve o mobile como futuro.
-5. **Duas árvores `supabase/` divergentes** — a raiz (20 migrations, 5 edge functions) e
+5. **Duas árvores `supabase/` divergentes** — a raiz (20 migrations, 6 edge functions) e
    `mobile/supabase/` (45 migrations, 7 edge functions). A do mobile é a mais recente e a
    que reflecte o estado actual; a da raiz está parada. Falta decidir qual é a
    autoritativa e apagar a outra.

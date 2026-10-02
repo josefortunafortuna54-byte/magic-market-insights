@@ -280,8 +280,8 @@ fundindo com `merge-i18n.cjs --mobile <loc>.m`. Só se funde depois de `--check`
 6. **Documentação:** `RESUMO/01`–`04` descrevem o mobile como futuro — superado.
 7. **Divergência web/mobile a vigiar:** os dois apps evoluem em paralelo e a documentação
    em `RESUMO/` já ficou atrás uma vez. Confirma o código antes de confiar nela.
-8. **⚠️ Duas árvores `supabase/` divergentes.** A raiz tem 20 migrations e 5 edge
-   functions; `mobile/supabase/` tem 40 migrations e 6 functions, e é a que reflecte o
+8. **⚠️ Duas árvores `supabase/` divergentes.** A raiz tem 20 migrations e 6 edge
+   functions; `mobile/supabase/` tem 45 migrations e 7 functions, e é a que reflecte o
    schema real. **Nenhuma das duas está completa** — o Stripe só existe na raiz, o
    `whatsapp-auth`/`ai-support`/`send-notification` só no mobile. O que está deployed é a
    união das duas. Isto já causou um diagnóstico errado: a `close-signals` da raiz tinha a
@@ -294,6 +294,19 @@ fundindo com `merge-i18n.cjs --mobile <loc>.m`. Só se funde depois de `--check`
    vazia, faz `RAISE WARNING` + `RETURN` — o job conta como sucesso e não fecha nada. A
    `service_role_key` nunca foi inserida; a própria migration `20260819040000` documenta
    isso e só emite `WARNING`, que não se vê. **Não é bug de código.** Ver secção 9.
+10. **Dívida de lint, medida em 2026-10-02.** O `npm run lint` da raiz dá **173
+    problemas (140 erros, 33 avisos)** e o do mobile **50 (8 erros, 42 avisos)**. Os
+    140 erros da raiz são quase uma só regra: **106 `@typescript-eslint/no-explicit-any`**,
+    mais 23 `no-require-imports` e 11 `no-empty`. **Não são bugs** — `any` é perda de
+    verificação de tipos, não comportamento errado, e vários `catch {}` são falhas
+    deliberadamente silenciosas (`sounds.ts`, `boomPrefs.ts`). Estão espalhados por ~72
+    ficheiros e a maioria é código anterior à auth. Corrigi-los significa escrever
+    contratos de tipos à mão em admin, pagamentos e hooks com quase **nenhuma cobertura
+    de testes** — daí não ter sido feito numa passada cega.
+
+    O que **está** verde e deve continuar: `deno check` nas 7 edge functions (0 erros),
+    `npx tsc --noEmit` na raiz e no mobile, e os 103 testes do mobile. Como não há CI
+    (dívida 1), vale correr os três à mão antes de dar por fechado um bloco de trabalho.
 
 ---
 
