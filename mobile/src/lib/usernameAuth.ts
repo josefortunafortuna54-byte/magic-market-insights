@@ -1,6 +1,7 @@
 import { supabase } from './supabase';
 import { SUPABASE_ANON_KEY, SUPABASE_URL } from './env';
 import { i18n } from '@/lib/i18n';
+import { normalizeUsername } from './usernameRules';
 
 const USERNAME_FN = `${SUPABASE_URL}/functions/v1/username-auth`;
 
@@ -47,12 +48,12 @@ export async function signInWithUsername(
   username: string,
   password: string,
 ): Promise<{ error: string | null }> {
-  return call('signin', username.trim().toLowerCase(), password);
+  return call('signin', normalizeUsername(username), password);
 }
 
 export async function createAccountWithUsername(
   username: string,
   password: string,
 ): Promise<{ error: string | null }> {
-  return call('create', username.trim().toLowerCase(), password);
+  return call('create', normalizeUsername(username), password);
 }

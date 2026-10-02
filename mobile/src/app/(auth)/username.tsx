@@ -16,17 +16,12 @@ import { Radius, Spacing, type Palette } from '@/core/theme';
 import { useTheme } from '@/hooks/useTheme';
 import { useAuth } from '@/hooks/useAuth';
 import { createAccountWithUsername, signInWithUsername } from '@/lib/usernameAuth';
+import { isValidUsername } from '@/lib/usernameRules';
 import { Trans, useTranslation } from 'react-i18next';
 
 type Mode = 'signin' | 'create';
 
 const MIN_PASSWORD = 8;
-
-function isValidUsername(value: string): boolean {
-  if (value.length < 3 || value.length > 30) return false;
-  if (!/^[a-z0-9][a-z0-9._-]*[a-z0-9]$/.test(value)) return false;
-  return !/^wa\d+$/.test(value);
-}
 
 export default function UsernameScreen() {
   const { colors } = useTheme();
