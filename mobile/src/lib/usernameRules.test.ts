@@ -3,6 +3,38 @@ import path from 'path';
 
 import { isValidUsername, normalizeUsername } from './usernameRules';
 
+// Tabela única de veredictos, usada pelas DUAS implementações que têm de
+// concordar: este módulo (mobile) e a edge function. Se a lista vivesse
+// duplicada em cada bloco, os dois testes poderiam divergir na cobertura sem
+// que nada falhasse — que é o modo exacto de falha que este ficheiro existe
+// para apanhar.
+const CASES: ReadonlyArray<readonly [string, boolean]> = [
+  // normais
+  ['joao', true],
+  ['ana', true],
+  ['joao.silva_1', true],
+  ['a-b.c_d', true],
+
+  // tamanho fora de 3..30
+  ['ab', false],
+  ['a'.repeat(31), false],
+
+  // conjunto de caracteres
+  ['Joao', false], // só passa depois de normalizado
+  ['.joao', false],
+  ['joao.', false],
+  ['joao silva', false],
+  ['joao@x', false],
+
+  // wa + dígitos: reservado, geraria o email sintético de uma conta WhatsApp
+  ['wa244821999999', false],
+  ['wa123', false],
+
+  // não exagerar: usernames que apenas começam por wa são legítimos
+  ['water', true],
+  ['wa', false], // curto demais, não pela reserva
+];
+
 describe('normalizeUsername', () => {
   it('normaliza para minúsculas e sem espaços nas pontas', () => {
     // A validação tem de correr DEPOIS disto, senão "Joao" é recusado no
@@ -90,5 +122,41 @@ describe('o CHECK na base de dados segue a mesma regra', () => {
 
   it('mantém o mesmo conjunto de caracteres', () => {
     expect(flat).toContain("username ~ '^[a-z0-9][a-z0-9._-]*[a-z0-9]$'");
+  });
+});
+
+describe('a edge function aplica a mesma regra', () => {
+  // A edge function é a cópia desta regra que corre em produção, e vive fora
+  // do alcance do jest: importa de jsr e de deno.land, e o jest não resolve
+  // nenhum dos dois. Em vez de comparar texto — o que só prova que a string
+  // está presente — extrai-se a função do ficheiro e corre-se a mesma tabela.
+  const edgePath = path.join(
+    __dirname,
+    '..',
+    '..',
+    'supabase',
+    'functions',
+    'username-auth',
+    'index.ts',
+  );
+  const source = fs.readFileSync(edgePath, 'utf8');
+
+  function loadEdgeValidator(): (value: string) => boolean {
+    const match = source.match(
+      /function isValidUsername\([^)]*\)\s*:\s*boolean\s*\{([\s\S]*?)\n\}/,
+    );
+    if (!match) {
+      throw new Error(
+        'isValidUsername não encontrada em username-auth/index.ts. A edge function ' +
+          'foi refeita e este teste tem de a seguir, senão deixa de testar nada.',
+      );
+    }
+    return new Function('value', match[1]) as (value: string) => boolean;
+  }
+
+  const edgeIsValid = loadEdgeValidator();
+
+  it.each(CASES)('%s -> %s', (value, expected) => {
+    expect(edgeIsValid(value)).toBe(expected);
   });
 });
