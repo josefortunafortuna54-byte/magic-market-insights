@@ -5,6 +5,8 @@
 -- ==========================================
 -- 1. GET_USERS_COUNT
 -- ==========================================
+-- 20260124000001 created this RETURNS bigint; CREATE OR REPLACE cannot change a return type.
+DROP FUNCTION IF EXISTS public.get_users_count();
 CREATE OR REPLACE FUNCTION public.get_users_count()
 RETURNS integer
 LANGUAGE sql
@@ -17,6 +19,8 @@ $$;
 -- ==========================================
 -- 2. GET_ALL_USERS
 -- ==========================================
+-- 20260124000001 created this RETURNS jsonb; CREATE OR REPLACE cannot change a return type.
+DROP FUNCTION IF EXISTS public.get_all_users();
 CREATE OR REPLACE FUNCTION public.get_all_users()
 RETURNS TABLE (
   id uuid,

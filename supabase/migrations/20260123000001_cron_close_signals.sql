@@ -52,21 +52,21 @@ END $$;
 -- OPTION B: Hardcoded fallback — SET YOUR VALUES BELOW
 -- Run this manually in SQL Editor if OPTION A didn't work:
 -- ============================================================
-/*
 -- Replace YOUR_PROJECT_URL and YOUR_SERVICE_ROLE_KEY:
-SELECT cron.schedule(
-  'close-signals-every-30min',
-  '*/30 * * * *',
-  $$
-  SELECT net.http_post(
-    url := 'YOUR_PROJECT_URL/functions/v1/close-signals',
-    headers := jsonb_build_object(
-      'Content-Type', 'application/json',
-      'Authorization', 'Bearer YOUR_SERVICE_ROLE_KEY',
-      'apikey', 'YOUR_ANON_KEY'
-    ),
-    body := '{}'::jsonb
-  );
-  $$
-);
-*/
+-- WARNING: keep these as line comments. A /* */ block is closed early by the
+-- "*/" in the cron expression below, making the rest parse as SQL.
+-- SELECT cron.schedule(
+--   'close-signals-every-30min',
+--   '*/30 * * * *',
+--   $$
+--   SELECT net.http_post(
+--     url := 'YOUR_PROJECT_URL/functions/v1/close-signals',
+--     headers := jsonb_build_object(
+--       'Content-Type', 'application/json',
+--       'Authorization', 'Bearer YOUR_SERVICE_ROLE_KEY',
+--       'apikey', 'YOUR_ANON_KEY'
+--     ),
+--     body := '{}'::jsonb
+--   );
+--   $$
+-- );
