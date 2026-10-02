@@ -180,7 +180,7 @@ convertido". Está errado e desatualizado.** O mobile tem **33 ecrãs**, 82 comp
   effect, deep links (`expo-share-intent`, esquema `magictrader`).
 - **Build:** `eas.json` com perfis development / preview / production,
   `projectId 112173d7-48e2-4d95-9c98-abd9f16be18a`, `bundleIdentifier com.magictrader.app`.
-- **Testes:** `mobile/src/{app,components,core,lib}` — **10 suites, 81 testes, todos a passar**
+- **Testes:** `mobile/src/{app,components,core,lib}` — **10 suites, 96 testes, todos a passar**
   (com `npx jest`; ver dívida técnica abaixo).
 - **Nota de convenção:** `mobile/AGENTS.md` manda ler
   `https://docs.expo.dev/versions/v56.0.0/` antes de escrever código — o Expo 56 é
@@ -257,7 +257,7 @@ fundindo com `merge-i18n.cjs --mobile <loc>.m`. Só se funde depois de `--check`
 | App mobile | **Funcional** — 33 ecrãs, push, áudio, câmaras, EAS configurado, checkout Stripe |
 | Supabase | 25 tabelas com RLS, 4 buckets, **duas árvores de migrations** (ver dívida 8) |
 | Pagamentos | Stripe no mobile; manual em Kwanzas na web e no mobile |
-| Testes | 81 testes mobile, todos a passar (`npm test` em `mobile/`) |
+| Testes | 96 testes mobile, todos a passar (`npm test` em `mobile/`) |
 | i18n | 14 locales nos dois apps; **onda M do mobile fechada** (13 idiomas, 3 562 chaves) |
 
 ### Dívida conhecida
