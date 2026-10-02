@@ -660,10 +660,17 @@ serve(async (req) => {
   // 1. Fetch existing active signals for deduplication
   let existingSymbols: string[] = [];
   try {
-    const { data: existing } = await supabase
+    const { data: existing, error: existingErr } = await supabase
       .from('signals')
       .select('symbol, timeframe, signal_type')
       .in('status', ['active', 'pending']);
+    // Carregar em diante sem sinais existentes e o comportamento pretendido --
+    // um job agendado nao deve abortar por uma leitura falhada. Mas o erro do
+    // PostgREST e devolvido, nao lancado, e portanto o `catch` nunca via nada.
+    // Com a falha invisivel, existingSymbols ficava vazio, a deduplicacao
+    // passava por vacuidade e o job emitia sinais duplicados para simbolos que
+    // ja tinham um sinal activo.
+    if (existingErr) throw new Error(existingErr.message);
     if (existing && existing.length > 0) {
       existingSymbols = existing.map((s: any) => `${s.symbol}_${s.timeframe}_${s.signal_type}`);
       console.log(` sinais existentes: ${existing.length} (${existing.map((s: any) => s.symbol).join(', ')})`);

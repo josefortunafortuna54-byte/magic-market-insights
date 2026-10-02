@@ -166,20 +166,27 @@ async function handleAddBoomTime(body: Record<string, unknown>) {
 
   // Publica o boom como mensagem no canal #sinais
   try {
-    const { data: sinais } = await supabase
+    const { data: sinais, error: sinaisErr } = await supabase
       .from('channels')
       .select('id')
       .eq('name', 'sinais')
       .single();
+    // O boom ja esta gravado (a linha acima devolve 500 se falhou), portanto
+    // este anuncio e secundario e nao deve falhar o pedido. Mas o erro do
+    // PostgREST e devolvido, nao lancado -- pelo que o `catch` em volta nunca
+    // via nada e o sinal chegava a existir sem aparecer no canal. Lancar aqui
+    // e o que passa a dar entrada ao log que ja existia.
+    if (sinaisErr) throw new Error(sinaisErr.message);
     if (sinais?.id && data) {
       const botId = '11111111-1111-1111-1111-111111111111';
-      await supabase.from('messages').insert({
+      const { error: insertErr } = await supabase.from('messages').insert({
         channel_id: sinais.id,
         user_id: botId,
         text: `🎯 ${String(pair).toUpperCase()} — Boom`,
         image_url: String(image_url || ''),
         boom_id: data.id,
       });
+      if (insertErr) throw new Error(insertErr.message);
     }
   } catch (e) {
     console.error('admin-manage: falha ao publicar boom no #sinais', e);
@@ -246,10 +253,15 @@ async function handleListUsers() {
 
   const userIds = (data.users ?? []).map((u) => u.id);
 
-  const { data: subs } = await supabase
+  const { data: subs, error: subsErr } = await supabase
     .from('subscriptions')
     .select('user_id, plan, status, current_period_end')
     .in('user_id', userIds);
+  // Sem este erro, subMap ficava vazio e `sub?.status === 'active'` nunca era
+  // verdade: a listagem devolvia TODOS os utilizadores como 'free', incluindo
+  // quem tinha subscricao activa. O admin decidia extensoes e_subsidios a
+  // partir de uma lista que dizia que ninguem pagava.
+  if (subsErr) return errorJson(subsErr.message, 500);
 
   const subMap = new Map<string, { plan: string; status: string; current_period_end: string }>();
   (subs ?? []).forEach((s) => subMap.set(s.user_id, s));
@@ -309,10 +321,15 @@ async function notifyUser(userId: string, title: string, body: string, data?: Re
   }
 
   try {
-    const { data: tokens } = await supabase
+    const { data: tokens, error: tokensErr } = await supabase
       .from('push_tokens')
       .select('token')
       .eq('user_id', userId);
+    // O `try/catch` em volta nao protege nada aqui: o erro do PostgREST nao e
+    // lancado, e descartado. Uma falha de leitura deixava tokenList vazio e o
+    // `if` de baixo saltava o push inteiro, sem registo -- a mesma notificacao
+    // silenciosamente perdida que se corrigiu em send-notification.
+    if (tokensErr) throw new Error(tokensErr.message);
     const tokenList = (tokens ?? []).map((t: { token: string }) => t.token);
     if (tokenList.length > 0) {
       await sendExpoPush(tokenList, title, body, { url: '/notificacoes', kind: 'plan' }, 'planos');
@@ -638,10 +655,14 @@ async function handleSendDm(body: Record<string, unknown>) {
     .single();
   if (msgErr) return errorJson(msgErr.message, 500);
 
-  const { data: tokens } = await supabase
+  const { data: tokens, error: tokensErr } = await supabase
     .from('push_tokens')
     .select('token')
     .eq('user_id', user_id);
+  // A mensagem ja foi inserida acima. Sem este erro, uma falha na leitura dos
+  // tokens deixava tokenList vazio e a DM era entregue sem push nenhum, com
+  // `notified: 0` na resposta -- o admin via um envio bem-sucedido.
+  if (tokensErr) return errorJson(tokensErr.message, 500);
   const tokenList = (tokens ?? []).map((t: { token: string }) => t.token);
 
   let notified = 0;
@@ -662,17 +683,23 @@ async function handleSendPush(body: Record<string, unknown>) {
   if (Array.isArray(user_ids) && user_ids.length > 0) {
     userIds = user_ids.map(String);
   } else {
-    const { data: allTokens } = await supabase.from('push_tokens').select('user_id');
+    const { data: allTokens, error: allErr } = await supabase.from('push_tokens').select('user_id');
+    // Sem este erro, uma falha deixava userIds vazio e o `return` de baixo
+    // respondia `{ notified: 0 }` -- sucesso. O admin broadcasting para toda a
+    // base via "0 notificados" e nao havia forma de distinguir de uma base
+    // sem tokens registados.
+    if (allErr) return errorJson(allErr.message, 500);
     userIds = [...new Set((allTokens ?? []).map((t: { user_id: string }) => t.user_id))];
   }
 
   if (userIds.length === 0) return json({ notified: 0 });
 
-  const { data: tokens } = await supabase
+  const { data: tokens, error: tokensErr } = await supabase
     .from('push_tokens')
     .select('user_id, token')
     .in('user_id', userIds);
 
+  if (tokensErr) return errorJson(tokensErr.message, 500);
   const tokenList = (tokens ?? []).map((t: { token: string }) => t.token);
   if (tokenList.length === 0) return json({ notified: 0 });
 
@@ -964,11 +991,19 @@ serve(async (req) => {
       if (!user_id) return errorJson('user_id em falta.');
 
       // Ler o registo existente para não perder plan ao criar linha nova
-      const { data: existing } = await supabase
+      const { data: existing, error: existingErr } = await supabase
         .from('subscriptions')
         .select('plan')
         .eq('user_id', user_id)
         .maybeSingle();
+      // Este erro nao pode ser engolido. A linha seguinte usa
+      // `existing?.plan ?? (active ? 'premium' : 'free')`, portanto uma falha
+      // de leitura levava ao ramo do default e o upsert reescrevia o plano de
+      // um utilizador a pagar -- um 'pro' com a expiry passada passava a
+      // 'free' por causa de uma falha de rede. O comentario acima explica
+      // porque e que este `select` existe; este e o que impede que ele
+      // funcione ao contrario.
+      if (existingErr) return errorJson(existingErr.message, 500);
 
       const active = Boolean(expires_at) && new Date(expires_at as string) > new Date();
       const { error } = await supabase
