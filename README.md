@@ -148,10 +148,15 @@ divergirem, **o código ganha** — reconfirma antes de decidir.
 3. **Cobertura de i18n desigual** — a web não tem chaves em falta, mas ainda tem valores
    por traduzir (56 a 293 por idioma).
 4. **A documentação em `RESUMO/` ficou atrás** o que descreve o mobile como futuro.
-5. **Duas árvores `supabase/` divergentes** — a raiz (20 migrations, 6 edge functions) e
-   `mobile/supabase/` (45 migrations, 7 edge functions). A do mobile é a mais recente e a
-   que reflecte o estado actual; a da raiz está parada. Falta decidir qual é a
-   autoritativa e apagar a outra.
+5. **Duas árvores `supabase/` divergentes — e a da raiz NÃO é a descartável** — a raiz
+   (20 migrations, 6 edge functions) e `mobile/supabase/` (45 migrations, 7 edge
+   functions). A do mobile é a mais recente na auth, mas **não reconstrói a base de dados**:
+   há **9 tabelas que só a raiz cria** (`boom_hours`, `boom_times`, `boom_votes`,
+   `boom_comments`, `payment_requests`, `whatsapp_subscriptions`, `admins`, `posts`,
+   `subscriptions`) e o mobile só lhes acrescenta políticas de RLS. **Apagar a raiz destrói
+   essas 9 tabelas.** A resolução é o inverso do que aqui estava: fundir as 14 migrations
+   só-da-raiz para o mobile, e só depois a raiz fica dispensável. Detalhe e evidência em
+   `RESUMO-PROJETO.md` secção 8, dívida 8.
 6. **O cron de fecho de sinais nunca correu** — falta a `service_role_key` em
    `app_config`. É um `INSERT` manual, não código. Ver `RESUMO-PROJETO.md` secção 9.
 

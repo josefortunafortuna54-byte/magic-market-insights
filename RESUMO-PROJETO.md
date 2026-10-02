@@ -280,14 +280,32 @@ fundindo com `merge-i18n.cjs --mobile <loc>.m`. Só se funde depois de `--check`
 6. **Documentação:** `RESUMO/01`–`04` descrevem o mobile como futuro — superado.
 7. **Divergência web/mobile a vigiar:** os dois apps evoluem em paralelo e a documentação
    em `RESUMO/` já ficou atrás uma vez. Confirma o código antes de confiar nela.
-8. **⚠️ Duas árvores `supabase/` divergentes.** A raiz tem 20 migrations e 6 edge
-   functions; `mobile/supabase/` tem 45 migrations e 7 functions, e é a que reflecte o
-   schema real. **Nenhuma das duas está completa** — o Stripe só existe na raiz, o
-   `whatsapp-auth`/`ai-support`/`send-notification` só no mobile. O que está deployed é a
-   união das duas. Isto já causou um diagnóstico errado: a `close-signals` da raiz tinha a
-   regra "48h → `sl`" e uma tabela de preços fictícios de 2024 que fabricavam resultados,
-   enquanto a versão em `mobile/` já usava `expired` e Twelve Data. **Decidir qual é a
-   autoritativa e apagar a outra.**
+8. **⚠️ Duas árvores `supabase/` divergentes — e a da raiz NÃO é a descartável.**
+   A raiz tem 20 migrations (20260112 → 20260922) e 6 edge functions; `mobile/supabase/`
+   tem 45 migrations (20260814 → 20261005) e 7 functions. **Nenhuma das duas é completa, e
+   a do mobile é a incompleta.** Medido a 2026-10-02: existem **9 tabelas que só a raiz
+   cria** — `boom_hours`, `boom_times`, `boom_votes`, `boom_comments`, `payment_requests`,
+   `whatsapp_subscriptions`, `admins`, `posts`, `subscriptions` — e o mobile **nunca as
+   cria em lado nenhum**. As migrations do mobile só lhes aplicam `create policy` e
+   `enable RLS`, que é a assinatura de "a tabela já existe, a política é acrescentada".
+
+   **Consequência: apagar a raiz, ou publicar só a árvore do mobile, destrói 9 tabelas de
+   que a app depende** (`BoomCard`, `BoomHourCard`, `useBoomSocial`, `useSubscription`, o
+   fluxo de pagamento manual, o painel de admin). O `mobile/supabase/` **não reconstrói
+   uma base de dados a partir do zero** — precisa que alguém aplique a raiz primeiro.
+
+   Isto inverte a recomendação que aqui estava escrita ("a do mobile é a autoritativa,
+   decide e apaga a outra").Segue a ordem real das dependências: a raiz vai de
+   20260112, o mobile só começa a 20260814, e há sobreposição entre 20260821–20260922 onde
+   as duas escrevem no mesmo schema. **A resolução é fundir as 14 migrations só-da-raiz para
+   dentro de `mobile/supabase/`, renumeradas, e só depois considerar a raiz descartável.**
+   Isso exige uma base de dados de teste para verificar, que este repositório ainda não
+   tem — daí a dívida ficar aberta em vez de ser feita às cegas.
+
+   O que está deployed é a união das duas. Isto já causou um diagnóstico errado: a
+   `close-signals` da raiz tinha a regra "48h → `sl`" e uma tabela de preços fictícios de
+   2024 que fabricavam resultados, enquanto a versão em `mobile/` já usava `expired` e
+   Twelve Data.
 9. **⚠️ O cron de fecho de sinais nunca correu.** A cadeia existe e está agendada
    (`close-signals-every-30min` → `cron_close_signals()` → `call_edge_function()`), mas
    `call_edge_function()` lê a `service_role_key` de `public.app_config` e, se estiver
