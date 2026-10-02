@@ -585,20 +585,27 @@ async function handleSendDm(body: Record<string, unknown>) {
 
   const adminBotId = '11111111-1111-1111-1111-111111111111';
 
-  const { data: existing } = await supabase
+  const { data: existing, error: membersErr } = await supabase
     .from('conversation_members')
     .select('conversation_id')
     .eq('user_id', user_id);
+  if (membersErr) return errorJson(membersErr.message, 500);
 
   let conversationId: string | null = null;
 
   for (const row of existing ?? []) {
-    const { data: otherMember } = await supabase
+    const { data: otherMember, error: otherErr } = await supabase
       .from('conversation_members')
       .select('user_id')
       .eq('conversation_id', row.conversation_id)
       .neq('user_id', user_id)
       .maybeSingle();
+    // otherMember distingue "conversa 1:1" de "conversa de grupo": e a
+    // ausencia de um terceiro membro que faz a diferenca. Com o erro engolido,
+    // otherMember ficava nulo numa falha de rede, !otherMember era verdadeiro e
+    // um grupo era considerado conversa privada -- a DM do admin ia parar ao
+    // grupo inteiro.
+    if (otherErr) return errorJson(otherErr.message, 500);
     if (!otherMember) {
       conversationId = row.conversation_id;
       break;
@@ -890,17 +897,24 @@ serve(async (req) => {
       };
       if (currency === 'usd' || currency === 'aoa') accountRow.currency = currency;
       // Primeira conta do utilizador: capital inicial = saldo inicial do relatório.
-      const { data: existingAccount } = await supabase
+      const { data: existingAccount, error: accountErr } = await supabase
         .from('capital_accounts')
         .select('user_id')
         .eq('user_id', user_id)
         .maybeSingle();
+      // Sem este erro, uma falha de leitura tornava existingAccount nulo, o
+      // codigo achava que era a primeira conta e escrevia capital = start por
+      // cima do saldo que o utilizador ja tinha. Uma falha de rede destruia o
+      // capital de alguem.
+      if (accountErr) return errorJson(accountErr.message, 500);
       if (!existingAccount) accountRow.capital = start;
 
       const { error: upsertError } = await supabase
         .from('capital_accounts')
         .upsert(accountRow, { onConflict: 'user_id', ignoreDuplicates: false });
-      if (upsertError) console.error('admin-manage: falha ao atualizar capital_accounts', upsertError.message);
+      // Antes era so console.error e a resposta de sucesso na mesma, portanto o
+      // admin via "publicado" com o capital por escrever.
+      if (upsertError) return errorJson(upsertError.message, 500);
 
       const fmt = (currency === 'aoa')
         ? `${Math.round(profit).toLocaleString('pt-PT')} Kz`
@@ -1106,23 +1120,26 @@ serve(async (req) => {
       const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
       const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString();
 
-      const { data: thisMonthReceipts } = await supabase
+      const { data: thisMonthReceipts, error: thisErr } = await supabase
         .from('payment_receipts')
         .select('amount, currency, plan')
         .eq('status', 'approved')
         .gte('created_at', startOfMonth);
+      if (thisErr) return errorJson(thisErr.message, 500);
 
-      const { data: lastMonthReceipts } = await supabase
+      const { data: lastMonthReceipts, error: lastErr } = await supabase
         .from('payment_receipts')
         .select('amount, currency, plan')
         .eq('status', 'approved')
         .gte('created_at', startOfLastMonth)
         .lt('created_at', startOfMonth);
+      if (lastErr) return errorJson(lastErr.message, 500);
 
-      const { data: pendingWithdrawals } = await supabase
+      const { data: pendingWithdrawals, error: withdrawalsErr } = await supabase
         .from('withdrawal_requests')
         .select('amount, currency')
         .eq('status', 'pending');
+      if (withdrawalsErr) return errorJson(withdrawalsErr.message, 500);
 
       const sumByPlan = (receipts: any[]) => {
         const byPlan: Record<string, number> = {};
@@ -1178,15 +1195,30 @@ serve(async (req) => {
     case 'act_on_report': {
       const { id, delete_message } = body;
       if (!id) return errorJson('id em falta.');
-      const { data: report } = await supabase.from('message_reports').select('message_id').eq('id', id).single();
-      if (report && delete_message) {
-        await supabase.from('messages').update({ deleted_at: new Date().toISOString() }).eq('id', report.message_id);
+      const { data: report, error: reportErr } = await supabase
+        .from('message_reports').select('message_id').eq('id', id).maybeSingle();
+      if (reportErr) return errorJson(reportErr.message, 500);
+      if (!report) return errorJson('Denúncia não encontrada.', 404);
+
+      // A mensagem e apagada ANTES de a denuncia ser marcada, e o erro nao e
+      // engolido. Ao contrario, uma falha deixava a denuncia marcada como
+      // tratada com a mensagem ainda visivel -- estado incoerente que nao se
+      // desfaz sozinho, porque ninguem volta a ver a denuncia como pendente.
+      let messageDeleted = false;
+      if (delete_message) {
+        const { error: delErr } = await supabase
+          .from('messages').update({ deleted_at: new Date().toISOString() }).eq('id', report.message_id);
+        if (delErr) return errorJson(delErr.message, 500);
+        messageDeleted = true;
       }
+
       const { error } = await supabase.from('message_reports').update({
         status: 'acted', reviewed_by: user.id, reviewed_at: new Date().toISOString(),
       }).eq('id', id);
       if (error) return errorJson(error.message, 500);
-      return json({ ok: true, message_deleted: !!delete_message });
+      // Reflete o que aconteceu, nao o que foi pedido: com o erro engolido
+      // acima, isto dizia "apagada" a um admin cuja mensagem continuava viva.
+      return json({ ok: true, message_deleted: messageDeleted });
     }
     case 'report_count': {
       const { count, error } = await supabase
@@ -1215,10 +1247,21 @@ serve(async (req) => {
     case 'delete_channel': {
       const { id } = body;
       if (!id) return errorJson('id em falta.');
-      const { data: ch } = await supabase.from('channels').select('name, type').eq('id', id).single();
-      if (ch?.type === 'pair') return errorJson('Pair rooms são geridos automaticamente.');
+      // maybeSingle e nao single: single() devolve erro tambem quando o canal
+      // nao existe, e entao um "nao encontrado" seria reportado como 500. Com
+      // maybeSingle o erro e so do banco, e `ch` nulo significa mesmo
+      // inexistente -- distincao que este caso precisa.
+      const { data: ch, error: chErr } = await supabase
+        .from('channels').select('name, type').eq('id', id).maybeSingle();
+      // Sem esta linha os dois guardas abaixo passam por vacuidade quando a
+      // leitura falha: ch fica nulo, ch?.type nao e 'pair' e ch?.name nao
+      // entra na lista. O canal de sistema apagava-se por causa de uma falha
+      // de rede, que e o oposto do que estes guardas existem para impedir.
+      if (chErr) return errorJson(chErr.message, 500);
+      if (!ch) return errorJson('Canal não encontrado.', 404);
+      if (ch.type === 'pair') return errorJson('Pair rooms são geridos automaticamente.');
       const systemNames = ['geral', 'sinais', 'duvidas', 'resultados', 'off-topic'];
-      if (systemNames.includes(ch?.name)) return errorJson('Canais do sistema não podem ser apagados.');
+      if (systemNames.includes(ch.name)) return errorJson('Canais do sistema não podem ser apagados.');
       const { error } = await supabase.from('channels').delete().eq('id', id);
       if (error) return errorJson(error.message, 500);
       return json({ ok: true });
@@ -1226,7 +1269,9 @@ serve(async (req) => {
     case 'toggle_channel_premium': {
       const { id } = body;
       if (!id) return errorJson('id em falta.');
-      const { data: ch } = await supabase.from('channels').select('is_premium').eq('id', id).single();
+      const { data: ch, error: chErr } = await supabase
+        .from('channels').select('is_premium').eq('id', id).maybeSingle();
+      if (chErr) return errorJson(chErr.message, 500);
       if (!ch) return errorJson('Canal não encontrado.', 404);
       const { error } = await supabase.from('channels').update({ is_premium: !ch.is_premium }).eq('id', id);
       if (error) return errorJson(error.message, 500);
