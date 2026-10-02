@@ -148,8 +148,10 @@ divergirem, **o código ganha** — reconfirma antes de decidir.
 3. **Cobertura de i18n desigual** — a web não tem chaves em falta, mas ainda tem valores
    por traduzir (56 a 293 por idioma).
 4. **A documentação em `RESUMO/` ficou atrás** o que descreve o mobile como futuro.
-5. **Duas árvores `supabase/` divergentes** — a raiz (20 migrations) e `mobile/supabase/`
-   (40 migrations). Decidir qual é a autoritativa.
+5. **Duas árvores `supabase/` divergentes** — a raiz (20 migrations, 5 edge functions) e
+   `mobile/supabase/` (43 migrations, 7 edge functions). A do mobile é a mais recente e a
+   que reflecte o estado actual; a da raiz está parada. Falta decidir qual é a
+   autoritativa e apagar a outra.
 6. **O cron de fecho de sinais nunca correu** — falta a `service_role_key` em
    `app_config`. É um `INSERT` manual, não código. Ver `RESUMO-PROJETO.md` secção 9.
 
