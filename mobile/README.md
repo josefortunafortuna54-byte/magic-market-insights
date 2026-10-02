@@ -46,7 +46,7 @@ gerado e está no `.gitignore` — nunca o commites à mão.
 | `src/hooks/` | Hooks de domínio (`useAuth`, `useTheme`, `usePresence`, …) |
 | `src/lib/` | Clientes (Supabase, auth, Stripe) e o i18n |
 | `src/services/` | Chamadas de rede e Realtime |
-| `supabase/` | **A árvore autoritativa do backend.** 43 migrations + 7 edge functions |
+| `supabase/` | **A árvore autoritativa do backend.** 45 migrations + 7 edge functions |
 
 > A raiz do repositório também tem `supabase/`, mas está desactualizada (20 migrations) e
 > divergiu desta. Usa **esta**. A dívida está registada no `README.md` da raiz.
@@ -90,7 +90,7 @@ trigger com `service_role` a partir do cliente.
 
 ## Base de dados
 
-`supabase/migrations/` — 43 migrations, aplicadas por ordem de nome. As três últimas
+`supabase/migrations/` — 45 migrations, aplicadas por ordem de nome. As cinco últimas
 relevantes para a auth:
 
 | Migration | O que faz |
@@ -98,6 +98,8 @@ relevantes para a auth:
 | `20261001000000_lock_down_user_profiles_role.sql` | Impede um utilizador de escrever o próprio `role` |
 | `20261002000000_username_auth.sql` | Coluna `username`, unicidade, trigger de escrita, rate-limit |
 | `20261003000000_verify_user_password.sql` | `verify_user_password`: compara senha em SQL, devolve só booleano |
+| `20261004000000_atomic_username_rate_limit.sql` | Contador de tentativas em SQL com `FOR UPDATE` — o `FOR UPDATE` é o que torna o rate limit real |
+| `20261005000000_username_reserve_wa.sql` | Reserva `wa` + dígitos no `CHECK` de username, para não colidir com emails de WhatsApp |
 
 **Edge functions** (`supabase/functions/`): `admin-manage`, `ai-support`, `close-signals`,
 `generate-crypto-signals`, `send-notification`, `username-auth`, `whatsapp-auth`.
