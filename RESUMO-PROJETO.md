@@ -300,14 +300,16 @@ fundindo com `merge-i18n.cjs --mobile <loc>.m`. Só se funde depois de `--check`
    **Verificado depois da fusão:** `mobile/supabase/` sozinha, desde uma BD vazia, aplica
    **60/60**, cria 35 tabelas e tem as 13 de que a app depende. A árvore é auto-suficiente.
 
-   **⚠️ As edge functions — parcialmente resolvidas.** A raiz tem 5 funções e o mobile 7.
+   **✅ As edge functions — resolvidas (2026-10-03).** A raiz tinha 5 funções e o mobile 7;
+   o mobile tem agora **9**, e cada função da raiz tem destino decidido.
+
    **Feito:** `stripe-checkout` e `stripe-webhook` foram trazidas para
    `mobile/supabase/functions/`, adaptadas à convenção da árvore destino — import
    `jsr:@supabase/supabase-js@2` em vez do `cdn.jsdelivr.net` sem versão, e `SUPABASE_*`
    com fallback para `PROJECT_URL`/`ANON_KEY`. `mobile/src/lib/env.ts` deixou de depender
    da raiz para o caminho de pagamento.
 
-   **Em aberto, e é uma decisão de comportamento:**
+   **Nas que divergiam, o mobile é o vencedor:**
 
    - **`admin-manage` — o mobile ganha, com folga.** 1198 linhas contra 660, e a versão
      do mobile tem correções explícitas para erros do PostgREST que a da raiz engole
