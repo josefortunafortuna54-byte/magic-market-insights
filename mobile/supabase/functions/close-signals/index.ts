@@ -4,6 +4,7 @@
 
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 import { serve } from 'https://deno.land/std@0.224.0/http/server.ts';
+import { decideClose, pipsOf, riskRewardOf } from '../_shared/close-decision.ts';
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
 const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
@@ -214,46 +215,22 @@ serve(async (req) => {
       }
     }
 
-    // ── Um sinal fecha uma vez so ──
-    // TP/SL tem precedencia sobre a expiracao: se o preco tocou o alvo, o sinal
-    // chegou ao alvo. Antes estes dois blocos eram `if` independentes e um sinal
-    // que cumpria os dois escrevia duas linhas em `signal_outcomes` — o status
-    // final ficava por corrida e o win-rate era corrompido.
-    let newStatus: string | null = null;
-
-    if (currentStatus === 'active') {
-      if (type === 'BUY') {
-        if (price >= tp) newStatus = 'tp';
-        else if (price <= sl) newStatus = 'sl';
-      } else if (type === 'SELL') {
-        if (price <= tp) newStatus = 'tp';
-        else if (price >= sl) newStatus = 'sl';
-      }
-    }
-
-    // `expires_at` e a unica fonte de verdade sobre expiracao. Nao usar a regra
-    // chapada de 48h que a raiz tinha: `nextExpiry` da por timeframe (M15 +4h,
-    // D1 +3 dias) e salta para segunda as 05:00 UTC, logo 48h expiraria H4 e D1
-    // antes da hora e cerraria sinais de fim-de-semana ainda dentro da janela.
-    if (!newStatus && signal.expires_at && new Date(signal.expires_at) < new Date()) {
-      newStatus = 'expired';
-    }
-
-    if (!newStatus) continue;
-
-    const finalStatus = newStatus;
-    const isExpired = finalStatus === 'expired';
-    const norm = normalizeSymbol(signal.symbol);
-    const pipMult = norm.includes('JPY') || norm.includes('XAU') ? 100 : 10000;
-    const riskReward = Math.abs(tp - entry) / Math.abs(entry - sl || 1);
-    const pipsResult = isExpired
-      ? 0
-      : (finalStatus === 'tp' ? Math.abs(tp - entry) : -Math.abs(sl - entry)) * pipMult;
+    const outcome = decideClose({
+      signalType: type,
+      price,
+      entry,
+      sl,
+      tp,
+      currentStatus,
+      expiresAt: signal.expires_at,
+      now: new Date(),
+    });
+    if (!outcome) continue;
 
     updates.push(
       supabase
         .from('signals')
-        .update({ status: finalStatus })
+        .update({ status: outcome })
         .eq('id', signal.id)
         .then(async (res) => {
           if (!res.error) {
@@ -269,9 +246,9 @@ serve(async (req) => {
               exit_price: price,
               stop_loss: sl,
               target_price: tp,
-              result: finalStatus,
-              pips_result: Math.round(pipsResult * 10) / 10,
-              risk_reward: Math.round(riskReward * 100) / 100,
+              result: outcome,
+              pips_result: pipsOf(outcome, entry, sl, tp, String(signal.symbol)),
+              risk_reward: Math.round(riskRewardOf(entry, sl, tp) * 100) / 100,
               confidence: signal.confidence,
               tech_score: null,
               closed_at: new Date().toISOString(),

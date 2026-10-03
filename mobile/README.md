@@ -25,7 +25,7 @@ O `start` dá development build, emulador Android, simulador iOS, ou Expo Go. A 
 |---|---|
 | `npx expo start` | Servidor de desenvolvimento |
 | `npx expo run:android` / `run:ios` | Build nativo de desenvolvimento |
-| `npm test` | Jest — 11 suites, 103 testes |
+| `npm test` | Jest — 12 suites, 123 testes |
 | `npx tsc --noEmit` | Typecheck |
 | `npm run lint` | `expo lint` |
 
@@ -52,8 +52,9 @@ gerado e está no `.gitignore` — nunca o commites à mão.
 > passou a 45 → 60 e **reconstrói a base de dados sozinha** (verificado por replay: 60/60).
 > As funções `stripe-checkout` e `stripe-webhook` também foram trazidas da raiz em
 > 2026-10-03, por `src/lib/env.ts` chamar `stripe-checkout`: o caminho de pagamento do
-> mobile deixou de depender da raiz. Resta decidir o destino de `generate-signal`, que é
-> código morto. A dívida está registada no `README.md` da raiz.
+> mobile deixou de depender da raiz. `generate-signal` e `_shared/admin.ts` na raiz
+> ficaram classificados como código morto — nada os invoca. A árvore da raiz é mantida
+> de propósito, por agora; a dívida está registada no `README.md` da raiz.
 
 ---
 

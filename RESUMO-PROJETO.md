@@ -182,7 +182,8 @@ convertido". Está errado e desatualizado.** O mobile tem **33 ecrãs**, 82 comp
   effect, deep links (`expo-share-intent`, esquema `magictrader`).
 - **Build:** `eas.json` com perfis development / preview / production,
   `projectId 112173d7-48e2-4d95-9c98-abd9f16be18a`, `bundleIdentifier com.magictrader.app`.
-- **Testes:** `mobile/src/{app,components,core,lib}` — **11 suites, 103 testes, todos a passar**
+- **Testes:** `mobile/src/{app,components,core,lib}` e `mobile/supabase/functions/_shared`
+  — **12 suites, 123 testes, todos a passar**
   (com `npx jest`; ver dívida técnica abaixo).
 - **Nota de convenção:** `mobile/AGENTS.md` manda ler
   `https://docs.expo.dev/versions/v56.0.0/` antes de escrever código — o Expo 56 é
@@ -259,7 +260,7 @@ fundindo com `merge-i18n.cjs --mobile <loc>.m`. Só se funde depois de `--check`
 | App mobile | **Funcional** — 33 ecrãs, push, áudio, câmaras, EAS configurado, checkout Stripe |
 | Supabase | 25 tabelas com RLS, 4 buckets, **duas árvores de migrations** (ver dívida 8) |
 | Pagamentos | Stripe no mobile; manual em Kwanzas na web e no mobile |
-| Testes | 103 testes mobile, todos a passar (`npm test` em `mobile/`) |
+| Testes | 123 testes mobile, todos a passar (`npm test` em `mobile/`) |
 | i18n | 14 locales nos dois apps; **onda M do mobile fechada** (13 idiomas, 3 562 chaves) |
 
 ### Dívida conhecida
@@ -400,8 +401,17 @@ fundindo com `merge-i18n.cjs --mobile <loc>.m`. Só se funde depois de `--check`
      blocos de TP/SL e de expiração eram `if` independentes. Um sinal que cumprisse os
      dois escrevia **duas** linhas em `signal_outcomes` e disparava **duas** actualizações
      para a mesma linha — o status final ficava por corrida e o win-rate era corrompido.
-     Passou a haver uma única decisão: TP/SL tem precedência, a expiração só entra se não
-     houve TP/SL, e um sinal fecha exactamente uma vez.
+Passou a haver uma única decisão: TP/SL tem precedência, a expiração só entra se não
+      houve TP/SL, e um sinal fecha exactamente uma vez.
+    - **A decisão passou a ser código testado.** A lógica de fecho foi extraída para
+      `mobile/supabase/functions/_shared/close-decision.ts` — sem Deno, sem rede, sem base
+      de dados — e o `index.ts` passou a ser o único que escreve. `decideClose` devolve um
+      outcome ou `null`, pelo que já não é *escrevível* devolver dois: o bug do fecho duplo
+      deixa de poder voltar por construção, não por disciplina.
+      Os testes (20, em `close-decision.test.ts`) cobriram também um segundo bug, este de
+      robustez: `decideClose` devolvia `expired` para um sinal em estado terminal. A query
+      só traz `active`/`pending`, mas se alargar o filtro teria re-fechado um sinal já
+      fechado. Passou a haver uma guarda de estados fecháveis.
    - **Não portado de propósito:** a janela de graça `hoursOld < 2` da raiz. Ignoraria TP/SL
      legítimos nos primeiros 2h de um sinal, o que num timeframe curto é perder fechos
      reais.
@@ -424,7 +434,7 @@ fundindo com `merge-i18n.cjs --mobile <loc>.m`. Só se funde depois de `--check`
 
      O que **está** verde e deve continuar: `deno check` nas 9 edge functions do mobile,
      **uma por passagem** (0 erros cada; em lote a mistura `jsr:`/`npm:` produz 13 erros
-     falsos), `npx tsc --noEmit` na raiz e no mobile, e os 103 testes do mobile. Como não há CI
+     falsos), `npx tsc --noEmit` na raiz e no mobile, e os 123 testes do mobile. Como não há CI
     (dívida 1), vale correr os três à mão antes de dar por fechado um bloco de trabalho.
 
 ---
