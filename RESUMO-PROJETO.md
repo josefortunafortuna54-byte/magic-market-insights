@@ -319,9 +319,22 @@ fundindo com `merge-i18n.cjs --mobile <loc>.m`. Só se funde depois de `--check`
      rejeitada por ser incompatível com a janela por timeframe. Ver a tabela abaixo.
    - **`generate-signal` (640 linhas) é código morto.** Nada a invoca: nenhum caller, e o
      `pg_cron` chama `generate-crypto-signals` via `cron_generate_signals()`. Os
-     indicadores da função do mobile são um superconjunto. Falta decidir o destino.
+     indicadores da função do mobile são um superconjunto.
    - **`supabase/functions/_shared/admin.ts` (37 linhas) também é código morto** — não é
      importado por nenhuma função.
+
+   **⚠️ A árvore `supabase/` da raiz é mantida de propósito, por agora.** Decisão de
+   2026-10-03. **Não** a apagar sem antes confirmar no dashboard que a versão *mobile* é a
+   que está deployed: as duas árvores fazem deploy ao **mesmo projecto**
+   (`zwxplzdadgtiohnuotlu`), portanto eliminar a fonte errada deixa de ter referência ao
+   código que produção corre, e esta máquina não tem acesso ao dashboard.
+
+   Todo o conteúdo da raiz está resolvido ou classificado acima, por isso mantê-la já não
+   custa correcção — custa **drift**: duas fontes para as mesmas funções. Foi exactamente o
+   drift que produziu o diagnóstico errado de `close-signals` que este documento carregava.
+   Antes de apagar, confirmar no dashboard que `admin-manage`, `close-signals`,
+   `stripe-checkout` e `stripe-webhook` em produção são as versões de
+   `mobile/supabase/functions/`. Aí a raiz pode ir toda, `_shared` incluído.
 
    **Verificado a 2026-10-03 por replay de PGlite** (Postgres 17 in-process; `pg_cron`,
    `pg_net` e `alter system` removidos, `auth.*`/Storage/roles stubados). A união das duas

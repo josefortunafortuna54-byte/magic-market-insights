@@ -168,8 +168,13 @@ divergirem, **o código ganha** — reconfirma antes de decidir.
    mobile já cobre isso. A fusão corrigiu também um bug do mobile: um sinal que tocava TP
    *e* já passado `expires_at` escrevia duas linhas em `signal_outcomes` e disparava duas
    actualizações para a mesma linha, corrompendo o win-rate. `generate-signal` (640 linhas)
-   e `_shared/admin.ts` (37 linhas) na raiz são código morto: nada os invoca. Detalhe e
-   evidência em `RESUMO-PROJETO.md` secção 8, dívida 8.
+   e `_shared/admin.ts` (37 linhas) na raiz são código morto: nada os invoca.
+   **A árvore `supabase/` da raiz mantém-se de propósito.** Todas as funções têm destino
+   decidido, mas apagá-la exige confirmar no dashboard que a versão *mobile* é a que está
+   deployed — as duas árvores fazem deploy ao mesmo projecto, e eliminar a fonte errada
+   deixa de ter referência ao código que produção corre. O que fica é o **drift**: duas
+   fontes para as mesmas funções. Detalhe e evidência em `RESUMO-PROJETO.md` secção 8,
+   dívida 8.
 6. **O cron de fecho de sinais nunca correu** — falta a `service_role_key` em
    `app_config`. É um `INSERT` manual, não código. Ver `RESUMO-PROJETO.md` secção 9.
 
