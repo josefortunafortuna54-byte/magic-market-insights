@@ -226,6 +226,10 @@ CREATE TABLE IF NOT EXISTS public.subscriptions (
   stripe_customer_id TEXT,
   stripe_subscription_id TEXT,
   status TEXT DEFAULT 'inactive',
+  -- Não apagar: parece redundante com `status`, mas get_user_plan() lê esta
+  -- coluna. Só era adicionada em 20260822000000, com timestamp posterior ao de
+  -- quem a lê — invertia a ordem numa árvore fundida e reproduzida do zero.
+  plan TEXT,
   current_period_end TIMESTAMP WITH TIME ZONE,
   created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
   updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
