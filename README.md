@@ -160,12 +160,16 @@ divergirem, **o código ganha** — reconfirma antes de decidir.
    `src/lib/env.ts` chamar `stripe-checkout` — o mobile já não depende da raiz para pagar.
    O mobile tem 9 funções e a raiz 5. Em `admin-manage` **o mobile ganha com folga** (1198
    linhas contra 660, com correções para erros do PostgREST que a da raiz engole).
-   **Em `close-signals` nenhuma ganha e nenhuma é subconjunto da outra**: o mobile tem
-   `pending`→`active`, `signal_outcomes`, `expires_at` e Twelve Data; a raiz tem a expiração
-   48h→`expired` e o relatório `skipped` para sinais sem preço. É uma **fusão de
-   comportamento**, não uma cópia de ficheiros, e é a decisão que fica em aberto.
-   `generate-signal` (640 linhas) e `_shared/admin.ts` (37 linhas) na raiz são código morto:
-   nada os invoca. Detalhe e evidência em `RESUMO-PROJETO.md` secção 8, dívida 8.
+   **Em `close-signals` o mobile ganhou no todo, e a raiz foi fundida onde acrescenta.**
+   Portado: o relatório `skipped`, que na raiz devolvia `{symbol, id, motivo}` e no mobile
+   era um `continue` silencioso — o sinal desaparecia sem rasto. Rejeitado: a expiração
+   chapada de 48h da raiz, porque a janela **não é chapada** — `nextExpiry` dá D1 +3 dias e
+   salta para segunda 05:00 UTC, logo 48h expiraria H4 e D1 antes da hora. O `expires_at` do
+   mobile já cobre isso. A fusão corrigiu também um bug do mobile: um sinal que tocava TP
+   *e* já passado `expires_at` escrevia duas linhas em `signal_outcomes` e disparava duas
+   actualizações para a mesma linha, corrompendo o win-rate. `generate-signal` (640 linhas)
+   e `_shared/admin.ts` (37 linhas) na raiz são código morto: nada os invoca. Detalhe e
+   evidência em `RESUMO-PROJETO.md` secção 8, dívida 8.
 6. **O cron de fecho de sinais nunca correu** — falta a `service_role_key` em
    `app_config`. É um `INSERT` manual, não código. Ver `RESUMO-PROJETO.md` secção 9.
 

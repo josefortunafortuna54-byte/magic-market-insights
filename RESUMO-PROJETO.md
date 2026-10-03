@@ -313,7 +313,8 @@ fundindo com `merge-i18n.cjs --mobile <loc>.m`. Só se funde depois de `--check`
      do mobile tem correções explícitas para erros do PostgREST que a da raiz engole
      (`subsErr`, `tokensErr`, `membersErr`, `accountErr`, `existingErr`), cada uma com o
      comentário que explica o bug de produção que causou. Não há o que reconciliar.
-   - **`close-signals` — nenhuma ganha.** Ver a tabela abaixo.
+   - **`close-signals` — resolvida.** O mobile absorveu o `skipped`; a expiração de 48h foi
+     rejeitada por ser incompatível com a janela por timeframe. Ver a tabela abaixo.
    - **`generate-signal` (640 linhas) é código morto.** Nada a invoca: nenhum caller, e o
      `pg_cron` chama `generate-crypto-signals` via `cron_generate_signals()`. Os
      indicadores da função do mobile são um superconjunto. Falta decidir o destino.
@@ -355,7 +356,7 @@ fundindo com `merge-i18n.cjs --mobile <loc>.m`. Só se funde depois de `--check`
    linhas 87-88 manda explicitamente não a reintroduzir, porque comparar um sinal contra um
    preço de 2024 fabricava resultados. Esse defeito já foi corrigido na raiz.
 
-   O que separa as duas versões **agora** é o contrário do que se supunha:
+   O que separava as duas versões **antes** da fusão era o contrário do que se supunha:
 
    | | Raiz | Mobile |
    |---|---|---|
@@ -366,9 +367,29 @@ fundindo com `merge-i18n.cjs --mobile <loc>.m`. Só se funde depois de `--check`
    | Expiração 48h → `expired` | **sim** | não |
    | Reporta sinal sem preço (`skipped`) | **sim** | não — `continue` silencioso |
 
-   Ou seja: o mobile tem mais funcionalidades, mas a raiz tem melhor observabilidade.
-   **Nenhuma é estritamente melhor e nenhuma é subconjunto da outra** — o que faz desta uma
-   fusão de comportamento, não uma cópia de ficheiros. É a decisão que fica em aberto.
+   **✅ `close-signals` resolvida (2026-10-03).** O mobile ganhou no todo, e a raiz foi
+   fundida **onde acrescenta** e rejeitada **onde contraria**:
+
+   - **Portado:** o relatório `skipped`. A raiz devolvia `{symbol, id, motivo}`; o mobile
+     fazia `continue` e o sinal desaparecia sem rasto. Agora a resposta traz
+     `skipped`/`skippedDetalhe`, e o motivo distingue "as fontes não responderam" de
+     "não há fonte para este símbolo". `skipped` **não** é escrito como `status`: o
+     `signals_status_check` só admite `pending|active|tp|sl|expired`.
+   - **Rejeitado: a expiração de 48h.** A janela de expiração **não é chapada** — é por
+     timeframe. `nextExpiry` dá M15 +4h, M30 +6h, H1 +12h, H4 +1 dia, D1 +3 dias, e aos
+     fins-de-semana salta para segunda 05:00 UTC; o backfill de `20260823120000` usa
+     M5 2h → H4 72h. Um "expired às 48h" **expiraria H4 e D1 antes da hora** e cerraria
+     sinais de sexta-feira que ainda estão dentro da janela. O `expires_at` do mobile já
+     cobre isto correctamente e é a única fonte de verdade.
+   - **Bug pré-existente corrigido de passagem:** `currentStatus` é o status original e os
+     blocos de TP/SL e de expiração eram `if` independentes. Um sinal que cumprisse os
+     dois escrevia **duas** linhas em `signal_outcomes` e disparava **duas** actualizações
+     para a mesma linha — o status final ficava por corrida e o win-rate era corrompido.
+     Passou a haver uma única decisão: TP/SL tem precedência, a expiração só entra se não
+     houve TP/SL, e um sinal fecha exactamente uma vez.
+   - **Não portado de propósito:** a janela de graça `hoursOld < 2` da raiz. Ignoraria TP/SL
+     legítimos nos primeiros 2h de um sinal, o que num timeframe curto é perder fechos
+     reais.
 
 9. **⚠️ O cron de fecho de sinais nunca correu.** A cadeia existe e está agendada
    (`close-signals-every-30min` → `cron_close_signals()` → `call_edge_function()`), mas
