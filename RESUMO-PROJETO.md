@@ -56,9 +56,11 @@ TMT/
 │   ├── src/core/                 # lógica pura: pips, capital, gating, booms, markets, theme
 │   ├── src/lib/                  # supabase, i18n (14 locales), adminApi, community
 │   ├── src/services/             # economicCalendar
-│   ├── supabase/                 # BACKEND AUTORITATIVO: 6 functions, 40 migrations
+│   ├── supabase/                 # BACKEND AUTORITATIVO: 7 functions, 60 migrations
 │   └── AGENTS.md                 # nota: ler docs versionadas do Expo antes de codificar
-├── supabase/                     # CÓPIA DESACTUALIZADA: 5 functions, 20 migrations
+├── supabase/                     # 5 functions, 20 migrations — TODAS as migrations já
+│                                 # foram fundidas no mobile; a raiz só subsiste pelas 3
+│                                 # edge functions que o mobile não tem (ver secção 8)
 ├── scripts/                      # ferramentas de i18n (ver secção 7)
 ├── docs/design/                  # mockups do redesign
 ├── RESUMO/                       # 4 ficheiros detalhados (parcialmente desatualizados)
@@ -280,36 +282,38 @@ fundindo com `merge-i18n.cjs --mobile <loc>.m`. Só se funde depois de `--check`
 6. **Documentação:** `RESUMO/01`–`04` descrevem o mobile como futuro — superado.
 7. **Divergência web/mobile a vigiar:** os dois apps evoluem em paralelo e a documentação
    em `RESUMO/` já ficou atrás uma vez. Confirma o código antes de confiar nela.
-8. **⚠️ Duas árvores `supabase/` divergentes — e a da raiz NÃO é a descartável.**
+8. **⚠️ Duas árvores `supabase/` — as migrations foram fundidas, as edge functions não.**
    A raiz tem 20 migrations (20260112 → 20260922) e 5 edge functions; `mobile/supabase/`
-   tem 45 migrations (20260814 → 20261005) e 7 functions. **Nenhuma das duas é completa, e
-   a do mobile é a incompleta.** Medido a 2026-10-02: existem **9 tabelas que só a raiz
-   cria** — `boom_hours`, `boom_times`, `boom_votes`, `boom_comments`, `payment_requests`,
-   `whatsapp_subscriptions`, `admins`, `posts`, `subscriptions` — e o mobile **nunca as
-   cria em lado nenhum**. As migrations do mobile só lhes aplicam `create policy` e
+   tem agora **60 migrations** (20260112 → 20261005) e 7 functions.
+
+   **✅ As migrations estão resolvidas (2026-10-03).** As 15 migrations só-da-raiz foram
+   copiadas para `mobile/supabase/` com os **timestamps preservados** — 45 → 60. O que
+   faltava era isto: `mobile/supabase/` **não reconstruía a base de dados**, porque existem
+   **9 tabelas que só a raiz criava** — `boom_hours`, `boom_times`, `boom_votes`,
+   `boom_comments`, `payment_requests`, `whatsapp_subscriptions`, `admins`, `posts`,
+   `subscriptions` — e as migrations do mobile só lhes aplicavam `create policy` e
    `enable RLS`, que é a assinatura de "a tabela já existe, a política é acrescentada".
+   Medido por execução, as 45 migrations do mobile sozinhas a uma BD vazia falhavam **22**,
+   em cascata desde `subscriptions` em diante — o que apagava `BoomCard`, `BoomHourCard`,
+   `useBoomSocial`, `useSubscription`, o fluxo de pagamento manual e o painel de admin.
 
-   **Consequência: apagar a raiz, ou publicar só a árvore do mobile, destrói 9 tabelas de
-   que a app depende** (`BoomCard`, `BoomHourCard`, `useBoomSocial`, `useSubscription`, o
-   fluxo de pagamento manual, o painel de admin). O `mobile/supabase/` **não reconstrói
-   uma base de dados a partir do zero** — precisa que alguém aplique a raiz primeiro.
-   Confirmado por execução a 2026-10-03: as 45 migrations do mobile aplicadas sozinhas a uma
-   BD vazia falham **22**, em cascata, desde `subscriptions` em diante.
+   **Verificado depois da fusão:** `mobile/supabase/` sozinha, desde uma BD vazia, aplica
+   **60/60**, cria 35 tabelas e tem as 13 de que a app depende. A árvore é auto-suficiente.
 
-   **⚠️ E as edge functions invertem o mesmo padrão — 3 só existem na raiz:**
-   `stripe-checkout`, `stripe-webhook` e `generate-signal`. As outras 2 da raiz
-   (`admin-manage`, `close-signals`) divergem das do mobile, e o mobile tem 5 que a raiz
-   não tem. Isto **não é cosmético**: `mobile/src/lib/env.ts` chama
+   **⚠️ Falta a mesma coisa, pela metade, nas edge functions.** A raiz tem 5 funções e o
+   mobile 7, e **3 só existem na raiz** — `stripe-checkout`, `stripe-webhook` e
+   `generate-signal`. As outras 2 da raiz (`admin-manage`, `close-signals`) divergem das do
+   mobile. Isto **não é cosmético**: `mobile/src/lib/env.ts` chama
    `${SUPABASE_URL}/functions/v1/stripe-checkout`, e essa função **não está na árvore do
-   mobile** — o app mobile depende hoje de uma função que vive na raiz. Portanto
-   **fundir só as migrations não torna a raiz dispensável**; a fusão tem de incluir as
-   edge functions, ou o caminho de pagamento Stripe do mobile parte.
+   mobile** — o caminho de pagamento Stripe do mobile depende hoje de uma função da raiz.
+   **Portanto a raiz ainda não pode ser apagada**, mesmo com as migrations já fundidas.
 
-   Isto inverte a recomendação que aqui estava escrita ("a do mobile é a autoritativa,
-   decide e apaga a outra").Segue a ordem real das dependências: a raiz vai de
-   20260112, o mobile só começa a 20260814, e há sobreposição entre 20260821–20260922 onde
-   as duas escrevem no mesmo schema. **A resolução é fundir as 15 migrations só-da-raiz para
-   dentro de `mobile/supabase/`, e só depois considerar a raiz descartável.**
+   **O próximo passo, em uma frase:** trazer as 3 funções raiz-only para
+   `mobile/supabase/functions/` e resolver as 2 divergentes, decidindo qual versão
+   sobrevive. O `mobile/` deve ser o vencedor em `admin-manage` e `close-signals` — a versão
+   da raiz já foi diagnosticada como errada antes (regra "48h → `sl`" e preços fictícios de
+   2024 na `close-signals`, contra `expired` + Twelve Data no mobile) — mas isso é uma
+   decisão sobre código em produção, não uma cópia mecânica de ficheiros.
 
    **Verificado a 2026-10-03 por replay de PGlite** (Postgres 17 in-process; `pg_cron`,
    `pg_net` e `alter system` removidos, `auth.*`/Storage/roles stubados). A união das duas

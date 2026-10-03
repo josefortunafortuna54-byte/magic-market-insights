@@ -46,10 +46,14 @@ gerado e está no `.gitignore` — nunca o commites à mão.
 | `src/hooks/` | Hooks de domínio (`useAuth`, `useTheme`, `usePresence`, …) |
 | `src/lib/` | Clientes (Supabase, auth, Stripe) e o i18n |
 | `src/services/` | Chamadas de rede e Realtime |
-| `supabase/` | **A árvore autoritativa do backend.** 45 migrations + 7 edge functions |
+| `supabase/` | **A árvore autoritativa do backend.** 60 migrations + 7 edge functions |
 
-> A raiz do repositório também tem `supabase/`, mas está desactualizada (20 migrations) e
-> divergiu desta. Usa **esta**. A dívida está registada no `README.md` da raiz.
+> As 20 migrations da raiz do repositório foram fundidas aqui em 2026-10-03: esta árvore
+> passou a 45 → 60 e **reconstrói a base de dados sozinha** (verificado por replay: 60/60).
+> A raiz ainda é necessária, mas **só por causa de 3 edge functions que só existem lá** —
+> `stripe-checkout`, `stripe-webhook` e `generate-signal`. A `stripe-checkout` é chamada por
+> `src/lib/env.ts`, portanto o caminho de pagamento do mobile depende dela. A dívida está
+> registada no `README.md` da raiz.
 
 ---
 
@@ -90,7 +94,7 @@ trigger com `service_role` a partir do cliente.
 
 ## Base de dados
 
-`supabase/migrations/` — 45 migrations, aplicadas por ordem de nome. As cinco últimas
+`supabase/migrations/` — 60 migrations, aplicadas por ordem de nome. As cinco últimas
 relevantes para a auth:
 
 | Migration | O que faz |

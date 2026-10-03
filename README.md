@@ -148,17 +148,19 @@ divergirem, **o código ganha** — reconfirma antes de decidir.
 3. **Cobertura de i18n desigual** — a web não tem chaves em falta, mas ainda tem valores
    por traduzir (56 a 293 por idioma).
 4. **A documentação em `RESUMO/` ficou atrás** o que descreve o mobile como futuro.
-5. **Duas árvores `supabase/` divergentes — e a da raiz NÃO é a descartável** — a raiz
-   (20 migrations, 5 edge functions) e `mobile/supabase/` (45 migrations, 7 edge
-   functions). A do mobile é a mais recente na auth, mas **não reconstrói a base de dados**:
-   há **9 tabelas que só a raiz cria** (`boom_hours`, `boom_times`, `boom_votes`,
-   `boom_comments`, `payment_requests`, `whatsapp_subscriptions`, `admins`, `posts`,
-   `subscriptions`) e o mobile só lhes acrescenta políticas de RLS. **Apagar a raiz destrói
-   essas 9 tabelas.** E **3 edge functions só existem na raiz** — `stripe-checkout`,
-   `stripe-webhook` e `generate-signal` — das quais o app mobile chama `stripe-checkout`
-   (`mobile/src/lib/env.ts`). A resolução é o inverso do que aqui estava: fundir as 15
-   migrations só-da-raiz para o mobile, e só depois a raiz fica dispensável. O replay da
-   árvore fundida foi verificado e passa 60/60. Detalhe e evidência em
+5. **⚠️ Duas árvores `supabase/` — as migrations já foram fundidas, as edge functions não.**
+   As 20 migrations da raiz foram copiadas para `mobile/supabase/` em 2026-10-03, com os
+   timestamps preservados. A árvore mobile passou de 45 para **60 migrations** e **já
+   reconstrói a base de dados sozinha** — verificado por replay desde uma BD vazia: 60/60,
+   35 tabelas, as 13 de que a app depende presentes, 0 colunas perdidas. Era o que faltava:
+   a raiz criava **9 tabelas** que o mobile não criava em lado nenhum, e as 45 migrations do
+   mobile sozinhas falhavam 22.
+   **O que falta é o mesmo pela metade nas edge functions.** A raiz tem 5 funções, o mobile
+   tem 7, e **3 só existem na raiz** — `stripe-checkout`, `stripe-webhook` e
+   `generate-signal`. `mobile/src/lib/env.ts` chama `stripe-checkout`, que o mobile não
+   define: **o caminho de pagamento do mobile depende hoje de uma função da raiz.** As outras
+   duas da raiz (`admin-manage`, `close-signals`) divergem das do mobile. Portanto **a raiz
+   ainda não pode ser apagada**, mesmo com as migrations já fundidas. Detalhe e evidência em
    `RESUMO-PROJETO.md` secção 8, dívida 8.
 6. **O cron de fecho de sinais nunca correu** — falta a `service_role_key` em
    `app_config`. É um `INSERT` manual, não código. Ver `RESUMO-PROJETO.md` secção 9.
