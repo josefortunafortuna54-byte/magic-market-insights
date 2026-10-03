@@ -281,7 +281,7 @@ fundindo com `merge-i18n.cjs --mobile <loc>.m`. Só se funde depois de `--check`
 7. **Divergência web/mobile a vigiar:** os dois apps evoluem em paralelo e a documentação
    em `RESUMO/` já ficou atrás uma vez. Confirma o código antes de confiar nela.
 8. **⚠️ Duas árvores `supabase/` divergentes — e a da raiz NÃO é a descartável.**
-   A raiz tem 20 migrations (20260112 → 20260922) e 6 edge functions; `mobile/supabase/`
+   A raiz tem 20 migrations (20260112 → 20260922) e 5 edge functions; `mobile/supabase/`
    tem 45 migrations (20260814 → 20261005) e 7 functions. **Nenhuma das duas é completa, e
    a do mobile é a incompleta.** Medido a 2026-10-02: existem **9 tabelas que só a raiz
    cria** — `boom_hours`, `boom_times`, `boom_votes`, `boom_comments`, `payment_requests`,
@@ -293,14 +293,51 @@ fundindo com `merge-i18n.cjs --mobile <loc>.m`. Só se funde depois de `--check`
    que a app depende** (`BoomCard`, `BoomHourCard`, `useBoomSocial`, `useSubscription`, o
    fluxo de pagamento manual, o painel de admin). O `mobile/supabase/` **não reconstrói
    uma base de dados a partir do zero** — precisa que alguém aplique a raiz primeiro.
+   Confirmado por execução a 2026-10-03: as 45 migrations do mobile aplicadas sozinhas a uma
+   BD vazia falham **22**, em cascata, desde `subscriptions` em diante.
+
+   **⚠️ E as edge functions invertem o mesmo padrão — 3 só existem na raiz:**
+   `stripe-checkout`, `stripe-webhook` e `generate-signal`. As outras 2 da raiz
+   (`admin-manage`, `close-signals`) divergem das do mobile, e o mobile tem 5 que a raiz
+   não tem. Isto **não é cosmético**: `mobile/src/lib/env.ts` chama
+   `${SUPABASE_URL}/functions/v1/stripe-checkout`, e essa função **não está na árvore do
+   mobile** — o app mobile depende hoje de uma função que vive na raiz. Portanto
+   **fundir só as migrations não torna a raiz dispensável**; a fusão tem de incluir as
+   edge functions, ou o caminho de pagamento Stripe do mobile parte.
 
    Isto inverte a recomendação que aqui estava escrita ("a do mobile é a autoritativa,
    decide e apaga a outra").Segue a ordem real das dependências: a raiz vai de
    20260112, o mobile só começa a 20260814, e há sobreposição entre 20260821–20260922 onde
-   as duas escrevem no mesmo schema. **A resolução é fundir as 14 migrations só-da-raiz para
-   dentro de `mobile/supabase/`, renumeradas, e só depois considerar a raiz descartável.**
-   Isso exige uma base de dados de teste para verificar, que este repositório ainda não
-   tem — daí a dívida ficar aberta em vez de ser feita às cegas.
+   as duas escrevem no mesmo schema. **A resolução é fundir as 15 migrations só-da-raiz para
+   dentro de `mobile/supabase/`, e só depois considerar a raiz descartável.**
+
+   **Verificado a 2026-10-03 por replay de PGlite** (Postgres 17 in-process; `pg_cron`,
+   `pg_net` e `alter system` removidos, `auth.*`/Storage/roles stubados). A união das duas
+   árvores dá **60 migrations** (20 + 45 − 5 partilhadas, byte-idênticas) e **aplika 60/60
+   por ordem de timestamp**, com as 13 tabelas de que a app depende presentes. Verificar só
+   a ordem "raiz toda, depois mobile toda" daria um falso verde: a ordem real de uma fusão
+   intercala as duas árvores por timestamp, e nesse entrelaço uma dependência está invertida.
+
+   **Uma inversão de ordem encontrada e corrigida.** `subscriptions.plan` era lida por
+   `get_user_plan()` em `20260818120000_plan_rls_enforcement.sql`, mas só era adicionada por
+   `20260822000000_receipts_withdrawals_admin.sql` — timestamp **posterior**. Na BD ao vivo
+   isso não aparece, porque `plan` já existia no schema antigo; numa árvore fundida e
+   reproduzida do zero, `get_user_plan()` não criava e levava consigo as 3 migrations
+   seguintes. A coluna passou a nascer em `20260123000003_create_missing_tables.sql`, que é
+   onde `subscriptions` é criada. Replay: 60/60.
+
+   **Sem perda silenciosa de colunas.** 14 tabelas são criadas nas duas árvores; 3 divergem
+   (`signals`, `payment_receipts`, `withdrawal_requests`). Um `create table if not exists`
+   repetido é um no-op sem erro, por isso uma divergência destas **não aparece num teste
+   verde** — só aparece comparando o schema resultante com o que o código declara. Feito isso:
+   **0 colunas declaradas em qualquer das árvores se perdem.** As colunas que faltam na
+   definição mais pobre chegam depois por `alter table ... add column if not exists`.
+
+   O que a verificação **não** cobre: RLS efectivo, triggers, concorrência, Auth/Storage/
+   Realtime reais, e o job de `pg_cron`. E a aplicação das 15 sobre a BD **ao vivo** continua
+   por confirmar — o schema legado acumulado não é reproduzível a partir das migrations, e
+   esta máquina não tem Docker (WSL2 ausente, `HypervisorPresent: False`) nem acesso ao
+   dashboard. É recommendável aplicar primeiro numa base de teste.
 
    O que está deployed é a união das duas. Isto já causou um diagnóstico errado: a
    `close-signals` da raiz tinha a regra "48h → `sl`" e uma tabela de preços fictícios de

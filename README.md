@@ -149,13 +149,16 @@ divergirem, **o código ganha** — reconfirma antes de decidir.
    por traduzir (56 a 293 por idioma).
 4. **A documentação em `RESUMO/` ficou atrás** o que descreve o mobile como futuro.
 5. **Duas árvores `supabase/` divergentes — e a da raiz NÃO é a descartável** — a raiz
-   (20 migrations, 6 edge functions) e `mobile/supabase/` (45 migrations, 7 edge
+   (20 migrations, 5 edge functions) e `mobile/supabase/` (45 migrations, 7 edge
    functions). A do mobile é a mais recente na auth, mas **não reconstrói a base de dados**:
    há **9 tabelas que só a raiz cria** (`boom_hours`, `boom_times`, `boom_votes`,
    `boom_comments`, `payment_requests`, `whatsapp_subscriptions`, `admins`, `posts`,
    `subscriptions`) e o mobile só lhes acrescenta políticas de RLS. **Apagar a raiz destrói
-   essas 9 tabelas.** A resolução é o inverso do que aqui estava: fundir as 14 migrations
-   só-da-raiz para o mobile, e só depois a raiz fica dispensável. Detalhe e evidência em
+   essas 9 tabelas.** E **3 edge functions só existem na raiz** — `stripe-checkout`,
+   `stripe-webhook` e `generate-signal` — das quais o app mobile chama `stripe-checkout`
+   (`mobile/src/lib/env.ts`). A resolução é o inverso do que aqui estava: fundir as 15
+   migrations só-da-raiz para o mobile, e só depois a raiz fica dispensável. O replay da
+   árvore fundida foi verificado e passa 60/60. Detalhe e evidência em
    `RESUMO-PROJETO.md` secção 8, dívida 8.
 6. **O cron de fecho de sinais nunca correu** — falta a `service_role_key` em
    `app_config`. É um `INSERT` manual, não código. Ver `RESUMO-PROJETO.md` secção 9.
