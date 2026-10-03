@@ -116,6 +116,13 @@ async function fetchCurrentPrice(symbol: string): Promise<number | null> {
   return fetchForexPrice(symbol);
 }
 
+function hasKnownSource(symbol: string): boolean {
+  const norm = normalizeSymbol(symbol);
+  if (CRYPTO_SYMBOLS[norm]) return true;
+  if (TWELVE_DATA_SYMBOLS[norm] && TWELVE_DATA_KEY) return true;
+  return Boolean(FOREX_PAIRS[norm]);
+}
+
 // ── Admin check ─────────────────────────────────────────────────────────────
 
 async function verifyAdmin(req: Request) {
@@ -155,18 +162,30 @@ serve(async (req) => {
     .in('status', ['active', 'pending']);
 
   if (fetchError) return errorJson(fetchError.message, 500);
-  if (!signals || signals.length === 0) return json({ closed: 0, activated: 0 });
+  if (!signals || signals.length === 0) {
+    return json({ closed: 0, activated: 0, skipped: 0, skippedDetalhe: [] });
+  }
 
   let closed = 0;
   let activated = 0;
   // PromiseLike e nao Promise: o query builder do supabase-js e thenable, mas
   // nao implementa `catch`/`finally`. `Promise.all` aceita qualquer
-  // `Iterable<PromiseLike>`, por isso o consumo na linha 289 nao muda.
+  // `Iterable<PromiseLike>`, por isso o consumo no fim do loop nao muda.
   const updates: PromiseLike<{ error: unknown }>[] = [];
+  const skipped: { symbol: string; id: string; motivo: string }[] = [];
 
   for (const signal of signals) {
     const price = await fetchCurrentPrice(signal.symbol);
-    if (price === null) continue;
+    if (price === null) {
+      skipped.push({
+        symbol: String(signal.symbol),
+        id: signal.id,
+        motivo: hasKnownSource(signal.symbol)
+          ? 'as fontes de preco nao responderam'
+          : 'nao ha fonte de preco para este simbolo',
+      });
+      continue;
+    }
 
     const entry = Number(signal.entry_price);
     const sl = Number(signal.stop_loss);
@@ -195,10 +214,14 @@ serve(async (req) => {
       }
     }
 
-    // ── SINAL ATIVO: verificar TP/SL ──
-    if (currentStatus === 'active') {
-      let newStatus: string | null = null;
+    // ── Um sinal fecha uma vez so ──
+    // TP/SL tem precedencia sobre a expiracao: se o preco tocou o alvo, o sinal
+    // chegou ao alvo. Antes estes dois blocos eram `if` independentes e um sinal
+    // que cumpria os dois escrevia duas linhas em `signal_outcomes` — o status
+    // final ficava por corrida e o win-rate era corrompido.
+    let newStatus: string | null = null;
 
+    if (currentStatus === 'active') {
       if (type === 'BUY') {
         if (price >= tp) newStatus = 'tp';
         else if (price <= sl) newStatus = 'sl';
@@ -206,91 +229,66 @@ serve(async (req) => {
         if (price <= tp) newStatus = 'tp';
         else if (price >= sl) newStatus = 'sl';
       }
-
-      if (newStatus) {
-        updates.push(
-          supabase
-            .from('signals')
-            .update({ status: newStatus })
-            .eq('id', signal.id)
-            .then(async (res) => {
-              if (!res.error) {
-                closed++;
-                // Record outcome
-                const riskReward = Math.abs(tp - entry) / Math.abs(entry - sl || 1);
-                const pipMult = normalizeSymbol(signal.symbol).includes('JPY') || normalizeSymbol(signal.symbol).includes('XAU') ? 100 : 10000;
-                const pipsResult = newStatus === 'tp'
-                  ? Math.abs(tp - entry) * pipMult
-                  : -Math.abs(sl - entry) * pipMult;
-                await supabase.from('signal_outcomes').insert({
-                  signal_id: signal.id,
-                  symbol: signal.symbol,
-                  timeframe: signal.timeframe,
-                  signal_type: signal.signal_type,
-                  smc_setup: signal.smc_setup || null,
-                  session_name: null,
-                  entry_price: entry,
-                  exit_price: price,
-                  stop_loss: sl,
-                  target_price: tp,
-                  result: newStatus,
-                  pips_result: Math.round(pipsResult * 10) / 10,
-                  risk_reward: Math.round(riskReward * 100) / 100,
-                  confidence: signal.confidence,
-                  tech_score: null,
-                  closed_at: new Date().toISOString(),
-                });
-              }
-              return res;
-            }),
-        );
-      }
     }
 
-    // ── SINAL EXPIRADO: verificar expires_at ──
-    if (currentStatus === 'active' || currentStatus === 'pending') {
-      if (signal.expires_at && new Date(signal.expires_at) < new Date()) {
-        // Record outcome before expiring
-        const riskReward = Math.abs(tp - entry) / Math.abs(entry - sl || 1);
-        const pipMult = normalizeSymbol(signal.symbol).includes('JPY') || normalizeSymbol(signal.symbol).includes('XAU') ? 100 : 10000;
-        const pipsResult = type === 'BUY'
-          ? (Number(signal.entry_price) - Number(signal.entry_price)) * pipMult  // 0 for expired
-          : 0;
-        updates.push(
-          supabase.from('signals').update({ status: 'expired' }).eq('id', signal.id)
-            .then(async (res) => {
-              if (!res.error) {
-                closed++;
-                // Insert outcome record
-                await supabase.from('signal_outcomes').insert({
-                  signal_id: signal.id,
-                  symbol: signal.symbol,
-                  timeframe: signal.timeframe,
-                  signal_type: signal.signal_type,
-                  smc_setup: signal.smc_setup || null,
-                  session_name: null,
-                  entry_price: signal.entry_price,
-                  exit_price: price,
-                  stop_loss: signal.stop_loss,
-                  target_price: signal.target_price,
-                  result: 'expired',
-                  pips_result: 0,
-                  risk_reward: riskReward,
-                  confidence: signal.confidence,
-                  tech_score: null,
-                  closed_at: new Date().toISOString(),
-                });
-              }
-              return res;
-            }),
-        );
-        continue;
-      }
+    // `expires_at` e a unica fonte de verdade sobre expiracao. Nao usar a regra
+    // chapada de 48h que a raiz tinha: `nextExpiry` da por timeframe (M15 +4h,
+    // D1 +3 dias) e salta para segunda as 05:00 UTC, logo 48h expiraria H4 e D1
+    // antes da hora e cerraria sinais de fim-de-semana ainda dentro da janela.
+    if (!newStatus && signal.expires_at && new Date(signal.expires_at) < new Date()) {
+      newStatus = 'expired';
     }
+
+    if (!newStatus) continue;
+
+    const finalStatus = newStatus;
+    const isExpired = finalStatus === 'expired';
+    const norm = normalizeSymbol(signal.symbol);
+    const pipMult = norm.includes('JPY') || norm.includes('XAU') ? 100 : 10000;
+    const riskReward = Math.abs(tp - entry) / Math.abs(entry - sl || 1);
+    const pipsResult = isExpired
+      ? 0
+      : (finalStatus === 'tp' ? Math.abs(tp - entry) : -Math.abs(sl - entry)) * pipMult;
+
+    updates.push(
+      supabase
+        .from('signals')
+        .update({ status: finalStatus })
+        .eq('id', signal.id)
+        .then(async (res) => {
+          if (!res.error) {
+            closed++;
+            await supabase.from('signal_outcomes').insert({
+              signal_id: signal.id,
+              symbol: signal.symbol,
+              timeframe: signal.timeframe,
+              signal_type: signal.signal_type,
+              smc_setup: signal.smc_setup || null,
+              session_name: null,
+              entry_price: entry,
+              exit_price: price,
+              stop_loss: sl,
+              target_price: tp,
+              result: finalStatus,
+              pips_result: Math.round(pipsResult * 10) / 10,
+              risk_reward: Math.round(riskReward * 100) / 100,
+              confidence: signal.confidence,
+              tech_score: null,
+              closed_at: new Date().toISOString(),
+            });
+          }
+          return res;
+        }),
+    );
   }
 
   await Promise.all(updates);
 
-  console.log(`[close-signals] fechados=${closed} ativados=${activated} de ${signals.length} sinais`);
-  return json({ closed, activated });
+  console.log(
+    `[close-signals] fechados=${closed} ativados=${activated} sem preco=${skipped.length} de ${signals.length} sinais`,
+  );
+  if (skipped.length > 0) {
+    console.log('[close-signals] sem preco:', JSON.stringify(skipped));
+  }
+  return json({ closed, activated, skipped: skipped.length, skippedDetalhe: skipped });
 });
