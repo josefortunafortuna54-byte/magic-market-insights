@@ -14,7 +14,7 @@ O projecto tem **duas aplicações completas** e um backend partilhado:
 |---|---|---|---|
 | **Web** | `src/` | React 18 · TypeScript · Vite · Tailwind · shadcn/ui | Vercel |
 | **Mobile** | `mobile/` | Expo SDK 56 · React Native 0.85 · React 19 · Expo Router | EAS |
-| **Backend** | `supabase/` | Postgres + RLS · Auth · Realtime · Storage · 5 Edge Functions | Supabase Cloud |
+| **Backend** | `mobile/supabase/` | Postgres + RLS · Auth · Realtime · Storage · 9 Edge Functions | Supabase Cloud |
 
 ---
 
@@ -155,13 +155,17 @@ divergirem, **o código ganha** — reconfirma antes de decidir.
    35 tabelas, as 13 de que a app depende presentes, 0 colunas perdidas. Era o que faltava:
    a raiz criava **9 tabelas** que o mobile não criava em lado nenhum, e as 45 migrations do
    mobile sozinhas falhavam 22.
-   **O que falta é o mesmo pela metade nas edge functions.** A raiz tem 5 funções, o mobile
-   tem 7, e **3 só existem na raiz** — `stripe-checkout`, `stripe-webhook` e
-   `generate-signal`. `mobile/src/lib/env.ts` chama `stripe-checkout`, que o mobile não
-   define: **o caminho de pagamento do mobile depende hoje de uma função da raiz.** As outras
-   duas da raiz (`admin-manage`, `close-signals`) divergem das do mobile. Portanto **a raiz
-   ainda não pode ser apagada**, mesmo com as migrations já fundidas. Detalhe e evidência em
-   `RESUMO-PROJETO.md` secção 8, dívida 8.
+   **Nas edge functions, o caminho de pagamento já está resolvido.** `stripe-checkout` e
+   `stripe-webhook` foram trazidas para `mobile/supabase/functions/` em 2026-10-03, por
+   `src/lib/env.ts` chamar `stripe-checkout` — o mobile já não depende da raiz para pagar.
+   O mobile tem 9 funções e a raiz 5. Em `admin-manage` **o mobile ganha com folga** (1198
+   linhas contra 660, com correções para erros do PostgREST que a da raiz engole).
+   **Em `close-signals` nenhuma ganha e nenhuma é subconjunto da outra**: o mobile tem
+   `pending`→`active`, `signal_outcomes`, `expires_at` e Twelve Data; a raiz tem a expiração
+   48h→`expired` e o relatório `skipped` para sinais sem preço. É uma **fusão de
+   comportamento**, não uma cópia de ficheiros, e é a decisão que fica em aberto.
+   `generate-signal` (640 linhas) e `_shared/admin.ts` (37 linhas) na raiz são código morto:
+   nada os invoca. Detalhe e evidência em `RESUMO-PROJETO.md` secção 8, dívida 8.
 6. **O cron de fecho de sinais nunca correu** — falta a `service_role_key` em
    `app_config`. É um `INSERT` manual, não código. Ver `RESUMO-PROJETO.md` secção 9.
 

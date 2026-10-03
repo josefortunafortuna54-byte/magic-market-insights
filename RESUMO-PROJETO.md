@@ -56,7 +56,7 @@ TMT/
 │   ├── src/core/                 # lógica pura: pips, capital, gating, booms, markets, theme
 │   ├── src/lib/                  # supabase, i18n (14 locales), adminApi, community
 │   ├── src/services/             # economicCalendar
-│   ├── supabase/                 # BACKEND AUTORITATIVO: 7 functions, 60 migrations
+│   ├── supabase/                 # BACKEND AUTORITATIVO: 9 functions, 60 migrations
 │   └── AGENTS.md                 # nota: ler docs versionadas do Expo antes de codificar
 ├── supabase/                     # 5 functions, 20 migrations — TODAS as migrations já
 │                                 # foram fundidas no mobile; a raiz só subsiste pelas 3
@@ -284,7 +284,7 @@ fundindo com `merge-i18n.cjs --mobile <loc>.m`. Só se funde depois de `--check`
    em `RESUMO/` já ficou atrás uma vez. Confirma o código antes de confiar nela.
 8. **⚠️ Duas árvores `supabase/` — as migrations foram fundidas, as edge functions não.**
    A raiz tem 20 migrations (20260112 → 20260922) e 5 edge functions; `mobile/supabase/`
-   tem agora **60 migrations** (20260112 → 20261005) e 7 functions.
+   tem agora **60 migrations** (20260112 → 20261005) e 9 functions.
 
    **✅ As migrations estão resolvidas (2026-10-03).** As 15 migrations só-da-raiz foram
    copiadas para `mobile/supabase/` com os **timestamps preservados** — 45 → 60. O que
@@ -300,20 +300,25 @@ fundindo com `merge-i18n.cjs --mobile <loc>.m`. Só se funde depois de `--check`
    **Verificado depois da fusão:** `mobile/supabase/` sozinha, desde uma BD vazia, aplica
    **60/60**, cria 35 tabelas e tem as 13 de que a app depende. A árvore é auto-suficiente.
 
-   **⚠️ Falta a mesma coisa, pela metade, nas edge functions.** A raiz tem 5 funções e o
-   mobile 7, e **3 só existem na raiz** — `stripe-checkout`, `stripe-webhook` e
-   `generate-signal`. As outras 2 da raiz (`admin-manage`, `close-signals`) divergem das do
-   mobile. Isto **não é cosmético**: `mobile/src/lib/env.ts` chama
-   `${SUPABASE_URL}/functions/v1/stripe-checkout`, e essa função **não está na árvore do
-   mobile** — o caminho de pagamento Stripe do mobile depende hoje de uma função da raiz.
-   **Portanto a raiz ainda não pode ser apagada**, mesmo com as migrations já fundidas.
+   **⚠️ As edge functions — parcialmente resolvidas.** A raiz tem 5 funções e o mobile 7.
+   **Feito:** `stripe-checkout` e `stripe-webhook` foram trazidas para
+   `mobile/supabase/functions/`, adaptadas à convenção da árvore destino — import
+   `jsr:@supabase/supabase-js@2` em vez do `cdn.jsdelivr.net` sem versão, e `SUPABASE_*`
+   com fallback para `PROJECT_URL`/`ANON_KEY`. `mobile/src/lib/env.ts` deixou de depender
+   da raiz para o caminho de pagamento.
 
-   **O próximo passo, em uma frase:** trazer as 3 funções raiz-only para
-   `mobile/supabase/functions/` e resolver as 2 divergentes, decidindo qual versão
-   sobrevive. O `mobile/` deve ser o vencedor em `admin-manage` e `close-signals` — a versão
-   da raiz já foi diagnosticada como errada antes (regra "48h → `sl`" e preços fictícios de
-   2024 na `close-signals`, contra `expired` + Twelve Data no mobile) — mas isso é uma
-   decisão sobre código em produção, não uma cópia mecânica de ficheiros.
+   **Em aberto, e é uma decisão de comportamento:**
+
+   - **`admin-manage` — o mobile ganha, com folga.** 1198 linhas contra 660, e a versão
+     do mobile tem correções explícitas para erros do PostgREST que a da raiz engole
+     (`subsErr`, `tokensErr`, `membersErr`, `accountErr`, `existingErr`), cada uma com o
+     comentário que explica o bug de produção que causou. Não há o que reconciliar.
+   - **`close-signals` — nenhuma ganha.** Ver a tabela abaixo.
+   - **`generate-signal` (640 linhas) é código morto.** Nada a invoca: nenhum caller, e o
+     `pg_cron` chama `generate-crypto-signals` via `cron_generate_signals()`. Os
+     indicadores da função do mobile são um superconjunto. Falta decidir o destino.
+   - **`supabase/functions/_shared/admin.ts` (37 linhas) também é código morto** — não é
+     importado por nenhuma função.
 
    **Verificado a 2026-10-03 por replay de PGlite** (Postgres 17 in-process; `pg_cron`,
    `pg_net` e `alter system` removidos, `auth.*`/Storage/roles stubados). A união das duas
@@ -343,10 +348,28 @@ fundindo com `merge-i18n.cjs --mobile <loc>.m`. Só se funde depois de `--check`
    esta máquina não tem Docker (WSL2 ausente, `HypervisorPresent: False`) nem acesso ao
    dashboard. É recommendável aplicar primeiro numa base de teste.
 
-   O que está deployed é a união das duas. Isto já causou um diagnóstico errado: a
-   `close-signals` da raiz tinha a regra "48h → `sl`" e uma tabela de preços fictícios de
-   2024 que fabricavam resultados, enquanto a versão em `mobile/` já usava `expired` e
-   Twelve Data.
+   O que está deployed é a união das duas, e é por isso que as duas `close-signals`
+   divergiram sem que nada as juntasse. **A diferença real, verificada linha a linha em
+   2026-10-03, não é a que este documento afirmava antes.** A `close-signals` da raiz **já usa
+   `expired`** (linhas 116-118) e **já não tem tabela de preços fictícios** — o comentário nas
+   linhas 87-88 manda explicitamente não a reintroduzir, porque comparar um sinal contra um
+   preço de 2024 fabricava resultados. Esse defeito já foi corrigido na raiz.
+
+   O que separa as duas versões **agora** é o contrário do que se supunha:
+
+   | | Raiz | Mobile |
+   |---|---|---|
+   | `pending` → `active` dentro de 0.15% do entry | não | **sim** |
+   | Regista em `signal_outcomes` (win-rate) | não | **sim** |
+   | Expiração por `expires_at` | não | **sim** |
+   | Preços | CoinGecko, Frankfurter | **Binance, Twelve Data**, Frankfurter |
+   | Expiração 48h → `expired` | **sim** | não |
+   | Reporta sinal sem preço (`skipped`) | **sim** | não — `continue` silencioso |
+
+   Ou seja: o mobile tem mais funcionalidades, mas a raiz tem melhor observabilidade.
+   **Nenhuma é estritamente melhor e nenhuma é subconjunto da outra** — o que faz desta uma
+   fusão de comportamento, não uma cópia de ficheiros. É a decisão que fica em aberto.
+
 9. **⚠️ O cron de fecho de sinais nunca correu.** A cadeia existe e está agendada
    (`close-signals-every-30min` → `cron_close_signals()` → `call_edge_function()`), mas
    `call_edge_function()` lê a `service_role_key` de `public.app_config` e, se estiver
@@ -363,8 +386,9 @@ fundindo com `merge-i18n.cjs --mobile <loc>.m`. Só se funde depois de `--check`
     contratos de tipos à mão em admin, pagamentos e hooks com quase **nenhuma cobertura
     de testes** — daí não ter sido feito numa passada cega.
 
-    O que **está** verde e deve continuar: `deno check` nas 7 edge functions (0 erros),
-    `npx tsc --noEmit` na raiz e no mobile, e os 103 testes do mobile. Como não há CI
+     O que **está** verde e deve continuar: `deno check` nas 9 edge functions do mobile,
+     **uma por passagem** (0 erros cada; em lote a mistura `jsr:`/`npm:` produz 13 erros
+     falsos), `npx tsc --noEmit` na raiz e no mobile, e os 103 testes do mobile. Como não há CI
     (dívida 1), vale correr os três à mão antes de dar por fechado um bloco de trabalho.
 
 ---

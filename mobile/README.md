@@ -46,14 +46,14 @@ gerado e está no `.gitignore` — nunca o commites à mão.
 | `src/hooks/` | Hooks de domínio (`useAuth`, `useTheme`, `usePresence`, …) |
 | `src/lib/` | Clientes (Supabase, auth, Stripe) e o i18n |
 | `src/services/` | Chamadas de rede e Realtime |
-| `supabase/` | **A árvore autoritativa do backend.** 60 migrations + 7 edge functions |
+| `supabase/` | **A árvore autoritativa do backend.** 60 migrations + 9 edge functions |
 
 > As 20 migrations da raiz do repositório foram fundidas aqui em 2026-10-03: esta árvore
 > passou a 45 → 60 e **reconstrói a base de dados sozinha** (verificado por replay: 60/60).
-> A raiz ainda é necessária, mas **só por causa de 3 edge functions que só existem lá** —
-> `stripe-checkout`, `stripe-webhook` e `generate-signal`. A `stripe-checkout` é chamada por
-> `src/lib/env.ts`, portanto o caminho de pagamento do mobile depende dela. A dívida está
-> registada no `README.md` da raiz.
+> As funções `stripe-checkout` e `stripe-webhook` também foram trazidas da raiz em
+> 2026-10-03, por `src/lib/env.ts` chamar `stripe-checkout`: o caminho de pagamento do
+> mobile deixou de depender da raiz. Resta decidir o destino de `generate-signal`, que é
+> código morto. A dívida está registada no `README.md` da raiz.
 
 ---
 
@@ -106,7 +106,13 @@ relevantes para a auth:
 | `20261005000000_username_reserve_wa.sql` | Reserva `wa` + dígitos no `CHECK` de username, para não colidir com emails de WhatsApp |
 
 **Edge functions** (`supabase/functions/`): `admin-manage`, `ai-support`, `close-signals`,
-`generate-crypto-signals`, `send-notification`, `username-auth`, `whatsapp-auth`.
+`generate-crypto-signals`, `send-notification`, `stripe-checkout`, `stripe-webhook`,
+`username-auth`, `whatsapp-auth`.
+
+> `deno check` tem de correr **por função**, não em lote: a árvore mistura importadores
+> `jsr:` e `npm:`, e uma passagem única sobre todas faz o `jsr:@supabase/supabase-js@2`
+> resolver para tipos sem `User`, o que produz 13 erros falsos. Isoladas, as 9 dão 0 erros —
+> que é também como o Supabase as empacota no deploy.
 
 A `close-signals` é agendada por `pg_cron` e **nunca correu**: falta a `service_role_key`
 em `app_config`, que é um `INSERT` manual no dashboard. Ver `RESUMO-PROJETO.md` secção 9.
