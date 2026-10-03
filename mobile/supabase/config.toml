@@ -1,4 +1,6 @@
-project_id = "the-magic-trader-mobile"
+# Must equal the value in supabase/config.toml: web and mobile read the same
+# SUPABASE_URL. The previous values in both files were fictional.
+project_id = "zwxplzdadgtiohnuotlu"
 
 [api]
 port = 54321
