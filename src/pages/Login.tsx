@@ -33,10 +33,11 @@ export default function Login() {
       if (error) throw error;
       localStorage.setItem("rememberMe", String(rememberMe));
       navigate("/analises");
-    } catch (err: any) {
-      setError(err.message === "Invalid login credentials"
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      setError(message === "Invalid login credentials"
         ? t('auth.loginError')
-        : err.message);
+        : message);
     } finally {
       setLoading(false);
     }
@@ -53,8 +54,8 @@ export default function Login() {
         },
       });
       if (error) throw error;
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
       setGoogleLoading(false);
     }
   };

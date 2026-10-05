@@ -32,10 +32,11 @@ export default function Registro() {
       });
       if (error) throw error;
       setSuccess(true);
-    } catch (err: any) {
-      setError(err.message === "User already registered"
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      setError(message === "User already registered"
         ? t('auth.emailExists')
-        : err.message);
+        : message);
     } finally {
       setLoading(false);
     }
@@ -50,8 +51,8 @@ export default function Registro() {
         options: { redirectTo: `${window.location.origin}/analises` },
       });
       if (error) throw error;
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
       setGoogleLoading(false);
     }
   };
