@@ -142,8 +142,15 @@ divergirem, **o código ganha** — reconfirma antes de decidir.
 
 ## Dívida técnica conhecida
 
-1. **Sem CI de qualidade.** Não há build, typecheck, lint ou testes em CI. O único
-   workflow (`.github/workflows/close-signals.yml`) é redundante com o `pg_cron` da BD.
+1. **O lint do mobile está fora do CI.** O `npx expo lint` do mobile dá 50 problemas
+   (8 erros, 42 avisos) e por isso não entra no `.github/workflows/ci.yml` — que já corre
+   `tsc` + os 123 testes no mobile, `lint` + `build` na web, e `deno check` nas 9 edge
+   functions, uma por passagem. Os 8 erros não são de estilo: são diagnósticos do React
+   Compiler (`reactCompiler: true` em `mobile/app.json`) sobre mutação de shared values
+   do Reanimated dentro de worklets. Corrigi-los é reestruturar animação por gesto, o que
+   não dá para validar sem dispositivo. Detalhe em `RESUMO-PROJETO.md` secção 8, dívida 10.
+   O `close-signals.yml` não é CI: é o agendamento que chama a edge function, redundante
+   com o `pg_cron` da BD.
 2. **Bundle da web: 1,87 MB (600 kB gzip)**, sem code-splitting.
 3. **Cobertura de i18n desigual** — a web não tem chaves em falta, mas ainda tem valores
    por traduzir (56 a 293 por idioma).

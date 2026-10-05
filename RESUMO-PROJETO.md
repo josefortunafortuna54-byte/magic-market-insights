@@ -264,9 +264,17 @@ fundindo com `merge-i18n.cjs --mobile <loc>.m`. Só se funde depois de `--check`
 | i18n | 14 locales nos dois apps; **onda M do mobile fechada** (13 idiomas, 3 562 chaves) |
 
 ### Dívida conhecida
-1. **Sem CI de qualidade.** **Não há build, typecheck, lint ou testes em CI.** Um bug
-   como a vírgula final em JSON só apareceu porque alguém olhou. O único workflow
-   (`.github/workflows/close-signals.yml`) é redundante com o `pg_cron` da BD.
+1. **CI de qualidade desde 2026-10-04; o que ficou por gating é o lint do mobile.**
+   `.github/workflows/ci.yml` corre em `push` para `main` e em pull request, com três
+   jobs: `tsc` + os 123 testes no mobile, `lint` + `build` na web, e `deno check` **uma
+   função por passagem** nas 9 edge functions. Todos os gates foram validados **sem
+   `.env`**, que é o estado real do runner — o build da web e os testes não dependem de
+   ficheiros locais. O `close-signals.yml` continua a ser apenas o agendamento que chama
+   a edge function, redundante com o `pg_cron` da BD.
+
+   `npx expo lint` do mobile **não** está no CI porque falha hoje com 8 erros que não são
+   de estilo — ver dívida 10. Deixá-lo de fora foi deliberado: pôr no CI um comando que
+   falha só serviria para habituar a ignorar o vermelho.
 2. **`useSubscription.checkout()` na web é um stub:** faz `window.location.href = "/planos"`
    e não chama o Stripe — e nenhum ficheiro em `src/` chega a invocá-lo. Se a web
    precisar de checkout Stripe próprio, esse código ainda não existe.
@@ -422,20 +430,34 @@ fundindo com `merge-i18n.cjs --mobile <loc>.m`. Só se funde depois de `--check`
    vazia, faz `RAISE WARNING` + `RETURN` — o job conta como sucesso e não fecha nada. A
    `service_role_key` nunca foi inserida; a própria migration `20260819040000` documenta
    isso e só emite `WARNING`, que não se vê. **Não é bug de código.** Ver secção 9.
-10. **Dívida de lint, medida em 2026-10-02.** O `npm run lint` da raiz dá **173
-    problemas (140 erros, 33 avisos)** e o do mobile **50 (8 erros, 42 avisos)**. Os
-    140 erros da raiz são quase uma só regra: **106 `@typescript-eslint/no-explicit-any`**,
-    mais 23 `no-require-imports` e 11 `no-empty`. **Não são bugs** — `any` é perda de
-    verificação de tipos, não comportamento errado, e vários `catch {}` são falhas
-    deliberadamente silenciosas (`sounds.ts`, `boomPrefs.ts`). Estão espalhados por ~72
-    ficheiros e a maioria é código anterior à auth. Corrigi-los significa escrever
-    contratos de tipos à mão em admin, pagamentos e hooks com quase **nenhuma cobertura
-    de testes** — daí não ter sido feito numa passada cega.
+10. **Dívida de lint, medida em 2026-10-04.** Antes de haver CI, o `npm run lint` da raiz
+    dava **173 problemas (140 erros, 33 avisos)** — mas esse número media três árvores:
+    o ESLint da raiz varria também `mobile/` e a `supabase/` da raiz, incluindo código
+    Deno que tem gate próprio. O `eslint.config.js` passou a delimitar-se a `src/`, e
+    sobraram **16 avisos e 0 erros** (11 `react-refresh/only-export-components`, 5
+    `react-hooks/exhaustive-deps`).
 
-     O que **está** verde e deve continuar: `deno check` nas 9 edge functions do mobile,
-     **uma por passagem** (0 erros cada; em lote a mistura `jsr:`/`npm:` produz 13 erros
-     falsos), `npx tsc --noEmit` na raiz e no mobile, e os 123 testes do mobile. Como não há CI
-    (dívida 1), vale correr os três à mão antes de dar por fechado um bloco de trabalho.
+    Os 6 erros que restavam na web foram corrigidos: 5 `catch (err: any)` em `Login.tsx`,
+    `Registro.tsx` e `RecuperarSenha.tsx` — que passaram a
+    `err instanceof Error ? err.message : String(err)`, o mesmo padrão que já existia em
+    `SignalDetail.tsx` — e um `require("tailwindcss-animate")` em `tailwind.config.ts`,
+    agora um `import`. Nenhum destes era bug: `any` é perda de verificação de tipos, não
+    comportamento errado, e vários `catch {}` são falhas deliberadamente silenciosas
+    (`sounds.ts`, `boomPrefs.ts`).
+
+    O `npx expo lint` do mobile dá **50 problemas (8 erros, 42 avisos)** e é o motivo de
+    o lint do mobile não estar no CI. Os 8 erros **não são de estilo**: são diagnósticos
+    do React Compiler (`reactCompiler: true` em `mobile/app.json`, React 19.2.3,
+    Reanimated 4.3.1) sobre mutação de shared values dentro de worklets
+    (`scale.value = withSpring(...)` em `AiFab.tsx` e `animations.tsx`). Corrigi-los é
+    reestruturar animação por gesto, e não há aqui dispositivo nem simulador para
+    confirmar que o gesto continua igual. **Fica registado, não corrigido às cegas.**
+
+    O que **está** verde e é gate no CI: `deno check` nas 9 edge functions do mobile,
+    **uma por passagem** (0 erros cada; em lote a mistura `jsr:`/`npm:` produz 13 erros
+    falsos), `npx tsc --noEmit` no mobile, os 123 testes do mobile, e `lint` + `build` da
+    web. Antes do workflow, valia correr tudo à mão antes de dar por fechado um bloco de
+    trabalho — agora é o runner que faz isso em cada `push`.
 
 ---
 
@@ -450,6 +472,11 @@ VALUES ('service_role_key', '<A_TUA_SERVICE_ROLE_KEY>')
 ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value;
 ```
 
+Está isto em `mobile/supabase/manual/ativar_cron_close_signals.sql`, com o mesmo
+`INSERT` e mais três queries de verificação. **É um passo manual por definição:** a chave
+vive no dashboard, não no repositório, e por isso o ficheiro está fora de `migrations/` —
+colocado lá, um replay de BD nova inseria o placeholder como se fosse a chave real.
+
 O `supabase_url` já está preenchido (é público). A `service_role_key` é a mesma que a edge
 function já lê de `Deno.env` — a que está em **Project Settings → API**. Fica na base de
 dados, com o mesmo nível de confiança que o resto do schema, e nunca passa por um
@@ -459,13 +486,15 @@ Depois de correr, confirma que está a funcionar:
 
 ```sql
 -- deve devolver uma linha com status 'succeeded' e data recente
-SELECT jobname, status, start_time FROM cron.job_run_details
-WHERE jobname = 'close-signals-every-30min' ORDER BY start_time DESC LIMIT 5;
+SELECT j.jobname, d.status, d.return_message, d.start_time
+FROM cron.job_run_details d
+JOIN cron.job j ON j.jobid = d.jobid
+WHERE j.jobname = 'close-signals-every-30min'
+ORDER BY d.start_time DESC LIMIT 5;
 ```
 
-Se `status` for `failed`, o erro está em `return_message` da mesma linha. Se o job
-existir mas nunca tiver corrido, o `pg_cron` não está activo — verifica em
-**Database → Extensions**.
+`cron.job_run_details` não tem `jobname` — é `cron.job` que o tem, daí o `JOIN`. A
+`return_message` é onde está a causa quando o `status` não é `succeeded`.
 
 Sem este `INSERT`, a landing mostra `Taxa de Acerto —` e `0 sinais analisados`
 permanentemente, porque nenhum sinal chega a `tp` nem a `sl`.
