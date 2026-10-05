@@ -1,0 +1,113 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Cancelar runs antigos em vez de gastar minutos com commits ja superados.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  mobile:
+    name: Mobile (typecheck + testes)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: mobile/package-lock.json
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Typecheck
+        run: npx tsc --noEmit
+
+      - name: Testes
+        run: npm test -- --ci
+
+  web:
+    name: Web (lint + build)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
+
+  edge-functions:
+    name: Edge functions (deno check)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      # Uma PASSAGEM por funcao. A arvore mistura `jsr:` e `npm:`, e correr
+      # `deno check` sobre as 9 de uma vez faz o `jsr:@supabase/supabase-js@2`
+      # resolver para tipos sem `User`, o que produz 13 erros falsos. Isoladas
+      # dao 0 erros - que e tambem como o Supabase as empacota no deploy.
+      #
+      # `--node-modules-dir=auto` e obrigatorio: sem ele o `npm:stripe` da
+      # stripe-webhook nao resolve. `DENO_NO_PACKAGE_JSON=1` impede o Deno de
+      # tentar ler o package.json do mobile, que esta directorio acima e nao
+      # tem relacao com as edge functions.
+      #
+      # Sem isto, um dia uma funcao nova pode nem ser registada em
+      # config.toml e ninguem da por isso.
+      - name: deno check por funcao
+        env:
+          DENO_NO_PACKAGE_JSON: "1"
+        run: |
+          set -euo pipefail
+          cd mobile/supabase/functions
+          total=0
+          for dir in */; do
+            fn="${dir%/}"
+            [ -f "$fn/index.ts" ] || continue
+            printf '%-26s' "$fn"
+            deno check --node-modules-dir=auto "$fn/index.ts"
+            total=$((total + 1))
+          done
+          echo "::notice::$total funcoes verificadas"
+
+      # Uma funcao assenta no _shared e falha se ele nao compilar. O deno check
+      # acima ja a cobre via `index.ts`, mas um modulo partilhado orfao nao e
+      # apanhado por ninguem.
+      - name: deno check nos modulos partilhados
+        env:
+          DENO_NO_PACKAGE_JSON: "1"
+        working-directory: mobile
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          for f in supabase/functions/_shared/*.ts; do
+            case "$f" in
+              *.test.ts) continue ;;
+            esac
+            printf '%-40s' "$f"
+            deno check --node-modules-dir=auto "$f"
+          done
