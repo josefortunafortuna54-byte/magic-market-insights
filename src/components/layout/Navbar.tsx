@@ -64,7 +64,7 @@ export function Navbar() {
           {/* Logo */}
           <Link to="/" className="flex items-center">
             <img
-              src="/logo-txt.png"
+              src="/logo-tmt.png"
               alt="The Magic Trader"
               className="h-10 w-auto object-contain logo-glow sm:h-12"
             />

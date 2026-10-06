@@ -24,7 +24,7 @@ export function Footer() {
           <div className="md:col-span-2">
             <Link to="/" className="flex items-center mb-4">
               <img
-                src="/logo-txt.png"
+                src="/logo-tmt.png"
                 alt="The Magic Trader"
                 className="h-20 w-auto object-contain logo-glow sm:h-24"
               />
