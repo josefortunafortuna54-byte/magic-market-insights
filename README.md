@@ -157,7 +157,8 @@ divergirem, **o código ganha** — reconfirma antes de decidir.
 4. **A documentação em `RESUMO/` ficou atrás** o que descreve o mobile como futuro.
 5. **⚠️ Duas árvores `supabase/` — as migrations já foram fundidas, as edge functions não.**
    As 20 migrations da raiz foram copiadas para `mobile/supabase/` em 2026-10-03, com os
-   timestamps preservados. A árvore mobile passou de 45 para **60 migrations** e **já
+   timestamps preservados. A árvore mobile passou de 45 para **60 migrations** — hoje 61,
+   com a de timeout de 2026-10-06 — e **já
    reconstrói a base de dados sozinha** — verificado por replay desde uma BD vazia: 60/60,
    35 tabelas, as 13 de que a app depende presentes, 0 colunas perdidas. Era o que faltava:
    a raiz criava **9 tabelas** que o mobile não criava em lado nenhum, e as 45 migrations do
@@ -182,10 +183,12 @@ divergirem, **o código ganha** — reconfirma antes de decidir.
    deixa de ter referência ao código que produção corre. O que fica é o **drift**: duas
    fontes para as mesmas funções. Detalhe e evidência em `RESUMO-PROJETO.md` secção 8,
    dívida 8.
-6. **O cron de fecho de sinais agora corre** — resolvido em 2026-10-06. Eram dois
-   problemas: a chave em `app_config` faltava (e a que se colou primeiro pertencia a
-   outro projecto), e o `verifyAdmin` de `close-signals` comparava o token com o segredo
-   por igualdade de string, valor que nunca coincidia com a chave da API. Ver
-   `RESUMO-PROJETO.md` secção 9.
+6. **O cron de fecho de sinais agora corre** — resolvido em 2026-10-06. Eram quatro
+   problemas: a chave em `app_config` faltava; a que se colou primeiro pertencia a outro
+   projecto; o `verifyAdmin` de `close-signals` comparava o token com o segredo por
+   igualdade de string, valor que nunca coincidia com a chave da API; e
+   `call_edge_function()` chamava `net.http_post` sem `timeout_milliseconds`, pelo que o
+   default de 5000 ms do pg_net cortava a resposta a meio (migration
+   `20261006000000`, limite agora 30 s). Ver `RESUMO-PROJETO.md` secção 9.
 
 O resto está em [`RESUMO-PROJETO.md`](./RESUMO-PROJETO.md) secção 8.

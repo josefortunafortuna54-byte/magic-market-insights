@@ -56,7 +56,7 @@ TMT/
 │   ├── src/core/                 # lógica pura: pips, capital, gating, booms, markets, theme
 │   ├── src/lib/                  # supabase, i18n (14 locales), adminApi, community
 │   ├── src/services/             # economicCalendar
-│   ├── supabase/                 # BACKEND AUTORITATIVO: 9 functions, 60 migrations
+│   ├── supabase/                 # BACKEND AUTORITATIVO: 9 functions, 61 migrations
 │   └── AGENTS.md                 # nota: ler docs versionadas do Expo antes de codificar
 ├── supabase/                     # 5 functions, 20 migrations — TODAS as migrations já
 │                                 # foram fundidas no mobile; a raiz só subsiste pelas 3
@@ -131,9 +131,10 @@ Realtime, Storage, Edge Functions.
 `payment_requests` · `payment_receipts` · `withdrawal_requests`
 
 ### Edge Functions
-⚠ Também duplicadas (ver dívida 8). A raiz tem 5 funções, `mobile/supabase/functions/` tem 6,
-e **nenhuma das duas está completa**: o Stripe só existe na raiz, o `whatsapp-auth`,
-`ai-support` e `send-notification` só no mobile. O que está deployed é a união das duas.
+⚠ Também duplicadas (ver dívida 8). A raiz tem 5 funções, `mobile/supabase/functions/` tem
+**9** — incluindo `stripe-checkout` e `stripe-webhook`, trazidas da raiz em 2026-10-03. Só
+`generate-signal` (código morto) fica apenas na raiz. O que está deployed é a união das
+duas (confirmar no dashboard qual a versão de cada uma — dívida 8).
 
 | Função | Onde | Papel |
 |---|---|---|
@@ -143,12 +144,16 @@ e **nenhuma das duas está completa**: o Stripe só existe na raiz, o `whatsapp-
 | `stripe-checkout` · `stripe-webhook` | raiz | Checkout Session (USD/AOA) e sincronização de subscrições |
 | `admin-manage` | ambas | CRUD admin com revalidação de email no servidor |
 | `whatsapp-auth` · `ai-support` · `send-notification` | mobile | Login por WhatsApp, suporte por IA, push |
+| `username-auth` | mobile | NomeÚnico + senha: `create`, `signin`, `claim` — deployed e testada em 2026-10-06 |
 
 ### Migrations
 ⚠ Também duplicadas (ver dívida 8). A raiz tem 20 (`20260112092032`–`20260922000000`); a
-`mobile/supabase/migrations/` tem **40** e é a que reflecte o schema real. Só a árvore do
-mobile tem `app_config`, `expires_at` em `signals`, `signal_outcomes`, `trade_journal`,
-`store_products`, `ai_quota`, `capital_management` e os crons de geração e expiração.
+`mobile/supabase/migrations/` tem **61** (`20260112092032`–`20261006000000`) e é a que
+reflecte o schema real. Só a árvore do mobile tem `app_config`, `expires_at` em `signals`,
+`signal_outcomes`, `trade_journal`, `store_products`, `ai_quota`, `capital_management` e os
+crons de geração e expiração. **Aplicadas em produção em 2026-10-06 e verificadas:** as 5
+da stack de username (`20261001`–`20261005`) e a de timeout do cron
+(`20261006000000_call_edge_function_timeout`).
 
 ### Storage (4 buckets, todos públicos)
 `posts` · `comments-audio` · `payment-proofs` · `community`
@@ -293,7 +298,7 @@ fundindo com `merge-i18n.cjs --mobile <loc>.m`. Só se funde depois de `--check`
    em `RESUMO/` já ficou atrás uma vez. Confirma o código antes de confiar nela.
 8. **⚠️ Duas árvores `supabase/` — as migrations foram fundidas, as edge functions não.**
    A raiz tem 20 migrations (20260112 → 20260922) e 5 edge functions; `mobile/supabase/`
-   tem agora **60 migrations** (20260112 → 20261005) e 9 functions.
+   tem agora **61 migrations** (20260112 → 20261006) e 9 functions.
 
    **✅ As migrations estão resolvidas (2026-10-03).** As 15 migrations só-da-raiz foram
    copiadas para `mobile/supabase/` com os **timestamps preservados** — 45 → 60. O que
@@ -466,7 +471,7 @@ fundindo com `merge-i18n.cjs --mobile <loc>.m`. Só se funde depois de `--check`
 O job está agendado e activo: `close-signals-every-10min` (jobid 37, `*/10 * * * *` →
 `cron_close_signals()` → `call_edge_function('close-signals')`).
 
-**Estavam dois problemas sobrepostos, e o diagnóstico anterior só via o primeiro.**
+**Estavam quatro problemas sobrepostos, e o diagnóstico anterior só via o primeiro.**
 
 1. **Faltava a chave em `app_config`.** Sem ela, `call_edge_function()` fazia
    `RAISE WARNING` + `RETURN` — nenhuma chamada HTTP, job contava como sucesso. Foi
@@ -483,6 +488,18 @@ O job está agendado e activo: `close-signals-every-10min` (jobid 37, `*/10 * * 
    através do gateway (`GET /rest/v1/` com o token), que verifica a assinatura e o papel
    `service_role` — um JWT forjado não passa (verificado), e a comparação deixa de
    depender de dois valores coincidirem byte a byte.
+4. **O pg_net cortava a resposta aos 5 segundos.** `net.http_post` era chamado sem
+   `timeout_milliseconds`, e o default do pg_net é `5000`: uma função que demorasse mais
+   a responder era abortada à espera do corpo mesmo a funcionar, e o tique ficava sem ver
+   o resultado. A migration `20261006000000_call_edge_function_timeout.sql` passa o limite
+   para `30000`, aplicada em produção em 2026-10-06 e confirmada por
+   `pg_get_functiondef`. A prova é o próprio cron: o tique das 14:40 ainda registou
+   `Timeout of 5000 ms reached`; o das 14:50, já depois da aplicação, devolveu
+   `status_code = 200`, e entre as 14:50 e as 16:50 há 13 registos com 200. Continuam a
+   aparecer timeouts — cinco depois da correção, todos já de `Timeout of 30000 ms`: são
+   funções que não terminam a tempo (fontes de preço a demorar), não o pg_net a cortar a
+   meio. O handler do Deno não é abortado; o que se perde é a observação do resultado.
+   Subir o limite para 60 s é possível, mas é um trade-off — fica registado, não feito.
 
 A prova real não é `cron.job_run_details`: esse dizia `succeeded` enquanto a função
 devolvia 401, porque `net.http_post` **não levanta erro em HTTP**. A prova é o status

@@ -46,10 +46,11 @@ gerado e está no `.gitignore` — nunca o commites à mão.
 | `src/hooks/` | Hooks de domínio (`useAuth`, `useTheme`, `usePresence`, …) |
 | `src/lib/` | Clientes (Supabase, auth, Stripe) e o i18n |
 | `src/services/` | Chamadas de rede e Realtime |
-| `supabase/` | **A árvore autoritativa do backend.** 60 migrations + 9 edge functions |
+| `supabase/` | **A árvore autoritativa do backend.** 61 migrations + 9 edge functions |
 
 > As 20 migrations da raiz do repositório foram fundidas aqui em 2026-10-03: esta árvore
-> passou a 45 → 60 e **reconstrói a base de dados sozinha** (verificado por replay: 60/60).
+> passou a 45 → 60 — hoje **61**, desde a migração de timeout do cron de 2026-10-06 — e
+> **reconstrói a base de dados sozinha** (verificado por replay: 60/60).
 > As funções `stripe-checkout` e `stripe-webhook` também foram trazidas da raiz em
 > 2026-10-03, por `src/lib/env.ts` chamar `stripe-checkout`: o caminho de pagamento do
 > mobile deixou de depender da raiz. `generate-signal` e `_shared/admin.ts` na raiz
@@ -91,12 +92,20 @@ entender antes de mexeres nela:
 escrita por `username-auth` (service_role) — um trigger bloqueia o resto. Não contornes o
 trigger com `service_role` a partir do cliente.
 
+**Em produção desde 2026-10-06:** as cinco migrations de auth estão aplicadas e a
+`username-auth` está deployed. Bateria de testes com a anon key: `GET`→405, corpo
+inválido→400, ação desconhecida→400, password curta→400, `signin` sem password→401,
+`claim` sem sessão→401 — e **zero 500**. A sonda de escalada de `role` foi bloqueada pelo
+trigger (`before=member`, `after=member`), e os RPCs têm `EXECUTE` só para `postgres` e
+`service_role`. O caminho feliz (`create` → `signin` → `claim` com conta real) ficou por
+testar de propósito, para não deixar contas de teste na produção.
+
 ---
 
 ## Base de dados
 
-`supabase/migrations/` — 60 migrations, aplicadas por ordem de nome. As cinco últimas
-relevantes para a auth:
+`supabase/migrations/` — 61 migrations, aplicadas por ordem de nome. As relevantes para a
+auth e para o cron:
 
 | Migration | O que faz |
 |---|---|
@@ -105,6 +114,7 @@ relevantes para a auth:
 | `20261003000000_verify_user_password.sql` | `verify_user_password`: compara senha em SQL, devolve só booleano |
 | `20261004000000_atomic_username_rate_limit.sql` | Contador de tentativas em SQL com `FOR UPDATE` — o `FOR UPDATE` é o que torna o rate limit real |
 | `20261005000000_username_reserve_wa.sql` | Reserva `wa` + dígitos no `CHECK` de username, para não colidir com emails de WhatsApp |
+| `20261006000000_call_edge_function_timeout.sql` | `call_edge_function()` passa a chamar `net.http_post` com `timeout_milliseconds => 30000` — o default de 5000 ms do pg_net cortava a resposta a meio |
 
 **Edge functions** (`supabase/functions/`): `admin-manage`, `ai-support`, `close-signals`,
 `generate-crypto-signals`, `send-notification`, `stripe-checkout`, `stripe-webhook`,
@@ -116,8 +126,10 @@ relevantes para a auth:
 > que é também como o Supabase as empacota no deploy.
 
 A `close-signals` é agendada por `pg_cron` (`close-signals-every-10min`) e **corre de
-facto desde 2026-10-06**, confirmado por `status_code = 200` em
-`net._http_response`. Ver `RESUMO-PROJETO.md` secção 9 — lá está por que o
+facto desde 2026-10-06**, confirmado por `status_code = 200` em `net._http_response` —
+desde que a `20261006000000_call_edge_function_timeout.sql` passasse `net.http_post` a
+`timeout_milliseconds => 30000`: sem isso, o default de 5000 ms do pg_net cortava a
+resposta a meio. Ver `RESUMO-PROJETO.md` secção 9 — lá está por que o
 `status = 'succeeded'` do `cron.job_run_details` não prova nada nesta cadeia.
 
 ---
