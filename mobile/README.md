@@ -115,8 +115,10 @@ relevantes para a auth:
 > resolver para tipos sem `User`, o que produz 13 erros falsos. Isoladas, as 9 dão 0 erros —
 > que é também como o Supabase as empacota no deploy.
 
-A `close-signals` é agendada por `pg_cron` e **nunca correu**: falta a `service_role_key`
-em `app_config`, que é um `INSERT` manual no dashboard. Ver `RESUMO-PROJETO.md` secção 9.
+A `close-signals` é agendada por `pg_cron` (`close-signals-every-10min`) e **corre de
+facto desde 2026-10-06**, confirmado por `status_code = 200` em
+`net._http_response`. Ver `RESUMO-PROJETO.md` secção 9 — lá está por que o
+`status = 'succeeded'` do `cron.job_run_details` não prova nada nesta cadeia.
 
 ---
 

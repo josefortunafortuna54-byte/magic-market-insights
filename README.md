@@ -182,7 +182,10 @@ divergirem, **o código ganha** — reconfirma antes de decidir.
    deixa de ter referência ao código que produção corre. O que fica é o **drift**: duas
    fontes para as mesmas funções. Detalhe e evidência em `RESUMO-PROJETO.md` secção 8,
    dívida 8.
-6. **O cron de fecho de sinais nunca correu** — falta a `service_role_key` em
-   `app_config`. É um `INSERT` manual, não código. Ver `RESUMO-PROJETO.md` secção 9.
+6. **O cron de fecho de sinais agora corre** — resolvido em 2026-10-06. Eram dois
+   problemas: a chave em `app_config` faltava (e a que se colou primeiro pertencia a
+   outro projecto), e o `verifyAdmin` de `close-signals` comparava o token com o segredo
+   por igualdade de string, valor que nunca coincidia com a chave da API. Ver
+   `RESUMO-PROJETO.md` secção 9.
 
 O resto está em [`RESUMO-PROJETO.md`](./RESUMO-PROJETO.md) secção 8.

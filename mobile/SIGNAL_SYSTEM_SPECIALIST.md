@@ -213,7 +213,7 @@ O sistema rastreia performance por:
 
 ### 6.2 Fechamento Automático
 
-- **Cron:** A cada 30 minutos (`close-signals-every-30min`)
+- **Cron:** A cada 10 minutos (`close-signals-every-10min`)
 - **Fonte de preço:** Twelve Data (forex) / Binance (crypto) — preço intradia real
 - **Verificação:** TP/SL + expiração
 

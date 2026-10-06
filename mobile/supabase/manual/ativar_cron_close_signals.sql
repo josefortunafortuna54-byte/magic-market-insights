@@ -75,16 +75,16 @@ WHERE key = 'service_role_key';
 
 SELECT jobid, jobname, schedule, active
 FROM cron.job
-WHERE jobname = 'close-signals-every-30min';
+WHERE jobname = 'close-signals-every-10min';
 
 
 -- ----------------------------------------------------------------------------
 -- 4. Ver o que o job fez da ultima vez.
 --
---    `status = 'succeeded'` com `return_message` a falar de `service_role_key`
---    e o sintoma exacto da chave em falta. A partir do momento em que o
---    passo 1 for executado, o proximo run (ate 30 min) tem de mostrar
---    `return_message = null`.
+--    `status = 'succeeded'` NAO prova nada: `net.http_post` nao levanta erro
+--    quando a funcao devolve 401, logo o job conta como sucesso mesmo quando
+--    nao fez nada. A prova real e o status HTTP que o pg_net guardou:
+--    `net._http_response.status_code` tem de ser 200.
 -- ----------------------------------------------------------------------------
 
 SELECT
@@ -94,6 +94,12 @@ SELECT
   d.start_time
 FROM cron.job_run_details d
 JOIN cron.job j ON j.jobid = d.jobid
-WHERE j.jobname = 'close-signals-every-30min'
+WHERE j.jobname = 'close-signals-every-10min'
 ORDER BY d.runid DESC
+LIMIT 5;
+
+-- Prova real: 200 = a funcao correu; 401 = a chave nao casou com a funcao.
+SELECT id, status_code, substring(content, 1, 160) AS content, created
+FROM net._http_response
+ORDER BY id DESC
 LIMIT 5;

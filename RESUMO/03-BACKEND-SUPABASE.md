@@ -154,7 +154,7 @@ Função Postgres usada pelo Admin para listar utilizadores (nome, email, datas)
 - Chamada pelo Admin (`/admin`) para gerar sinais de 10 símbolos.
 
 ### `close-signals` — encerramento de sinais
-- Cron (ver migrations) chama a cada 30 min (schedule `close-signals-every-30min`).
+- Cron (ver migrations) chama a cada 10 min (schedule `close-signals-every-10min`).
 - Marca sinais `active` como `tp`/`sl` conforme evolução do preço (mock do mercado).
 
 ### `stripe-checkout` — pagamento

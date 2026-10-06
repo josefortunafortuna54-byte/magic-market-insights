@@ -424,8 +424,8 @@ fundindo com `merge-i18n.cjs --mobile <loc>.m`. Só se funde depois de `--check`
      legítimos nos primeiros 2h de um sinal, o que num timeframe curto é perder fechos
      reais.
 
-9. **⚠️ O cron de fecho de sinais nunca correu.** A cadeia existe e está agendada
-   (`close-signals-every-30min` → `cron_close_signals()` → `call_edge_function()`), mas
+9. **⚠️ O cron de fecho de sinais estava silenciosamente a falhar.** A cadeia existe e está
+   agendada (`close-signals-every-10min` → `cron_close_signals()` → `call_edge_function()`), mas
    `call_edge_function()` lê a `service_role_key` de `public.app_config` e, se estiver
    vazia, faz `RAISE WARNING` + `RETURN` — o job conta como sucesso e não fecha nada. A
    `service_role_key` nunca foi inserida; a própria migration `20260819040000` documenta
@@ -461,40 +461,44 @@ fundindo com `merge-i18n.cjs --mobile <loc>.m`. Só se funde depois de `--check`
 
 ---
 
-## 9. Correr o fecho de sinais (acção manual, única)
+## 9. Fecho de sinais por cron — resolvido e verificado (2026-10-06)
 
-O cron está escrito e agendado. Falta-lhe um único valor na base de dados. Corre isto
-uma vez no **SQL Editor do Supabase**:
+O job está agendado e activo: `close-signals-every-10min` (jobid 37, `*/10 * * * *` →
+`cron_close_signals()` → `call_edge_function('close-signals')`).
+
+**Estavam dois problemas sobrepostos, e o diagnóstico anterior só via o primeiro.**
+
+1. **Faltava a chave em `app_config`.** Sem ela, `call_edge_function()` fazia
+   `RAISE WARNING` + `RETURN` — nenhuma chamada HTTP, job contava como sucesso. Foi
+   inserida em 2026-10-06.
+2. **A chave colada era de outro projecto.** O payload dizia
+   `"ref":"zwxplzbadgtiohnuotlu"` — o projecto certo é `zwxplzdadgtiohnuotlu`. Duas
+   letras em troca de duas. Resultado: `net._http_response` passou a encher-se de
+   **401 `Não autenticado.`** a cada 10 minutos.
+3. **Mesmo com a chave certa, a função rejeitava.** O `verifyAdmin` de `close-signals`
+   comparava o token com `Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')` por **igualdade de
+   string**, e esse segredo injectado pela plataforma não é o mesmo valor que a API
+   `api-keys` devolve como `service_role` (é a chave nova `sb_secret_…`). Testado:
+   com o código original e a chave oficial, dava 401. Foi substituído por validação
+   através do gateway (`GET /rest/v1/` com o token), que verifica a assinatura e o papel
+   `service_role` — um JWT forjado não passa (verificado), e a comparação deixa de
+   depender de dois valores coincidirem byte a byte.
+
+A prova real não é `cron.job_run_details`: esse dizia `succeeded` enquanto a função
+devolvia 401, porque `net.http_post` **não levanta erro em HTTP**. A prova é o status
+que o `pg_net` guardou:
 
 ```sql
-INSERT INTO public.app_config (key, value)
-VALUES ('service_role_key', '<A_TUA_SERVICE_ROLE_KEY>')
-ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value;
+SELECT id, status_code, substring(content, 1, 160) AS content, created
+FROM net._http_response ORDER BY id DESC LIMIT 5;
 ```
 
-Está isto em `mobile/supabase/manual/ativar_cron_close_signals.sql`, com o mesmo
-`INSERT` e mais três queries de verificação. **É um passo manual por definição:** a chave
-vive no dashboard, não no repositório, e por isso o ficheiro está fora de `migrations/` —
-colocado lá, um replay de BD nova inseria o placeholder como se fosse a chave real.
+`status_code = 200` → a função correu. **Confirmado no tick das 10:50** depois do
+deploy `close-signals` v26; todos os ticks anteriores registavam 401.
 
-O `supabase_url` já está preenchido (é público). A `service_role_key` é a mesma que a edge
-function já lê de `Deno.env` — a que está em **Project Settings → API**. Fica na base de
-dados, com o mesmo nível de confiança que o resto do schema, e nunca passa por um
-ficheiro do git.
+`mobile/supabase/manual/ativar_cron_close_signals.sql` mantém-se como o script de
+diagnóstico, com o nome de job corrigido e a verificação por `status_code`. **Não**
+devolve chave nenhuma a esta secção: a chave vive no dashboard, nunca no git.
 
-Depois de correr, confirma que está a funcionar:
-
-```sql
--- deve devolver uma linha com status 'succeeded' e data recente
-SELECT j.jobname, d.status, d.return_message, d.start_time
-FROM cron.job_run_details d
-JOIN cron.job j ON j.jobid = d.jobid
-WHERE j.jobname = 'close-signals-every-30min'
-ORDER BY d.start_time DESC LIMIT 5;
-```
-
-`cron.job_run_details` não tem `jobname` — é `cron.job` que o tem, daí o `JOIN`. A
-`return_message` é onde está a causa quando o `status` não é `succeeded`.
-
-Sem este `INSERT`, a landing mostra `Taxa de Acerto —` e `0 sinais analisados`
-permanentemente, porque nenhum sinal chega a `tp` nem a `sl`.
+> ⚠️ A comprovação por `status = 'succeeded'` em `cron.job_run_details` **não vale nada**
+> para esta cadeia — foi exactamente o que mascarou o problema durante meses.

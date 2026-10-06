@@ -126,6 +126,22 @@ function hasKnownSource(symbol: string): boolean {
 
 // ── Admin check ─────────────────────────────────────────────────────────────
 
+// O service-role valida-se perguntando ao gateway: so devolve 200 a uma chave
+// com assinatura JWT valida e papel service_role, logo um JWT forjado falha aqui.
+// A comparacao de strings com o segredo nunca casava: o segredo injectado pela
+// plataforma e a chave de api-keys nao sao o mesmo valor.
+async function isServiceRoleToken(jwt: string): Promise<boolean> {
+  if (!jwt || !supabaseUrl) return false;
+  try {
+    const res = await fetch(`${supabaseUrl}/rest/v1/`, {
+      headers: { apikey: jwt, Authorization: `Bearer ${jwt}` },
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
 async function verifyAdmin(req: Request) {
   const authHeader = req.headers.get('Authorization') ?? '';
   const jwt = authHeader.replace(/^Bearer\s+/i, '');
@@ -133,6 +149,7 @@ async function verifyAdmin(req: Request) {
 
   // Service role key (from pg_cron) — skip admin check
   if (jwt === serviceRoleKey) return { user: null, error: null, isServiceRole: true };
+  if (await isServiceRoleToken(jwt)) return { user: null, error: null, isServiceRole: true };
 
   const { data: { user }, error: authError } = await supabase.auth.getUser(jwt);
   if (authError || !user) return { user: null, error: 'Não autenticado.', isServiceRole: false };
