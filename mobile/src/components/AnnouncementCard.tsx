@@ -3,7 +3,7 @@ import { FlatList, Linking, Pressable, StyleSheet, View } from 'react-native';
 import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useRouter } from 'expo-router';
+import { useRouter, type Href } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/ui';
 import { Radius, Spacing, type Palette } from '@/core/theme';
@@ -56,8 +56,7 @@ export function AnnouncementCard() {
   const openLink = (ad: Announcement) => {
     if (!ad.link) return;
     if (ad.link.startsWith('/')) {
-      // @ts-expect-error rota dinâmica gerida pelos admins
-      router.push(ad.link);
+      router.push(ad.link as Href);
       return;
     }
     Linking.openURL(ad.link).catch(() => {});
