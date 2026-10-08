@@ -26,7 +26,13 @@ export function Footer() {
               <img
                 src="/logo-tmt.png"
                 alt="The Magic Trader"
-                className="h-20 w-auto object-contain logo-glow sm:h-24"
+                className="h-20 w-auto object-contain logo-glow dark:hidden sm:h-24"
+              />
+              <img
+                src="/logo-tmtb.png"
+                alt=""
+                aria-hidden="true"
+                className="hidden h-20 w-auto object-contain logo-glow dark:block sm:h-24"
               />
             </Link>
             <p className="text-sm text-muted-foreground max-w-md">

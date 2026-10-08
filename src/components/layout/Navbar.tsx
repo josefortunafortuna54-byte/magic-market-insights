@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Sparkles, BarChart3, History, Crown, LogIn, LogOut, User, Clock, MessageCircle, Bell } from "lucide-react";
+import { Menu, X, Sparkles, BarChart3, History, Crown, LogIn, LogOut, User, Clock, MessageCircle, Bell, Sun, Moon } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSubscription } from "@/hooks/useSubscription";
@@ -37,6 +38,18 @@ export function Navbar() {
   const { unread } = useUnreadUserNotifications();
   const isPremium = tier !== "free";
 
+  const { resolvedTheme, setTheme } = useTheme();
+  const [themeMounted, setThemeMounted] = useState(false);
+  useEffect(() => {
+    setThemeMounted(true);
+  }, []);
+  const isDark = resolvedTheme === "dark";
+  const toggleTheme = () => {
+    const next = isDark ? "light" : "dark";
+    setTheme(next);
+    try { localStorage.setItem("tmt_theme", next); } catch { /* ignore */ }
+  };
+
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
@@ -59,14 +72,20 @@ export function Navbar() {
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 border-b navbar-border bg-background/80 backdrop-blur-xl">
       <div className="container mx-auto px-4">
-        <div className="flex h-16 items-center justify-between">
+        <div className="flex h-20 items-center justify-between">
 
           {/* Logo */}
           <Link to="/" className="flex items-center">
             <img
               src="/logo-tmt.png"
               alt="The Magic Trader"
-              className="h-10 w-auto object-contain logo-glow sm:h-12"
+              className="h-12 w-auto object-contain logo-glow dark:hidden sm:h-16"
+            />
+            <img
+              src="/logo-tmtb.png"
+              alt=""
+              aria-hidden="true"
+              className="hidden h-12 w-auto object-contain logo-glow dark:block sm:h-16"
             />
           </Link>
 
@@ -88,6 +107,15 @@ export function Navbar() {
 
           {/* Auth */}
           <div className="hidden md:flex items-center gap-3">
+            <button
+              type="button"
+              onClick={toggleTheme}
+              aria-label={isDark ? t("theme.light") : t("theme.dark")}
+              title={isDark ? t("theme.light") : t("theme.dark")}
+              className="flex h-8 w-8 items-center justify-center rounded-xl text-muted-foreground hover:bg-secondary/60 hover:text-foreground active:scale-95 transition-all"
+            >
+              {themeMounted ? (isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />) : <Moon className="h-5 w-5 opacity-0" />}
+            </button>
             {user ? (
               <>
               <Link
@@ -211,6 +239,14 @@ export function Navbar() {
                   </Link>
                 );
               })}
+              <button
+                type="button"
+                onClick={toggleTheme}
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-muted-foreground hover:bg-secondary/50 transition-colors"
+              >
+                {themeMounted ? (isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />) : <Moon className="h-5 w-5 opacity-0" />}
+                <span className="flex-1 text-left">{isDark ? t("theme.light") : t("theme.dark")}</span>
+              </button>
               <div className="pt-4 space-y-2 border-t border-border/50">
                 {user ? (
                   <>
