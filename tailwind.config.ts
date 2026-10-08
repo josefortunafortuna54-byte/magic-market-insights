@@ -120,6 +120,11 @@ export default {
           "0%, 100%": { opacity: "1" },
           "50%":      { opacity: "0" },
         },
+        /* Novo: ticker de preços a rolar (marquee) */
+        "ticker": {
+          "0%":   { transform: "translateX(0)" },
+          "100%": { transform: "translateX(-50%)" },
+        },
       },
       animation: {
         "accordion-down":  "accordion-down 0.2s ease-out",
@@ -131,6 +136,7 @@ export default {
         "price-flash-down":"price-flash-down 0.8s ease-out",
         "slide-up":        "slide-up 0.4s ease-out",
         "blink":           "blink 1.2s step-start infinite",
+        "ticker":          "ticker 40s linear infinite",
       },
       backgroundImage: {
         "gradient-radial":  "radial-gradient(var(--tw-gradient-stops))",

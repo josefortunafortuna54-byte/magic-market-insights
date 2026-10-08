@@ -1,6 +1,7 @@
 import { ReactNode } from "react";
 import { Navbar } from "./Navbar";
 import { Footer } from "./Footer";
+import { PriceTicker } from "./PriceTicker";
 
 interface LayoutProps {
   children: ReactNode;
@@ -12,7 +13,8 @@ export function Layout({ children, noFooter = false, title }: LayoutProps) {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
-      <main className="flex-1 mt-16">
+      <main className="flex-1 mt-20">
+        <PriceTicker />
         {title && (
           <div className="border-b border-border bg-card">
             <div className="mx-auto max-w-6xl px-4 py-4">
