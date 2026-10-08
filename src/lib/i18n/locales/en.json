@@ -78,6 +78,7 @@
     "statPairs": "Forex Pairs",
     "nextBoomSubtitle": "Highest volatility session",
     "nextBoomNoSchedule": "No scheduled booms.",
+    "nextBoomCountdown": "Next Boom in",
     "perfSubtitle": "Signal history",
     "perfSignalsAnalyzed": "{{count}} signals analyzed",
     "featuresTitle": "Why choose The Magic Trader?",
@@ -438,6 +439,7 @@
     "tabReports": "Reports",
     "tabChannels": "Channels",
     "tabAnnouncements": "Announcements",
+    "tabCapital": "Capital",
     "checkingAccess": "Checking access…",
     "gateTitle": "Admin area",
     "gateSubtitle": "Enter the access code to access the admin area.",
@@ -451,6 +453,7 @@
     "statSignalsToday": "Signals Today",
     "statWinRate": "Win Rate",
     "statPremium": "Premium",
+    "statActiveUsers": "Active (30d)",
     "closeTpSl": "Close TP/SL",
     "doneClose": "Signals closed",
     "generateSignals": "Generate Signals",
@@ -879,6 +882,7 @@
     "trustSecure": "Secure payment",
     "trustCancel": "Cancel anytime",
     "trustSupport": "Dedicated support",
+    "launchUntilBoom": "Launch prices until the next Boom:",
     "alertsWhatsapp": "WhatsApp",
     "alertsWhatsappDesc": "Instant notifications",
     "alertsTelegram": "Telegram",
@@ -1553,6 +1557,8 @@
     "included": "What's included",
     "upgradeCta": "Become Premium",
     "requestCta": "Request now",
+    "seatsLeft": "{{count}} of {{total}} spots left",
+    "soldOut": "Sold out",
     "incBot1": "Lifetime access",
     "incBot2": "Automatic updates",
     "incBot3": "Priority support",
@@ -1563,5 +1569,13 @@
     "incEbook2": "Practical examples",
     "incEbook3": "Free updates",
     "refresh": "Refresh"
+  },
+  "app": {
+    "title": "Take The Magic Trader everywhere",
+    "subtitle": "Download the mobile app and receive signals, schedules and your balance directly on your phone. Free, no ads and always real-time.",
+    "availableOn": "Available on",
+    "playStore": "Google Play",
+    "direct": "Download from the website",
+    "tagline": "Free · No ads · Real-time signals"
   }
 }

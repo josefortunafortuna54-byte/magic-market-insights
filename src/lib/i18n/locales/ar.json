@@ -78,6 +78,7 @@
     "howTitle": "كيف يعمل",
     "liveSection": "الـ BOOMs الجارية",
     "nextBoomNoSchedule": "لا توجد Booms مجدولة.",
+    "nextBoomCountdown": "الـ Boom التالي خلال",
     "nextBoomSubtitle": "جلسة بأعلى تقلب",
     "perfSignalsAnalyzed": "{{count}} إشارة تم تحليلها",
     "perfSubtitle": "سجل الإشارات",
@@ -480,6 +481,7 @@
     "statSignalsToday": "إشارات اليوم",
     "statWinRate": "نسبة النجاح",
     "statPremium": "Premium",
+    "statActiveUsers": "نشط (30 يوم)",
     "closeTpSl": "إغلاق TP/SL",
     "doneClose": "تم إغلاق الإشارات",
     "generateSignals": "توليد الإشارات",
@@ -744,6 +746,7 @@
     "subscriptionExpires": "ينتهي الاشتراك في",
     "subscriptionExpiry": "انتهاء الاشتراك",
     "tabAnnouncements": "الإعلانات",
+    "tabCapital": "رأس المال",
     "tabChannels": "القنوات",
     "tabMessaging": "الرسائل",
     "tabReceipts": "إثباتات الدفع",
@@ -918,6 +921,7 @@
     "trustSecure": "دفع آمن",
     "trustCancel": "ألغِ في أي وقت",
     "trustSupport": "دعم مخصص",
+    "launchUntilBoom": "أسعار الإطلاق حتى الـ Boom التالي:",
     "alertsWhatsapp": "WhatsApp",
     "alertsWhatsappDesc": "إشعارات فورية",
     "alertsTelegram": "Telegram",
@@ -1535,6 +1539,8 @@
     "included": "ما يتضمنه",
     "upgradeCta": "كن عضواً بريميوم",
     "requestCta": "اطلب الآن",
+    "seatsLeft": "بقي {{count}} من {{total}} مقاعد",
+    "soldOut": "نفدت الكمية",
     "incBot1": "وصول مدى الحياة",
     "incBot2": "تحديثات تلقائية",
     "incBot3": "دعم ذو أولوية",
@@ -1563,5 +1569,13 @@
     "expiringTitle_one": "{{count}} يوم متبقٍ في خطتك",
     "expiringTitle_other": "{{count}} أيام متبقية في خطتك",
     "renew": "تجديد"
+  },
+  "app": {
+    "title": "خذ The Magic Trader معك أينما كنت",
+    "subtitle": "حمّل تطبيق الجوال واستقبل الإشارات والجداول ورصيدك مباشرة على هاتفك. مجاناً، بدون إعلانات، ودائماً في الوقت الفعلي.",
+    "availableOn": "متوفر على",
+    "playStore": "Google Play",
+    "direct": "تحميل من الموقع",
+    "tagline": "مجاني · بدون إعلانات · إشارات في الوقت الفعلي"
   }
 }

@@ -78,6 +78,7 @@
     "statPairs": "Pares Forex",
     "nextBoomSubtitle": "Sessão com maior volatilidade",
     "nextBoomNoSchedule": "Sem booms agendados.",
+    "nextBoomCountdown": "Próximo Boom em",
     "perfSubtitle": "Histórico de sinais",
     "perfSignalsAnalyzed": "{{count}} sinais analisados",
     "featuresTitle": "Por que escolher The Magic Trader?",
@@ -438,6 +439,7 @@
     "tabReports": "Reports",
     "tabChannels": "Canais",
     "tabAnnouncements": "Anúncios",
+    "tabCapital": "Banca",
     "checkingAccess": "A verificar acesso…",
     "loadingAdmin": "A carregar admin…",
     "restrictedTitle": "Acesso restrito",
@@ -446,6 +448,7 @@
     "statSignalsToday": "Sinais Hoje",
     "statWinRate": "Taxa de Acerto",
     "statPremium": "Premium",
+    "statActiveUsers": "Ativos (30d)",
     "closeTpSl": "Fechar TP/SL",
     "doneClose": "Sinais fechados",
     "generateSignals": "Gerar Sinais",
@@ -879,6 +882,7 @@
     "trustSecure": "Pagamento seguro",
     "trustCancel": "Cancela quando quiseres",
     "trustSupport": "Suporte dedicado",
+    "launchUntilBoom": "Preços de lançamento até ao próximo Boom:",
     "alertsWhatsapp": "WhatsApp",
     "alertsWhatsappDesc": "Notificações instantâneas",
     "alertsTelegram": "Telegram",
@@ -1553,6 +1557,8 @@
     "included": "O que inclui",
     "upgradeCta": "Tornar-se Premium",
     "requestCta": "Pedir agora",
+    "seatsLeft": "Restam {{count}} de {{total}} vagas",
+    "soldOut": "Esgotado",
     "incBot1": "Acesso vitalício",
     "incBot2": "Actualizações automáticas",
     "incBot3": "Suporte prioritário",
@@ -1563,5 +1569,13 @@
     "incEbook2": "Exemplos práticos",
     "incEbook3": "Actualizações gratuitas",
     "refresh": "Atualizar"
+  },
+  "app": {
+    "title": "Leva a The Magic Trader para todo o lado",
+    "subtitle": "Baixa a app móvel e recebe os sinais, horários e a tua banca diretamente no telemóvel. Gratuita, sem anúncios e sempre em tempo real.",
+    "availableOn": "Disponível em",
+    "playStore": "Google Play",
+    "direct": "Descarregar no site",
+    "tagline": "Gratuita · Sem anúncios · Sinais em tempo real"
   }
 }

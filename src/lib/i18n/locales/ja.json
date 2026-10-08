@@ -78,6 +78,7 @@
     "howTitle": "使い方",
     "liveSection": "進行中のBOOM",
     "nextBoomNoSchedule": "予定のブームはありません。",
+    "nextBoomCountdown": "次のBoomまで",
     "nextBoomSubtitle": "ボラティリティが最も高いセッション",
     "perfSignalsAnalyzed": "分析したシグナル {{count}}件",
     "perfSubtitle": "シグナル履歴",
@@ -480,6 +481,7 @@
     "statSignalsToday": "本日のシグナル",
     "statWinRate": "勝率",
     "statPremium": "プレミアム",
+    "statActiveUsers": "アクティブ (30日)",
     "closeTpSl": "TP/SLをクローズ",
     "doneClose": "シグナルをクローズしました",
     "generateSignals": "シグナルを生成",
@@ -744,6 +746,7 @@
     "subscriptionExpires": "サブスクリプションの有効期限",
     "subscriptionExpiry": "サブスクリプションの有効期限",
     "tabAnnouncements": "お知らせ",
+    "tabCapital": "資本",
     "tabChannels": "チャンネル",
     "tabMessaging": "メッセージ",
     "tabReceipts": "領収書",
@@ -918,6 +921,7 @@
     "trustSecure": "安全な支払い",
     "trustCancel": "いつでもキャンセル可能",
     "trustSupport": "専任サポート",
+    "launchUntilBoom": "次のBoomまでのローンチ価格:",
     "alertsWhatsapp": "WhatsApp",
     "alertsWhatsappDesc": "インスタント通知",
     "alertsTelegram": "Telegram",
@@ -1535,6 +1539,8 @@
     "included": "含まれるもの",
     "upgradeCta": "プレミアムになる",
     "requestCta": "今すぐリクエスト",
+    "seatsLeft": "残り{{count}}席（全{{total}}席）",
+    "soldOut": "売り切れ",
     "incBot1": "永久アクセス",
     "incBot2": "自動アップデート",
     "incBot3": "優先サポート",
@@ -1563,5 +1569,13 @@
     "expiringTitle_one": "プランの有効期限まで残り{{count}}日",
     "expiringTitle_other": "プランの有効期限まで残り{{count}}日",
     "renew": "更新"
+  },
+  "app": {
+    "title": "The Magic Trader をどこでも",
+    "subtitle": "モバイルアプリをダウンロードして、シグナル・スケジュール・残高をスマホで直接受け取れます。無料・広告なし・常にリアルタイム。",
+    "availableOn": "対応プラットフォーム",
+    "playStore": "Google Play",
+    "direct": "ウェブサイトからダウンロード",
+    "tagline": "無料・広告なし・リアルタイムのシグナル"
   }
 }

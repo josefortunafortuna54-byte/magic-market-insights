@@ -78,6 +78,7 @@
     "howTitle": "So funktioniert es",
     "liveSection": "Laufende BOOMs",
     "nextBoomNoSchedule": "Keine Booms geplant.",
+    "nextBoomCountdown": "Nächster Boom in",
     "nextBoomSubtitle": "Sitzung mit höchster Volatilität",
     "perfSignalsAnalyzed": "{{count}} Signale analysiert",
     "perfSubtitle": "Signalverlauf",
@@ -480,6 +481,7 @@
     "statSignalsToday": "Signale heute",
     "statWinRate": "Trefferquote",
     "statPremium": "Premium",
+    "statActiveUsers": "Aktiv (30T)",
     "closeTpSl": "TP/SL schließen",
     "doneClose": "Signale geschlossen",
     "generateSignals": "Signale generieren",
@@ -744,6 +746,7 @@
     "subscriptionExpires": "Abo läuft ab am",
     "subscriptionExpiry": "Ablauf des Abos",
     "tabAnnouncements": "Ankündigungen",
+    "tabCapital": "Kapital",
     "tabChannels": "Kanäle",
     "tabMessaging": "Nachrichten",
     "tabReceipts": "Belege",
@@ -918,6 +921,7 @@
     "trustSecure": "Sichere Zahlung",
     "trustCancel": "Jederzeit kündbar",
     "trustSupport": "Dedizierter Support",
+    "launchUntilBoom": "Einführungspreise bis zum nächsten Boom:",
     "alertsWhatsapp": "WhatsApp",
     "alertsWhatsappDesc": "Sofortige Benachrichtigungen",
     "alertsTelegram": "Telegram",
@@ -1535,6 +1539,8 @@
     "included": "Was enthalten ist",
     "upgradeCta": "Premium werden",
     "requestCta": "Jetzt anfragen",
+    "seatsLeft": "Noch {{count}} von {{total}} Plätzen frei",
+    "soldOut": "Ausverkauft",
     "incBot1": "Lebenslanger Zugang",
     "incBot2": "Automatische Updates",
     "incBot3": "Prioritäts-Support",
@@ -1563,5 +1569,13 @@
     "expiringTitle_one": "{{count}} Tag verbleibend in deinem Plan",
     "expiringTitle_other": "{{count}} Tage verbleibend in deinem Plan",
     "renew": "Verlängern"
+  },
+  "app": {
+    "title": "Nimm The Magic Trader überallhin mit",
+    "subtitle": "Lade die mobile App herunter und erhalte Signale, Zeitpläne und deinen Kontostand direkt auf dein Telefon. Kostenlos, ohne Werbung und immer in Echtzeit.",
+    "availableOn": "Verfügbar auf",
+    "playStore": "Google Play",
+    "direct": "Von der Website herunterladen",
+    "tagline": "Kostenlos · Ohne Werbung · Echtzeit-Signale"
   }
 }

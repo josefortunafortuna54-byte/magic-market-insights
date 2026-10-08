@@ -78,6 +78,7 @@
     "howTitle": "Jinsi Inavyofanya Kazi",
     "liveSection": "BOOM Zinazoendelea",
     "nextBoomNoSchedule": "Hakuna boom zilizopangwa.",
+    "nextBoomCountdown": "Boom inayofuata katika",
     "nextBoomSubtitle": "Kipindi chenye ubadilikaji mkubwa zaidi",
     "perfSignalsAnalyzed": "Ishara {{count}} zimechambuliwa",
     "perfSubtitle": "Historia ya ishara",
@@ -480,6 +481,7 @@
     "statSignalsToday": "Ishara Leo",
     "statWinRate": "Kiwango cha Kushinda",
     "statPremium": "Premium",
+    "statActiveUsers": "Hai (siku 30)",
     "closeTpSl": "Funga TP/SL",
     "doneClose": "Ishara zimefungwa",
     "generateSignals": "Tengeneza Ishara",
@@ -744,6 +746,7 @@
     "subscriptionExpires": "Usajili unaisha",
     "subscriptionExpiry": "Mwisho wa usajili",
     "tabAnnouncements": "Tangazo",
+    "tabCapital": "Mtaji",
     "tabChannels": "Chaneli",
     "tabMessaging": "Ujumbe",
     "tabReceipts": "Risiti",
@@ -918,6 +921,7 @@
     "trustSecure": "Malipo salama",
     "trustCancel": "Ghairi wakati wowote",
     "trustSupport": "Msaada Maalum",
+    "launchUntilBoom": "Bei za uzinduzi hadi Boom inayofuata:",
     "alertsWhatsapp": "WhatsApp",
     "alertsWhatsappDesc": "Arifa za papo hapo",
     "alertsTelegram": "Telegram",
@@ -1535,6 +1539,8 @@
     "included": "Kinachojumlishwa",
     "upgradeCta": "Kuwa Premium",
     "requestCta": "Omba sasa",
+    "seatsLeft": "Nafasi {{count}} kati ya {{total}} zimesalia",
+    "soldOut": "Imeisha",
     "incBot1": "Ufikiaji wa maisha yote",
     "incBot2": "Sasisho otomatiki",
     "incBot3": "Msaada wa kipaumbele",
@@ -1563,5 +1569,13 @@
     "expiringTitle_one": "Siku {{count}} imebaki kwenye mpango wako",
     "expiringTitle_other": "Siku {{count}} zimebaki kwenye mpango wako",
     "renew": "Endeleza"
+  },
+  "app": {
+    "title": "Beba The Magic Trader kila mahali",
+    "subtitle": "Pakua programu ya simu na upokee ishara, ratiba na salio lako moja kwa moja kwenye simu yako. Bure, bila matangazo na daima katika wakati halisi.",
+    "availableOn": "Inapatikana kwenye",
+    "playStore": "Google Play",
+    "direct": "Pakua kutoka kwenye tovuti",
+    "tagline": "Bure · Bila matangazo · Ishara za wakati halisi"
   }
 }

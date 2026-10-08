@@ -78,6 +78,7 @@
     "howTitle": "Как это работает",
     "liveSection": "Активные BOOM",
     "nextBoomNoSchedule": "Запланированных бумов нет.",
+    "nextBoomCountdown": "Следующий Boom через",
     "nextBoomSubtitle": "Сессия с наибольшей волатильностью",
     "perfSignalsAnalyzed": "Проанализировано сигналов: {{count}}",
     "perfSubtitle": "История сигналов",
@@ -480,6 +481,7 @@
     "statSignalsToday": "Сигналы сегодня",
     "statWinRate": "Процент побед",
     "statPremium": "Premium",
+    "statActiveUsers": "Активные (30д)",
     "closeTpSl": "Закрыть TP/SL",
     "doneClose": "Сигналы закрыты",
     "generateSignals": "Генерировать Сигналы",
@@ -744,6 +746,7 @@
     "subscriptionExpires": "Подписка истекает",
     "subscriptionExpiry": "Срок подписки",
     "tabAnnouncements": "Объявления",
+    "tabCapital": "Капитал",
     "tabChannels": "Каналы",
     "tabMessaging": "Сообщения",
     "tabReceipts": "Чеки",
@@ -918,6 +921,7 @@
     "trustSecure": "Безопасная оплата",
     "trustCancel": "Отмена в любое время",
     "trustSupport": "Выделенная поддержка",
+    "launchUntilBoom": "Цены запуска до следующего Boom:",
     "alertsWhatsapp": "WhatsApp",
     "alertsWhatsappDesc": "Мгновенные уведомления",
     "alertsTelegram": "Telegram",
@@ -1535,6 +1539,8 @@
     "included": "Что входит",
     "upgradeCta": "Стать Премиум",
     "requestCta": "Запросить сейчас",
+    "seatsLeft": "Осталось {{count}} из {{total}} мест",
+    "soldOut": "Распродано",
     "incBot1": "Пожизненный доступ",
     "incBot2": "Автоматические обновления",
     "incBot3": "Приоритетная поддержка",
@@ -1563,5 +1569,13 @@
     "expiringTitle_one": "Остался {{count}} день до конца тарифа",
     "expiringTitle_other": "Осталось {{count}} дней до конца тарифа",
     "renew": "Продлить"
+  },
+  "app": {
+    "title": "Возьмите The Magic Trader с собой куда угодно",
+    "subtitle": "Скачайте мобильное приложение и получайте сигналы, расписания и ваш баланс прямо на телефон. Бесплатно, без рекламы и всегда в реальном времени.",
+    "availableOn": "Доступно на",
+    "playStore": "Google Play",
+    "direct": "Скачать с сайта",
+    "tagline": "Бесплатно · Без рекламы · Сигналы в реальном времени"
   }
 }

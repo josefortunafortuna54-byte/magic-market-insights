@@ -78,6 +78,7 @@
     "howTitle": "Hoe het werkt",
     "liveSection": "Lopende BOOMs",
     "nextBoomNoSchedule": "Geen booms ingepland.",
+    "nextBoomCountdown": "Volgende Boom over",
     "nextBoomSubtitle": "Sessie met de hoogste volatiliteit",
     "perfSignalsAnalyzed": "{{count}} signalen geanalyseerd",
     "perfSubtitle": "Signaalgeschiedenis",
@@ -527,6 +528,7 @@
     "statSignalsToday": "Signalen Vandaag",
     "statWinRate": "Winstpercentage",
     "statPremium": "Premium",
+    "statActiveUsers": "Actief (30d)",
     "closeTpSl": "TP/SL sluiten",
     "doneClose": "Signalen gesloten",
     "generateSignals": "Signalen Genereren",
@@ -791,6 +793,7 @@
     "subscriptionExpires": "Abonnement vervalt op",
     "subscriptionExpiry": "Vervaldatum abonnement",
     "tabAnnouncements": "Aankondigingen",
+    "tabCapital": "Kapitaal",
     "tabChannels": "Kanalen",
     "tabMessaging": "Berichten",
     "tabReceipts": "Betalingsbewijzen",
@@ -965,6 +968,7 @@
     "trustSecure": "Veilige betaling",
     "trustCancel": "Annuleer wanneer je wilt",
     "trustSupport": "Dedicated support",
+    "launchUntilBoom": "Lanceringsprijzen tot de volgende Boom:",
     "alertsWhatsapp": "WhatsApp",
     "alertsWhatsappDesc": "Directe meldingen",
     "alertsTelegram": "Telegram",
@@ -1535,6 +1539,8 @@
     "included": "Wat is inbegrepen",
     "upgradeCta": "Word Premium",
     "requestCta": "Nu aanvragen",
+    "seatsLeft": "Nog {{count}} van {{total}} plaatsen beschikbaar",
+    "soldOut": "Uitverkocht",
     "incBot1": "Levenslang toegang",
     "incBot2": "Automatische updates",
     "incBot3": "Prioritaire ondersteuning",
@@ -1563,5 +1569,13 @@
     "expiringTitle_one": "{{count}} dag resterend op je plan",
     "expiringTitle_other": "{{count}} dagen resterend op je plan",
     "renew": "Vernieuwen"
+  },
+  "app": {
+    "title": "Neem The Magic Trader overal mee naartoe",
+    "subtitle": "Download de mobiele app en ontvang signalen, schema's en je saldo rechtstreeks op je telefoon. Gratis, zonder advertenties en altijd in realtime.",
+    "availableOn": "Beschikbaar op",
+    "playStore": "Google Play",
+    "direct": "Downloaden vanaf de website",
+    "tagline": "Gratis · Geen advertenties · Real-time signalen"
   }
 }

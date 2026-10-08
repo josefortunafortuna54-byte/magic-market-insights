@@ -78,6 +78,7 @@
     "howTitle": "Ndenge Ezalaka",
     "liveSection": "BOOMs oyo ekweli",
     "nextBoomNoSchedule": "Ba booms oyo basakwisi te.",
+    "nextBoomCountdown": "Boom oyo elandaka na",
     "nextBoomSubtitle": "Session ya volatilité ya likoló",
     "perfSignalsAnalyzed": "{{count}} signaux oyo atali",
     "perfSubtitle": "Lisapo ya signaux",
@@ -527,6 +528,7 @@
     "statSignalsToday": "Ba signaux lelo",
     "statWinRate": "Taxe ya kolonga",
     "statPremium": "Premium",
+    "statActiveUsers": "Aktivo (30 mikolo)",
     "closeTpSl": "Kokanga TP/SL",
     "doneClose": "Ba signaux bakangami",
     "generateSignals": "Tanda ya kokanga",
@@ -791,6 +793,7 @@
     "subscriptionExpires": "Souscription ekosila na",
     "subscriptionExpiry": "Expiração ya souscription",
     "tabAnnouncements": "Bobati",
+    "tabCapital": "Kapital",
     "tabChannels": "Ba chaînes",
     "tabMessaging": "Ba messages",
     "tabReceipts": "Ba preuves",
@@ -965,6 +968,7 @@
     "trustSecure": "Paiement ya libateli",
     "trustCancel": "Longola ntango okolinga",
     "trustSupport": "Support oyo ezali mpo na yo",
+    "launchUntilBoom": "Ntalo ya liboso kino Boom oyo elandaka:",
     "alertsWhatsapp": "WhatsApp",
     "alertsWhatsappDesc": "Ba notificações mbala moko",
     "alertsTelegram": "Telegram",
@@ -1535,6 +1539,8 @@
     "included": "Oyo ezali kati",
     "upgradeCta": "Koma Premium",
     "requestCta": "Senga sikoyo",
+    "seatsLeft": "Bisika {{count}} ya {{total}} etikali",
+    "soldOut": "Esili",
     "incBot1": "Kokota se na bomoyi mobimba",
     "incBot2": "Misalisu ya mokolo na mokolo",
     "incBot3": "Lisalisi ya liboso",
@@ -1563,5 +1569,13 @@
     "expiringTitle_one": "{{count}} mokolo oyo esili na plan na yo",
     "expiringTitle_other": "{{count}} mikolo oyo esili na plan na yo",
     "renew": "Sunga"
+  },
+  "app": {
+    "title": "Kamba The Magic Trader esika nyonso",
+    "subtitle": "Kokitisa app ya mobile mpe ozwa ba signaux, ba horaires mpe mbongo na yo mbala moko na téléphone na yo. Ezali ya libulu, ezanga publicité mpe ntango nyonso temps réel.",
+    "availableOn": "Ezali na",
+    "playStore": "Google Play",
+    "direct": "Kokitisa na site",
+    "tagline": "Ya libulu · Ezanga publicité · Ba signaux na temps réel"
   }
 }

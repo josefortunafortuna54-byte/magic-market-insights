@@ -78,6 +78,7 @@
     "howTitle": "이용 방법",
     "liveSection": "진행 중인 BOOM",
     "nextBoomNoSchedule": "예정된 boom이 없습니다.",
+    "nextBoomCountdown": "다음 Boom까지",
     "nextBoomSubtitle": "변동성이 가장 큰 구간",
     "perfSignalsAnalyzed": "{{count}}개 시그널 분석됨",
     "perfSubtitle": "시그널 기록",
@@ -527,6 +528,7 @@
     "statSignalsToday": "오늘의 신호",
     "statWinRate": "승률",
     "statPremium": "Premium",
+    "statActiveUsers": "활성 (30일)",
     "closeTpSl": "TP/SL 마감",
     "doneClose": "신호가 마감되었습니다",
     "generateSignals": "신호 생성",
@@ -791,6 +793,7 @@
     "subscriptionExpires": "구독 만료일",
     "subscriptionExpiry": "구독 만료",
     "tabAnnouncements": "공지",
+    "tabCapital": "자본",
     "tabChannels": "채널",
     "tabMessaging": "메시지",
     "tabReceipts": "영수증",
@@ -965,6 +968,7 @@
     "trustSecure": "안전한 결제",
     "trustCancel": "언제든 취소 가능",
     "trustSupport": "전담 지원",
+    "launchUntilBoom": "다음 Boom까지 런칭 가격:",
     "alertsWhatsapp": "WhatsApp",
     "alertsWhatsappDesc": "즉시 알림",
     "alertsTelegram": "Telegram",
@@ -1535,6 +1539,8 @@
     "included": "포함 내용",
     "upgradeCta": "프리미엄 되기",
     "requestCta": "지금 요청",
+    "seatsLeft": "{{count}}/{{total}} 자리 남음",
+    "soldOut": "매진",
     "incBot1": "평생 액세스",
     "incBot2": "자동 업데이트",
     "incBot3": "우선 지원",
@@ -1563,5 +1569,13 @@
     "expiringTitle_one": "플랜에 {{count}}일 남음",
     "expiringTitle_other": "플랜에 {{count}}일 남음",
     "renew": "갱신"
+  },
+  "app": {
+    "title": "The Magic Trader를 어디서나",
+    "subtitle": "모바일 앱을 다운로드해 신호, 일정, 잔액을 휴대폰에서 바로 받아보세요. 무료, 광고 없음, 항상 실시간.",
+    "availableOn": "다운로드 가능",
+    "playStore": "Google Play",
+    "direct": "웹사이트에서 다운로드",
+    "tagline": "무료 · 광고 없음 · 실시간 신호"
   }
 }

@@ -78,6 +78,7 @@
     "howTitle": "Comment ça Marche",
     "liveSection": "BOOMs en cours",
     "nextBoomNoSchedule": "Aucun boom planifié.",
+    "nextBoomCountdown": "Prochain Boom dans",
     "nextBoomSubtitle": "Session à forte volatilité",
     "perfSignalsAnalyzed": "{{count}} signaux analysés",
     "perfSubtitle": "Historique des signaux",
@@ -480,6 +481,7 @@
     "statSignalsToday": "Signaux Aujourd'hui",
     "statWinRate": "Taux de réussite",
     "statPremium": "Premium",
+    "statActiveUsers": "Actifs (30j)",
     "closeTpSl": "Clôturer TP/SL",
     "doneClose": "Signaux clôturés",
     "generateSignals": "Générer les Signaux",
@@ -744,6 +746,7 @@
     "subscriptionExpires": "L'abonnement expire le",
     "subscriptionExpiry": "Expiration de l'abonnement",
     "tabAnnouncements": "Annonces",
+    "tabCapital": "Banca",
     "tabChannels": "Canaux",
     "tabMessaging": "Messages",
     "tabReceipts": "Justificatifs",
@@ -918,6 +921,7 @@
     "trustSecure": "Paiement sécurisé",
     "trustCancel": "Annule quand tu veux",
     "trustSupport": "Support dédié",
+    "launchUntilBoom": "Prix de lancement jusqu'au prochain Boom :",
     "alertsWhatsapp": "WhatsApp",
     "alertsWhatsappDesc": "Notifications instantanées",
     "alertsTelegram": "Telegram",
@@ -1535,6 +1539,8 @@
     "included": "Ce qui est inclus",
     "upgradeCta": "Devenir Premium",
     "requestCta": "Demander maintenant",
+    "seatsLeft": "Il reste {{count}} places sur {{total}}",
+    "soldOut": "Épuisé",
     "incBot1": "Accès à vie",
     "incBot2": "Mises à jour automatiques",
     "incBot3": "Assistance prioritaire",
@@ -1563,5 +1569,13 @@
     "expiringTitle_one": "{{count}} jour restant sur votre plan",
     "expiringTitle_other": "{{count}} jours restants sur votre plan",
     "renew": "Renouveler"
+  },
+  "app": {
+    "title": "Emportez The Magic Trader partout",
+    "subtitle": "Téléchargez l'app mobile et recevez les signaux, les horaires et votre solde directement sur votre téléphone. Gratuite, sans publicité et toujours en temps réel.",
+    "availableOn": "Disponible sur",
+    "playStore": "Google Play",
+    "direct": "Télécharger depuis le site",
+    "tagline": "Gratuite · Sans publicité · Signaux en temps réel"
   }
 }

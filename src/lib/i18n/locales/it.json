@@ -78,6 +78,7 @@
     "howTitle": "Come funziona",
     "liveSection": "BOOM in corso",
     "nextBoomNoSchedule": "Nessun boom programmato.",
+    "nextBoomCountdown": "Prossimo Boom tra",
     "nextBoomSubtitle": "Sessione con la massima volatilità",
     "perfSignalsAnalyzed": "{{count}} segnali analizzati",
     "perfSubtitle": "Storico dei segnali",
@@ -480,6 +481,7 @@
     "statSignalsToday": "Segnali Oggi",
     "statWinRate": "Tasso di Successo",
     "statPremium": "Premium",
+    "statActiveUsers": "Attivi (30g)",
     "closeTpSl": "Chiudi TP/SL",
     "doneClose": "Segnali chiusi",
     "generateSignals": "Genera Segnali",
@@ -744,6 +746,7 @@
     "subscriptionExpires": "L'abbonamento scade il",
     "subscriptionExpiry": "Scadenza abbonamento",
     "tabAnnouncements": "Annunci",
+    "tabCapital": "Capitale",
     "tabChannels": "Canali",
     "tabMessaging": "Messaggi",
     "tabReceipts": "Ricevute",
@@ -918,6 +921,7 @@
     "trustSecure": "Pagamento sicuro",
     "trustCancel": "Annulla quando vuoi",
     "trustSupport": "Supporto dedicato",
+    "launchUntilBoom": "Prezzi di lancio fino al prossimo Boom:",
     "alertsWhatsapp": "WhatsApp",
     "alertsWhatsappDesc": "Notifiche istantanee",
     "alertsTelegram": "Telegram",
@@ -1535,6 +1539,8 @@
     "included": "Cosa include",
     "upgradeCta": "Diventa Premium",
     "requestCta": "Richiedi ora",
+    "seatsLeft": "Rimangono {{count}} posti su {{total}}",
+    "soldOut": "Esaurito",
     "incBot1": "Accesso a vita",
     "incBot2": "Aggiornamenti automatici",
     "incBot3": "Supporto prioritario",
@@ -1563,5 +1569,13 @@
     "expiringTitle_one": "{{count}} giorno rimanente sul tuo piano",
     "expiringTitle_other": "{{count}} giorni rimanenti sul tuo piano",
     "renew": "Rinnova"
+  },
+  "app": {
+    "title": "Porta The Magic Trader ovunque",
+    "subtitle": "Scarica l'app mobile e ricevi segnali, orari e il tuo saldo direttamente sul telefono. Gratuita, senza pubblicità e sempre in tempo reale.",
+    "availableOn": "Disponibile su",
+    "playStore": "Google Play",
+    "direct": "Scarica dal sito",
+    "tagline": "Gratuita · Senza pubblicità · Segnali in tempo reale"
   }
 }

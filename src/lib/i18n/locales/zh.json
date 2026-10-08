@@ -78,6 +78,7 @@
     "howTitle": "运作方式",
     "liveSection": "进行中的 BOOM",
     "nextBoomNoSchedule": "暂无已排期的 boom。",
+    "nextBoomCountdown": "距下次 Boom",
     "nextBoomSubtitle": "波动最大的时段",
     "perfSignalsAnalyzed": "已分析 {{count}} 个信号",
     "perfSubtitle": "信号历史",
@@ -480,6 +481,7 @@
     "statSignalsToday": "今日信号",
     "statWinRate": "胜率",
     "statPremium": "Premium",
+    "statActiveUsers": "活跃 (30天)",
     "closeTpSl": "平仓 TP/SL",
     "doneClose": "信号已平仓",
     "generateSignals": "生成信号",
@@ -744,6 +746,7 @@
     "subscriptionExpires": "剩余有效期",
     "subscriptionExpiry": "订阅到期时间",
     "tabAnnouncements": "公告",
+    "tabCapital": "资本",
     "tabChannels": "频道",
     "tabMessaging": "消息",
     "tabReceipts": "凭证",
@@ -918,6 +921,7 @@
     "trustSecure": "安全支付",
     "trustCancel": "随时取消",
     "trustSupport": "专属支持",
+    "launchUntilBoom": "首发价格截止到下一次 Boom:",
     "alertsWhatsapp": "WhatsApp",
     "alertsWhatsappDesc": "即时通知",
     "alertsTelegram": "Telegram",
@@ -1535,6 +1539,8 @@
     "included": "包含内容",
     "upgradeCta": "升级高级版",
     "requestCta": "立即获取",
+    "seatsLeft": "剩余 {{count}}/{{total}} 个名额",
+    "soldOut": "已售罄",
     "incBot1": "终身访问",
     "incBot2": "自动更新",
     "incBot3": "优先支持",
@@ -1563,5 +1569,13 @@
     "expiringTitle_one": "你的套餐还剩 {{count}} 天",
     "expiringTitle_other": "你的套餐还剩 {{count}} 天",
     "renew": "续订"
+  },
+  "app": {
+    "title": "随时随地使用 The Magic Trader",
+    "subtitle": "下载移动应用，直接在手机上接收信号、日程和余额。免费、无广告、始终实时。",
+    "availableOn": "可在以下平台使用",
+    "playStore": "Google Play",
+    "direct": "从网站下载",
+    "tagline": "免费 · 无广告 · 实时信号"
   }
 }
