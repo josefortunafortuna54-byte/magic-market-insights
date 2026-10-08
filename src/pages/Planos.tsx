@@ -2,12 +2,14 @@ import { useState, type ComponentType } from "react";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
 import { motion } from "framer-motion";
-import { Check, Zap, Rocket, Trophy, Crown, Star } from "lucide-react";
+import { Check, Zap, Rocket, Trophy, Crown, Star, Flame } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useSubscription } from "@/hooks/useSubscription";
+import { useBoomHours } from "@/hooks/useBoomHours";
+import { useBoomCountdown, formatCountdown } from "@/hooks/useBoomCountdown";
 import { PLANS, PRICES, planLabel, type Currency, type PlanId } from "@/lib/plans";
 import { PLAN_LIMITS } from "@/lib/gating";
 
@@ -40,6 +42,8 @@ export default function Planos() {
   const { t } = useTranslation();
   const { tier, currency: defaultCurrency } = useSubscription();
   const [currency, setCurrency] = useState<Currency>(defaultCurrency);
+  const { booms } = useBoomHours();
+  const countdown = useBoomCountdown(booms);
 
   return (
     <Layout>
@@ -68,6 +72,24 @@ export default function Planos() {
               </TabsList>
             </Tabs>
           </div>
+
+          {/* Urgência — preços de lançamento até ao próximo Boom */}
+          {countdown && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.15 }}
+              className="mx-auto mb-10 flex max-w-xl items-center justify-center gap-2 rounded-xl border border-accent/30 bg-accent/5 px-4 py-3 text-center"
+            >
+              <Flame className="h-5 w-5 shrink-0 text-accent" />
+              <span className="text-sm text-muted-foreground">
+                {t("planos.launchUntilBoom")}{" "}
+                <span className="font-semibold tabular-nums text-accent">
+                  {formatCountdown(countdown.ms)}
+                </span>
+              </span>
+            </motion.div>
+          )}
 
           {/* Cards de planos */}
           <div className="grid sm:grid-cols-2 xl:grid-cols-4 gap-6 max-w-7xl mx-auto items-stretch">

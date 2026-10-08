@@ -1,4 +1,4 @@
-import { Zap, Rocket, Trophy } from "lucide-react";
+import { Zap, Rocket, Trophy, Flame } from "lucide-react";
 import { Link } from "react-router-dom";
 import {
   Dialog,
@@ -12,6 +12,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { PLANS, PRICES, planLabel } from "@/lib/plans";
 import { useSubscription } from "@/hooks/useSubscription";
+import { useBoomHours } from "@/hooks/useBoomHours";
+import { useBoomCountdown, formatCountdown } from "@/hooks/useBoomCountdown";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
 
@@ -30,6 +32,8 @@ export function PlanUpsellModal({
 }) {
   const { currency, tier } = useSubscription();
   const { t } = useTranslation();
+  const { booms } = useBoomHours();
+  const countdown = useBoomCountdown(booms);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -41,6 +45,13 @@ export function PlanUpsellModal({
           <DialogDescription>
             {t('components.planUpsell.description')}
           </DialogDescription>
+          {countdown && (
+            <p className="mx-auto mt-1 inline-flex items-center gap-1.5 text-xs font-semibold text-accent">
+              <Flame className="h-3.5 w-3.5" />
+              {t("planos.launchUntilBoom")}{" "}
+              <span className="tabular-nums">{formatCountdown(countdown.ms)}</span>
+            </p>
+          )}
         </DialogHeader>
 
         <div className="space-y-3 py-2">
