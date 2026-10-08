@@ -221,15 +221,6 @@ export default function Depositos() {
         ? t("depositos.capitalPaidInAoa", { usd: formatBancaMoney(capitalUsd, "usd") })
         : undefined;
 
-    void addMovement({
-      type: "deposit",
-      method: depositModal.method,
-      amount: depositAmount,
-      currency,
-      plan: isCapitalDeposit ? "capital" : plan,
-      status: "pendente",
-      ...(capitalNote ? { notes: capitalNote } : {}),
-    });
     if (user) {
       const payload = {
         user_id: user.id,
@@ -243,10 +234,11 @@ export default function Depositos() {
       // O upload já foi feito; agora regista-se a linha no servidor com retry.
       // Se um insert "falhou" mas o registo existe, considera-se sucesso.
       let saved = false;
+      let receiptId: string | null = null;
       try {
         for (let attempt = 0; attempt <= 2; attempt++) {
           try {
-            await saveReceipt(payload);
+            receiptId = await saveReceipt(payload);
             saved = true;
             break;
           } catch (err) {
@@ -290,6 +282,16 @@ export default function Depositos() {
         // Regista o pedido de ativação na caixa de notificações do utilizador.
         void notifyPlanRequestSubmitted(planLabel(plan), price);
       }
+      void addMovement({
+        type: "deposit",
+        method: depositModal.method,
+        amount: depositAmount,
+        currency,
+        plan: isCapitalDeposit ? "capital" : plan,
+        status: "pendente",
+        ...(capitalNote ? { notes: capitalNote } : {}),
+        ...(receiptId ? { receiptId } : {}),
+      });
     }
     setSending(false);
     setDepositModal(null);
@@ -302,8 +304,9 @@ export default function Depositos() {
     details: string;
     currency: Currency;
   }) => {
+    let requestId: string | null = null;
     try {
-      await submitWithdrawalRequest({
+      requestId = await submitWithdrawalRequest({
         method: input.method,
         amount: input.amount,
         currency: input.currency,
@@ -319,6 +322,7 @@ export default function Depositos() {
       currency: input.currency,
       status: "pendente",
       notes: input.details,
+      ...(requestId ? { requestId } : {}),
     });
     setWithdrawOpen(false);
     toast.success(t("depositos.confirmWithdrawOk"), {

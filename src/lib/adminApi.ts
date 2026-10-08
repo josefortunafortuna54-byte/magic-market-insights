@@ -149,23 +149,30 @@ export async function saveReceipt(receipt: {
   method: string;
   amount: number;
   currency: string;
-}): Promise<void> {
+}): Promise<string | null> {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Não autenticado");
   // Código de afiliado capturado no primeiro arranque via deep link (?ref=).
   // Inserção direta (RLS permite apenas a própria linha) — não passa pela
   // função admin, que rejeitaria utilizadores normais.
-  const { error } = await supabase.from("payment_receipts").insert({
-    user_id: user.id,
-    user_email: user.email ?? receipt.user_email ?? null,
-    proof_url: receipt.proof_url,
-    plan: receipt.plan,
-    method: receipt.method,
-    amount: receipt.amount,
-    currency: receipt.currency,
-    referral_code: getReferralCode(),
-  });
+  // Devolve o id inserido para o movimento ficar ligado ao comprovativo e o
+  // cancelamento apagar a linha de servidor associada.
+  const { data, error } = await supabase
+    .from("payment_receipts")
+    .insert({
+      user_id: user.id,
+      user_email: user.email ?? receipt.user_email ?? null,
+      proof_url: receipt.proof_url,
+      plan: receipt.plan,
+      method: receipt.method,
+      amount: receipt.amount,
+      currency: receipt.currency,
+      referral_code: getReferralCode(),
+    })
+    .select("id")
+    .single();
   if (error) throw error;
+  return data?.id ?? null;
 }
 
 // ── Notifications ──────────────────────────────────────────────────────
@@ -528,17 +535,22 @@ export async function submitWithdrawalRequest(req: {
   amount: number;
   currency: string;
   details?: string;
-}): Promise<void> {
+}): Promise<string | null> {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Não autenticado");
-  const { error } = await supabase.from("withdrawal_requests").insert({
-    user_id: user.id,
-    method: req.method,
-    amount: req.amount,
-    currency: req.currency,
-    details: req.details ?? null,
-  });
+  const { data, error } = await supabase
+    .from("withdrawal_requests")
+    .insert({
+      user_id: user.id,
+      method: req.method,
+      amount: req.amount,
+      currency: req.currency,
+      details: req.details ?? null,
+    })
+    .select("id")
+    .single();
   if (error) throw error;
+  return data?.id ?? null;
 }
 
 export async function listWithdrawals(status?: string, limit = 50, offset = 0): Promise<WithdrawalRequest[]> {
