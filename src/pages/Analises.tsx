@@ -212,20 +212,36 @@ export default function Analises() {
 
         {/* Filtros */}
         <div className="container mx-auto px-4 pb-6">
-          <div className="glass-card p-4">
-            <div className="flex flex-wrap items-center gap-4">
+          <div className="glass-card overflow-hidden">
+            <div className="flex items-center justify-between gap-3 border-b border-border/50 px-4 py-3">
               <div className="flex items-center gap-2">
-                <Filter className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm font-medium">{t("analises.filters")}</span>
+                <Filter className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+                <span className="text-sm font-semibold">{t("analises.filters")}</span>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-muted-foreground">{t("analises.tfLabel")}</span>
-                <div className="flex gap-1 flex-wrap">
+              <div className="flex items-center gap-3">
+                <span className="text-xs text-muted-foreground">
+                  <span className="font-semibold text-foreground">{activeSignals.length}</span>{" "}
+                  {t("analises.activeSignals", { count: activeSignals.length })}
+                </span>
+                <button
+                  onClick={() => { refetch(); refetchPrices(); }}
+                  className="p-1.5 rounded-lg text-muted-foreground hover:bg-secondary/60 hover:text-foreground transition-colors"
+                >
+                  <RefreshCw className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            </div>
+
+            <div className="grid gap-x-8 gap-y-5 p-4 sm:p-5 md:grid-cols-2 xl:grid-cols-3">
+              <div>
+                <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("analises.tfLabel")}</p>
+                <div className="flex flex-wrap gap-1.5">
                   {TIMEFRAMES.map((tf) => {
                     const locked = gatingOn && tf !== "Todos" && !canAccessTimeframe(tf);
                     const isSelected = selectedTimeframe === tf;
                     return (
-                      <button key={tf}
+                      <button
+                        key={tf}
                         onClick={() => {
                           if (locked) {
                             setUpsellOpen(true);
@@ -234,13 +250,14 @@ export default function Analises() {
                           setSelectedTimeframe(tf);
                         }}
                         aria-label={locked ? t("analises.unlock", { what: tf }) : undefined}
-                        className={`px-3 py-1 rounded-lg text-xs font-medium transition-all flex items-center gap-1 ${
+                        className={`flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs font-medium transition-all ${
                           locked
-                            ? "bg-accent/5 text-accent border border-accent/30"
+                            ? "border-accent/30 bg-accent/5 text-accent hover:bg-accent/10"
                             : isSelected
-                              ? "bg-primary text-white"
-                              : "bg-secondary/60 text-muted-foreground hover:text-foreground"
-                        }`}>
+                              ? "border-primary bg-primary text-white shadow-sm shadow-primary/20"
+                              : "border-border/60 bg-secondary/40 text-muted-foreground hover:border-primary/30 hover:text-foreground"
+                        }`}
+                      >
                         {locked && <Lock className="h-2.5 w-2.5" />}
                         {tf}
                       </button>
@@ -248,35 +265,47 @@ export default function Analises() {
                   })}
                 </div>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-muted-foreground">{t("analises.typeLabel")}</span>
-                <div className="flex gap-1">
+
+              <div>
+                <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("analises.typeLabel")}</p>
+                <div className="flex flex-wrap gap-1.5">
                   {SIGNAL_TYPES.map((type) => (
-                    <button key={type} onClick={() => setSelectedType(type)}
-                      className={`px-3 py-1 rounded-lg text-xs font-medium transition-all ${selectedType === type ? type === "BUY" ? "bg-success text-white" : type === "SELL" ? "bg-destructive text-white" : "bg-primary text-white" : "bg-secondary/60 text-muted-foreground hover:text-foreground"}`}>
+                    <button
+                      key={type}
+                      onClick={() => setSelectedType(type)}
+                      className={`rounded-lg border px-3 py-1.5 text-xs font-medium transition-all ${
+                        selectedType === type
+                          ? type === "BUY"
+                            ? "border-success bg-success text-white"
+                            : type === "SELL"
+                              ? "border-destructive bg-destructive text-white"
+                              : "border-primary bg-primary text-white shadow-sm shadow-primary/20"
+                          : "border-border/60 bg-secondary/40 text-muted-foreground hover:border-primary/30 hover:text-foreground"
+                      }`}
+                    >
                       {type}
                     </button>
                   ))}
                 </div>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-muted-foreground">{t("analises.smcLabel")}</span>
-                <div className="flex gap-1 flex-wrap">
+
+              <div>
+                <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("analises.smcLabel")}</p>
+                <div className="flex flex-wrap gap-1.5">
                   {SMC_SETUPS.map((s) => (
-                    <button key={s} onClick={() => setSmcFilter(s)}
-                      className={`px-3 py-1 rounded-lg text-xs font-medium transition-all ${smcFilter === s ? "bg-primary text-white" : "bg-secondary/60 text-muted-foreground hover:text-foreground"}`}>
+                    <button
+                      key={s}
+                      onClick={() => setSmcFilter(s)}
+                      className={`rounded-lg border px-3 py-1.5 text-xs font-medium transition-all ${
+                        smcFilter === s
+                          ? "border-primary bg-primary text-white shadow-sm shadow-primary/20"
+                          : "border-border/60 bg-secondary/40 text-muted-foreground hover:border-primary/30 hover:text-foreground"
+                      }`}
+                    >
                       {s}
                     </button>
                   ))}
                 </div>
-              </div>
-              <div className="ml-auto flex items-center gap-2">
-                <span className="text-xs text-muted-foreground">
-                  <span className="text-foreground font-semibold">{activeSignals.length}</span> {t("analises.activeSignals", { count: activeSignals.length })}
-                </span>
-                <button onClick={() => { refetch(); refetchPrices(); }} className="p-1.5 rounded-lg hover:bg-secondary/60 transition-colors">
-                  <RefreshCw className="h-3.5 w-3.5 text-muted-foreground" />
-                </button>
               </div>
             </div>
           </div>
