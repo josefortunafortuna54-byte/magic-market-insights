@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabaseClient";
 import type { BoomHour } from "@/lib/types";
@@ -22,8 +22,7 @@ async function fetchBoomHours(): Promise<BoomHour[]> {
     .from("boom_hours")
     .select("*")
     .eq("is_active", true)
-    .order("time_wat", { ascending: true })
-    .limit(10);
+    .order("time_wat", { ascending: true });
 
   if (error) throw error;
 
@@ -45,6 +44,20 @@ async function fetchBoomHours(): Promise<BoomHour[]> {
   });
 }
 
+function toMinutes(t: string): number | null {
+  const m = /^(\d{1,2}):(\d{2})$/.exec(t.trim());
+  if (!m) return null;
+  const h = Number(m[1]);
+  const min = Number(m[2]);
+  return h <= 23 && min <= 59 ? h * 60 + min : null;
+}
+
+// WAT = UTC+1. A hora de referência das janelas e sempre a WAT local.
+function watNowMinutes(): number {
+  const d = new Date(Date.now() + 60 * 60 * 1000);
+  return d.getUTCHours() * 60 + d.getUTCMinutes();
+}
+
 export function useBoomHours() {
   const queryClient = useQueryClient();
 
@@ -54,6 +67,20 @@ export function useBoomHours() {
     staleTime: 60_000,
     refetchInterval: 60_000,
   });
+
+  // Divisão intencional do data[0]: a próxima é a primeira cuja hora não
+  // passou (ou a primeira de amanhã, se já passaram todas). O fetch traz
+  // todas as sessões do dia de propósito: limitar a 10 faria o `data[0]`
+  // (00:30) aparecer como "próximo" logo depois do meio da manhã.
+  const nextBoom = useMemo<BoomHour | null>(() => {
+    const now = watNowMinutes();
+    return (
+      data.find((b) => {
+        const t = toMinutes(b.time_wat);
+        return t !== null && t > now;
+      }) ?? data[0] ?? null
+    );
+  }, [data]);
 
   useEffect(() => {
     const channel = supabase
@@ -67,7 +94,7 @@ export function useBoomHours() {
   }, [queryClient]);
 
   return {
-    nextBoom: data[0] ?? null,
+    nextBoom,
     booms: data,
     loading,
     refetch,
