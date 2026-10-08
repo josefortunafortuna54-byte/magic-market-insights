@@ -2,21 +2,26 @@ import { useMemo } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { Sparkles, TrendingUp, Brain, Shield, Crown, ChevronRight, BarChart3, Zap, Target, Flame, Activity, Calendar, Users } from "lucide-react";
+import { Sparkles, TrendingUp, Brain, Shield, Crown, ChevronRight, BarChart3, Zap, Target, Flame, Activity, Calendar, Users, Download, Play, TrendingDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Layout } from "@/components/layout/Layout";
 import { SignalCard } from "@/components/signals/SignalCard";
 import { HeroSignalTerminal } from "@/components/home/HeroSignalTerminal";
+import { GuidedTour } from "@/components/tour/GuidedTour";
+import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 import { useSignals } from "@/hooks/useSignals";
 import { useBoomHours } from "@/hooks/useBoomHours";
+import { useBoomCountdown, formatCountdown } from "@/hooks/useBoomCountdown";
 import { useHistory } from "@/hooks/useHistory";
 
 export default function Index() {
   const { t } = useTranslation();
   const { signals, loading } = useSignals();
-  const { nextBoom, loading: boomLoading } = useBoomHours();
+  const { nextBoom, booms, loading: boomLoading } = useBoomHours();
   const { stats } = useHistory();
+  const { user } = useAuth();
+  const countdown = useBoomCountdown(booms);
 
   const features = [
     { icon: BarChart3, title: t("inicio.feature1Title"), description: t("inicio.feature1Desc") },
@@ -65,13 +70,14 @@ export default function Index() {
           className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(120%_80%_at_78%_-15%,rgba(34,197,94,0.10),transparent_60%)] dark:bg-[radial-gradient(120%_80%_at_78%_-15%,rgba(34,197,94,0.07),transparent_60%)]"
         />
 
-        <div className="container mx-auto px-4 pt-28 pb-20 lg:pt-32 lg:pb-24 lg:flex lg:min-h-[86vh] lg:items-center">
+        <div className="container mx-auto px-4 pt-4 pb-20 lg:flex lg:pt-6 lg:pb-24">
           <div className="w-full grid gap-12 lg:grid-cols-12 lg:gap-8">
             <div className="lg:col-span-7">
               <motion.div
                 initial={reduceMotion ? false : { opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={reduceMotion ? { duration: 0 } : { duration: 0.4 }}
+                id="tour-hero"
                 className="inline-flex items-center gap-2.5 rounded-full border border-primary/20 bg-primary/10 px-4 py-2"
               >
                 <span className="h-2 w-2 rounded-full bg-success ring-4 ring-success/15" />
@@ -179,6 +185,13 @@ export default function Index() {
                     <p className="text-sm text-muted-foreground mt-1">{nextBoom.pairs.join(" · ")}</p>
                   )}
                   <p className="text-xs text-muted-foreground mt-1">{nextBoom.description}</p>
+                  {countdown && (
+                    <p className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-accent/30 bg-accent/10 px-3 py-1 text-xs font-semibold text-accent">
+                      <Flame className="h-3.5 w-3.5" />
+                      {t("inicio.nextBoomCountdown")}{" "}
+                      <span className="tabular-nums">{formatCountdown(countdown.ms)}</span>
+                    </p>
+                  )}
                 </div>
               ) : (
                 <p className="text-sm text-muted-foreground">{t("inicio.nextBoomNoSchedule")}</p>
@@ -210,10 +223,10 @@ export default function Index() {
       </section>
 
       {/* Features */}
-      <section className="py-24 bg-card/30">
+      <section className="py-12 bg-card/30">
         <div className="container mx-auto px-4">
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-16">
-            <h2 className="font-display text-3xl sm:text-4xl font-bold mb-4">{t("inicio.featuresTitle")}</h2>
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-8">
+            <h2 id="tour-features" className="font-display text-3xl sm:text-4xl font-bold mb-4">{t("inicio.featuresTitle")}</h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">{t("inicio.featuresSubtitle")}</p>
           </motion.div>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -235,12 +248,12 @@ export default function Index() {
       </section>
 
       {/* Sinais em Destaque — dados reais */}
-      <section className="py-24">
+      <section className="py-12">
         <div className="container mx-auto px-4">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
-            className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-12">
+            className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-8">
             <div>
-              <h2 className="font-display text-3xl sm:text-4xl font-bold mb-2">{t("inicio.featuredTitle")}</h2>
+              <h2 id="tour-featured" className="font-display text-3xl sm:text-4xl font-bold mb-2">{t("inicio.featuredTitle")}</h2>
               <p className="text-muted-foreground">{t("inicio.featuredSubtitle")}</p>
             </div>
             <Link to="/analises">
@@ -278,10 +291,10 @@ export default function Index() {
       </section>
 
       {/* Como Funciona */}
-      <section className="py-24 bg-card/30">
+      <section className="py-12 bg-card/30">
         <div className="container mx-auto px-4">
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-16">
-            <h2 className="font-display text-3xl sm:text-4xl font-bold mb-4">{t("inicio.howTitle")}</h2>
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-8">
+            <h2 id="tour-how" className="font-display text-3xl sm:text-4xl font-bold mb-4">{t("inicio.howTitle")}</h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">{t("inicio.howSubtitle")}</p>
           </motion.div>
           <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
@@ -305,28 +318,112 @@ export default function Index() {
         </div>
       </section>
 
+      {/* App — publicidade download */}
+      <section className="relative overflow-hidden border-b border-border/40 bg-gradient-to-br from-primary/[0.07] via-card/40 to-accent/[0.07] py-12 sm:py-14">
+        <div aria-hidden="true" className="pointer-events-none absolute -top-24 right-0 h-72 w-72 rounded-full bg-primary/10 blur-3xl" />
+        <div className="container mx-auto px-4 relative">
+          <div className="grid items-center gap-10 lg:grid-cols-2">
+            <div>
+              <h2 id="tour-app" className="font-display text-3xl sm:text-4xl font-bold mb-4">{t("app.title")}</h2>
+              <p className="text-muted-foreground max-w-xl mb-6">{t("app.subtitle")}</p>
+              <p className="text-xs font-semibold uppercase tracking-wide text-primary mb-5">{t("app.tagline")}</p>
+              <div className="flex flex-wrap items-center gap-3">
+                <a
+                  href="https://play.google.com/store/apps/details?id=com.magictrader.app"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-3 rounded-2xl border border-border/60 bg-card px-5 py-3 transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-lg"
+                >
+                  <span className="grid h-9 w-9 place-items-center rounded-lg bg-gradient-to-b from-[#0facf2] to-[#0e7dd6]">
+                    <Play className="h-4 w-4 fill-white text-white" />
+                  </span>
+                  <span className="flex flex-col text-left leading-tight">
+                    <span className="text-[10px] uppercase tracking-wider text-muted-foreground">{t("app.availableOn")}</span>
+                    <span className="font-display text-base font-bold">{t("app.playStore")}</span>
+                  </span>
+                </a>
+                <a
+                  href="https://play.google.com/store/apps/details?id=com.magictrader.app"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 rounded-2xl border border-border/60 px-5 py-3 text-sm font-semibold text-muted-foreground transition-all hover:border-primary/40 hover:text-foreground"
+                >
+                  <Download className="h-4 w-4" />
+                  {t("app.direct")}
+                </a>
+              </div>
+            </div>
+
+            <div className="relative mx-auto w-[250px]">
+              <div aria-hidden="true" className="absolute inset-0 -z-10 translate-y-6 scale-110 rounded-[2.5rem] bg-gradient-to-br from-primary/30 to-accent/20 blur-2xl" />
+              <div className="rounded-[2.2rem] border border-border/70 bg-card p-2.5 shadow-2xl">
+                <div className="overflow-hidden rounded-[1.7rem] bg-secondary/50">
+                  <div className="flex items-center justify-between px-4 pt-4 pb-3">
+                    <div className="flex items-center gap-1.5">
+                      <span className="h-2 w-2 rounded-full bg-destructive/70" />
+                      <span className="h-2 w-2 rounded-full bg-warning/70" />
+                      <span className="h-2 w-2 rounded-full bg-success/70" />
+                    </div>
+                    <span className="font-display text-[10px] font-bold tracking-[0.2em] text-muted-foreground">TMT</span>
+                    <span className="flex items-center gap-1 text-[10px] font-bold text-success">
+                      <span className="h-1.5 w-1.5 rounded-full bg-success animate-blink" />
+                      AO VIVO
+                    </span>
+                  </div>
+                  <div className="space-y-2 px-3 pb-4">
+                    {[
+                      { pair: "EUR/USD", price: "1.08432", change: 0.12 },
+                      { pair: "XAU/USD", price: "2415.60", change: -0.31 },
+                      { pair: "BTC/USD", price: "63920", change: 1.04 },
+                    ].map((row) => (
+                      <div key={row.pair} className="flex items-center justify-between rounded-xl border border-border/50 bg-card px-3 py-2.5">
+                        <span className="text-[11px] font-semibold text-muted-foreground">{row.pair}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono text-xs font-bold tabular-nums">{row.price}</span>
+                          <span className={`flex items-center gap-0.5 text-[10px] font-bold ${row.change > 0 ? "text-success" : "text-destructive"}`}>
+                            {row.change > 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+                            {row.change > 0 ? "+" : ""}{row.change.toFixed(2)}%
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                    <div className="rounded-xl border border-primary/30 bg-primary/10 px-3 py-2 text-center">
+                      <span className="font-display text-[11px] font-bold text-primary">SINAIS EM DIRETO</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* CTA */}
-      <section className="py-24 relative overflow-hidden">
+      <section className="py-12 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent" />
         <div className="container mx-auto px-4 relative z-10">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="max-w-3xl mx-auto text-center">
             <Crown className="h-16 w-16 text-primary mx-auto mb-6" />
-            <h2 className="font-display text-3xl sm:text-4xl font-bold mb-4">{t("inicio.ctaTitle")}</h2>
+            <h2 id="tour-cta" className="font-display text-3xl sm:text-4xl font-bold mb-4">{t("inicio.ctaTitle")}</h2>
             <p className="text-muted-foreground mb-8">{t("inicio.ctaSubtitle")}</p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Link to="/registro">
-                <Button variant="hero" size="xl">
-                  {t("inicio.ctaStart")}
-                  <Sparkles className="h-5 w-5 ml-2" />
-                </Button>
-              </Link>
+              {!user && (
+                <Link to="/registro">
+                  <Button variant="hero" size="xl">
+                    {t("inicio.ctaStart")}
+                    <Sparkles className="h-5 w-5 ml-2" />
+                  </Button>
+                </Link>
+              )}
               <Link to="/planos">
-                <Button variant="outline" size="lg">{t("inicio.ctaPlansPremium")}</Button>
+                <Button variant={user ? "hero" : "outline"} size="lg">{t("inicio.ctaPlansPremium")}</Button>
               </Link>
             </div>
           </motion.div>
         </div>
       </section>
+
+      <GuidedTour />
     </Layout>
   );
 }
