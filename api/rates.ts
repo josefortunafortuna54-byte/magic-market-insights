@@ -7,10 +7,18 @@
  * (medido: 10-13 s), pelo que o browser acabava a falhar com ERR_FAILED
  * e os precos ficavam congelados sem aviso nenhum ao utilizador.
  *
- * Aqui o pedido e feito uma unica vez, no servidor, e a resposta e
+ * O frankfurter deixou de servir para isto por dois motivos:
+ * 1. `latest` so avanca uma vez por dia, e nos dias em que o snapshot
+ *    ainda e o de ontem a variacao e 0.00% para todo o forex; e
+ * 2. nao tem XAU/USD, e o goldprice.org que se usou a seguir passou a
+ *    responder Forbidden a pedidos de servidor.
+ *
+ * Agora o pedido e feito uma unica vez, no servidor, e a resposta e
  * servida do cache da CDN. O browser passa a fazer 1 pedido por minuto,
  * a partir da propria origem (sem CORS) e sem depender da latencia do
- * upstream.
+ * upstream. Precos e variacao (percentagem desde o fecho anterior, igual
+ * ao que o mobile mostra) vem da API de charts do Yahoo Finance, que nao
+ * precisa de chave: um pedido por par, 9 no total por build.
  *
  * O bitcoin tambem passa por aqui, mas pela Binance: o preco do coingecko
  * que se usava antes ja nao serve, passou a responder 403 por bloqueio
@@ -20,8 +28,8 @@
 
 export const config = { runtime: "edge" };
 
-const UPSTREAM = "https://api.frankfurter.app";
 const BINANCE = "https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT";
+const YAHOO = "https://query1.finance.yahoo.com/v8/finance/chart/";
 
 // O upstream demora segundos. Corta antes de a funcao expirar, para
 // devolver o que houver em cache em vez de um 500.
@@ -34,36 +42,50 @@ const S_MAXAGE = 300;
 const STALE_REVALIDATE = 3600;
 const MEMO_TTL_MS = 4 * 60 * 1000;
 
-type Rates = Record<string, number>;
 type Pair = { price: number; change: number };
 type Payload = { date: string; pairs: Record<string, Pair | null>; stale: boolean };
 
-/**
- * Todos os pares sao derivados de uma unica chamada com base USD.
- * Com `from=USD`, rates[X] e quantos X valem 1 USD, logo os pares
- * invertidos sao 1/rates[X].
- */
-const FOREX: Array<{ id: string; calc: (r: Rates) => number | null }> = [
-  { id: "EUR/USD", calc: (r) => (r.EUR ? 1 / r.EUR : null) },
-  { id: "GBP/USD", calc: (r) => (r.GBP ? 1 / r.GBP : null) },
-  { id: "USD/JPY", calc: (r) => r.JPY ?? null },
-  { id: "AUD/USD", calc: (r) => (r.AUD ? 1 / r.AUD : null) },
-  { id: "EUR/GBP", calc: (r) => (r.EUR && r.GBP ? r.GBP / r.EUR : null) },
-  { id: "USD/CHF", calc: (r) => r.CHF ?? null },
-  { id: "NZD/USD", calc: (r) => (r.NZD ? 1 / r.NZD : null) },
-  { id: "USD/CAD", calc: (r) => r.CAD ?? null },
-  // XAU/USD (ouro) nao existe no feed do frankfurter -- responde 404.
-  // Sem outra fonte de metais, fica fora; antes disto tambem falhava,
-  // mas custava um pedido por minuto.
+// Um pedido por par, todos de graca e sem cookies. O Yahoo devolve o
+// preco atual e a variacao desde o fecho anterior no mesmo payload,
+// pelo que nao ha calculos nem segundas datas. XAU/USD nao existe como
+// par spot no Yahoo (responde 404); usa-se o futuro GC=F, que e a
+// aproximacao gratuita mais proxima do spot.
+const SYMBOLS: Array<{ id: string; symbol: string }> = [
+  { id: "EUR/USD", symbol: "EURUSD=X" },
+  { id: "GBP/USD", symbol: "GBPUSD=X" },
+  { id: "USD/JPY", symbol: "USDJPY=X" },
+  { id: "AUD/USD", symbol: "AUDUSD=X" },
+  { id: "EUR/GBP", symbol: "EURGBP=X" },
+  { id: "USD/CHF", symbol: "USDCHF=X" },
+  { id: "NZD/USD", symbol: "NZDUSD=X" },
+  { id: "USD/CAD", symbol: "USDCAD=X" },
+  { id: "XAU/USD", symbol: "GC=F" },
 ];
 
-async function getJson(url: string): Promise<unknown | null> {
+let memo: { at: number; data: Payload } | null = null;
+
+async function getYahooPair(symbol: string): Promise<Pair | null> {
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), TIMEOUT_MS);
   try {
-    const res = await fetch(url, { signal: ctrl.signal });
+    const res = await fetch(`${YAHOO}${symbol}?interval=1d&range=5d`, {
+      headers: { "user-agent": "Mozilla/5.0" },
+      signal: ctrl.signal,
+    });
     if (!res.ok) return null;
-    return await res.json();
+    const json = (await res.json()) as {
+      chart?: {
+        result?: Array<{ meta?: { regularMarketPrice?: number; regularMarketChangePercent?: number } }>;
+      };
+    };
+    const meta = json.chart?.result?.[0]?.meta;
+    const price = Number(meta?.regularMarketPrice);
+    if (!Number.isFinite(price) || price <= 0) return null;
+    const pct = Number(meta?.regularMarketChangePercent);
+    return {
+      price,
+      change: Number.isFinite(pct) ? Math.round(pct * 100) / 100 : 0,
+    };
   } catch {
     return null;
   } finally {
@@ -71,73 +93,43 @@ async function getJson(url: string): Promise<unknown | null> {
   }
 }
 
-const asRates = (v: unknown): Rates | null => {
-  if (!v || typeof v !== "object") return null;
-  const rates = (v as { rates?: unknown }).rates;
-  if (!rates || typeof rates !== "object") return null;
-  const out: Rates = {};
-  for (const [k, val] of Object.entries(rates as Record<string, unknown>)) {
-    const n = Number(val);
-    if (Number.isFinite(n) && n > 0) out[k] = n;
+async function getBtc(): Promise<Pair | null> {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), TIMEOUT_MS);
+  try {
+    const res = await fetch(BINANCE, { signal: ctrl.signal });
+    if (!res.ok) return null;
+    const j = (await res.json()) as { lastPrice?: unknown; priceChangePercent?: unknown };
+    const price = Number(j.lastPrice);
+    const pct = Number(j.priceChangePercent);
+    if (!Number.isFinite(price) || price <= 0) return null;
+    return { price, change: Number.isFinite(pct) ? Math.round(pct * 100) / 100 : 0 };
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timer);
   }
-  return Object.keys(out).length ? out : null;
-};
-
-function yesterday(): string {
-  const d = new Date();
-  d.setUTCDate(d.getUTCDate() - 1);
-  return d.toISOString().slice(0, 10);
 }
 
-let memo: { at: number; data: Payload } | null = null;
-
 async function build(): Promise<Payload> {
-  // Apenas as series cambiais vem do frankfurter. O bitcoin vem da
-  // Binance, e o preco do coingecko que se usava antes ja nao serve:
-  // passou a responder 403 por bloqueio do Cloudflare, tanto a
-  // pedido de servidor como a pedido de browser. A Binance e uma
-  // exchange, responde com CORS aberto e devolve o preco e a variacao
-  // de 24 h no mesmo pedido.
-  const [hoje, ontem, btc] = await Promise.all([
-    getJson(`${UPSTREAM}/latest?from=USD`),
-    getJson(`${UPSTREAM}/${yesterday()}?from=USD`),
-    getJson(BINANCE),
+  const [quotes, btc] = await Promise.all([
+    Promise.all(SYMBOLS.map(({ symbol }) => getYahooPair(symbol))),
+    getBtc(),
   ]);
 
-  const rHoje = asRates(hoje);
-  const rOntem = asRates(ontem);
   const pairs: Record<string, Pair | null> = {};
+  SYMBOLS.forEach(({ id }, i) => {
+    pairs[id] = quotes[i];
+  });
+  pairs["BTC/USD"] = btc;
 
-  for (const { id, calc } of FOREX) {
-    const price = rHoje ? calc(rHoje) : null;
-    if (price === null) {
-      pairs[id] = null;
-      continue;
-    }
-    const prev = rOntem ? calc(rOntem) : null;
-    pairs[id] = {
-      price,
-      change: prev ? Math.round(((price - prev) / prev) * 10000) / 100 : 0,
-    };
-  }
-
-  const btcLast = Number((btc as { lastPrice?: unknown } | null)?.lastPrice);
-  const btcPct = Number((btc as { priceChangePercent?: unknown } | null)?.priceChangePercent);
-  pairs["BTC/USD"] =
-    Number.isFinite(btcLast) && btcLast > 0
-      ? {
-          price: btcLast,
-          change: Number.isFinite(btcPct) ? Math.round(btcPct * 100) / 100 : 0,
-        }
-      : null;
-
-  // Sem uma das duas series nao da para calcular a variacao, por isso o
-  // payload e marcado como velho para o cliente saber que nao e fresco.
-  const semSerieCompleta = !rHoje || !rOntem || !pairs["BTC/USD"];
+  // Sem nenhum preco o payload e marcado como velho para o cliente saber
+  // que nao e fresco; um par so (ex. o ouro com o mercado fechado) nao
+  // compromete o resto.
   return {
     date: new Date().toISOString().slice(0, 10),
     pairs,
-    stale: semSerieCompleta,
+    stale: !Object.values(pairs).some(Boolean),
   };
 }
 
