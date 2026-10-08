@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { BarChart3, CheckCircle, Clock, Gem, Receipt, RefreshCw, TrendingUp, Users } from "lucide-react";
+import { Activity, BarChart3, CheckCircle, Clock, Gem, Receipt, RefreshCw, TrendingUp, Users } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import * as adminApi from "@/lib/adminApi";
@@ -11,6 +11,7 @@ export interface AdminDashboardStats {
   tp: number;
   sl: number;
   users: number;
+  activeUsers: number;
   premium: number;
   expiring: number;
   pendingReceipts: number;
@@ -36,6 +37,7 @@ export function AdminDashboardTab({ stats, busy, run, onRefresh }: AdminDashboar
 
   const cards: { labelKey: string; value: number | string; color: string; icon: typeof Users }[] = [
     { labelKey: "admin.statUsers", value: stats.users.toLocaleString("pt-PT"), color: "text-primary", icon: Users },
+    { labelKey: "admin.statActiveUsers", value: stats.activeUsers.toLocaleString("pt-PT"), color: "text-success", icon: Activity },
     { labelKey: "admin.statSignalsToday", value: stats.total, color: "text-success", icon: TrendingUp },
     { labelKey: "admin.statWinRate", value: `${hitRate}%`, color: "text-accent", icon: BarChart3 },
     { labelKey: "admin.statPremium", value: stats.premium, color: "text-accent", icon: Gem },
@@ -63,7 +65,7 @@ export function AdminDashboardTab({ stats, busy, run, onRefresh }: AdminDashboar
   return (
     <div className="space-y-8">
       {/* Stat cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-3">
         {cards.map((c) => (
           <div key={c.labelKey} className="glass-card p-4 text-center">
             <c.icon className={`mx-auto mb-1 h-5 w-5 ${c.color}`} />

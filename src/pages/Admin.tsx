@@ -18,6 +18,7 @@ import { AdminBoomTimesTab } from "@/components/admin/AdminBoomTimesTab";
 import { AdminUsersTab } from "@/components/admin/AdminUsersTab";
 import { AdminReceiptsTab } from "@/components/admin/AdminReceiptsTab";
 import { AdminWithdrawalsTab } from "@/components/admin/AdminWithdrawalsTab";
+import { AdminCapitalTab } from "@/components/admin/AdminCapitalTab";
 import { AdminMessagingTab } from "@/components/admin/AdminMessagingTab";
 import { AdminReportsTab } from "@/components/admin/AdminReportsTab";
 import { AdminChannelsTab } from "@/components/admin/AdminChannelsTab";
@@ -26,7 +27,7 @@ import { NotificationBadge } from "@/components/admin/NotificationBadge";
 import { NotificationListModal } from "@/components/admin/NotificationListModal";
 import { SkeletonList } from "@/components/admin/SkeletonList";
 
-type Tab = "dashboard" | "receipts" | "signals" | "boom" | "boom_times" | "posts" | "users" | "withdrawals" | "messaging" | "reports" | "channels" | "announcements";
+type Tab = "dashboard" | "receipts" | "signals" | "boom" | "boom_times" | "posts" | "users" | "withdrawals" | "capital" | "messaging" | "reports" | "channels" | "announcements";
 
 const TABS: { key: Tab; labelKey: string }[] = [
   { key: "dashboard", labelKey: "admin.tabDashboard" },
@@ -37,6 +38,7 @@ const TABS: { key: Tab; labelKey: string }[] = [
   { key: "posts", labelKey: "admin.tabPosts" },
   { key: "users", labelKey: "admin.tabUsers" },
   { key: "withdrawals", labelKey: "admin.tabWithdrawals" },
+  { key: "capital", labelKey: "admin.tabCapital" },
   { key: "messaging", labelKey: "admin.tabMessaging" },
   { key: "reports", labelKey: "admin.tabReports" },
   { key: "channels", labelKey: "admin.tabChannels" },
@@ -57,7 +59,7 @@ export default function Admin() {
   const [boomHours, setBoomHours] = useState<AdminRow[]>([]);
   const [usersList, setUsersList] = useState<AdminRow[]>([]);
   const [stats, setStats] = useState<AdminDashboardStats>({
-    total: 0, active: 0, tp: 0, sl: 0, users: 0, premium: 0, expiring: 0, pendingReceipts: 0,
+    total: 0, active: 0, tp: 0, sl: 0, users: 0, activeUsers: 0, premium: 0, expiring: 0, pendingReceipts: 0,
   });
   const [tab, setTab] = useState<Tab>("dashboard");
   const [notifications, setNotifications] = useState<adminApi.AdminNotification[]>([]);
@@ -78,12 +80,42 @@ export default function Admin() {
   const loadData = async () => {
     const { data: signalsData } = await supabase.from("signals").select("*").order("created_at", { ascending: false }).limit(100);
     setSignals(signalsData || []);
-    const { data: usersData } = await supabase.rpc("get_all_users");
-    setUsersList(usersData || []);
-    const { data: subsResult } = await supabase.from("subscriptions").select("*");
-    setSubsData(subsResult || []);
-    const { data: usersCountData } = await supabase.rpc("get_users_count");
-    const usersCount = usersCountData || 0;
+    // O RPC get_all_users foi revogado de authenticated (20260809000000) e o
+    // select directo de subscriptions só devolve a própria linha (RLS own).
+    // A edge function list_users usa service_role e devolve users + estado da
+    // subscrição; é ela que alimenta a lista e as estatísticas.
+    let userRows: AdminRow[] = [];
+    let subsRows: AdminRow[] = [];
+    let usersCount = 0;
+    let activeUsers = 0;
+    try {
+      const users = await adminApi.listUsers();
+      const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
+      const now = Date.now();
+      userRows = users.map((u) => ({
+        id: u.id,
+        email: u.email,
+        created_at: u.created_at,
+        last_sign_in: u.last_sign_in_at ?? null,
+        role: u.role ?? "free",
+        subscription_status: u.subscription_status ?? null,
+        subscription_expires: u.subscription_expires ?? null,
+      }));
+      subsRows = users.map((u) => ({
+        user_id: u.id,
+        status: u.subscription_status ?? null,
+        current_period_end: u.subscription_expires ?? null,
+      }));
+      usersCount = users.length;
+      activeUsers = users.filter((u) => {
+        const ts = u.last_sign_in_at ? new Date(u.last_sign_in_at).getTime() : Number.NaN;
+        return Number.isFinite(ts) && now - ts < THIRTY_DAYS_MS;
+      }).length;
+    } catch (e: unknown) {
+      console.warn("[admin] listUsers error:", e instanceof Error ? e.message : e);
+    }
+    setUsersList(userRows);
+    setSubsData(subsRows);
     const { data: boomData } = await supabase.from("boom_hours").select("*").order("created_at", { ascending: true });
     setBoomHours(boomData || []);
     const { data: postsData } = await supabase.from("posts").select("*").order("created_at", { ascending: false }).limit(20);
@@ -108,6 +140,7 @@ export default function Admin() {
       tp: s.filter((x) => x.status === "tp").length,
       sl: s.filter((x) => x.status === "sl").length,
       users: usersCount || 0,
+      activeUsers,
       premium,
       expiring,
       pendingReceipts,
@@ -208,6 +241,7 @@ export default function Admin() {
           {tab === "posts" && <AdminComunidadeTab posts={posts} onRefresh={loadData} />}
           {tab === "users" && <AdminUsersTab usersList={usersList} subsData={subsData} onRefresh={loadData} />}
           {tab === "withdrawals" && <AdminWithdrawalsTab />}
+          {tab === "capital" && <AdminCapitalTab />}
           {tab === "messaging" && <AdminMessagingTab />}
           {tab === "reports" && <AdminReportsTab />}
           {tab === "channels" && <AdminChannelsTab />}
