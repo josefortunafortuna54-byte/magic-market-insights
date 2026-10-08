@@ -15,6 +15,8 @@ export interface StoreProduct {
   color: string;
   rating?: number;
   users?: number;
+  capacity?: number;
+  seatsLeft?: number;
 }
 
 export const STORE_PRODUCTS_STORAGE_KEY = "store_products_v1";
@@ -69,6 +71,8 @@ export const DEFAULT_STORE_PRODUCTS: StoreProduct[] = [
     color: "#96CEB4",
     rating: 4.9,
     users: 56,
+    capacity: 12,
+    seatsLeft: 4,
   },
   {
     id: "mentoria-grupo",
@@ -81,6 +85,8 @@ export const DEFAULT_STORE_PRODUCTS: StoreProduct[] = [
     color: "#FFEAA7",
     rating: 4.5,
     users: 234,
+    capacity: 40,
+    seatsLeft: 18,
   },
   {
     id: "ebook-fundamentos",
@@ -133,6 +139,8 @@ function fromRow(r: Record<string, unknown>): StoreProduct {
     color: (r.color as string) ?? "#7C3AED",
     rating: r.rating != null ? Number(r.rating) : undefined,
     users: r.users_count != null ? Number(r.users_count) : undefined,
+    capacity: r.capacity != null ? Number(r.capacity) : undefined,
+    seatsLeft: r.seats_left != null ? Number(r.seats_left) : undefined,
   };
 }
 

@@ -143,6 +143,37 @@ export default function Loja() {
       </span>
     );
 
+  const Seats = ({ item }: { item: StoreProduct }) => {
+    if (item.category !== "mentorias" || item.capacity == null || item.seatsLeft == null) return null;
+    const soldOut = item.seatsLeft <= 0;
+    const pct =
+      item.capacity > 0
+        ? Math.min(100, Math.max(0, ((item.capacity - item.seatsLeft) / item.capacity) * 100))
+        : 0;
+    return (
+      <div className="mt-2">
+        <div className="flex items-center justify-between text-[11px]">
+          <span
+            className={
+              soldOut ? "font-extrabold text-destructive" : "font-semibold text-amber-400"
+            }
+          >
+            {soldOut
+              ? t("store.soldOut")
+              : t("store.seatsLeft", { count: item.seatsLeft, total: item.capacity })}
+          </span>
+          <span className="text-[10px] text-muted-foreground">{Math.round(pct)}%</span>
+        </div>
+        <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-muted">
+          <div
+            className={`h-full rounded-full ${soldOut ? "bg-destructive" : "bg-amber-400"}`}
+            style={{ width: `${pct}%` }}
+          />
+        </div>
+      </div>
+    );
+  };
+
   return (
     <Layout noFooter>
       <section className="pt-6 pb-24">
@@ -259,6 +290,7 @@ export default function Loja() {
                         </span>
                         <Price item={item} locked={locked} />
                       </div>
+                      <Seats item={item} />
                     </button>
                   );
                 })}
@@ -350,6 +382,7 @@ export default function Loja() {
                       </span>
                       <Price item={item} locked={locked} />
                     </div>
+                    <Seats item={item} />
                   </button>
                 );
               })}
@@ -418,6 +451,7 @@ export default function Loja() {
                 <span className="flex-1" />
                 <Price item={selectedItem} locked={isLocked(selectedItem)} />
               </div>
+              <Seats item={selectedItem} />
 
               <p className="mt-4 text-sm leading-[21px] text-muted-foreground">
                 {selectedItem.description}
