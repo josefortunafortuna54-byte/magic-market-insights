@@ -894,10 +894,10 @@
     "riskReturn": "Риск/Доходность",
     "smcSetup": "Сет SMC",
     "statusActive": "● Активен",
-    "statusSl": "✗ Stop Loss",
-    "statusTp": "✓ Take Profit",
-    "stopLoss": "Stop Loss",
-    "takeProfit": "Take Profit"
+    "statusSl": "✗ Стоп-лосс",
+    "statusTp": "✓ Тейк-профит",
+    "stopLoss": "Стоп-лосс",
+    "takeProfit": "Тейк-профит"
   },
   "planos": {
     "title": "Тарифы",
@@ -1035,7 +1035,7 @@
     "losses": "Убытки",
     "noTrades": "Сделок нет",
     "noTradesHint": "Добавьте первую сделку, чтобы увидеть статистику",
-    "profitFactor": "Profit Factor",
+    "profitFactor": "Коэффициент прибыли",
     "recentTrades": "Последние сделки",
     "showAll": "Показать все ({{count}})",
     "showLess": "Показать меньше",

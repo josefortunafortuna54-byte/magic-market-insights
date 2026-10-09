@@ -385,7 +385,7 @@
     "nameSaved": "تم تحديث الاسم",
     "memberSince": "عضو منذ {{date}}",
     "adminArea": "منطقة الإدارة",
-    "adminBadge": "ADMIN",
+    "adminBadge": "مدير",
     "sectionAdmin": "الإدارة",
     "signInSubtitle": "ادخل إلى حسابك لعرض ملفك الشخصي وإدارة رأس المال.",
     "usernameClaimError": "تعذّر حجز الاسم الفريد.",
