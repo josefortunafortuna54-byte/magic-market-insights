@@ -239,14 +239,14 @@ export function SignalCard({
       <div className="grid grid-cols-3 gap-3 mb-4">
         <div className="bg-secondary/50 rounded-lg p-3 text-center">
           <p className="text-xs text-primary mb-1">{t('sinal.entry')}</p>
-          <p className="font-mono font-semibold text-sm">{signal.entry.toFixed(5)}</p>
+          <p className="font-mono font-semibold text-xs sm:text-sm break-all sm:break-normal overflow-x-auto px-0.5">{signal.entry.toFixed(5)}</p>
         </div>
         <div className="bg-destructive/10 rounded-lg p-3 text-center">
           <p className="text-xs text-destructive mb-1 flex items-center justify-center gap-1">
             <Shield className="h-3 w-3" />
             SL
           </p>
-          <p className="font-mono font-semibold text-sm text-destructive">{signal.stopLoss.toFixed(5)}</p>
+          <p className="font-mono font-semibold text-xs sm:text-sm break-all sm:break-normal overflow-x-auto px-0.5 text-destructive">{signal.stopLoss.toFixed(5)}</p>
           <p className="text-[10px] text-destructive/70">{slPips.toFixed(1)}p</p>
         </div>
         <div className="bg-success/10 rounded-lg p-3 text-center">
@@ -254,7 +254,7 @@ export function SignalCard({
             <Target className="h-3 w-3" />
             TP
           </p>
-          <p className="font-mono font-semibold text-sm text-success">{signal.takeProfit.toFixed(5)}</p>
+          <p className="font-mono font-semibold text-xs sm:text-sm break-all sm:break-normal overflow-x-auto px-0.5 text-success">{signal.takeProfit.toFixed(5)}</p>
           <p className="text-[10px] text-success/70">{tpPips.toFixed(1)}p</p>
         </div>
       </div>
