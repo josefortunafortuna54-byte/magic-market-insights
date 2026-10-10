@@ -1,7 +1,4 @@
-import { normalizeAuthCallbackUrl } from "./lib/authUrlNormalizer";
 import { createRoot } from "react-dom/client";
-
-normalizeAuthCallbackUrl();
 import { initI18n } from "@/lib/i18n";
 import App from "./App.tsx";
 import "./index.css";
