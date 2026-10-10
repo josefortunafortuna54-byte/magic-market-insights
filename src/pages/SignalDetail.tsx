@@ -278,20 +278,20 @@ export default function SignalDetail() {
                     <p className="text-xs text-muted-foreground mb-1 flex items-center justify-center gap-1">
                       <Shield className="h-3 w-3 text-destructive" /> {t("sinal.stopLoss")}
                     </p>
-                    <p className="font-mono text-lg font-bold text-destructive">{signal.stopLoss.toFixed(5)}</p>
+                    <p className="font-mono text-sm sm:text-lg font-bold text-destructive tracking-tight tabular-nums whitespace-nowrap overflow-x-auto">{signal.stopLoss.toFixed(5)}</p>
                     <p className="text-xs text-destructive/70 mt-1">{t("components.signalCard.pips", { count: slPips.toFixed(1) })}</p>
                   </div>
                   <div className="glass-card p-4 text-center border-primary/20 bg-primary/5">
                     <p className="text-xs text-primary mb-1 flex items-center justify-center gap-1">
                       <BarChart3 className="h-3 w-3" /> {t("sinal.entry")}
                     </p>
-                    <p className="font-mono text-lg font-bold text-foreground">{signal.entry.toFixed(5)}</p>
+                    <p className="font-mono text-sm sm:text-lg font-bold text-foreground tracking-tight tabular-nums whitespace-nowrap overflow-x-auto">{signal.entry.toFixed(5)}</p>
                   </div>
                   <div className="glass-card p-4 text-center">
                     <p className="text-xs text-muted-foreground mb-1 flex items-center justify-center gap-1">
                       <Target className="h-3 w-3 text-success" /> {t("sinal.takeProfit")}
                     </p>
-                    <p className="font-mono text-lg font-bold text-success">{signal.takeProfit.toFixed(5)}</p>
+                    <p className="font-mono text-sm sm:text-lg font-bold text-success tracking-tight tabular-nums whitespace-nowrap overflow-x-auto">{signal.takeProfit.toFixed(5)}</p>
                     <p className="text-xs text-success/70 mt-1">{t("components.signalCard.pips", { count: tpPips.toFixed(1) })}</p>
                   </div>
                   <div className="glass-card p-4 text-center">
