@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
-import { Sparkles, Mail, Lock, Eye, EyeOff, AlertCircle, CheckCircle } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, AlertCircle, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,6 +19,7 @@ export default function Registro() {
   const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  const [showEmailForm, setShowEmailForm] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -85,18 +86,14 @@ export default function Registro() {
       <section className="min-h-[calc(100vh-4rem)] flex items-center justify-center py-12">
         <div className="container mx-auto px-4">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-md mx-auto">
-            <div className="text-center mb-8">
-              <Link to="/" className="inline-flex items-center gap-2 mb-6">
-                <Sparkles className="h-8 w-8 text-primary" />
-                <span className="font-display text-xl font-bold">The Magic Trader</span>
-              </Link>
-              <h1 className="font-display text-2xl font-bold mb-2">{t('auth.createAccount')}</h1>
-              <p className="text-muted-foreground">{t('auth.registerSubtitle')}</p>
+            <div className="text-center mb-6">
+              <h1 className="font-display text-2xl font-bold mb-1">{t('auth.createAccount')}</h1>
+              <p className="text-muted-foreground text-sm">{t('auth.registerSubtitle')}</p>
             </div>
 
-            <div className="glass-card p-8">
+            <div className="glass-card p-6">
               <button onClick={handleGoogle} disabled={googleLoading}
-                className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-xl border border-border/60 bg-secondary/30 hover:bg-secondary/60 transition-all text-sm font-medium mb-6 disabled:opacity-50">
+                className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-xl border border-border/60 bg-secondary/30 hover:bg-secondary/60 transition-all text-sm font-medium mb-3 disabled:opacity-50">
                 {googleLoading ? (
                   <div className="h-4 w-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
                 ) : (
@@ -110,7 +107,17 @@ export default function Registro() {
                 {googleLoading ? t('auth.redirecting') : t('auth.registerWithGoogle')}
               </button>
 
-              <div className="flex items-center gap-3 mb-6">
+              <button
+                type="button"
+                onClick={() => { setError(""); setShowEmailForm(true); }}
+                disabled={showEmailForm}
+                className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-xl border border-border/60 bg-secondary/30 hover:bg-secondary/60 transition-all text-sm font-medium mb-3 disabled:opacity-50"
+              >
+                <Mail className="h-4 w-4 text-primary" />
+                {t('auth.continueEmail')}
+              </button>
+
+              <div className="flex items-center gap-3 mb-4">
                 <div className="flex-1 h-px bg-border/50" />
                 <span className="text-xs text-muted-foreground">{t('auth.orWithEmail')}</span>
                 <div className="flex-1 h-px bg-border/50" />
@@ -123,36 +130,38 @@ export default function Registro() {
                 </div>
               )}
 
-              <form onSubmit={handleSubmit} className="space-y-5">
-                <div className="space-y-2">
-                  <Label htmlFor="email">{t('auth.email')}</Label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input id="email" type="email" placeholder={t('auth.emailPlaceholder')}
-                      value={email} onChange={(e) => setEmail(e.target.value)}
-                      className="pl-10" required />
+              {showEmailForm && (
+                <form onSubmit={handleSubmit} className="space-y-4 animate-slide-up">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="email">{t('auth.email')}</Label>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input id="email" type="email" placeholder={t('auth.emailPlaceholder')}
+                        value={email} onChange={(e) => setEmail(e.target.value)}
+                        className="pl-10" required autoComplete="email" />
+                    </div>
                   </div>
-                </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="password">{t('auth.password')}</Label>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input id="password" type={showPassword ? "text" : "password"}
-                      placeholder={t('auth.passwordMinPlaceholder')} value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      className="pl-10 pr-10" required />
-                    <button type="button" onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
-                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    </button>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="password">{t('auth.password')}</Label>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input id="password" type={showPassword ? "text" : "password"}
+                        placeholder={t('auth.passwordMinPlaceholder')} value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        className="pl-10 pr-10" required autoComplete="new-password" />
+                      <button type="button" onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
+                    </div>
                   </div>
-                </div>
 
-                <Button type="submit" variant="hero" className="w-full" disabled={loading}>
-                  {loading ? t('auth.creatingAccount') : t('auth.createAccount')}
-                </Button>
-              </form>
+                  <Button type="submit" variant="hero" className="w-full" disabled={loading}>
+                    {loading ? t('auth.creatingAccount') : t('auth.createAccount')}
+                  </Button>
+                </form>
+              )}
 
               <div className="mt-6 text-center text-sm">
                 <span className="text-muted-foreground">{t('auth.hasAccount')}</span>{" "}
