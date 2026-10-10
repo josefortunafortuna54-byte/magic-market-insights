@@ -83,15 +83,15 @@ export default function Registro() {
 
   return (
     <Layout>
-      <section className="min-h-[calc(100vh-4rem)] flex items-center justify-center py-12">
+      <section className="min-h-[calc(100vh-4rem)] flex items-start justify-center pt-6 pb-12">
         <div className="container mx-auto px-4">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-md mx-auto">
-            <div className="text-center mb-6">
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="max-w-md mx-auto w-full">
+            <div className="text-center mb-4">
               <h1 className="font-display text-2xl font-bold mb-1">{t('auth.createAccount')}</h1>
               <p className="text-muted-foreground text-sm">{t('auth.registerSubtitle')}</p>
             </div>
 
-            <div className="glass-card p-6">
+            <div className="glass-card p-4">
               <button onClick={handleGoogle} disabled={googleLoading}
                 className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-xl border border-border/60 bg-secondary/30 hover:bg-secondary/60 transition-all text-sm font-medium mb-3 disabled:opacity-50">
                 {googleLoading ? (

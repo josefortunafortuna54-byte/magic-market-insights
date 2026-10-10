@@ -63,23 +63,23 @@ export default function Login() {
 
   return (
     <Layout>
-      <section className="min-h-[calc(100vh-4rem)] flex items-center justify-center py-12">
+      <section className="min-h-[calc(100vh-4rem)] flex items-start justify-center pt-6 pb-12">
         <div className="container mx-auto px-4">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-md mx-auto">
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="max-w-md mx-auto w-full">
 
             {/* Header */}
-            <div className="text-center mb-6">
+            <div className="text-center mb-4">
               <h1 className="font-display text-2xl font-bold mb-1">{t('auth.loginTitle')}</h1>
               <p className="text-muted-foreground text-sm">{t('auth.loginSubtitle')}</p>
             </div>
 
-            <div className="glass-card p-6">
+            <div className="glass-card p-4">
 
               {/* Botão Google */}
               <button
                 onClick={handleGoogle}
                 disabled={googleLoading}
-                className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-xl border border-border/60 bg-secondary/30 hover:bg-secondary/60 transition-all text-sm font-medium mb-3 disabled:opacity-50"
+                className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-xl border border-border/60 bg-secondary/30 hover:bg-secondary/60 transition-all text-sm font-medium mb-2 disabled:opacity-50"
               >
                 {googleLoading ? (
                   <div className="h-4 w-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
@@ -98,7 +98,7 @@ export default function Login() {
               <button
                 onClick={() => { setError(""); setWhatsappOpen(true); }}
                 disabled={whatsappOpen}
-                className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-xl border border-border/60 hover:bg-secondary/40 transition-all text-sm font-medium mb-3 disabled:opacity-50"
+                className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-xl border border-border/60 hover:bg-secondary/40 transition-all text-sm font-medium mb-2 disabled:opacity-50"
               >
                 <MessageCircle className="h-4 w-4 text-[#25D366]" />
                 {t('auth.enterWhatsapp')}
@@ -108,7 +108,7 @@ export default function Login() {
               <button
                 onClick={() => { setError(""); setUsernameOpen(true); }}
                 disabled={usernameOpen}
-                className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-xl border border-border/60 hover:bg-secondary/40 transition-all text-sm font-medium mb-3 disabled:opacity-50"
+                className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-xl border border-border/60 hover:bg-secondary/40 transition-all text-sm font-medium mb-2 disabled:opacity-50"
               >
                 <UserCircle className="h-4 w-4 text-primary" />
                 {t('auth.enterUsername')}
@@ -119,14 +119,14 @@ export default function Login() {
                 type="button"
                 onClick={() => { setError(""); setShowEmailForm(true); }}
                 disabled={showEmailForm}
-                className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-xl border border-border/60 bg-secondary/30 hover:bg-secondary/60 transition-all text-sm font-medium mb-3 disabled:opacity-50"
+                className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-xl border border-border/60 bg-secondary/30 hover:bg-secondary/60 transition-all text-sm font-medium mb-2 disabled:opacity-50"
               >
                 <Mail className="h-4 w-4 text-primary" />
                 {t('auth.continueEmail')}
               </button>
 
               {/* Divider */}
-              <div className="flex items-center gap-3 mb-4">
+              <div className="flex items-center gap-3 mb-3">
                 <div className="flex-1 h-px bg-border/50" />
                 <span className="text-xs text-muted-foreground">{t('auth.orWithEmail')}</span>
                 <div className="flex-1 h-px bg-border/50" />
@@ -134,7 +134,7 @@ export default function Login() {
 
               {/* Erro */}
               {error && (
-                <div className="flex items-center gap-2 p-3 rounded-lg bg-destructive/10 border border-destructive/30 text-destructive text-sm mb-4">
+                <div className="flex items-center gap-2 p-3 rounded-lg bg-destructive/10 border border-destructive/30 text-destructive text-sm mb-3">
                   <AlertCircle className="h-4 w-4 shrink-0" />
                   {error}
                 </div>
