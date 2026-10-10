@@ -51,7 +51,7 @@ export default function Login() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${window.location.origin}/analises`,
+          redirectTo: `${window.location.hostname === "localhost" ? "http://localhost:8080" : window.location.origin}/analises`,
         },
       });
       if (error) throw error;
