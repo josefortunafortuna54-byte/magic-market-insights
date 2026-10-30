@@ -8,6 +8,7 @@ import { Layout } from "@/components/layout/Layout";
 import { AdSlot } from "@/components/ads/AdSlot";
 import { SignalCard } from "@/components/signals/SignalCard";
 import { HeroSignalTerminal } from "@/components/home/HeroSignalTerminal";
+import { HeroSubtitleRotator } from "@/components/home/HeroSubtitleRotator";
 import { GuidedTour } from "@/components/tour/GuidedTour";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
@@ -95,14 +96,13 @@ export default function Index() {
                 <span className="text-primary">{t("inicio.heroTitle2")}</span>
               </motion.h1>
 
-              <motion.p
+              <motion.div
                 initial={reduceMotion ? false : { opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={reduceMotion ? { duration: 0 } : { duration: 0.4, delay: 0.12 }}
-                className="mt-6 max-w-xl text-base text-muted-foreground sm:text-lg"
               >
-                {t("inicio.heroSubtitle")}
-              </motion.p>
+                <HeroSubtitleRotator />
+              </motion.div>
 
               <motion.div
                 initial={reduceMotion ? false : { opacity: 0, y: 16 }}
