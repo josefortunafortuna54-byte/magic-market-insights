@@ -1,0 +1,58 @@
+# EAS uses this file INSTEAD of .gitignore when present.
+# Keep it a superset of .gitignore plus extra build-irrelevant files.
+
+# dependencies
+node_modules/
+
+# Expo
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# Native
+.kotlin/
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+/ios
+/android
+
+# Metro
+.metro-health-check*
+
+# debug
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# local build logs / automation artifacts
+expo-web.err.log
+expo-web.out.log
+.playwright-mcp/
+.superpawers/
+.vscode/
+.claude/
+docs/
+
+# local env files
+.env
+.env*.local
+
+# supabase cli
+supabase/.temp/
+
+# typescript
+*.tsbuildinfo
+
+# backups / scratch
+*.bak
+*.log
+example
+
+# macOS
+.DS_Store
+*.pem
