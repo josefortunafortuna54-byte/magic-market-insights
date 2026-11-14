@@ -20,32 +20,36 @@ export default function Privacidade() {
                 <h2 className="font-display text-lg font-semibold text-foreground mb-2">1. Dados Recolhidos</h2>
                 <p>
                   Recolhemos apenas os dados necessários para o funcionamento da plataforma: endereço de email,
-                  nome de utilizador (quando fornecido via Google OAuth) e dados de pagamento processados
-                  diretamente pela Stripe.
+                  nome e NomeUnico, foto de perfil (quando fornecida), conteúdo que publicas na Comunidade
+                  (mensagens, imagens e áudio), token de notificações e registos técnicos de utilização. Os dados
+                  de pagamento são tratados pelos prestadores de pagamento no site oficial; a app móvel não
+                  processa pagamentos.
                 </p>
               </div>
 
               <div>
                 <h2 className="font-display text-lg font-semibold text-foreground mb-2">2. Uso dos Dados</h2>
                 <p>
-                  Os seus dados são utilizados exclusivamente para: autenticação, gestão da sua subscrição,
-                  envio de notificações relacionadas com a sua conta, e melhoria da experiência na plataforma.
+                  Os teus dados são utilizados para autenticação, gestão da conta e da subscrição, envio de
+                  notificações, funcionamento da Comunidade, suporte e segurança da plataforma.
                 </p>
               </div>
 
               <div>
                 <h2 className="font-display text-lg font-semibold text-foreground mb-2">3. Armazenamento</h2>
                 <p>
-                  Os dados são armazenados de forma segura através do Supabase (PostgreSQL) com encriptação
-                  em trânsito e em repouso. Não armazenamos dados de pagamento diretamente.
+                  Os dados são armazenados de forma segura através do Supabase (PostgreSQL) com encriptação em
+                  trânsito e em repouso. Comprovativos de pagamento, quando enviados, ficam em armazenamento
+                  privado. Não armazenamos dados de cartões.
                 </p>
               </div>
 
               <div>
                 <h2 className="font-display text-lg font-semibold text-foreground mb-2">4. Partilha de Dados</h2>
                 <p>
-                  Não partilhamos, vendemos ou transmitimos os seus dados pessoais a terceiros, exceto
-                  quando exigido por lei ou para o processamento de pagamentos através do Stripe.
+                  Não vendemos nem partilhamos os teus dados pessoais com terceiros, exceto com prestadores que
+                  nos ajudam a operar a plataforma (alojamento, autenticação, notificações e pagamentos no site)
+                  ou quando exigido por lei.
                 </p>
               </div>
 
@@ -60,8 +64,12 @@ export default function Privacidade() {
               <div>
                 <h2 className="font-display text-lg font-semibold text-foreground mb-2">6. Os Seus Direitos</h2>
                 <p>
-                  Pode solicitar a eliminação dos seus dados pessoais a qualquer momento contactando-nos.
-                  Tem direito de acesso, retificação e eliminação dos seus dados pessoais.
+                  Podes apagar a tua conta em{" "}
+                  <Link to="/apagar-conta" className="text-primary underline">
+                    /apagar-conta
+                  </Link>{" "}
+                  ou na app em Perfil → Apagar conta. A eliminação remove o perfil, conteúdo e ficheiros
+                  associados e não pode ser revertida. Tens também direito de acesso e retificação dos teus dados.
                 </p>
               </div>
 
@@ -71,9 +79,16 @@ export default function Privacidade() {
                   Para questões sobre privacidade, contacte-nos através do email de suporte da plataforma.
                 </p>
               </div>
+
+              <div>
+                <h2 className="font-display text-lg font-semibold text-foreground mb-2">8. Menores</h2>
+                <p>
+                  A plataforma destina-se a maiores de 18 anos. Não recolhemos intencionalmente dados de menores.
+                </p>
+              </div>
             </div>
 
-            <p className="text-xs text-muted-foreground mt-4">Última atualização: Janeiro 2026</p>
+            <p className="text-xs text-muted-foreground mt-4">Última atualização: Novembro 2026</p>
           </motion.div>
         </div>
       </section>

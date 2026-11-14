@@ -72,6 +72,10 @@ export default function LoginScreen() {
     if (user) router.replace('/(tabs)/inicio');
   }, [user, router]);
 
+  useEffect(() => {
+    if (oauthError) setError(oauthError);
+  }, [oauthError]);
+
   if (user) return null;
 
   const loginGoogle = async () => {

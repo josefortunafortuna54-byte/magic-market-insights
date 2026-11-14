@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Linking, Pressable, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { AppButton, AppText, Badge, Screen } from '@/components/ui';
@@ -10,6 +10,7 @@ import { useTheme } from '@/hooks/useTheme';
 import { useSubscription } from '@/hooks/useSubscription';
 import { useTranslation } from 'react-i18next';
 import { PLANS, PRICES, planLabel, type Currency, type PlanId } from '@/lib/plans';
+import { webDepositUrl } from '@/lib/env';
 
 type PlanKey =
   | 'planos.featureFree.0'
@@ -147,7 +148,7 @@ export default function PlanosScreen() {
       return;
     }
     if (isPremium && activePlan === plan) return;
-    router.push({ pathname: '/depositos', params: { plan, currency } });
+    Linking.openURL(webDepositUrl(plan, currency));
   };
 
   const planButton = (plan: Exclude<PlanId, 'free'>) => {

@@ -287,7 +287,16 @@
     "usernameHint": "A unique handle for your profile and mentions. It is not used to sign in.",
     "usernameReserve": "Reserve NomeÚnico",
     "usernameReserved": "Reserved: @{{username}}",
-    "usernameSection": "NomeÚnico"
+    "usernameSection": "NomeÚnico",
+    "sectionDanger": "DANGER ZONE",
+    "deleteAccount": "Delete account",
+    "deleteAccountTitle": "Delete account",
+    "deleteAccountBody": "This action is permanent. Your profile, history, content and files will be deleted and cannot be recovered.",
+    "deleteAccountWarning": "If you have an active subscription, cancel it on the website first. Deleting your account does not refund payments already made.",
+    "deleteAccountConfirm": "Delete permanently",
+    "deleteAccountCancel": "Cancel",
+    "deleteAccountError": "Could not delete your account. Please try again.",
+    "deleteAccountSuccess": "Account deleted."
   },
   "language": {
     "title": "Language"
@@ -678,9 +687,10 @@
   },
   "capital": {
     "title": "Capital Management",
-    "subtitle": "Track your investment and returns managed by our professional team.",
+    "subtitle": "Simulate your capital strategy and track progress for educational purposes.",
+    "simulationDisclaimer": "Educational simulation. This area does not move real money and the values shown are not financial advice.",
     "lockTitle": "Premium Capital Management",
-    "lockDesc": "Track your investments and profits managed by our professional team.",
+    "lockDesc": "Track your capital simulation and educational progress.",
     "loading": "Loading…",
     "currentBalance": "CURRENT BALANCE",
     "active": "ACTIVE",
@@ -808,9 +818,11 @@
     "pipsAuto": "Pips calculated automatically"
   },
   "depositos": {
-    "title": "Deposits & Withdrawals",
+    "title": "Wallet",
     "balance": "BALANCE",
     "balanceSub": "Available in your wallet",
+    "webTitle": "Subscriptions and payments on the website",
+    "webDesc": "Plan purchases and payment management are handled only on the official website. This app does not process payments.",
     "tabDeposit": "Deposit",
     "tabWithdraw": "Withdraw",
     "choosePlan": "Choose your plan",
@@ -1024,7 +1036,7 @@
       "s4Title": "4. User Account",
       "s4Body": "The user is responsible for keeping their access credentials confidential. A premium account is personal and non-transferable.",
       "s5Title": "5. Payments",
-      "s5Body": "Premium subscriptions are processed via Stripe. Plans are automatically renewed at the end of each billing period, unless cancelled before the renewal date.",
+      "s5Body": "Premium subscriptions are purchased only on the official website, through the payment providers indicated. Plans renew automatically at the end of each billing period unless cancelled before the renewal date. The mobile app does not process payments.",
       "s6Title": "6. Intellectual Property",
       "s6Body": "All content on the platform, including but not limited to texts, graphics, logos, software and analysis, is owned by The Magic Trader and is protected by copyright.",
       "s7Title": "7. Changes",
@@ -1032,19 +1044,21 @@
     },
     "privacidadeDoc": {
       "s1Title": "1. Data Collected",
-      "s1Body": "We only collect the data necessary for the platform to function: email address, username (when provided via Google OAuth) and payment data processed directly by Stripe.",
+      "s1Body": "We only collect the data necessary for the platform to function: email address, name and NomeUnico, profile photo (when provided), content you publish in the Community (messages, images and audio), notification token and technical usage logs. Payment data is handled exclusively by payment providers on the official website; the app does not process payments.",
       "s2Title": "2. Use of Data",
-      "s2Body": "Your data is used exclusively for: authentication, managing your subscription, sending notifications related to your account, and improving the experience on the platform.",
+      "s2Body": "Your data is used for authentication, account and subscription management, sending notifications, running the Community, support and platform security.",
       "s3Title": "3. Storage",
-      "s3Body": "Data is securely stored via Supabase (PostgreSQL) with encryption in transit and at rest. We do not store payment data directly.",
+      "s3Body": "Data is securely stored via Supabase (PostgreSQL) with encryption in transit and at rest. Payment proofs, when submitted, are kept in private storage. We do not store card data.",
       "s4Title": "4. Data Sharing",
-      "s4Body": "We do not share, sell or transmit your personal data to third parties, except when required by law or for payment processing through Stripe.",
+      "s4Body": "We do not sell or share your personal data with third parties, except with providers that help us operate the platform (hosting, authentication, notifications and payments on the website) or when required by law.",
       "s5Title": "5. Cookies",
       "s5Body": "We use essential cookies for the platform to function and authentication cookies managed by Supabase. We do not use third-party tracking cookies.",
       "s6Title": "6. Your Rights",
-      "s6Body": "You can request the deletion of your personal data at any time by contacting us. You have the right to access, rectify and delete your personal data.",
+      "s6Body": "You can delete your account directly in the app under Profile > Delete account, or at https://the-magic-trader.vercel.app/apagar-conta. Deletion removes your profile, content and associated files and cannot be undone. You also have the right to access and rectify your data.",
       "s7Title": "7. Contact",
-      "s7Body": "For privacy questions, contact us through the platform's support email."
+      "s7Body": "For privacy questions, contact us through the platform's support email.",
+      "s8Title": "8. Minors",
+      "s8Body": "The platform is intended for people aged 18 and over. We do not knowingly collect data from minors."
     },
     "avisoRiscoDoc": {
       "intro": "Trading financial products involves significant risks and is not suitable for all investors. You should carefully consider your investment objectives, experience level and risk tolerance.",

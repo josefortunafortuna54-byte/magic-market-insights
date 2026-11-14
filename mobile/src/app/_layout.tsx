@@ -1,15 +1,14 @@
 import { useEffect } from 'react';
 import { AppState } from 'react-native';
-import { Stack, useRouter } from 'expo-router';
+import { Stack } from 'expo-router';
 import { useFonts } from 'expo-font';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { StatusBar } from 'expo-status-bar';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { KeyboardProvider } from 'react-native-keyboard-controller';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ShareIntentProvider, useShareIntentContext } from 'expo-share-intent';
 import { useTranslation } from 'react-i18next';
-import { AuthProvider, useAuth } from '@/hooks/useAuth';
+import { AuthProvider } from '@/hooks/useAuth';
 import { ThemeProvider, useTheme } from '@/hooks/useTheme';
 import { AiFab } from '@/components/AiFab';
 import { OnboardingTour } from '@/components/OnboardingTour';
@@ -23,7 +22,6 @@ import { initReferralCapture } from '@/lib/referral';
 import { AppHeader } from '@/components/AppHeader';
 import { Presence } from '@/hooks/usePresence';
 import { PushTokenInit } from '@/hooks/usePushToken';
-import { saveReceiptInbox } from '@/lib/receiptInbox';
 import { initI18n, getStoredLanguage, detectDeviceLanguage, i18n } from '@/lib/i18n';
 
 initI18n();
@@ -66,43 +64,12 @@ function LanguageSync() {
   return null;
 }
 
-function ShareIntentHandler() {
-  const router = useRouter();
-  const { user } = useAuth();
-  const { isReady, hasShareIntent, shareIntent, resetShareIntent } = useShareIntentContext();
-
-  useEffect(() => {
-    if (!isReady || !hasShareIntent) return;
-    const file = shareIntent.files?.[0];
-    if (!file) {
-      resetShareIntent();
-      return;
-    }
-    let cancelled = false;
-    (async () => {
-      await saveReceiptInbox({
-        uri: file.path,
-        mimeType: file.mimeType,
-        fileName: file.fileName,
-      });
-      if (cancelled) return;
-      resetShareIntent();
-      if (user) router.replace('/depositos');
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [isReady, hasShareIntent, shareIntent, resetShareIntent, user, router]);
-
-  return null;
-}
-
 function RootNavigator() {
   const { t } = useTranslation();
   const { colors, scheme } = useTheme();
   useNotificationNavigation();
 
-  const [fontsLoaded] = useFonts({
+  useFonts({
     ...Ionicons.font,
   });
 
@@ -168,11 +135,9 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
     <KeyboardProvider>
-    <ShareIntentProvider>
       <QueryClientProvider client={queryClient}>
         <ThemeProvider>
           <AuthProvider>
-            <ShareIntentHandler />
             <LanguageSync />
             <NotificationInit />
             <Presence />
@@ -185,7 +150,6 @@ export default function RootLayout() {
           </AuthProvider>
         </ThemeProvider>
       </QueryClientProvider>
-    </ShareIntentProvider>
     </KeyboardProvider>
     </GestureHandlerRootView>
   );

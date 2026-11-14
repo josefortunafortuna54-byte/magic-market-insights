@@ -36,6 +36,10 @@ export default function PrivacidadeScreen() {
           title: t('legal.privacidadeDoc.s7Title'),
           body: t('legal.privacidadeDoc.s7Body'),
         },
+        {
+          title: t('legal.privacidadeDoc.s8Title'),
+          body: t('legal.privacidadeDoc.s8Body'),
+        },
       ]}
     />
   );

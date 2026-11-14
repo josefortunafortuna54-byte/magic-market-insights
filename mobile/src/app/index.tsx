@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Animated, Easing, ImageBackground, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Animated, Easing, ImageBackground, StyleSheet, Text } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/hooks/useAuth';
 import { getOAuthErrorParams } from '@/lib/googleAuth';
-import { getReceiptInbox } from '@/lib/receiptInbox';
 
 export default function SplashScreen() {
   const router = useRouter();
@@ -24,16 +23,8 @@ export default function SplashScreen() {
 
   useEffect(() => {
     if (!user) return;
-    let mounted = true;
-    const timer = setTimeout(async () => {
-      const inbox = await getReceiptInbox();
-      if (!mounted) return;
-      router.replace(inbox ? '/depositos' : '/(tabs)/inicio');
-    }, 300);
-    return () => {
-      mounted = false;
-      clearTimeout(timer);
-    };
+    const timer = setTimeout(() => router.replace('/(tabs)/inicio'), 300);
+    return () => clearTimeout(timer);
   }, [user, router]);
 
   useEffect(() => {

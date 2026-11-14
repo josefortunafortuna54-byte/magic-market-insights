@@ -86,6 +86,11 @@ export function Footer() {
                   {t("legal.avisoRiscoTitle")}
                 </Link>
               </li>
+              <li>
+                <Link to="/apagar-conta" className="hover:text-foreground transition-colors">
+                  {t("legal.apagarConta")}
+                </Link>
+              </li>
             </ul>
           </div>
         </div>

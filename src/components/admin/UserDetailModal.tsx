@@ -7,9 +7,11 @@ import {
   Clock,
   CreditCard,
   Fingerprint,
+  Rocket,
   ShieldCheck,
   User as UserIcon,
   UserX,
+  Zap,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -21,6 +23,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { UserWithSubscription } from "@/lib/adminApi";
+import { useAdminCodePrompt } from "@/components/admin/useAdminCodePrompt";
 
 interface UserDetailModalProps {
   user: UserWithSubscription | null;
@@ -48,6 +51,7 @@ export function UserDetailModal({
 }: UserDetailModalProps) {
   const [loading, setLoading] = useState(false);
   const [selectedExpiryDays, setSelectedExpiryDays] = useState<number | null>(null);
+  const [confirmAdmin, adminPrompt] = useAdminCodePrompt();
 
   if (!user) {
     return (
@@ -111,18 +115,22 @@ export function UserDetailModal({
     );
   };
 
-  const handleRoleChange = (newRole: string) => {
+  const handleRoleChange = async (newRole: string) => {
     if (newRole === role) return;
-    if (!window.confirm(`Alterar para ${newRole}?\nO plano do utilizador será alterado de ${role} para ${newRole}.`)) return;
+    const ok = await confirmAdmin(
+      `Alterar o plano de ${user.email} de ${role} para ${newRole}?`,
+    );
+    if (!ok) return;
     void run(() => onRoleChange(user.id, newRole), "Função do utilizador atualizada");
   };
 
-  const handleSetExpiry = (days: number | null) => {
-    if (days === null) {
-      if (!window.confirm("Definir expiração?\nA subscrição não expirará mais.")) return;
-    } else {
-      if (!window.confirm(`Definir expiração?\nA subscrição expirará em ${days} dias.`)) return;
-    }
+  const handleSetExpiry = async (days: number | null) => {
+    const ok = await confirmAdmin(
+      days === null
+        ? `Remover a expiração da subscrição de ${user.email}?`
+        : `Definir a expiração da subscrição de ${user.email} para ${days} dias?`,
+    );
+    if (!ok) return;
     const expiresAt = days ? new Date(Date.now() + days * 86400000).toISOString() : null;
     void run(() => onExpiryChange(user.id, expiresAt), "Expiração da subscrição atualizada");
   };
@@ -137,8 +145,9 @@ export function UserDetailModal({
         : "bg-success";
 
   return (
-    <Dialog open={open} onOpenChange={(o) => { if (!o) onClose(); }}>
-      <DialogContent className="max-h-[90vh] max-w-lg overflow-y-auto">
+    <>
+      <Dialog open={open} onOpenChange={(o) => { if (!o) onClose(); }}>
+        <DialogContent className="max-h-[90vh] max-w-lg overflow-y-auto">
         <DialogHeader className="flex-row items-center justify-between">
           <DialogTitle className="text-sm font-medium text-muted-foreground">Detalhes do Utilizador</DialogTitle>
         </DialogHeader>
@@ -238,6 +247,22 @@ export function UserDetailModal({
               onSelect={handleRoleChange}
             />
             <PlanCard
+              option={{ value: "basic", label: "Basic" }}
+              role={role}
+              Icon={Zap}
+              iconColor="text-primary"
+              disabled={loading || role === "basic"}
+              onSelect={handleRoleChange}
+            />
+            <PlanCard
+              option={{ value: "pro", label: "Pro" }}
+              role={role}
+              Icon={Rocket}
+              iconColor="text-warning"
+              disabled={loading || role === "pro"}
+              onSelect={handleRoleChange}
+            />
+            <PlanCard
               option={{ value: "premium", label: "Premium" }}
               role={role}
               Icon={ShieldCheck}
@@ -322,8 +347,10 @@ export function UserDetailModal({
             <ChevronRight className="h-4 w-4 text-muted-foreground" />
           </button>
         </div>
-      </DialogContent>
-    </Dialog>
+        </DialogContent>
+      </Dialog>
+      {adminPrompt}
+    </>
   );
 }
 

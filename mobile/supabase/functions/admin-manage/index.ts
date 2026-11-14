@@ -373,6 +373,34 @@ async function sendUserEmail(to: string | null | undefined, subject: string, htm
 }
 
 /**
+ * Fan-out de um alerta para os administradores (email/push/WhatsApp/SMS).
+ * A edge function admin-alert decide quais canais estão configurados.
+ * Best-effort: uma falha aqui nunca bloqueia a operação principal.
+ */
+async function notifyAdminChannels(
+  type: string,
+  title: string,
+  message: string,
+  entityType?: string,
+  entityId?: string,
+  data?: Record<string, unknown>,
+): Promise<void> {
+  try {
+    await fetch(`${supabaseUrl}/functions/v1/admin-alert`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${serviceRoleKey}`,
+        apikey: serviceRoleKey,
+      },
+      body: JSON.stringify({ type, title, message, entity_type: entityType, entity_id: entityId, data }),
+    });
+  } catch (e) {
+    console.error('admin-manage: falha ao alertar admins', e);
+  }
+}
+
+/**
  * Credita capital de forma aditiva (nunca sobrescreve o saldo já publicado).
  * Best-effort: falha é logada mas nunca bloqueia a ativação do plano.
  * Usa o RPC atómico da migração para evitar o `select ... for update` local
@@ -488,6 +516,20 @@ async function handleApproveReceipt(body: Record<string, unknown>) {
     );
   }
 
+  void notifyAdminChannels(
+    'receipt_approved',
+    'Comprovativo aprovado',
+    `${receipt.user_email ?? receipt.user_id} | ${receipt.plan} | ${Number(receipt.amount)} ${String(receipt.currency).toUpperCase()}`,
+    'receipt',
+    String(id),
+    {
+      user_email: receipt.user_email,
+      plan: receipt.plan,
+      amount: Number(receipt.amount),
+      currency: receipt.currency,
+    },
+  );
+
   return json({ approved: true });
 }
 
@@ -534,6 +576,20 @@ async function handleRejectReceipt(body: Record<string, unknown>) {
       `<p>Olá,</p><p>Infelizmente o seu pedido do plano <strong>${planLabel}</strong> não foi aprovado.</p><p>Contacte o suporte para mais detalhes.</p><p>Equipa TMT</p>`,
     );
   }
+
+  void notifyAdminChannels(
+    'receipt_rejected',
+    'Comprovativo recusado',
+    `${receipt.user_email ?? receipt.user_id} | ${receipt.plan} | ${Number(receipt.amount)} ${String(receipt.currency).toUpperCase()}`,
+    'receipt',
+    String(id),
+    {
+      user_email: receipt.user_email,
+      plan: receipt.plan,
+      amount: Number(receipt.amount),
+      currency: receipt.currency,
+    },
+  );
 
   return json({ rejected: true });
 }
@@ -1119,6 +1175,15 @@ serve(async (req) => {
         { type: 'management_request', requestId: id },
       );
 
+      void notifyAdminChannels(
+        'management_request_approved',
+        'Pedido de gerenciamento aprovado',
+        `${req.user_id} | ${req.plan_id} | ${String(req.currency).toUpperCase()}`,
+        'management_request',
+        id,
+        { user_id: req.user_id, plan_id: req.plan_id, currency: req.currency },
+      );
+
       return json({ contract });
     }
     case 'reject_capital_management_request': {
@@ -1147,6 +1212,15 @@ serve(async (req) => {
         { type: 'management_request', requestId: id },
       );
 
+      void notifyAdminChannels(
+        'management_request_rejected',
+        'Pedido de gerenciamento recusado',
+        `${req.user_id} | pedido ${id}`,
+        'management_request',
+        id,
+        { user_id: req.user_id },
+      );
+
       return json({ ok: true });
     }
     case 'ban_user': {
@@ -1160,13 +1234,58 @@ serve(async (req) => {
     }
     case 'update_user_role': {
       const user_id = typeof body.user_id === 'string' ? body.user_id : null;
-      const role = typeof body.role === 'string' ? body.role : null;
+      const role = typeof body.role === 'string' ? body.role.toLowerCase() : null;
+      const allowedRoles = ['free', 'basic', 'pro', 'premium'];
       if (!user_id || !role) return errorJson('user_id e role em falta.');
+      if (!allowedRoles.includes(role)) {
+        return errorJson(`role inválido. Usa: ${allowedRoles.join(', ')}.`);
+      }
+
+      // A lista de utilizadores (handleListUsers) deriva o role da tabela
+      // subscriptions, não do user_metadata. Atualizar só o metadata fazia a
+      // alteração "pegar" no auth mas continuar a aparecer free no painel.
+      const now = new Date();
+      const { data: existing, error: existingErr } = await supabase
+        .from('subscriptions')
+        .select('plan, status, current_period_end')
+        .eq('user_id', user_id)
+        .maybeSingle();
+      if (existingErr) return errorJson(existingErr.message, 500);
+
+      const existingEnd = existing?.current_period_end
+        ? new Date(existing.current_period_end)
+        : null;
+      const keepExistingEnd =
+        role !== 'free' &&
+        existing?.status === 'active' &&
+        existingEnd !== null &&
+        existingEnd.getTime() > now.getTime();
+      const paidEnd = keepExistingEnd
+        ? existingEnd
+        : new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+      const periodEnd = role === 'free' ? null : paidEnd.toISOString();
+
+      const { error: subError } = await supabase
+        .from('subscriptions')
+        .upsert(
+          {
+            user_id,
+            plan: role,
+            status: role === 'free' ? 'expired' : 'active',
+            expires_at: periodEnd,
+            current_period_end: periodEnd,
+            updated_at: now.toISOString(),
+          },
+          { onConflict: 'user_id' },
+        );
+      if (subError) return errorJson(subError.message, 500);
+
       const { error } = await supabase.auth.admin.updateUserById(user_id, {
         user_metadata: { role },
       });
       if (error) return errorJson(error.message, 500);
-      return json({ updated: true });
+
+      return json({ updated: true, role, status: role === 'free' ? 'expired' : 'active', current_period_end: periodEnd });
     }
     case 'update_subscription_expiry': {
       const { user_id, expires_at } = body;
@@ -1261,24 +1380,54 @@ serve(async (req) => {
     case 'approve_withdrawal': {
       const { id } = body;
       if (!id) return errorJson('id em falta.');
-      const { error } = await supabase.from('withdrawal_requests').update({
-        status: 'approved',
-        reviewed_by: user.id,
-        reviewed_at: new Date().toISOString(),
-      }).eq('id', id);
+      const { data: updated, error } = await supabase
+        .from('withdrawal_requests')
+        .update({
+          status: 'approved',
+          reviewed_by: user.id,
+          reviewed_at: new Date().toISOString(),
+        })
+        .eq('id', id)
+        .select('user_id, method, amount, currency')
+        .maybeSingle();
       if (error) return errorJson(error.message, 500);
+      if (updated) {
+        void notifyAdminChannels(
+          'withdrawal_approved',
+          'Levantamento aprovado',
+          `${updated.method} | ${updated.amount} ${String(updated.currency).toUpperCase()}`,
+          'withdrawal',
+          String(id),
+          updated,
+        );
+      }
       return json({ ok: true });
     }
     case 'reject_withdrawal': {
       const { id, notes } = body;
       if (!id) return errorJson('id em falta.');
-      const { error } = await supabase.from('withdrawal_requests').update({
-        status: 'rejected',
-        reviewed_by: user.id,
-        reviewed_at: new Date().toISOString(),
-        notes: notes || null,
-      }).eq('id', id);
+      const { data: updated, error } = await supabase
+        .from('withdrawal_requests')
+        .update({
+          status: 'rejected',
+          reviewed_by: user.id,
+          reviewed_at: new Date().toISOString(),
+          notes: notes || null,
+        })
+        .eq('id', id)
+        .select('user_id, method, amount, currency')
+        .maybeSingle();
       if (error) return errorJson(error.message, 500);
+      if (updated) {
+        void notifyAdminChannels(
+          'withdrawal_rejected',
+          'Levantamento recusado',
+          `${updated.method} | ${updated.amount} ${String(updated.currency).toUpperCase()}`,
+          'withdrawal',
+          String(id),
+          updated,
+        );
+      }
       return json({ ok: true });
     }
     case 'mark_withdrawal_paid': {
@@ -1335,6 +1484,20 @@ serve(async (req) => {
           console.error('[admin-manage] débito de levantamento falhou', debitErr.message);
         }
       }
+
+      void notifyAdminChannels(
+        'withdrawal_paid',
+        'Levantamento pago',
+        `${Number(transitioned.amount)} ${String(transitioned.currency).toUpperCase()} (líquido ${netAmount})`,
+        'withdrawal',
+        String(id),
+        {
+          user_id: transitioned.user_id,
+          amount: Number(transitioned.amount),
+          net_amount: netAmount,
+          currency: transitioned.currency,
+        },
+      );
 
       return json({
         ok: true,

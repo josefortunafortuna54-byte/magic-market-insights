@@ -121,6 +121,7 @@ export default function Admin() {
       }));
       subsRows = users.map((u) => ({
         user_id: u.id,
+        plan: u.role ?? "free",
         status: u.subscription_status ?? null,
         current_period_end: u.subscription_expires ?? null,
       }));

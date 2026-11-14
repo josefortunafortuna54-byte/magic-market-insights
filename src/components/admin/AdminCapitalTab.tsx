@@ -21,6 +21,7 @@ import {
 } from "@/lib/adminApi";
 import { formatShortDate } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import { useAdminCodePrompt } from "@/components/admin/useAdminCodePrompt";
 
 const CURRENCIES = ["usd", "aoa"] as const;
 
@@ -51,6 +52,7 @@ export function AdminCapitalTab() {
   const [reporting, setReporting] = useState<string | null>(null);
   const [reports, setReports] = useState<Record<string, AdminCapitalReport[]>>({});
   const [busy, setBusy] = useState(false);
+  const [confirmAdmin, adminPrompt] = useAdminCodePrompt();
 
   const load = useCallback(async () => {
     try {
@@ -206,7 +208,13 @@ export function AdminCapitalTab() {
                 <Button
                   size="sm"
                   disabled={busy}
-                  onClick={() => void runAction(() => approveManagementRequest(r.id), "Pedido aprovado")}
+                  onClick={async () => {
+                    const ok = await confirmAdmin(
+                      `Aprovar o pedido de gerenciamento de ${r.email || "utilizador"} (${planLabel(r.plan_id)})?`,
+                    );
+                    if (!ok) return;
+                    await runAction(() => approveManagementRequest(r.id), "Pedido aprovado");
+                  }}
                 >
                   Aprovar
                 </Button>
@@ -380,6 +388,8 @@ export function AdminCapitalTab() {
           )}
         </CardContent>
       </Card>
+
+      {adminPrompt}
     </div>
   );
 }

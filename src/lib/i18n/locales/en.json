@@ -1227,6 +1227,8 @@
   "sendProofHint": "Gallery or files",
   "proofAttached": "Proof attached",
   "receiptSaveError": "Proof sent but could not be registered on the server. Please contact support.",
+  "sessionExpiredTitle": "Session expired",
+  "sessionExpiredMsg": "Sign in to continue with your deposit or withdrawal.",
   "deleteMovement": "Delete",
   "deleteMovementTitle": "Delete movement?",
   "deleteMovementMsg": "Are you sure you want to delete this pending movement?",
@@ -1401,6 +1403,7 @@
   "termosTitle": "Terms of Use",
   "privacidadeTitle": "Privacy",
   "avisoRiscoTitle": "Risk Warning",
+  "apagarConta": "Delete account",
   "termosDoc": {
    "s1Title": "1. Acceptance of the Terms",
    "s1Body": "By accessing and using the The Magic Trader platform, the user agrees to these Terms of Use. If you do not agree with any of the terms, you should not use the platform.",

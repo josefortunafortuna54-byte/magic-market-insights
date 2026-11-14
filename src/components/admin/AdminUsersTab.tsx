@@ -17,6 +17,7 @@ interface UserRow {
 
 interface SubRow {
   user_id: string;
+  plan?: string;
   status?: string;
   current_period_end?: string | null;
 }
@@ -62,7 +63,7 @@ export function AdminUsersTab({ usersList, subsData, onRefresh }: Props) {
       email: u.email,
       created_at: u.created_at,
       last_sign_in_at: u.last_sign_in ?? null,
-      role: sub ? "premium" : "free",
+      role: sub?.plan ?? (sub ? "premium" : "free"),
       subscription_status: sub?.status,
       subscription_expires: sub?.current_period_end ?? undefined,
       banned: bannedByEmail[u.email] ?? false,
@@ -94,7 +95,9 @@ export function AdminUsersTab({ usersList, subsData, onRefresh }: Props) {
             <tbody>
               {usersList.map((raw) => {
                 const u = raw as unknown as UserRow;
-                const isPrem = subs.find((s) => s.user_id === u.id && s.status === "active");
+                const activeSub = subs.find((s) => s.user_id === u.id && s.status === "active");
+                const plan = activeSub?.plan ?? (activeSub ? "premium" : "free");
+                const isPrem = plan !== "free";
                 return (
                   <tr key={u.id} className="border-b border-border/30 hover:bg-secondary/20">
                     <td className="p-3">
@@ -116,7 +119,9 @@ export function AdminUsersTab({ usersList, subsData, onRefresh }: Props) {
                     </td>
                     <td className="p-3">
                       {isPrem ? (
-                        <span className="text-xs bg-success/20 text-success px-2 py-1 rounded-lg font-semibold">✓ Premium</span>
+                        <span className="text-xs bg-success/20 text-success px-2 py-1 rounded-lg font-semibold">
+                          ✓ {plan.toUpperCase()}
+                        </span>
                       ) : (
                         <span className="text-xs bg-secondary text-muted-foreground px-2 py-1 rounded-lg">Free</span>
                       )}
@@ -142,8 +147,38 @@ export function AdminUsersTab({ usersList, subsData, onRefresh }: Props) {
         open={open}
         onClose={() => { setOpen(false); setSelectedUser(null); }}
         onBan={async (userId) => { await adminApi.banUser(userId); await onRefresh(); await refreshBanned(); }}
-        onRoleChange={async (userId, role) => { await adminApi.updateUserRole(userId, role); await onRefresh(); await refreshBanned(); }}
-        onExpiryChange={async (userId, expiresAt) => { await adminApi.updateSubscriptionExpiry(userId, expiresAt); await onRefresh(); await refreshBanned(); }}
+        onRoleChange={async (userId, role) => {
+          await adminApi.updateUserRole(userId, role);
+          setSelectedUser((prev) =>
+            prev && prev.id === userId
+              ? {
+                  ...prev,
+                  role,
+                  subscription_status: role === "free" ? "expired" : "active",
+                  subscription_expires:
+                    role === "free"
+                      ? undefined
+                      : new Date(Date.now() + 30 * 86400000).toISOString(),
+                }
+              : prev,
+          );
+          await onRefresh();
+          await refreshBanned();
+        }}
+        onExpiryChange={async (userId, expiresAt) => {
+          await adminApi.updateSubscriptionExpiry(userId, expiresAt);
+          setSelectedUser((prev) =>
+            prev && prev.id === userId
+              ? {
+                  ...prev,
+                  subscription_status: expiresAt ? "active" : "expired",
+                  subscription_expires: expiresAt ?? undefined,
+                }
+              : prev,
+          );
+          await onRefresh();
+          await refreshBanned();
+        }}
       />
     </>
   );

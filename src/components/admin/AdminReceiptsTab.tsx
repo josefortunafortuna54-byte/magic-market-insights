@@ -22,6 +22,7 @@ import {
 import { PAYMENT_METHODS, PAYMENT_METHOD_ICONS } from "@/lib/plans";
 import { timeAgo } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import { useAdminCodePrompt } from "@/components/admin/useAdminCodePrompt";
 
 type StatusFilter = "all" | "pending" | "approved" | "rejected";
 
@@ -45,6 +46,7 @@ export function AdminReceiptsTab() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [search, setSearch] = useState("");
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [confirmAdmin, adminPrompt] = useAdminCodePrompt();
 
   const load = useCallback(async () => {
     try {
@@ -246,9 +248,17 @@ export function AdminReceiptsTab() {
                           size="sm"
                           disabled={busyId === r.id}
                           className="flex-1 md:flex-none border-success/40 bg-success/10 text-success hover:bg-success/20"
-                          onClick={() =>
-                            runAction(r.id, () => approveReceipt(r.id), "Comprovativo aprovado!")
-                          }
+                          onClick={async () => {
+                            const ok = await confirmAdmin(
+                              `Aprovar o comprovativo de ${r.user_email || "utilizador"} (${r.plan} · ${r.amount} ${r.currency?.toUpperCase()})?`,
+                            );
+                            if (!ok) return;
+                            await runAction(
+                              r.id,
+                              () => approveReceipt(r.id),
+                              "Comprovativo aprovado!",
+                            );
+                          }}
                         >
                           <Check className="h-4 w-4" /> Aprovar
                         </Button>
@@ -283,6 +293,8 @@ export function AdminReceiptsTab() {
           })}
         </div>
       )}
+
+      {adminPrompt}
     </div>
   );
 }

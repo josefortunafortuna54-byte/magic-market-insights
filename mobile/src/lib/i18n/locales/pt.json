@@ -287,7 +287,16 @@
     "usernameReserved": "Reservado: @{{username}}",
     "usernameReserve": "Reservar NomeUnico",
     "usernameClaimOk": "NomeUnico reservado.",
-    "usernameClaimError": "Não foi possível reservar o NomeUnico."
+    "usernameClaimError": "Não foi possível reservar o NomeUnico.",
+    "sectionDanger": "ZONA DE PERIGO",
+    "deleteAccount": "Apagar conta",
+    "deleteAccountTitle": "Apagar conta",
+    "deleteAccountBody": "Esta ação é permanente. O teu perfil, histórico, conteúdos e ficheiros serão eliminados e não podem ser recuperados.",
+    "deleteAccountWarning": "Se tiveres uma subscrição ativa, cancela-a primeiro no site. A eliminação da conta não reembolsa pagamentos já efetuados.",
+    "deleteAccountConfirm": "Apagar definitivamente",
+    "deleteAccountCancel": "Cancelar",
+    "deleteAccountError": "Não foi possível apagar a conta. Tenta novamente.",
+    "deleteAccountSuccess": "Conta apagada."
   },
   "language": {
     "title": "Idioma"
@@ -682,9 +691,10 @@
   },
   "capital": {
     "title": "Gerenciamento de Capital",
-    "subtitle": "Acompanha o teu investimento e resultados geridos pela nossa equipa.",
+    "subtitle": "Simula a tua estratégia de capital e acompanha o progresso de forma educacional.",
+    "simulationDisclaimer": "Simulação educacional. Esta área não move dinheiro real e os valores apresentados não constituem aconselhamento financeiro.",
     "lockTitle": "Gerenciamento de Capital Premium",
-    "lockDesc": "Acompanha os teus investimentos e lucros geridos pela nossa equipa profissional.",
+    "lockDesc": "Acompanha a tua simulação de capital e o progresso educativo.",
     "loading": "A carregar…",
     "currentBalance": "SALDO ATUAL",
     "active": "ATIVO",
@@ -812,9 +822,12 @@
     "pipsAuto": "Pips calculados automaticamente"
   },
   "depositos": {
-    "title": "Depósitos e Levantamentos",
+    "title": "Carteira",
     "balance": "SALDO",
     "balanceSub": "Disponível na carteira",
+    "webTitle": "Assinaturas e pagamentos no site",
+    "webDesc": "A compra de planos e a gestão de pagamentos são feitas apenas no site oficial. Esta app não processa pagamentos.",
+    "webCta": "Abrir o site oficial",
     "tabDeposit": "Depositar",
     "tabWithdraw": "Levantar",
     "choosePlan": "Escolhe o teu plano",
@@ -1028,7 +1041,7 @@
       "s4Title": "4. Conta de Utilizador",
       "s4Body": "O utilizador é responsável por manter a confidencialidade das suas credenciais de acesso. Uma conta premium é pessoal e intransmissível.",
       "s5Title": "5. Pagamentos",
-      "s5Body": "As subscrições premium são processadas via Stripe. Os planos são renovados automaticamente ao final de cada período de faturação, a menos que sejam cancelados antes da data de renovação.",
+      "s5Body": "As subscrições premium são adquiridas apenas no site oficial, através dos prestadores de pagamento indicados. Os planos são renovados automaticamente ao final de cada período de faturação, a menos que sejam cancelados antes da data de renovação. A app móvel não processa pagamentos.",
       "s6Title": "6. Propriedade Intelectual",
       "s6Body": "Todo o conteúdo da plataforma, incluindo mas não se limitando a textos, gráficos, logotipos, software e análises, é propriedade de The Magic Trader e é protegido por direitos de autor.",
       "s7Title": "7. Alterações",
@@ -1036,19 +1049,21 @@
     },
     "privacidadeDoc": {
       "s1Title": "1. Dados Recolhidos",
-      "s1Body": "Recolhemos apenas os dados necessários para o funcionamento da plataforma: endereço de email, nome de utilizador (quando fornecido via Google OAuth) e dados de pagamento processados diretamente pela Stripe.",
+      "s1Body": "Recolhemos apenas os dados necessários para o funcionamento da plataforma: endereço de email, nome e NomeUnico, foto de perfil (quando fornecida), conteúdo que publicas na Comunidade (mensagens, imagens e áudio), token de notificações e registos técnicos de utilização. Os dados de pagamento são tratados exclusivamente pelos prestadores de pagamento no site oficial; a app não processa pagamentos.",
       "s2Title": "2. Uso dos Dados",
-      "s2Body": "Os seus dados são utilizados exclusivamente para: autenticação, gestão da sua subscrição, envio de notificações relacionadas com a sua conta, e melhoria da experiência na plataforma.",
+      "s2Body": "Os teus dados são utilizados para autenticação, gestão da conta e da subscrição, envio de notificações, funcionamento da Comunidade, suporte e segurança da plataforma.",
       "s3Title": "3. Armazenamento",
-      "s3Body": "Os dados são armazenados de forma segura através do Supabase (PostgreSQL) com encriptação em trânsito e em repouso. Não armazenamos dados de pagamento diretamente.",
+      "s3Body": "Os dados são armazenados de forma segura através do Supabase (PostgreSQL) com encriptação em trânsito e em repouso. Comprovativos de pagamento, quando enviados, ficam em armazenamento privado. Não armazenamos dados de cartões.",
       "s4Title": "4. Partilha de Dados",
-      "s4Body": "Não partilhamos, vendemos ou transmitimos os seus dados pessoais a terceiros, exceto quando exigido por lei ou para o processamento de pagamentos através do Stripe.",
+      "s4Body": "Não vendemos nem partilhamos os teus dados pessoais com terceiros, exceto com prestadores que nos ajudam a operar a plataforma (alojamento, autenticação, notificações e pagamentos no site) ou quando exigido por lei.",
       "s5Title": "5. Cookies",
       "s5Body": "Utilizamos cookies essenciais para o funcionamento da plataforma e cookies de autenticação geridos pelo Supabase. Não utilizamos cookies de rastreamento de terceiros.",
       "s6Title": "6. Os Seus Direitos",
-      "s6Body": "Pode solicitar a eliminação dos seus dados pessoais a qualquer momento contactando-nos. Tem direito de acesso, retificação e eliminação dos seus dados pessoais.",
+      "s6Body": "Podes apagar a tua conta diretamente na app em Perfil > Apagar conta, ou em https://the-magic-trader.vercel.app/apagar-conta. A eliminação remove o perfil, conteúdo e ficheiros associados e não pode ser revertida. Tens também direito de acesso e retificação dos teus dados.",
       "s7Title": "7. Contacto",
-      "s7Body": "Para questões sobre privacidade, contacte-nos através do email de suporte da plataforma."
+      "s7Body": "Para questões sobre privacidade, contacte-nos através do email de suporte da plataforma.",
+      "s8Title": "8. Menores",
+      "s8Body": "A plataforma destina-se a maiores de 18 anos. Não recolhemos intencionalmente dados de menores."
     },
     "avisoRiscoDoc": {
       "intro": "O trading de produtos financeiros envolve riscos significativos e não é adequado para todos os investidores. Deve considerar cuidadosamente os seus objetivos de investimento, nível de experiência e tolerância ao risco.",

@@ -44,6 +44,7 @@ import RecuperarSenha from "./pages/RecuperarSenha";
 import Termos from "./pages/Termos";
 import Privacidade from "./pages/Privacidade";
 import AvisoRisco from "./pages/AvisoRisco";
+import ApagarConta from "./pages/ApagarConta";
 import SignalDetail from "./pages/SignalDetail";
 
 const queryClient = new QueryClient();
@@ -95,6 +96,7 @@ const App = () => (
               <Route path="/termos" element={<Termos />} />
               <Route path="/privacidade" element={<Privacidade />} />
               <Route path="/aviso-risco" element={<AvisoRisco />} />
+              <Route path="/apagar-conta" element={<ApagarConta />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>

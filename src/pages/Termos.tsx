@@ -52,8 +52,9 @@ export default function Termos() {
               <div>
                 <h2 className="font-display text-lg font-semibold text-foreground mb-2">5. Pagamentos</h2>
                 <p>
-                  As subscrições premium são processadas via Stripe. Os planos são renovados automaticamente
-                  ao final de cada período de faturação, a menos que sejam cancelados antes da data de renovação.
+                  As subscrições premium são adquiridas no site oficial, através dos prestadores de pagamento
+                  indicados. Os planos são renovados automaticamente ao final de cada período de faturação, a menos
+                  que sejam cancelados antes da data de renovação. A app móvel não processa pagamentos.
                 </p>
               </div>
 

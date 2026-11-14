@@ -13,6 +13,7 @@ import {
 } from "@/lib/adminApi";
 import { timeAgo } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import { useAdminCodePrompt } from "@/components/admin/useAdminCodePrompt";
 
 type StatusFilter = "all" | "pending" | "approved" | "rejected" | "paid";
 
@@ -39,6 +40,7 @@ export function AdminWithdrawalsTab() {
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [search, setSearch] = useState("");
+  const [confirmAdmin, adminPrompt] = useAdminCodePrompt();
 
   const load = useCallback(async () => {
     try {
@@ -163,9 +165,13 @@ export function AdminWithdrawalsTab() {
                         <Button
                           variant="success"
                           size="sm"
-                          onClick={() =>
-                            runAction(() => approveWithdrawal(w.id), "Levantamento aprovado!")
-                          }
+                          onClick={async () => {
+                            const ok = await confirmAdmin(
+                              `Aprovar o levantamento de $${Number(w.amount).toFixed(2)} via ${w.method}?`,
+                            );
+                            if (!ok) return;
+                            await runAction(() => approveWithdrawal(w.id), "Levantamento aprovado!");
+                          }}
                         >
                           Aprovar
                         </Button>
@@ -184,7 +190,13 @@ export function AdminWithdrawalsTab() {
                       <Button
                         variant="secondary"
                         size="sm"
-                        onClick={() => runAction(() => markWithdrawalPaid(w.id), "Marcado como pago!")}
+                        onClick={async () => {
+                          const ok = await confirmAdmin(
+                            `Marcar o levantamento de $${Number(w.amount).toFixed(2)} via ${w.method} como pago?`,
+                          );
+                          if (!ok) return;
+                          await runAction(() => markWithdrawalPaid(w.id), "Marcado como pago!");
+                        }}
                       >
                         Marcar Pago
                       </Button>
@@ -196,6 +208,8 @@ export function AdminWithdrawalsTab() {
           })}
         </div>
       )}
+
+      {adminPrompt}
     </div>
   );
 }

@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Layout } from "@/components/layout/Layout";
 import { supabase } from "@/lib/supabaseClient";
+import { notifyAdmins } from "@/lib/adminAlerts";
 import { useTranslation } from "react-i18next";
 
 export default function Registro() {
@@ -27,11 +28,27 @@ export default function Registro() {
     setLoading(true);
     setError("");
     try {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email, password,
         options: { emailRedirectTo: `${window.location.origin}/analises` },
       });
       if (error) throw error;
+
+      // Signups com confirmação de email ainda não têm sessão: o alerta é
+      // enviado já, sem esperar pelo primeiro login. Emails já registados vêm
+      // sem identidades e são ignorados (a notificação in-app também não existe).
+      const created = data.user;
+      if (created && (created.identities?.length ?? 0) > 0) {
+        void notifyAdmins({
+          type: "new_user",
+          title: "Novo registo",
+          message: created.email ?? email,
+          entity_type: "user",
+          entity_id: created.id,
+          data: { email: created.email ?? email },
+        });
+      }
+
       setSuccess(true);
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);

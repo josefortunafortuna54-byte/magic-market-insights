@@ -1,0 +1,86 @@
+# EAS Build only reads the .easignore at the GIT ROOT (this file, TMT/).
+# NOTE: mobile/.easignore is never read — EAS resolves the git root and looks
+# for .easignore only there. This file REPLACES all .gitignore rules when
+# packing the build tarball, so it must stay a SUPERSET of TMT/.gitignore and
+# mobile/.gitignore.
+
+# --- git history: not needed on the build server (~17 MB smaller uploads)
+.git
+
+# --- always ignored by EAS anyway
+node_modules/
+
+# --- TMT web app (Vite) and root tooling — not needed for the Expo mobile build
+/api/
+/dist/
+/dist-ssr/
+/docs/
+/public/
+/RESUMO/
+/scripts/
+/src/
+/supabase/
+/.github/
+/.omo/
+/.playwright-mcp/
+/.superpawers/
+/.vercel/
+/.vscode/
+/.claude/
+/ChatGPT Image*
+/login-premium.png
+/test_response.json
+/assets/
+
+# --- mobile: caches, build output, local state (from mobile/.gitignore + mobile/.easignore)
+mobile/.expo/
+mobile/dist/
+mobile/web-build/
+mobile/expo-env.d.ts
+mobile/.kotlin/
+mobile/coverage/
+mobile/.metro-health-check*
+mobile/ios/
+mobile/android/
+mobile/.playwright-mcp/
+mobile/.superpawers/
+mobile/.claude/
+mobile/.vscode/
+mobile/supabase/.temp/
+mobile/scripts/_i18n-work/
+mobile/*.orig.*
+mobile/*.jks
+mobile/*.p8
+mobile/*.p12
+mobile/*.key
+mobile/*.mobileprovision
+mobile/*.pem
+mobile/*.log
+mobile/*.bak
+mobile/*.tsbuildinfo
+mobile/example
+mobile/.DS_Store
+
+# --- heavy design-reference images not referenced by the app (kept in git)
+mobile/ui/
+mobile/assets/images/ChatGPT Image*
+
+# --- env & secrets (from TMT/.gitignore)
+.env
+.env*
+!.env.example
+!**/.env.example
+
+# --- editor / OS noise (from TMT/.gitignore)
+logs/
+*.log
+*.local
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*.tsbuildinfo
+.DS_Store
+vite.config.ts.timestamp-*

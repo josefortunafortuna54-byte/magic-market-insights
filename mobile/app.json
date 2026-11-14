@@ -81,17 +81,6 @@
           "photosPermission": "Permite anexar imagens nas mensagens da Comunidade."
         }
       ],
-      [
-        "expo-share-intent",
-        {
-          "androidIntentFilters": [
-            "image/*"
-          ],
-          "iosActivationRules": {
-            "NSExtensionActivationSupportsImageWithMaxCount": 1
-          }
-        }
-      ],
       "expo-image"
     ],
     "experiments": {

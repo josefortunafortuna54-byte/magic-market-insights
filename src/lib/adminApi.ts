@@ -1,4 +1,5 @@
 import { supabase } from "./supabaseClient";
+import { notifyAdmins } from "./adminAlerts";
 
 const FUNCTIONS_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-manage`;
 
@@ -172,16 +173,37 @@ export async function saveReceipt(receipt: {
     .select("id")
     .single();
   if (error) throw error;
-  return data?.id ?? null;
+
+  const receiptId = data?.id ?? null;
+  void notifyAdmins({
+    type: "receipt_pending",
+    title: "Novo comprovativo",
+    message: `${user.email ?? receipt.user_email ?? "Utilizador"} | ${receipt.plan} | ${receipt.amount} ${receipt.currency.toUpperCase()}`,
+    entity_type: "receipt",
+    entity_id: receiptId ?? undefined,
+    data: {
+      email: user.email ?? receipt.user_email,
+      plan: receipt.plan,
+      method: receipt.method,
+      amount: receipt.amount,
+      currency: receipt.currency,
+    },
+  });
+
+  return receiptId;
 }
 
 // ── Notifications ──────────────────────────────────────────────────────
 
 export type NotificationType =
   | "receipt_pending" | "receipt_approved" | "receipt_rejected"
-  | "withdrawal_pending"
+  | "withdrawal_pending" | "withdrawal_approved" | "withdrawal_rejected" | "withdrawal_paid"
   | "signal_closed" | "signal_tp" | "signal_sl"
   | "new_user" | "subscription_expired" | "subscription_expiring"
+  | "management_request_pending"
+  | "management_request_approved"
+  | "management_request_rejected"
+  | "message_report_pending"
   | "system_error";
 
 export interface AdminNotification {
@@ -570,7 +592,22 @@ export async function submitManagementRequest(req: {
     .select("id")
     .single();
   if (error) throw error;
-  return data?.id ?? null;
+
+  const requestId = data?.id ?? null;
+  void notifyAdmins({
+    type: "management_request_pending",
+    title: "Novo pedido de gerenciamento",
+    message: `${user.email ?? "Utilizador"} | ${req.plan_id} | ${req.currency.toUpperCase()}`,
+    entity_type: "management_request",
+    entity_id: requestId ?? undefined,
+    data: {
+      email: user.email,
+      plan_id: req.plan_id,
+      currency: req.currency,
+    },
+  });
+
+  return requestId;
 }
 
 // ── Bulk Delete ────────────────────────────────────────────────────────
@@ -627,7 +664,23 @@ export async function submitWithdrawalRequest(req: {
     .select("id")
     .single();
   if (error) throw error;
-  return data?.id ?? null;
+
+  const requestId = data?.id ?? null;
+  void notifyAdmins({
+    type: "withdrawal_pending",
+    title: "Nova solicitação de saque",
+    message: `${user.email ?? "Utilizador"} | ${req.method} | ${req.amount} ${req.currency.toUpperCase()}`,
+    entity_type: "withdrawal",
+    entity_id: requestId ?? undefined,
+    data: {
+      email: user.email,
+      method: req.method,
+      amount: req.amount,
+      currency: req.currency,
+    },
+  });
+
+  return requestId;
 }
 
 export async function listWithdrawals(status?: string, limit = 50, offset = 0): Promise<WithdrawalRequest[]> {

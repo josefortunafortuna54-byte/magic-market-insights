@@ -2,6 +2,8 @@ import { useEffect } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { supabase } from '@/lib/supabase';
+import { createSessionFromUrl, getRedirectTo } from '@/lib/googleAuth';
+import { i18n } from '@/lib/i18n';
 import { type Palette } from '@/core/theme';
 import { useTheme } from '@/hooks/useTheme';
 
@@ -21,35 +23,40 @@ export default function GoogleAuthRedirectScreen() {
 
     const hash = first(params, '#');
     const hashParams = hash ? new URLSearchParams(hash) : null;
-    const accessToken = first(params, 'access_token') ?? hashParams?.get('access_token') ?? undefined;
-    const refreshToken = first(params, 'refresh_token') ?? hashParams?.get('refresh_token') ?? undefined;
-    const code = first(params, 'code') ?? hashParams?.get('code') ?? undefined;
+    const callback = new URLSearchParams();
+    for (const key of ['code', 'access_token', 'refresh_token', 'error', 'error_code', 'error_description']) {
+      const value = first(params, key) ?? hashParams?.get(key) ?? undefined;
+      if (value) callback.set(key, value);
+    }
 
     (async () => {
-      let oauthError: string | null = null;
       try {
-        if (accessToken && refreshToken) {
-          const { error } = await supabase.auth.setSession({
-            access_token: accessToken,
-            refresh_token: refreshToken,
-          });
-          if (error) throw error;
-        } else if (code) {
-          const { error } = await supabase.auth.exchangeCodeForSession(code);
-          if (error) throw error;
-        }
-
-        const { data } = await supabase.auth.getSession();
-        if (data.session) {
+        const { data: current } = await supabase.auth.getSession();
+        if (current.session) {
           if (!cancelled) router.replace('/(tabs)/inicio');
           return;
         }
-        oauthError = 'authErrors.googleNotComplete';
+
+        const { error } = await createSessionFromUrl(`${getRedirectTo()}?${callback.toString()}`);
+
+        const { data } = await supabase.auth.getSession();
+        if (!cancelled) {
+          if (data.session) {
+            router.replace('/(tabs)/inicio');
+          } else {
+            router.replace({
+              pathname: '/(auth)/login',
+              params: { oauthError: error ?? i18n.t('authErrors.googleNotComplete') },
+            });
+          }
+        }
       } catch (err) {
-        oauthError = err instanceof Error ? err.message : String(err);
-      }
-      if (!cancelled) {
-        router.replace({ pathname: '/(auth)/login', params: oauthError ? { oauthError } : {} });
+        if (!cancelled) {
+          router.replace({
+            pathname: '/(auth)/login',
+            params: { oauthError: err instanceof Error ? err.message : i18n.t('authErrors.googleError') },
+          });
+        }
       }
     })();
 

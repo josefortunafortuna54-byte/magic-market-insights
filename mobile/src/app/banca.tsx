@@ -1,27 +1,24 @@
-import { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { AppButton, AppText, Badge, Card, EmptyState, Screen, SectionTitle } from '@/components/ui';
+import { AppText, Badge, Card, EmptyState, Screen, SectionTitle } from '@/components/ui';
 import { GradientCard } from '@/components/GradientCard';
 import { PremiumLock } from '@/components/PremiumLock';
-import { WithdrawalModal } from '@/components/WithdrawalModal';
 import { GrowthPlanSection } from '@/components/GrowthPlanSection';
 import { ManagementEnded } from '@/components/ManagementEnded';
 import { ContractCard } from '@/components/ContractCard';
 import { CapitalSimulatorCard } from '@/components/CapitalSimulatorCard';
 import { formatBancaMoney, formatShortDate } from '@/core/format';
-import { contractEnded, formatMinDepositCore, profit, profitPct, progressPct, withdrawable, dailyGain } from '@/core/capital';
+import { contractEnded, formatMinDepositCore, profit, profitPct, progressPct, dailyGain } from '@/core/capital';
 import { Spacing, type Palette } from '@/core/theme';
 import { useTheme } from '@/hooks/useTheme';
 import { useBanca } from '@/hooks/useBanca';
 import { useSubscription } from '@/hooks/useSubscription';
 import { useCapitalAccount } from '@/hooks/useCapitalAccount';
-import { useCapitalDeposits } from '@/hooks/useCapitalDeposits';
 import { useCapitalContract } from '@/hooks/useCapitalContract';
 import { useWithdrawalRequests } from '@/hooks/useWithdrawalRequests';
-import { MIN_CAPITAL_DEPOSIT, PAYMENT_METHODS } from '@/lib/plans';
+import { PAYMENT_METHODS } from '@/lib/plans';
 import type { CapitalPlanId, WithdrawalRequest } from '@/core/types';
 
 const PLAN_RETURN_PCT: Record<string, number> = {
@@ -41,6 +38,20 @@ function StatusPill({ label, color }: { label: string; color: string }) {
   );
 }
 
+function SimulationBanner() {
+  const { colors } = useTheme();
+  const styles = makeStyles(colors);
+  const { t } = useTranslation();
+  return (
+    <View style={styles.simBanner}>
+      <Ionicons name="information-circle-outline" size={16} color={colors.accent} />
+      <AppText variant="small" style={{ color: colors.textMuted, flex: 1 }}>
+        {t('capital.simulationDisclaimer')}
+      </AppText>
+    </View>
+  );
+}
+
 export default function BancaScreen() {
   const { colors } = useTheme();
   const styles = makeStyles(colors);
@@ -49,10 +60,8 @@ export default function BancaScreen() {
   const { canAccessBanca, loading: subLoading } = useSubscription();
   const { config, loading: bancaLoading } = useBanca();
   const { account, reports, metaPercent, loading: accountLoading, error: accountError } = useCapitalAccount();
-  const { deposits, loading: depositsLoading } = useCapitalDeposits();
   const { contract, loading: contractLoading, error: contractError } = useCapitalContract();
   const { requests: withdrawalRequests, loading: withdrawalsLoading, error: withdrawalsError } = useWithdrawalRequests();
-  const [withdrawOpen, setWithdrawOpen] = useState(false);
 
   // Regra absoluta: um cliente premium NUNCA vê bloqueio. Enquanto o plano
   // não está confirmado, mostramos loading — nunca a restrição.
@@ -64,7 +73,7 @@ export default function BancaScreen() {
     );
   }
 
-  const dataLoading = bancaLoading || accountLoading || depositsLoading || contractLoading || withdrawalsLoading;
+  const dataLoading = bancaLoading || accountLoading || contractLoading || withdrawalsLoading;
   if (subLoading || dataLoading) {
     return <Screen><AppText variant="muted">{t('capital.loading')}</AppText></Screen>;
   }
@@ -108,11 +117,6 @@ export default function BancaScreen() {
   const managementActive = contract ? (contract.status === 'active' && !contractEnded(contract.end_date) && !goalReached) : (!contract && (Boolean(account) || capital > 0 || current > 0) && !goalReached);
 
   // Depósitos de gestão aprovados na moeda da conta (fonte da verdade do server)
-  const depositsNum = deposits
-    .filter((d) => d.status === 'approved' && d.currency === cur)
-    .reduce((s, d) => s + Number(d.amount), 0);
-  const hasDeposits = depositsNum >= MIN_CAPITAL_DEPOSIT[cur];
-
   // Estado binário: gestão ativa (conta publicada ou capital registado)
   const hasManagement = Boolean(account) || capital > 0 || current > 0;
 
@@ -136,6 +140,7 @@ export default function BancaScreen() {
         <AppText variant="muted" style={{ marginBottom: Spacing.md }}>
           {t('capital.subtitle')}
         </AppText>
+        <SimulationBanner />
 
         <GradientCard colors={[`${colors.accent}26`, `${colors.primary}12`]} style={styles.hero}>
           <AppText variant="small" style={[styles.heroEyebrow, { color: colors.accent }]}>
@@ -176,12 +181,6 @@ export default function BancaScreen() {
           capital={0}
           currency="usd"
           strategy={config.planId}
-          onDeposit={(amount) =>
-            router.push({
-              pathname: '/depositos',
-              params: { amount: String(Math.round(amount * 100) / 100), currency: 'usd' },
-            })
-          }
         />
       </Screen>
     );
@@ -194,6 +193,7 @@ export default function BancaScreen() {
         <AppText variant="muted" style={{ marginBottom: Spacing.md }}>
           {t('capital.subtitle')}
         </AppText>
+        <SimulationBanner />
         <AppText variant="h2" style={{ marginBottom: Spacing.sm }}>{t('capital.endedTitle')}</AppText>
         <ManagementEnded
           finalValue={current}
@@ -212,6 +212,7 @@ export default function BancaScreen() {
       <AppText variant="muted" style={{ marginBottom: Spacing.md }}>
         {t('capital.subtitle')}
       </AppText>
+      <SimulationBanner />
 
       <GradientCard colors={[colors.primaryDim, 'rgba(22,164,58,0.15)']} style={styles.hero}>
         <View style={styles.heroTop}>
@@ -367,23 +368,6 @@ export default function BancaScreen() {
 
       <Card style={styles.card}>
         <View style={styles.cardHeader}>
-          <AppText variant="label">{t('capital.withdrawalTitle')}</AppText>
-          <Badge color={colors.success} bg={`${colors.success}20`}>{t('capital.weekly')}</Badge>
-        </View>
-        <AppText variant="muted" style={{ marginBottom: Spacing.sm }}>
-          {t('capital.withdrawalDesc')}
-        </AppText>
-        <AppButton
-          title={t('capital.requestWithdrawal')}
-          variant="secondary"
-          icon={<Ionicons name="cash-outline" size={18} color={colors.accent} />}
-          onPress={() => setWithdrawOpen(true)}
-          disabled={!hasDeposits}
-        />
-      </Card>
-
-      <Card style={styles.card}>
-        <View style={styles.cardHeader}>
           <AppText variant="label">{t('capital.liabilitiesTitle')}</AppText>
         </View>
         {withdrawalRequests.length === 0 ? (
@@ -414,17 +398,7 @@ export default function BancaScreen() {
           profitValue={p}
           returnPct={targetPct}
           goalReached={goalReached}
-          onWithdraw={() => setWithdrawOpen(true)}
         />
-
-      <WithdrawalModal
-        visible={withdrawOpen}
-        available={withdrawable(current)}
-        currency={cur}
-        onClose={() => setWithdrawOpen(false)}
-        contractEndDate={contract?.end_date}
-        penaltyPct={contract?.penalty_pct}
-      />
     </Screen>
   );
 }
@@ -445,6 +419,18 @@ const makeStyles = (c: Palette) =>
     statsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm, marginBottom: Spacing.md },
     statCard: { flexGrow: 1, flexBasis: '46%', alignItems: 'center', gap: Spacing.xs, paddingVertical: Spacing.md },
     card: { marginBottom: Spacing.md, gap: Spacing.sm },
+    simBanner: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: Spacing.xs,
+      backgroundColor: `${c.accent}12`,
+      borderColor: `${c.accent}40`,
+      borderWidth: 1,
+      borderRadius: 12,
+      paddingVertical: Spacing.sm,
+      paddingHorizontal: Spacing.md,
+      marginBottom: Spacing.md,
+    },
     cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
     reportCard: { marginBottom: Spacing.md, gap: Spacing.sm },
     reportTitleRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.xs },

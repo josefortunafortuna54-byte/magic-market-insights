@@ -21,6 +21,7 @@ import { useTranslation } from 'react-i18next';
 import { i18n } from '@/lib/i18n';
 import { isAdminEmail } from '@/lib/supabase';
 import { claimUsername } from '@/lib/usernameAuth';
+import { deleteAccount } from '@/lib/account';
 
 function MenuRow({
   icon,
@@ -85,6 +86,8 @@ export default function PerfilScreen() {
   const [nameInput, setNameInput] = useState('');
   const [savingName, setSavingName] = useState(false);
   const [signOutVisible, setSignOutVisible] = useState(false);
+  const [deleteVisible, setDeleteVisible] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [usernameInput, setUsernameInput] = useState('');
   const [claiming, setClaiming] = useState(false);
   const [claimError, setClaimError] = useState('');
@@ -119,6 +122,19 @@ export default function PerfilScreen() {
 
   const confirmSignOut = () => {
     setSignOutVisible(true);
+  };
+
+  const performDeleteAccount = async () => {
+    setDeleting(true);
+    try {
+      await deleteAccount();
+      setDeleteVisible(false);
+      Alert.alert(t('perfil.deleteAccountSuccess'));
+    } catch (err: any) {
+      Alert.alert(err?.message || t('perfil.deleteAccountError'));
+    } finally {
+      setDeleting(false);
+    }
   };
 
   // O username vem do perfil, nao do user: e a unica linha que o guarda, e o
@@ -327,6 +343,17 @@ export default function PerfilScreen() {
                 </View>
               </View>
             ) : null}
+            <View style={styles.section}>
+              <AppText variant="label" style={styles.sectionLabel}>{t('perfil.sectionDanger')}</AppText>
+              <View style={styles.menu}>
+                <MenuRow
+                  icon="trash-outline"
+                  label={t('perfil.deleteAccount')}
+                  danger
+                  onPress={() => setDeleteVisible(true)}
+                />
+              </View>
+            </View>
             <MenuRow icon="log-out" label={t('perfil.signOut')} danger onPress={confirmSignOut} />
           </>
         ) : (
@@ -363,6 +390,40 @@ export default function PerfilScreen() {
                   setSignOutVisible(false);
                   signOut();
                 }}
+                style={styles.signOutConfirmBtn}
+              />
+            </View>
+          </Pressable>
+        </Pressable>
+      </Modal>
+
+      <Modal
+        visible={deleteVisible}
+        transparent
+        animationType="fade"
+        statusBarTranslucent
+        onRequestClose={() => (deleting ? undefined : setDeleteVisible(false))}>
+        <Pressable style={styles.sheetBackdrop} onPress={() => (deleting ? undefined : setDeleteVisible(false))}>
+          <Pressable style={styles.signOutCard} onPress={() => {}}>
+            <View style={[styles.signOutIcon, { backgroundColor: `${colors.destructive}1A`, borderColor: `${colors.destructive}44` }]}>
+              <Ionicons name="trash-outline" size={26} color={colors.destructive} />
+            </View>
+            <AppText variant="h2" style={styles.signOutTitle}>{t('perfil.deleteAccountTitle')}</AppText>
+            <AppText variant="small" style={styles.signOutBody}>{t('perfil.deleteAccountBody')}</AppText>
+            <AppText variant="small" style={styles.signOutBody}>{t('perfil.deleteAccountWarning')}</AppText>
+            <View style={styles.signOutActions}>
+              <AppButton
+                title={t('perfil.deleteAccountCancel')}
+                variant="outline"
+                disabled={deleting}
+                onPress={() => setDeleteVisible(false)}
+                style={styles.signOutCancelBtn}
+              />
+              <AppButton
+                title={t('perfil.deleteAccountConfirm')}
+                variant="danger"
+                loading={deleting}
+                onPress={performDeleteAccount}
                 style={styles.signOutConfirmBtn}
               />
             </View>

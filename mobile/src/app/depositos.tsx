@@ -1,382 +1,35 @@
-import { useEffect, useMemo, useState } from 'react';
-import { Alert, Animated, AppState, Easing, Pressable, StyleSheet, View } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
+import { Linking, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
-import { AppButton, AppInput, AppText, Badge, Card, Chip, EmptyState, Screen, SectionTitle } from '@/components/ui';
+import { AppButton, AppText, Badge, Card, EmptyState, Screen, SectionTitle } from '@/components/ui';
 import { GradientCard } from '@/components/GradientCard';
-import { PaymentModal } from '@/components/PaymentModal';
-import { PaymentMethodIcon } from '@/components/PaymentMethodIcon';
 import { useMovements, type WalletMovement } from '@/hooks/useMovements';
 import { useBanca } from '@/hooks/useBanca';
 import { useCapitalAccount } from '@/hooks/useCapitalAccount';
-import { useAuth } from '@/hooks/useAuth';
-import { supabase } from '@/lib/supabase';
-import { uploadReceipt, type ReceiptFile } from '@/lib/payments';
-import { clearReceiptInbox, getReceiptInbox } from '@/lib/receiptInbox';
-import { saveReceipt, submitWithdrawalRequest } from '@/lib/adminApi';
-import { notifyPlanRequestSubmitted } from '@/lib/planRequests';
-import { savePendingPlanPayment } from '@/lib/referral';
-import { ReceiptSuccessModal } from '@/components/ReceiptSuccessModal';
-import {
-  PAYMENT_METHODS,
-  PLANS,
-  PLAN_PRICES,
-  PRICES,
-  planLabel,
-  type Currency,
-  type PaymentMethod,
-  type PaymentMethodInfo,
-  type PlanId,
-} from '@/lib/plans';
-import { formatBancaMoney, formatMoney, formatShortDate } from '@/core/format';
-import { Radius, Spacing, type Palette } from '@/core/theme';
+import { formatBancaMoney, formatShortDate } from '@/core/format';
+import { Spacing, type Palette } from '@/core/theme';
 import { useTheme } from '@/hooks/useTheme';
-
-type TabId = 'deposit' | 'withdraw';
-
-// Verifica se o comprovativo ficou realmente registado no servidor, evitando
-// falsos negativos (insert confirmado mas resposta perdida na rede).
-async function receiptRegisteredOnServer(userId: string, proofUrl: string): Promise<boolean> {
-  try {
-    const { count, error } = await supabase
-      .from('payment_receipts')
-      .select('id', { count: 'exact', head: true })
-      .eq('user_id', userId)
-      .eq('proof_url', proofUrl);
-    return !error && (count ?? 0) > 0;
-  } catch {
-    return false;
-  }
-}
+import { PAYMENT_METHODS, planLabel, type PlanId } from '@/lib/plans';
+import { webDepositUrl } from '@/lib/env';
 
 export default function DepositosScreen() {
   const { colors } = useTheme();
   const styles = makeStyles(colors);
   const { t } = useTranslation();
-  const params = useLocalSearchParams<{ plan?: string; currency?: string; amount?: string }>();
   const { config: banca } = useBanca();
   const { account: capitalAccount } = useCapitalAccount();
-  const { user } = useAuth();
-  const { movements, loading, addMovement, deleteMovement } = useMovements();
+  const { movements, loading } = useMovements();
 
-  // Servidor é a fonte da verdade para o hero da Gestão de Capital; o config local é fallback.
   const heroCurrency = capitalAccount?.currency ?? banca.currency ?? 'usd';
   const heroAchieved = capitalAccount?.achieved ?? banca.achieved;
 
-  const [activeTab, setActiveTab] = useState<TabId>('deposit');
-  const [tabAnim] = useState(() => new Animated.Value(0));
-  const [plan, setPlan] = useState<Exclude<PlanId, 'free'>>(
-    PLANS.some((p) => p.id === params.plan) ? (params.plan as Exclude<PlanId, 'free'>) : 'basic',
-  );
-  const [currency, setCurrency] = useState<Currency>(params.currency === 'aoa' ? 'aoa' : 'usd');
-  const [activeMethod, setActiveMethod] = useState<PaymentMethod | null>(null);
-
-  const [syncedParams, setSyncedParams] = useState<{ plan?: string; currency?: string; amount?: string }>({
-    plan: params.plan,
-    currency: params.currency,
-    amount: params.amount,
-  });
-  if (
-    syncedParams.plan !== params.plan ||
-    syncedParams.currency !== params.currency ||
-    syncedParams.amount !== params.amount
-  ) {
-    setSyncedParams({ plan: params.plan, currency: params.currency, amount: params.amount });
-    if (params.plan && PLANS.some((p) => p.id === params.plan)) {
-      setPlan(params.plan as Exclude<PlanId, 'free'>);
-    }
-    if (params.currency === 'aoa' || params.currency === 'usd') {
-      setCurrency(params.currency as Currency);
-    }
-  }
-
-  // Valor vindo do simulador de retorno da banca (primeiro depósito):
-  // o ecrã fica bloqueado num único depósito de capital com esse montante.
-  const parsedCustomAmount = params.amount
-    ? parseFloat(String(params.amount).replace(',', '.'))
-    : NaN;
-  const customAmount = isFinite(parsedCustomAmount) && parsedCustomAmount > 0 ? parsedCustomAmount : null;
-  const isCapitalDeposit = customAmount !== null;
-  const [depositModal, setDepositModal] = useState<{ method?: PaymentMethod; initialProof?: ReceiptFile | null } | null>(null);
-  const [sending, setSending] = useState(false);
-  const [showReceiptSuccess, setShowReceiptSuccess] = useState(false);
-  const [withdrawAmount, setWithdrawAmount] = useState('');
-  const [withdrawDetails, setWithdrawDetails] = useState('');
-
-  useEffect(() => {
-    const checkInbox = async () => {
-      const inbox = await getReceiptInbox();
-      if (!inbox) return;
-      await clearReceiptInbox();
-      setDepositModal((prev) => prev ?? { initialProof: inbox });
-    };
-    void checkInbox();
-    const sub = AppState.addEventListener('change', (state) => {
-      if (state === 'active') void checkInbox();
-    });
-    return () => sub.remove();
-  }, []);
-
-  useEffect(() => {
-    tabAnim.setValue(0);
-    Animated.timing(tabAnim, {
-      toValue: 1,
-      duration: 260,
-      easing: Easing.out(Easing.cubic),
-      useNativeDriver: true,
-    }).start();
-  }, [activeTab, tabAnim]);
-
-  const methodsForCurrency = useMemo(
-    () => PAYMENT_METHODS.filter((m) => (currency === 'usd' ? m.usd : m.aoa)),
-    [currency],
-  );
-
-  const selectMethod = (m: PaymentMethodInfo) => {
-    setActiveMethod(m.id);
-    // Métodos de moeda única definem a moeda do depósito/levantamento.
-    if (m.usd !== m.aoa) setCurrency(m.usd ? 'usd' : 'aoa');
-  };
-
-  const price = PRICES[currency][plan];
-  const planPrice = PLAN_PRICES[currency][plan];
-  const currencySymbol = currency === 'usd' ? 'USD' : 'AOA';
-  const selectedPlan = PLANS.find((p) => p.id === plan);
-
-  const formatMovementAmount = (amount: number, curr: Currency) =>
+  const formatMovementAmount = (amount: number, curr: 'usd' | 'aoa') =>
     curr === 'usd' ? `$${formatMoney(amount)}` : `${formatMoney(amount)} Kz`;
-
-  // Regra: apenas UM pedido de depósito pendente por utilizador.
-  const hasPendingDepositRequest = async (): Promise<boolean> => {
-    if (user?.id) {
-      const { count, error } = await supabase
-        .from('payment_receipts')
-        .select('id', { count: 'exact', head: true })
-        .eq('user_id', user.id)
-        .eq('status', 'pending');
-      if (!error && (count ?? 0) > 0) return true;
-    }
-    return movements.some((m) => m.type === 'deposit' && m.status === 'pendente');
-  };
-
-  const alertPendingDeposit = () => {
-    Alert.alert(t('depositos.pendingDepositTitle'), t('depositos.pendingDepositMsg'));
-  };
-
-  const openDepositModal = async () => {
-    if (await hasPendingDepositRequest()) {
-      alertPendingDeposit();
-      return;
-    }
-    setDepositModal({ method: activeMethod ?? undefined });
-  };
-
-  const confirmDeposit = async (proof: ReceiptFile | null, retries = 2) => {
-    if (!depositModal?.method || !proof) return;
-    if (!user) {
-      Alert.alert(t('planos.connectionError'));
-      return;
-    }
-    if (await hasPendingDepositRequest()) {
-      alertPendingDeposit();
-      setDepositModal(null);
-      return;
-    }
-    setSending(true);
-    const depositAmount = customAmount ?? planPrice;
-    let result: { url: string | null; error?: string } = { url: null };
-    for (let attempt = 0; attempt <= retries; attempt++) {
-      result = await uploadReceipt(user.id, proof);
-      if (result.url) break;
-      if (attempt < retries) await new Promise((r) => setTimeout(r, 1500));
-    }
-    if (!result.url) {
-      setSending(false);
-      Alert.alert(
-        t('planos.connectionError'),
-        result.error || t('planos.retryMessage') || 'Erro ao enviar comprovativo.',
-        [
-          { text: t('planos.cancel'), style: 'cancel' },
-          { text: t('planos.tryAgain') || 'Tentar novamente', onPress: () => confirmDeposit(proof, retries) },
-        ],
-      );
-      return;
-    }
-    // Save receipt server-side for admin review
-    if (user) {
-      const payload = {
-        user_id: user.id,
-        user_email: user.email ?? '',
-        proof_url: result.url,
-        plan: isCapitalDeposit ? 'capital' : plan,
-        method: depositModal.method,
-        amount: depositAmount,
-        currency,
-      };
-      // O upload já foi feito; regista-se a linha no servidor com retry.
-      // Se um insert "falhou" mas o registo existe, considera-se sucesso.
-      let saved = false;
-      let receiptId: string | null = null;
-      for (let attempt = 0; attempt <= 2; attempt++) {
-        try {
-          receiptId = await saveReceipt(payload);
-          saved = true;
-          break;
-        } catch (err: any) {
-          console.warn('[confirmDeposit] saveReceipt failed:', err?.message);
-          if (await receiptRegisteredOnServer(user.id, result.url)) {
-            saved = true;
-            break;
-          }
-          if (attempt < 2) await new Promise((r) => setTimeout(r, 1500));
-        }
-      }
-      if (!saved) {
-        setSending(false);
-        Alert.alert(
-          t('planos.connectionError'),
-          t('depositos.receiptSaveError') || 'Comprovativo enviado mas não foi possível registar no servidor. Contacte o suporte.',
-          [
-            { text: t('planos.cancel'), style: 'cancel' },
-            { text: t('planos.tryAgain') || 'Tentar novamente', onPress: () => confirmDeposit(proof, retries) },
-          ],
-        );
-        return;
-      }
-      // Movimento local ligado ao comprovativo, para o trigger de sincronização
-      // propagar a decisão do admin sem depender do fallback.
-      void addMovement({
-        type: 'deposit',
-        method: depositModal.method,
-        amount: depositAmount,
-        currency,
-        plan: isCapitalDeposit ? 'capital' : plan,
-        status: 'pendente',
-        ...(receiptId ? { receiptId } : {}),
-      });
-      // Regista o valor pago — ao ativar o premium passa a ser o saldo da
-      // gestão de capital (para utilizadores vindos de link de afiliado).
-      // Depósitos de capital não são ativação de plano.
-      if (!isCapitalDeposit) {
-        void savePendingPlanPayment({ plan, amount: depositAmount, currency });
-      }
-    }
-    setSending(false);
-    setDepositModal(null);
-    setShowReceiptSuccess(true);
-    void notifyPlanRequestSubmitted(
-      isCapitalDeposit ? t('depositos.capitalDepositTitle') : planLabel(plan),
-      isCapitalDeposit ? formatMovementAmount(depositAmount, currency) : price,
-    );
-  };
-
-  const submitWithdrawal = async () => {
-    const amount = parseFloat(withdrawAmount.replace(',', '.'));
-    if (!activeMethod || !isFinite(amount) || amount <= 0 || !withdrawDetails.trim()) {
-      Alert.alert(t('depositos.invalidWithdraw'));
-      return;
-    }
-    // Save server-side
-    let requestId: string | null = null;
-    try {
-      requestId = await submitWithdrawalRequest({
-        method: activeMethod,
-        amount,
-        currency,
-        details: withdrawDetails.trim(),
-      });
-    } catch (err: any) {
-      console.warn('[submitWithdrawal] server save failed:', err?.message);
-    }
-    // Also save locally for instant UI
-    void addMovement({
-      type: 'withdrawal',
-      method: activeMethod,
-      amount,
-      currency,
-      status: 'pendente',
-      notes: withdrawDetails.trim(),
-      ...(requestId ? { requestId } : {}),
-    });
-    setWithdrawAmount('');
-    setWithdrawDetails('');
-    Alert.alert(t('depositos.confirmWithdrawOk'), t('depositos.confirmWithdrawMsg'), [{ text: 'OK' }]);
-  };
-
-  const methodSegment = (() => {
-    const options = isCapitalDeposit ? methodsForCurrency : PAYMENT_METHODS;
-    const activeInfo = options.find((m) => m.id === activeMethod) ?? null;
-    const showCurrencyToggle = !isCapitalDeposit && activeInfo !== null && activeInfo.usd && activeInfo.aoa;
-    return (
-      <View style={styles.methodSection}>
-        <AppText variant="label" style={styles.fieldLabel}>{t('planos.chooseMethod')}</AppText>
-        <View style={styles.methodChips}>
-          {options.map((m) => {
-            const active = activeMethod === m.id;
-            const currencies = m.usd && m.aoa ? 'USD / AOA' : m.usd ? 'USD' : 'AOA';
-            return (
-              <Pressable
-                key={m.id}
-                onPress={() => selectMethod(m)}
-                style={[styles.methodBtn, active && styles.methodBtnActive]}
-                accessibilityRole="button"
-                accessibilityState={{ selected: active }}>
-                <PaymentMethodIcon method={m} size={16} color={active ? colors.bg : m.color} />
-                <View style={styles.methodBtnText}>
-                  <AppText
-                    variant="small"
-                    style={{ color: active ? colors.bg : colors.text, fontWeight: '700' }}>
-                    {m.label}
-                  </AppText>
-                  <AppText
-                    variant="small"
-                    style={{ fontSize: 10, color: active ? colors.bg : colors.textMuted, fontWeight: '600' }}>
-                    {currencies}
-                  </AppText>
-                </View>
-              </Pressable>
-            );
-          })}
-        </View>
-        {showCurrencyToggle ? (
-          <View style={styles.segment}>
-            {(['usd', 'aoa'] as const).map((c) => {
-              const active = currency === c;
-              return (
-                <Pressable
-                  key={c}
-                  onPress={() => setCurrency(c)}
-                  style={styles.segmentBtn}
-                  accessibilityRole="button"
-                  accessibilityState={{ selected: active }}>
-                  {active ? <View style={styles.segmentPill} /> : null}
-                  <AppText
-                    variant="small"
-                    style={{ color: active ? colors.bg : colors.textMuted, fontWeight: '700' }}>
-                    {c === 'usd' ? t('planos.usd') : t('planos.aoa')}
-                  </AppText>
-                </Pressable>
-              );
-            })}
-          </View>
-        ) : null}
-      </View>
-    );
-  })();
 
   const renderMovement = (m: WalletMovement, index: number) => {
     const isDeposit = m.type === 'deposit';
     const method = PAYMENT_METHODS.find((pm) => pm.id === m.method);
     const statusColor = m.status === 'concluido' ? colors.success : m.status === 'recusado' ? colors.destructive : colors.warning;
-    const isPending = m.status === 'pendente';
-
-    const handleDelete = () => {
-      Alert.alert(t('depositos.deleteMovementTitle'), t('depositos.deleteMovementMsg'), [
-        { text: t('common.cancel'), style: 'cancel' },
-        { text: t('depositos.deleteMovement'), style: 'destructive', onPress: () => deleteMovement(m.id) },
-      ]);
-    };
 
     return (
       <View key={m.id} style={[styles.movementRow, index > 0 && styles.movementDivider]}>
@@ -405,25 +58,13 @@ export default function DepositosScreen() {
             style={{ color: isDeposit ? colors.success : colors.accent, fontWeight: '800' }}>
             {`${isDeposit ? '+' : '-'} ${formatMovementAmount(m.amount, m.currency)}`}
           </AppText>
-          <View style={styles.movementStatusRow}>
-            <Badge color={statusColor} bg={`${statusColor}20`}>
-              {m.status === 'concluido' ? t('depositos.statusConcluido') : t('depositos.statusPendente')}
-            </Badge>
-            {isPending ? (
-              <Pressable onPress={handleDelete} style={styles.deleteBtn}>
-                <Ionicons name="trash-outline" size={14} color={colors.destructive} />
-              </Pressable>
-            ) : null}
-          </View>
+          <Badge color={statusColor} bg={`${statusColor}20`}>
+            {m.status === 'concluido' ? t('depositos.statusConcluido') : t('depositos.statusPendente')}
+          </Badge>
         </View>
       </View>
     );
   };
-
-  const tabs: { id: TabId; icon: 'arrow-down-circle-outline' | 'arrow-up-circle-outline'; label: string }[] = [
-    { id: 'deposit', icon: 'arrow-down-circle-outline', label: t('depositos.tabDeposit') },
-    { id: 'withdraw', icon: 'arrow-up-circle-outline', label: t('depositos.tabWithdraw') },
-  ];
 
   return (
     <Screen>
@@ -442,7 +83,7 @@ export default function DepositosScreen() {
             <AppText style={styles.heroLabel}>{t('depositos.balance')}</AppText>
           </View>
           <View style={styles.heroUsdPill}>
-            <AppText style={styles.heroUsdText}>{currencySymbol}</AppText>
+            <AppText style={styles.heroUsdText}>{heroCurrency === 'usd' ? 'USD' : 'AOA'}</AppText>
           </View>
         </View>
         <AppText style={styles.heroValue}>{formatBancaMoney(heroAchieved, heroCurrency)}</AppText>
@@ -452,127 +93,21 @@ export default function DepositosScreen() {
         </View>
       </GradientCard>
 
-      <View style={styles.tabs}>
-        {tabs.map((tab) => {
-          const active = activeTab === tab.id;
-          return (
-            <Pressable
-              key={tab.id}
-              onPress={() => setActiveTab(tab.id)}
-              style={styles.tab}
-              accessibilityRole="tab"
-              accessibilityState={{ selected: active }}>
-              {active ? <View style={styles.tabPill} /> : null}
-              <Ionicons name={tab.icon} size={16} color={active ? colors.bg : colors.textMuted} />
-              <AppText
-                variant="small"
-                style={{ color: active ? colors.bg : colors.textMuted, fontWeight: '700' }}>
-                {tab.label}
-              </AppText>
-            </Pressable>
-          );
-        })}
-      </View>
-
-      <Animated.View
-        style={[
-          styles.tabBody,
-          {
-            opacity: tabAnim,
-            transform: [
-              { translateY: tabAnim.interpolate({ inputRange: [0, 1], outputRange: [12, 0] }) },
-            ],
-          },
-        ]}>
-        {activeTab === 'deposit' ? (
-          <>
-            {methodSegment}
-            {!isCapitalDeposit ? (
-              <View style={styles.planChips}>
-                {PLANS.map((p) => (
-                  <Chip key={p.id} label={planLabel(p.id)} active={plan === p.id} onPress={() => setPlan(p.id)} />
-                ))}
-              </View>
-            ) : null}
-            <Card style={styles.summaryCard}>
-              <View style={styles.summaryHeader}>
-                <View style={styles.planIconWrap}>
-                  <Ionicons
-                    name={isCapitalDeposit ? 'trending-up' : selectedPlan?.icon ?? 'flash'}
-                    size={20}
-                    color={colors.accent}
-                  />
-                </View>
-                <View style={styles.summaryMeta}>
-                  <AppText variant="label">
-                    {isCapitalDeposit ? t('depositos.capitalDepositTitle') : planLabel(plan)}
-                  </AppText>
-                  <AppText variant="small" style={{ color: colors.textMuted }}>
-                    {isCapitalDeposit ? t('depositos.capitalDepositSubtitle') : t('depositos.amount')}
-                  </AppText>
-                </View>
-                <AppText style={styles.summaryPrice}>
-                  {isCapitalDeposit ? formatBancaMoney(customAmount, currency) : price}
-                </AppText>
-              </View>
-              <AppButton
-                title={t('depositos.depositCta', {
-                  amount: isCapitalDeposit ? formatBancaMoney(customAmount, currency) : price,
-                })}
-                variant={isCapitalDeposit || plan === 'pro' ? 'gold' : 'primary'}
-                style={styles.cta}
-                onPress={openDepositModal}
-              />
-              <View style={styles.secureRow}>
-                <Ionicons name="shield-checkmark" size={14} color={colors.success} />
-                <AppText variant="small" style={{ color: colors.textMuted }}>
-                  {t('depositos.secureNote')}
-                </AppText>
-              </View>
-            </Card>
-          </>
-        ) : (
-          <>
-            {methodSegment}
-            <Card style={styles.withdrawCard}>
-              <AppText variant="muted">{t('depositos.withdrawSubtitle')}</AppText>
-
-              <View style={styles.availableRow}>
-                <AppText variant="label" style={{ color: colors.textMuted }}>
-                  {t('depositos.withdrawAvailable')}
-                </AppText>
-                <AppText variant="label" style={{ color: colors.success }}>
-                  {formatBancaMoney(banca.achieved, banca.currency ?? 'usd')}
-                </AppText>
-              </View>
-
-              <AppInput
-                label={t('depositos.withdrawAmount', { currency: currencySymbol })}
-                placeholder="0.00"
-                keyboardType="decimal-pad"
-                value={withdrawAmount}
-                onChangeText={setWithdrawAmount}
-                icon={<Ionicons name="cash-outline" size={18} color={colors.textMuted} />}
-              />
-              <AppInput
-                label={t('depositos.withdrawDetails')}
-                placeholder={activeMethod ? PAYMENT_METHODS.find((m) => m.id === activeMethod)?.getDetails(t) : undefined}
-                value={withdrawDetails}
-                onChangeText={setWithdrawDetails}
-                multiline
-                numberOfLines={2}
-                icon={<Ionicons name="card-outline" size={18} color={colors.textMuted} />}
-              />
-              <AppButton
-                title={t('depositos.withdrawCta')}
-                variant="secondary"
-                style={styles.cta}
-                onPress={submitWithdrawal}
-              />
-            </Card>
-          </>
-        )}
-      </Animated.View>
+      <Card style={styles.infoCard}>
+        <View style={styles.infoHead}>
+          <View style={[styles.infoIcon, { backgroundColor: `${colors.accent}18` }]}>
+            <Ionicons name="globe-outline" size={20} color={colors.accent} />
+          </View>
+          <AppText variant="label" style={{ flex: 1 }}>{t('depositos.webTitle')}</AppText>
+        </View>
+        <AppText variant="muted">{t('depositos.webDesc')}</AppText>
+        <AppButton
+          title={t('depositos.webCta')}
+          variant="secondary"
+          icon={<Ionicons name="open-outline" size={18} color={colors.accent} />}
+          onPress={() => Linking.openURL(webDepositUrl())}
+        />
+      </Card>
 
       <View style={styles.section}>
         <SectionTitle>{t('depositos.historySection')}</SectionTitle>
@@ -586,296 +121,142 @@ export default function DepositosScreen() {
           <Card style={styles.historyCard}>{movements.map(renderMovement)}</Card>
         )}
       </View>
-
-      {depositModal ? (
-        <PaymentModal
-          plan={plan}
-          currency={currency}
-          price={price}
-          onClose={() => setDepositModal(null)}
-          onConfirm={confirmDeposit}
-          method={depositModal.method}
-          onMethodSelect={(m) => setDepositModal({ method: m, initialProof: depositModal.initialProof })}
-          availableMethods={methodsForCurrency}
-          initialProof={depositModal.initialProof ?? null}
-          busy={sending}
-        />
-      ) : null}
-
-      <ReceiptSuccessModal
-        visible={showReceiptSuccess}
-        onDone={() => setShowReceiptSuccess(false)}
-      />
     </Screen>
   );
 }
 
+function formatMoney(amount: number): string {
+  return amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
 const makeStyles = (c: Palette) =>
   StyleSheet.create({
-  hero: {
-    padding: Spacing.lg,
-    gap: Spacing.sm,
-    marginBottom: Spacing.lg,
-    overflow: 'hidden',
-    borderColor: 'rgba(255,255,255,0.14)',
-    shadowColor: c.primary,
-    shadowOpacity: 0.25,
-    shadowRadius: 24,
-    shadowOffset: { width: 0, height: 10 },
-    elevation: 8,
-  },
-  heroCircleA: {
-    position: 'absolute',
-    top: -70,
-    right: -40,
-    width: 200,
-    height: 200,
-    borderRadius: 100,
-    backgroundColor: 'rgba(255,255,255,0.06)',
-  },
-  heroCircleB: {
-    position: 'absolute',
-    bottom: -90,
-    left: -30,
-    width: 180,
-    height: 180,
-    borderRadius: 90,
-    backgroundColor: 'rgba(255,255,255,0.05)',
-  },
-  heroTopRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  heroTitleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.sm,
-  },
-  heroBadge: {
-    width: 32,
-    height: 32,
-    borderRadius: 10,
-    backgroundColor: 'rgba(255,255,255,0.14)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  heroLabel: {
-    color: 'rgba(255,255,255,0.9)',
-    fontSize: 13,
-    fontWeight: '700',
-    letterSpacing: 1,
-  },
-  heroUsdPill: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 999,
-    backgroundColor: 'rgba(255,255,255,0.14)',
-  },
-  heroUsdText: {
-    color: '#FFFFFF',
-    fontSize: 12,
-    fontWeight: '700',
-  },
-  heroValue: {
-    color: '#FFFFFF',
-    fontSize: 36,
-    fontWeight: '800',
-    letterSpacing: -0.5,
-    lineHeight: 42,
-  },
-  heroFooter: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.xs,
-  },
-  heroSub: {
-    color: 'rgba(255,255,255,0.7)',
-    fontSize: 12,
-  },
-  tabs: {
-    flexDirection: 'row',
-    backgroundColor: c.surfaceElevated,
-    borderRadius: 999,
-    padding: 4,
-    marginBottom: Spacing.lg,
-  },
-  tab: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: Spacing.sm,
-    paddingVertical: 10,
-    borderRadius: 999,
-  },
-  tabPill: {
-    position: 'absolute',
-    top: 0,
-    bottom: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: c.accent,
-    borderRadius: 999,
-    shadowColor: c.accent,
-    shadowOpacity: 0.35,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 4,
-  },
-  tabBody: {
-    marginBottom: Spacing.lg,
-    gap: Spacing.md,
-  },
-  segment: {
-    flexDirection: 'row',
-    backgroundColor: c.surfaceElevated,
-    borderRadius: 999,
-    padding: 4,
-  },
-  segmentBtn: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 9,
-    borderRadius: 999,
-  },
-  segmentPill: {
-    position: 'absolute',
-    top: 0,
-    bottom: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: c.accent,
-    borderRadius: 999,
-    shadowColor: c.accent,
-    shadowOpacity: 0.35,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 4,
-  },
-  planChips: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: Spacing.sm,
-  },
-  summaryCard: {
-    gap: Spacing.md,
-    padding: Spacing.lg,
-  },
-  summaryHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.md,
-  },
-  planIconWrap: {
-    width: 42,
-    height: 42,
-    borderRadius: 13,
-    backgroundColor: `${c.accent}14`,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  summaryMeta: {
-    flex: 1,
-    gap: 2,
-  },
-  summaryPrice: {
-    color: c.text,
-    fontSize: 20,
-    fontWeight: '800',
-    letterSpacing: -0.3,
-  },
-  cta: {
-    minHeight: 54,
-    borderRadius: Radius.lg,
-  },
-  secureRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: Spacing.xs,
-  },
-  withdrawCard: {
-    gap: Spacing.md,
-  },
-  availableRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: c.surfaceElevated,
-    borderColor: c.border,
-    borderWidth: 1,
-    borderRadius: Radius.md,
-    paddingVertical: Spacing.sm,
-    paddingHorizontal: Spacing.md,
-  },
-  fieldLabel: {
-    color: c.textMuted,
-  },
-  methodChips: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: Spacing.sm,
-  },
-  methodSection: {
-    gap: Spacing.sm,
-  },
-  methodBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.sm,
-    paddingHorizontal: 14,
-    paddingVertical: 9,
-    borderRadius: 999,
-    borderWidth: 1,
-    borderColor: c.border,
-    backgroundColor: c.surfaceElevated,
-  },
-  methodBtnText: {
-    alignItems: 'flex-start',
-  },
-  methodBtnActive: {
-    backgroundColor: c.accent,
-    borderColor: c.accent,
-  },
-  section: {
-    marginBottom: Spacing.lg,
-  },
-  historyCard: {
-    gap: 0,
-  },
-  movementRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.md,
-    paddingVertical: Spacing.sm,
-  },
-  movementDivider: {
-    borderTopWidth: 1,
-    borderTopColor: c.border,
-  },
-  movementIcon: {
-    width: 42,
-    height: 42,
-    borderRadius: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  movementInfo: {
-    flex: 1,
-    gap: 2,
-  },
-  movementRight: {
-    alignItems: 'flex-end',
-    gap: 4,
-  },
-  movementStatusRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.xs,
-  },
-  deleteBtn: {
-    padding: 4,
-  },
-});
+    hero: {
+      padding: Spacing.lg,
+      gap: Spacing.sm,
+      marginBottom: Spacing.lg,
+      overflow: 'hidden',
+      borderColor: 'rgba(255,255,255,0.14)',
+      shadowColor: c.primary,
+      shadowOpacity: 0.25,
+      shadowRadius: 24,
+      shadowOffset: { width: 0, height: 10 },
+      elevation: 8,
+    },
+    heroCircleA: {
+      position: 'absolute',
+      top: -70,
+      right: -40,
+      width: 200,
+      height: 200,
+      borderRadius: 100,
+      backgroundColor: 'rgba(255,255,255,0.06)',
+    },
+    heroCircleB: {
+      position: 'absolute',
+      bottom: -90,
+      left: -30,
+      width: 180,
+      height: 180,
+      borderRadius: 90,
+      backgroundColor: 'rgba(255,255,255,0.05)',
+    },
+    heroTopRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+    heroTitleRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: Spacing.sm,
+    },
+    heroBadge: {
+      width: 32,
+      height: 32,
+      borderRadius: 10,
+      backgroundColor: 'rgba(255,255,255,0.14)',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    heroLabel: {
+      color: 'rgba(255,255,255,0.9)',
+      fontSize: 13,
+      fontWeight: '700',
+      letterSpacing: 1,
+    },
+    heroUsdPill: {
+      paddingHorizontal: 10,
+      paddingVertical: 4,
+      borderRadius: 999,
+      backgroundColor: 'rgba(255,255,255,0.14)',
+    },
+    heroUsdText: {
+      color: '#FFFFFF',
+      fontSize: 12,
+      fontWeight: '700',
+    },
+    heroValue: {
+      color: '#FFFFFF',
+      fontSize: 36,
+      fontWeight: '800',
+      letterSpacing: -0.5,
+      lineHeight: 42,
+    },
+    heroFooter: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: Spacing.xs,
+    },
+    heroSub: {
+      color: 'rgba(255,255,255,0.7)',
+      fontSize: 12,
+    },
+    infoCard: {
+      marginBottom: Spacing.lg,
+      gap: Spacing.md,
+    },
+    infoHead: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: Spacing.md,
+    },
+    infoIcon: {
+      width: 42,
+      height: 42,
+      borderRadius: 13,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    section: {
+      marginBottom: Spacing.lg,
+    },
+    historyCard: {
+      gap: 0,
+    },
+    movementRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: Spacing.md,
+      paddingVertical: Spacing.sm,
+    },
+    movementDivider: {
+      borderTopWidth: 1,
+      borderTopColor: c.border,
+    },
+    movementIcon: {
+      width: 42,
+      height: 42,
+      borderRadius: 14,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    movementInfo: {
+      flex: 1,
+      gap: 2,
+    },
+    movementRight: {
+      alignItems: 'flex-end',
+      gap: 4,
+    },
+  });

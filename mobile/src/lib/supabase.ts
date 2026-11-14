@@ -10,6 +10,7 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY || 'placeho
     autoRefreshToken: true,
     persistSession: true,
     detectSessionInUrl: Platform.OS === 'web',
+    flowType: 'pkce',
   },
 });
 

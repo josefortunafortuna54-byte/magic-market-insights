@@ -1,4 +1,4 @@
-import { fireEvent, render } from '@testing-library/react-native';
+import { render } from '@testing-library/react-native';
 import BancaScreen from '../banca';
 import { useCapitalAccount } from '@/hooks/useCapitalAccount';
 
@@ -67,13 +67,12 @@ describe('BancaScreen', () => {
     expect(getByText(/capital\.minDeposit/)).toBeTruthy();
   });
 
-  it('abre o modal de levantamento ao carregar no botão (depósito >= min)', () => {
+  it('mostra o aviso de simulação educacional', () => {
     (useCapitalAccount as jest.Mock).mockReturnValue({
       account: { id: 'a1', capital: 1000, achieved: 1250, currency: 'usd', total_withdrawn: 0, status: 'active', meta_percent: 25 },
       reports: [], loading: false, metaPercent: 25,
     });
     const { getByText } = render(<BancaScreen />);
-    fireEvent.press(getByText('capital.requestWithdrawal'));
-    expect(require('@/components/WithdrawalModal').WithdrawalModal).toHaveBeenCalled();
+    expect(getByText('capital.simulationDisclaimer')).toBeTruthy();
   });
 });

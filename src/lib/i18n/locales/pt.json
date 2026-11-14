@@ -1227,6 +1227,8 @@
   "sendProofHint": "Galeria ou ficheiros",
   "proofAttached": "Comprovativo anexado",
   "receiptSaveError": "Comprovativo enviado mas não foi possível registar no servidor. Contacte o suporte.",
+  "sessionExpiredTitle": "Sessão expirada",
+  "sessionExpiredMsg": "Inicia sessão para continuares com o depósito ou levantamento.",
   "deleteMovement": "Apagar",
   "deleteMovementTitle": "Apagar movimento?",
   "deleteMovementMsg": "Tem certeza que deseja apagar este movimento pendente?",
@@ -1401,6 +1403,7 @@
   "termosTitle": "Termos de Uso",
   "privacidadeTitle": "Privacidade",
   "avisoRiscoTitle": "Aviso de Risco",
+  "apagarConta": "Apagar conta",
   "termosDoc": {
    "s1Title": "1. Aceitação dos Termos",
    "s1Body": "Ao aceder e utilizar a plataforma The Magic Trader, o utilizador concorda com estes Termos de Uso. Se não concordar com algum dos termos, não deve utilizar a plataforma.",

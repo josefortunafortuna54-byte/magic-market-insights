@@ -90,7 +90,7 @@ const formatMovementAmount = (amount: number, curr: Currency) =>
 
 export default function Depositos() {
   const { t, i18n } = useTranslation();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const { config: banca } = useBanca();
   const { movements, loading, addMovement, deleteMovement } = useMovements();
   const navigate = useNavigate();
@@ -168,7 +168,20 @@ export default function Depositos() {
     });
   };
 
+  const redirectToLogin = () => {
+    toast.error(t("depositos.sessionExpiredTitle"), {
+      description: t("depositos.sessionExpiredMsg"),
+    });
+    setDepositModal(null);
+    setWithdrawOpen(false);
+    navigate("/login", { replace: true });
+  };
+
   const openDepositModal = async () => {
+    if (!user) {
+      if (!authLoading) redirectToLogin();
+      return;
+    }
     if (await hasPendingDepositRequest()) {
       alertPendingDeposit();
       return;
@@ -179,7 +192,7 @@ export default function Depositos() {
   const confirmDeposit = async (proof: ReceiptFile | null, retries = 2) => {
     if (!depositModal?.method || !proof) return;
     if (!user) {
-      toast.error(t("planos.connectionError"));
+      if (!authLoading) redirectToLogin();
       return;
     }
     if (await hasPendingDepositRequest()) {
@@ -305,6 +318,10 @@ export default function Depositos() {
     details: string;
     currency: Currency;
   }) => {
+    if (!user) {
+      if (!authLoading) redirectToLogin();
+      return;
+    }
     setWithdrawBusy(true);
     try {
       let requestId: string | null = null;
@@ -575,7 +592,13 @@ export default function Depositos() {
                   <Button
                     variant="secondary"
                     className="w-full h-[54px]"
-                    onClick={() => setWithdrawOpen(true)}
+                    onClick={() => {
+                      if (!user) {
+                        if (!authLoading) redirectToLogin();
+                        return;
+                      }
+                      setWithdrawOpen(true);
+                    }}
                   >
                     {t("depositos.withdrawCta")}
                   </Button>
