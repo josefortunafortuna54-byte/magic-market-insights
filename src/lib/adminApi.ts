@@ -20,7 +20,13 @@ async function callAdminFn<T = AdminFnResult>(action: string, payload: Record<st
   });
 
   const raw = (await res.json()) as unknown as AdminFnResult;
-  if (!res.ok || raw.error) throw new Error(String(raw.error || "Erro desconhecido"));
+  if (!res.ok || raw.error) {
+    const message = String(raw.error || "Erro desconhecido");
+    if (message.startsWith("Ação desconhecida")) {
+      throw new Error("Backend desatualizado: faz deploy da edge function admin-manage.");
+    }
+    throw new Error(message);
+  }
   return raw as T;
 }
 

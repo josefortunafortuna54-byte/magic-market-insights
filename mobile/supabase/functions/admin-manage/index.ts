@@ -1441,7 +1441,7 @@ serve(async (req) => {
         end.setUTCDate(Math.min(start.getUTCDate(), lastDayOfMonth));
         const isoDate = (d: Date) => d.toISOString().slice(0, 10);
 
-        const update: Record<string, unknown> = {
+        const update: Record<string, any> = {
           status: 'active',
           start_date: isoDate(start),
           end_date: isoDate(end),
