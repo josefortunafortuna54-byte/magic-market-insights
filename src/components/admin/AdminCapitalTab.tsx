@@ -7,23 +7,40 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import {
   approveManagementRequest,
+  createCapitalManagement,
   listCapitalAccounts,
   listCapitalContracts,
   listCapitalReports,
   listManagementRequests,
+  listUsers,
+  manageCapitalContract,
   postCapitalReport,
   rejectManagementRequest,
+  searchCapitalUsers,
   upsertCapitalAccount,
   type AdminCapitalAccount,
   type AdminCapitalContract,
   type AdminCapitalReport,
   type AdminManagementRequest,
+  type CapitalContractAction,
+  type UserWithSubscription,
 } from "@/lib/adminApi";
 import { formatShortDate } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { useAdminCodePrompt } from "@/components/admin/useAdminCodePrompt";
+import { Check, RotateCcw, Search, UserPlus, X } from "lucide-react";
 
 const CURRENCIES = ["usd", "aoa"] as const;
+
+const PLAN_MONTHS = { conservador: 3, equilibrado: 2, agressivo: 1 } as const;
+type CapitalPlanId = keyof typeof PLAN_MONTHS;
+const PLAN_IDS = Object.keys(PLAN_MONTHS) as CapitalPlanId[];
+
+const contractActionLabel: Record<CapitalContractAction, string> = {
+  complete: "Concluir",
+  cancel: "Cancelar",
+  renew: "Renovar",
+};
 
 const money = (v: number, currency: string) =>
   currency === "aoa" ? `${Number(v).toLocaleString("pt-PT")} Kz` : `$${Number(v).toFixed(2)}`;
@@ -53,18 +70,31 @@ export function AdminCapitalTab() {
   const [reports, setReports] = useState<Record<string, AdminCapitalReport[]>>({});
   const [busy, setBusy] = useState(false);
   const [confirmAdmin, adminPrompt] = useAdminCodePrompt();
+  const [users, setUsers] = useState<UserWithSubscription[]>([]);
+  const [userQuery, setUserQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<UserWithSubscription[]>([]);
+  const [searching, setSearching] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<UserWithSubscription | null>(null);
+  const [newPlan, setNewPlan] = useState<CapitalPlanId>("equilibrado");
+  const [newCurrency, setNewCurrency] = useState<"usd" | "aoa">("usd");
+  const [newCapital, setNewCapital] = useState("");
+  const [newStart, setNewStart] = useState("");
+  const [newMeta, setNewMeta] = useState("");
+  const [resetAchieved, setResetAchieved] = useState(false);
 
   const load = useCallback(async () => {
     try {
-      const [accs, ctr, reqs] = await Promise.all([
+      const [accs, ctr, reqs, userList] = await Promise.all([
         listCapitalAccounts(),
         listCapitalContracts(),
         listManagementRequests("pending"),
+        listUsers().catch(() => [] as UserWithSubscription[]),
       ]);
       setAccounts(accs);
       setContracts(ctr.contracts);
       setActiveCount(ctr.activeCount);
       setRequests(reqs);
+      setUsers(userList);
     } catch (e: unknown) {
       toast.error("Erro", { description: e instanceof Error ? e.message : "Não foi possível carregar as contas de capital." });
     } finally {
@@ -92,6 +122,40 @@ export function AdminCapitalTab() {
     ];
   }, [accounts, activeCount]);
 
+  const filteredUsers = useMemo(() => {
+    const q = userQuery.trim().toLowerCase();
+    if (!q) return [];
+    const local = users
+      .filter((u) => (u.email ?? "").toLowerCase().includes(q) || u.id.toLowerCase().includes(q))
+      .slice(0, 8);
+    return searchResults.length > 0 ? searchResults : local;
+  }, [userQuery, users, searchResults]);
+
+  useEffect(() => {
+    const q = userQuery.trim();
+    if (q.length < 2 || selectedUser) {
+      setSearchResults([]);
+      setSearching(false);
+      return;
+    }
+    let cancelled = false;
+    const timer = setTimeout(async () => {
+      setSearching(true);
+      try {
+        const result = await searchCapitalUsers(q);
+        if (!cancelled) setSearchResults(result);
+      } catch {
+        if (!cancelled) setSearchResults([]);
+      } finally {
+        if (!cancelled) setSearching(false);
+      }
+    }, 300);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [userQuery, selectedUser]);
+
   const runAction = async (fn: () => Promise<void>, success: string) => {
     setBusy(true);
     try {
@@ -105,7 +169,11 @@ export function AdminCapitalTab() {
     }
   };
 
-  const setEdit = (userId: string, field: "capital" | "achieved" | "total_withdrawn", value: string) => {
+  const setEdit = (
+    userId: string,
+    field: "capital" | "achieved" | "total_withdrawn" | "meta_percent",
+    value: string,
+  ) => {
     setEditing((prev) => ({
       ...prev,
       [userId]: { ...prev[userId], [field]: parseFloat(value.replace(",", ".")) || 0 },
@@ -120,9 +188,59 @@ export function AdminCapitalTab() {
       ...(draft.achieved != null ? { achieved: draft.achieved } : {}),
       ...(draft.total_withdrawn != null ? { total_withdrawn: draft.total_withdrawn } : {}),
       ...(draft.currency ? { currency: draft.currency } : {}),
+      ...(draft.meta_percent != null ? { meta_percent: draft.meta_percent } : {}),
     };
     void runAction(async () => upsertCapitalAccount(payload), "Conta atualizada");
     setEditing((prev) => ({ ...prev, [acc.user_id]: {} }));
+  };
+
+  const addToManagement = async () => {
+    if (!selectedUser) {
+      toast.error("Escolhe um utilizador", { description: "Pesquisa pelo email e seleciona o utilizador." });
+      return;
+    }
+    const capital = newCapital.trim() === "" ? null : parseFloat(newCapital.replace(",", "."));
+    if (capital != null && (!Number.isFinite(capital) || capital < 0)) {
+      toast.error("Capital inválido", { description: "Introduz um valor igual ou superior a zero." });
+      return;
+    }
+    const meta = newMeta.trim() === "" ? null : parseFloat(newMeta.replace(",", "."));
+    if (meta != null && (!Number.isFinite(meta) || meta < 0 || meta > 100)) {
+      toast.error("Meta inválida", { description: "A meta deve estar entre 0% e 100%." });
+      return;
+    }
+
+    const months = PLAN_MONTHS[newPlan];
+    const ok = await confirmAdmin(
+      `Adicionar ${selectedUser.email || "utilizador"} à gestão (${planLabel(newPlan)}, ${months} mês(es))?`,
+    );
+    if (!ok) return;
+
+    await runAction(async () => {
+      await createCapitalManagement({
+        user_id: selectedUser.id,
+        plan_id: newPlan,
+        currency: newCurrency,
+        ...(capital != null ? { capital } : {}),
+        ...(newStart ? { start_date: newStart } : {}),
+        ...(meta != null ? { meta_percent: meta } : {}),
+        reset_achieved: resetAchieved,
+      });
+      setSelectedUser(null);
+      setUserQuery("");
+      setNewCapital("");
+      setNewStart("");
+      setNewMeta("");
+      setResetAchieved(false);
+    }, "Utilizador adicionado à gestão");
+  };
+
+  const manageContract = async (contract: AdminCapitalContract, op: CapitalContractAction) => {
+    const ok = await confirmAdmin(
+      `${contractActionLabel[op]} a gestão de ${contract.email || "utilizador"} (${planLabel(contract.plan_id)})?`,
+    );
+    if (!ok) return;
+    await runAction(async () => { await manageCapitalContract(contract.id, op); }, `Contrato: ${contractActionLabel[op].toLowerCase()}`);
   };
 
   const loadReports = async (userId: string) => {
@@ -183,6 +301,145 @@ export function AdminCapitalTab() {
           </div>
         ))}
       </div>
+
+      <Card>
+        <CardContent className="space-y-3 pt-3">
+          <div className="flex items-center gap-2">
+            <UserPlus className="h-4 w-4 text-primary" />
+            <h3 className="text-sm font-semibold">Adicionar utilizador à gestão</h3>
+          </div>
+
+          {selectedUser ? (
+            <div className="flex items-center gap-2 rounded-xl border border-border bg-secondary/40 p-2">
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-medium">{selectedUser.email || selectedUser.id}</p>
+                <p className="truncate text-xs text-muted-foreground">{selectedUser.id}</p>
+              </div>
+              <Button variant="ghost" size="icon" onClick={() => setSelectedUser(null)} aria-label="Remover utilizador">
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          ) : (
+            <div>
+              <div className="relative">
+                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  value={userQuery}
+                  onChange={(e) => setUserQuery(e.target.value)}
+                  placeholder="Pesquisar utilizador por email ou ID..."
+                  className="pl-9"
+                />
+              </div>
+              {userQuery.trim() ? (
+                <div className="mt-1 max-h-56 overflow-auto rounded-xl border border-border bg-card shadow-sm">
+                  {filteredUsers.length === 0 ? (
+                    <p className="px-3 py-3 text-sm text-muted-foreground">
+                      {searching ? "A pesquisar..." : "Nenhum utilizador encontrado."}
+                    </p>
+                  ) : (
+                    filteredUsers.map((u) => (
+                      <button
+                        key={u.id}
+                        type="button"
+                        onClick={() => {
+                          setSelectedUser(u);
+                          setUserQuery("");
+                        }}
+                        className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-secondary"
+                      >
+                        <span className="min-w-0 flex-1 truncate">{u.email || u.id}</span>
+                        {u.role ? <Badge variant="secondary">{u.role}</Badge> : null}
+                      </button>
+                    ))
+                  )}
+                </div>
+              ) : (
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Escreve o email para encontrar o utilizador e adicioná-lo manualmente à gestão de banca.
+                </p>
+              )}
+            </div>
+          )}
+
+          <div className="grid grid-cols-2 items-end gap-2 md:grid-cols-5">
+            <div>
+              <Label className="text-[10px] text-muted-foreground">PLANO</Label>
+              <select
+                className="mt-1 flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm"
+                value={newPlan}
+                onChange={(e) => setNewPlan(e.target.value as CapitalPlanId)}
+              >
+                {PLAN_IDS.map((p) => (
+                  <option key={p} value={p}>{planLabel(p)}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <Label className="text-[10px] text-muted-foreground">MOEDA</Label>
+              <select
+                className="mt-1 flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm"
+                value={newCurrency}
+                onChange={(e) => setNewCurrency(e.target.value as "usd" | "aoa")}
+              >
+                {CURRENCIES.map((c) => <option key={c} value={c}>{c.toUpperCase()}</option>)}
+              </select>
+            </div>
+            <div>
+              <Label className="text-[10px] text-muted-foreground">CAPITAL</Label>
+              <Input
+                type="number"
+                step="0.01"
+                min="0"
+                value={newCapital}
+                onChange={(e) => setNewCapital(e.target.value)}
+                placeholder="Opcional"
+                className="mt-1 h-9"
+              />
+            </div>
+            <div>
+              <Label className="text-[10px] text-muted-foreground">META %</Label>
+              <Input
+                type="number"
+                step="0.01"
+                min="0"
+                max="100"
+                value={newMeta}
+                onChange={(e) => setNewMeta(e.target.value)}
+                placeholder="Opcional"
+                className="mt-1 h-9"
+              />
+            </div>
+            <div>
+              <Label className="text-[10px] text-muted-foreground">INÍCIO</Label>
+              <Input
+                type="date"
+                value={newStart}
+                onChange={(e) => setNewStart(e.target.value)}
+                className="mt-1 h-9"
+              />
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3">
+            <label className="flex items-center gap-2 text-xs text-muted-foreground">
+              <input
+                type="checkbox"
+                checked={resetAchieved}
+                onChange={(e) => setResetAchieved(e.target.checked)}
+                className="h-4 w-4 rounded border-input"
+              />
+              Reiniciar resultado para o capital indicado
+            </label>
+            <span className="text-xs text-muted-foreground">
+              Prazo: {PLAN_MONTHS[newPlan]} mês(es)
+            </span>
+            <Button className="ml-auto" onClick={() => void addToManagement()} disabled={busy || !selectedUser}>
+              <UserPlus className="mr-1.5 h-4 w-4" />
+              Adicionar à gestão
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardContent className="pt-3">
@@ -262,6 +519,33 @@ export function AdminCapitalTab() {
                 <Badge variant={c.status === "active" ? "default" : "secondary"}>
                   {contractStatusLabel(c.status)}
                 </Badge>
+                {c.status === "active" ? (
+                  <div className="flex gap-1">
+                    <Button size="sm" variant="outline" disabled={busy} onClick={() => void manageContract(c, "renew")}>
+                      <RotateCcw className="mr-1 h-3.5 w-3.5" />
+                      Renovar
+                    </Button>
+                    <Button size="sm" variant="outline" disabled={busy} onClick={() => void manageContract(c, "complete")}>
+                      <Check className="mr-1 h-3.5 w-3.5" />
+                      Concluir
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="text-destructive hover:text-destructive"
+                      disabled={busy}
+                      onClick={() => void manageContract(c, "cancel")}
+                    >
+                      <X className="mr-1 h-3.5 w-3.5" />
+                      Cancelar
+                    </Button>
+                  </div>
+                ) : (
+                  <Button size="sm" variant="outline" disabled={busy} onClick={() => void manageContract(c, "renew")}>
+                    <RotateCcw className="mr-1 h-3.5 w-3.5" />
+                    Reativar
+                  </Button>
+                )}
               </div>
             ))
           )}
@@ -297,7 +581,7 @@ export function AdminCapitalTab() {
                     </Button>
                   </div>
 
-                  <div className="mt-3 grid grid-cols-2 md:grid-cols-5 gap-2 items-end">
+                  <div className="mt-3 grid grid-cols-2 md:grid-cols-6 gap-2 items-end">
                     <div>
                       <Label className="text-[10px] text-muted-foreground">MOEDA</Label>
                       <select
@@ -338,6 +622,18 @@ export function AdminCapitalTab() {
                         className="mt-1 h-9"
                       />
                     </div>
+                    <div>
+                      <Label className="text-[10px] text-muted-foreground">META %</Label>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        max="100"
+                        defaultValue={acc.meta_percent != null ? Number(acc.meta_percent) : ""}
+                        onChange={(e) => setEdit(acc.user_id, "meta_percent", e.target.value)}
+                        className="mt-1 h-9"
+                      />
+                    </div>
                     <Button size="sm" disabled={busy || Object.keys(draft).length === 0} onClick={() => saveEdit(acc)}>
                       Guardar
                     </Button>
@@ -347,6 +643,15 @@ export function AdminCapitalTab() {
                     <span>Capital: <b className="text-foreground">{money(Number(draft.capital ?? acc.capital), acc.currency)}</b></span>
                     <span>Resultado: <b className="text-foreground">{money(Number(draft.achieved ?? acc.achieved), acc.currency)}</b></span>
                     <span>Levantado: <b className="text-foreground">{money(Number(draft.total_withdrawn ?? acc.total_withdrawn), acc.currency)}</b></span>
+                    <span>
+                      Meta: <b className="text-foreground">
+                        {draft.meta_percent != null
+                          ? `${Number(draft.meta_percent)}%`
+                          : acc.meta_percent != null
+                            ? `${Number(acc.meta_percent)}%`
+                            : "—"}
+                      </b>
+                    </span>
                   </div>
 
                   {reporting === acc.user_id ? (

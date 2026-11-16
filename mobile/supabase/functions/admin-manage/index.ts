@@ -1223,6 +1223,262 @@ serve(async (req) => {
 
       return json({ ok: true });
     }
+    case 'search_capital_users': {
+      const query = typeof body.query === 'string' ? body.query.trim().toLowerCase() : '';
+      if (query.length < 2) return json({ users: [] });
+
+      const matches: { id: string; email: string; created_at: string; last_sign_in_at: string | null }[] = [];
+      const perPage = 200;
+      let page = 1;
+
+      while (page <= 10 && matches.length < 20) {
+        const { data, error } = await supabase.auth.admin.listUsers({ page, perPage });
+        if (error) return errorJson(error.message, 500);
+        const list = data?.users ?? [];
+
+        for (const u of list) {
+          const email = (u.email ?? '').toLowerCase();
+          if (email.includes(query) || u.id === query) {
+            matches.push({
+              id: u.id,
+              email: u.email ?? '',
+              created_at: u.created_at,
+              last_sign_in_at: u.last_sign_in_at ?? null,
+            });
+          }
+        }
+
+        if (list.length < perPage) break;
+        page += 1;
+      }
+
+      return json({ users: matches.slice(0, 20) });
+    }
+    case 'create_capital_management': {
+      const user_id = typeof body.user_id === 'string' ? body.user_id : null;
+      const planId = typeof body.plan_id === 'string' ? body.plan_id : null;
+      const currency = body.currency === 'aoa' ? 'aoa' : 'usd';
+      if (!user_id || !planId) return errorJson('user_id e plan_id são obrigatórios.');
+
+      const monthsByPlan: Record<string, number> = { conservador: 3, equilibrado: 2, agressivo: 1 };
+      const months = monthsByPlan[planId];
+      if (!months) return errorJson('Plano inválido.', 400);
+
+      const { data: target, error: targetErr } = await supabase.auth.admin.getUserById(user_id);
+      if (targetErr) return errorJson(targetErr.message, 500);
+      if (!target?.user) return errorJson('Utilizador não encontrado.', 404);
+
+      const today = new Date().toISOString().slice(0, 10);
+      const { error: expErr } = await supabase
+        .from('capital_contracts')
+        .update({ status: 'completed', updated_at: new Date().toISOString() })
+        .eq('user_id', user_id)
+        .eq('status', 'active')
+        .lt('end_date', today);
+      if (expErr) return errorJson(expErr.message, 500);
+
+      const { data: running, error: runErr } = await supabase
+        .from('capital_contracts')
+        .select('id')
+        .eq('user_id', user_id)
+        .eq('status', 'active')
+        .limit(1)
+        .maybeSingle();
+      if (runErr) return errorJson(runErr.message, 500);
+      if (running) return errorJson('O utilizador já tem um contrato ativo.', 409);
+
+      const { data: existingAccount, error: accReadErr } = await supabase
+        .from('capital_accounts')
+        .select('*')
+        .eq('user_id', user_id)
+        .maybeSingle();
+      if (accReadErr) return errorJson(accReadErr.message, 500);
+
+      const requestedCapital = body.capital == null || body.capital === ''
+        ? null
+        : Number(body.capital);
+      if (requestedCapital != null && (!Number.isFinite(requestedCapital) || requestedCapital < 0)) {
+        return errorJson('Capital inválido.');
+      }
+      const capital = requestedCapital ?? Number(existingAccount?.capital ?? 0);
+
+      const startDate = typeof body.start_date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(body.start_date)
+        ? body.start_date
+        : today;
+      const start = new Date(`${startDate}T00:00:00Z`);
+      if (Number.isNaN(start.getTime())) return errorJson('Data de início inválida.');
+
+      const end = new Date(Date.UTC(start.getUTCFullYear(), start.getUTCMonth() + months, 1));
+      const lastDayOfMonth = new Date(
+        Date.UTC(end.getUTCFullYear(), end.getUTCMonth() + 1, 0),
+      ).getUTCDate();
+      end.setUTCDate(Math.min(start.getUTCDate(), lastDayOfMonth));
+      const isoDate = (d: Date) => d.toISOString().slice(0, 10);
+
+      const { data: contract, error: ctrErr } = await supabase
+        .from('capital_contracts')
+        .insert({
+          user_id,
+          plan_id: planId,
+          currency,
+          capital_inicial: capital,
+          start_date: isoDate(start),
+          end_date: isoDate(end),
+          months,
+          status: 'active',
+          penalty_pct: 10,
+          terms_version: 'v2',
+        })
+        .select()
+        .single();
+      if (ctrErr) return errorJson(ctrErr.message, 500);
+
+      const accountRow: Record<string, unknown> = {
+        user_id,
+        currency,
+        status: 'active',
+        updated_at: new Date().toISOString(),
+      };
+      if (requestedCapital != null) {
+        accountRow.capital = requestedCapital;
+        if (!existingAccount || body.reset_achieved === true) accountRow.achieved = requestedCapital;
+      } else if (!existingAccount) {
+        accountRow.capital = capital;
+        accountRow.achieved = capital;
+      }
+      if (body.meta_percent != null) {
+        const mp = Number(body.meta_percent);
+        if (mp >= 0 && mp <= 100) accountRow.meta_percent = mp;
+      }
+
+      const { data: account, error: accErr } = await supabase
+        .from('capital_accounts')
+        .upsert(accountRow, { onConflict: 'user_id' })
+        .select()
+        .single();
+      if (accErr) return errorJson(accErr.message, 500);
+
+      await notifyUser(
+        user_id,
+        'Gestão de banca ativada',
+        `A tua banca está agora em gestão no plano ${capitalizePlan(planId)}.`,
+        { type: 'management_request', contractId: contract.id },
+      );
+
+      return json({ contract, account });
+    }
+    case 'manage_capital_contract': {
+      const id = typeof body.id === 'string' ? body.id : null;
+      const op = typeof body.op === 'string' ? body.op : null;
+      if (!id || !op) return errorJson('id e op são obrigatórios.');
+
+      const { data: contract, error: ctrErr } = await supabase
+        .from('capital_contracts')
+        .select('*')
+        .eq('id', id)
+        .maybeSingle();
+      if (ctrErr) return errorJson(ctrErr.message, 500);
+      if (!contract) return errorJson('Contrato não encontrado.', 404);
+
+      if (op === 'complete' || op === 'cancel') {
+        if (contract.status !== 'active') return errorJson('Contrato não está ativo.', 409);
+        const status = op === 'complete' ? 'completed' : 'cancelled';
+        const { data: updated, error } = await supabase
+          .from('capital_contracts')
+          .update({ status, updated_at: new Date().toISOString() })
+          .eq('id', id)
+          .select()
+          .single();
+        if (error) return errorJson(error.message, 500);
+
+        await notifyUser(
+          contract.user_id,
+          op === 'complete' ? 'Gestão de banca concluída' : 'Gestão de banca cancelada',
+          op === 'complete'
+            ? 'O contrato de gestão da tua banca foi concluído.'
+            : 'O contrato de gestão da tua banca foi cancelado. Fala com o suporte para mais detalhes.',
+          { type: 'management_request', contractId: id },
+        );
+
+        return json({ contract: updated });
+      }
+
+      if (op === 'renew') {
+        const monthsByPlan: Record<string, number> = { conservador: 3, equilibrado: 2, agressivo: 1 };
+        const months = monthsByPlan[contract.plan_id as string];
+        if (!months) return errorJson('Plano inválido.', 400);
+
+        const today = new Date().toISOString().slice(0, 10);
+        const { error: expErr } = await supabase
+          .from('capital_contracts')
+          .update({ status: 'completed', updated_at: new Date().toISOString() })
+          .eq('user_id', contract.user_id)
+          .eq('status', 'active')
+          .lt('end_date', today);
+        if (expErr) return errorJson(expErr.message, 500);
+
+        const { data: running, error: runErr } = await supabase
+          .from('capital_contracts')
+          .select('id')
+          .eq('user_id', contract.user_id)
+          .eq('status', 'active')
+          .neq('id', id)
+          .limit(1)
+          .maybeSingle();
+        if (runErr) return errorJson(runErr.message, 500);
+        if (running) return errorJson('O utilizador já tem outro contrato ativo.', 409);
+
+        const startDate = typeof body.start_date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(body.start_date)
+          ? body.start_date
+          : today;
+        const start = new Date(`${startDate}T00:00:00Z`);
+        if (Number.isNaN(start.getTime())) return errorJson('Data de início inválida.');
+
+        const end = new Date(Date.UTC(start.getUTCFullYear(), start.getUTCMonth() + months, 1));
+        const lastDayOfMonth = new Date(
+          Date.UTC(end.getUTCFullYear(), end.getUTCMonth() + 1, 0),
+        ).getUTCDate();
+        end.setUTCDate(Math.min(start.getUTCDate(), lastDayOfMonth));
+        const isoDate = (d: Date) => d.toISOString().slice(0, 10);
+
+        const update: Record<string, unknown> = {
+          status: 'active',
+          start_date: isoDate(start),
+          end_date: isoDate(end),
+          months,
+          updated_at: new Date().toISOString(),
+        };
+        if (body.capital_inicial != null) {
+          const ci = Number(body.capital_inicial);
+          if (!Number.isFinite(ci) || ci < 0) return errorJson('Capital inválido.');
+          update.capital_inicial = ci;
+        }
+        if (body.penalty_pct != null) {
+          const pp = Number(body.penalty_pct);
+          if (!Number.isFinite(pp) || pp < 0 || pp > 100) return errorJson('Penalidade inválida.');
+          update.penalty_pct = pp;
+        }
+
+        const { data: updated, error } = await supabase
+          .from('capital_contracts')
+          .update(update)
+          .eq('id', id)
+          .select()
+          .single();
+        if (error) return errorJson(error.message, 500);
+
+        await notifyUser(
+          contract.user_id,
+          'Gestão de banca renovada',
+          `O teu período de gestão foi renovado por ${months} mês(es).`,
+          { type: 'management_request', contractId: id },
+        );
+
+        return json({ contract: updated });
+      }
+
+      return errorJson('Operação inválida.', 400);
+    }
     case 'ban_user': {
       const user_id = typeof body.user_id === 'string' ? body.user_id : null;
       if (!user_id) return errorJson('user_id em falta.');

@@ -471,6 +471,7 @@ export interface AdminCapitalAccount {
   achieved: number;
   total_withdrawn: number;
   status: string;
+  meta_percent?: number | null;
   updated_at?: string;
 }
 
@@ -485,6 +486,7 @@ export async function upsertCapitalAccount(data: {
   achieved?: number;
   total_withdrawn?: number;
   currency?: "usd" | "aoa";
+  meta_percent?: number;
 }): Promise<void> {
   await callAdminFn("upsert_capital_account", data);
 }
@@ -572,6 +574,37 @@ export async function approveManagementRequest(id: string): Promise<void> {
 
 export async function rejectManagementRequest(id: string): Promise<void> {
   await callAdminFn("reject_capital_management_request", { id });
+}
+
+export async function searchCapitalUsers(query: string): Promise<UserWithSubscription[]> {
+  const data = await callAdminFn<{ users: UserWithSubscription[] }>("search_capital_users", { query });
+  return data.users ?? [];
+}
+
+export interface CreateCapitalManagementInput {
+  user_id: string;
+  plan_id: "conservador" | "equilibrado" | "agressivo";
+  currency: "usd" | "aoa";
+  capital?: number;
+  start_date?: string;
+  meta_percent?: number;
+  reset_achieved?: boolean;
+}
+
+export async function createCapitalManagement(data: CreateCapitalManagementInput): Promise<AdminCapitalContract> {
+  const res = await callAdminFn<{ contract: AdminCapitalContract }>("create_capital_management", { ...data });
+  return res.contract;
+}
+
+export type CapitalContractAction = "complete" | "cancel" | "renew";
+
+export async function manageCapitalContract(
+  id: string,
+  op: CapitalContractAction,
+  opts: { start_date?: string; capital_inicial?: number; penalty_pct?: number } = {},
+): Promise<AdminCapitalContract> {
+  const res = await callAdminFn<{ contract: AdminCapitalContract }>("manage_capital_contract", { id, op, ...opts });
+  return res.contract;
 }
 
 export async function submitManagementRequest(req: {
