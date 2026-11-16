@@ -54,6 +54,15 @@ const planLabel = (p: string) =>
 const contractStatusLabel = (s: string) =>
   s === "active" ? "Ativa" : s === "completed" ? "Concluída" : s === "cancelled" ? "Cancelada" : s;
 
+type ContractFilter = "all" | "active" | "completed" | "debt";
+
+const CONTRACT_FILTERS: { id: ContractFilter; label: string }[] = [
+  { id: "all", label: "Todas" },
+  { id: "active", label: "Ativas" },
+  { id: "completed", label: "Concluídas" },
+  { id: "debt", label: "Dívida (bancas quebradas)" },
+];
+
 const daysLeft = (endDate: string) => {
   const ms = new Date(`${endDate}T00:00:00`).getTime() - Date.now();
   return Math.max(0, Math.ceil(ms / 86_400_000));
@@ -81,6 +90,7 @@ export function AdminCapitalTab() {
   const [newStart, setNewStart] = useState("");
   const [newMeta, setNewMeta] = useState("");
   const [resetAchieved, setResetAchieved] = useState(false);
+  const [contractFilter, setContractFilter] = useState<ContractFilter>("all");
 
   const load = useCallback(async () => {
     try {
@@ -121,6 +131,42 @@ export function AdminCapitalTab() {
       { label: "USD / AOA", value: `${usdAccounts} / ${aoaAccounts}`, color: "#34C759" },
     ];
   }, [accounts, activeCount]);
+
+  const accountByUser = useMemo(
+    () => new Map(accounts.map((a) => [a.user_id, a])),
+    [accounts],
+  );
+
+  const isDebtContract = useCallback(
+    (c: AdminCapitalContract) => {
+      const acc = accountByUser.get(c.user_id);
+      return acc != null && Number(acc.achieved) < 0;
+    },
+    [accountByUser],
+  );
+
+  const contractFilterCounts = useMemo(
+    () => ({
+      all: contracts.length,
+      active: contracts.filter((c) => c.status === "active").length,
+      completed: contracts.filter((c) => c.status === "completed").length,
+      debt: contracts.filter(isDebtContract).length,
+    }),
+    [contracts, isDebtContract],
+  );
+
+  const filteredContracts = useMemo(() => {
+    switch (contractFilter) {
+      case "active":
+        return contracts.filter((c) => c.status === "active");
+      case "completed":
+        return contracts.filter((c) => c.status === "completed");
+      case "debt":
+        return contracts.filter(isDebtContract);
+      default:
+        return contracts;
+    }
+  }, [contracts, contractFilter, isDebtContract]);
 
   const filteredUsers = useMemo(() => {
     const q = userQuery.trim().toLowerCase();
@@ -494,13 +540,34 @@ export function AdminCapitalTab() {
           <div className="mb-2 flex items-center justify-between">
             <h3 className="text-sm font-semibold">Bancas em gestão</h3>
             <span className="text-xs text-muted-foreground">
-              {activeCount} ativa(s) · {contracts.length} no total
+              {activeCount} ativa(s) · {filteredContracts.length} de {contracts.length} mostrada(s)
             </span>
+          </div>
+          <div className="mb-2 flex flex-wrap gap-2">
+            {CONTRACT_FILTERS.map((f) => (
+              <button
+                key={f.id}
+                type="button"
+                onClick={() => setContractFilter(f.id)}
+                className={cn(
+                  "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
+                  contractFilter === f.id
+                    ? f.id === "debt"
+                      ? "border-destructive bg-destructive text-destructive-foreground"
+                      : "border-primary bg-primary text-primary-foreground"
+                    : "border-border bg-secondary/40 text-muted-foreground hover:text-foreground",
+                )}
+              >
+                {f.label} · {contractFilterCounts[f.id]}
+              </button>
+            ))}
           </div>
           {contracts.length === 0 ? (
             <p className="py-4 text-center text-sm text-muted-foreground">Nenhuma banca em gestão.</p>
+          ) : filteredContracts.length === 0 ? (
+            <p className="py-4 text-center text-sm text-muted-foreground">Nenhuma banca neste filtro.</p>
           ) : (
-            contracts.map((c, idx) => (
+            filteredContracts.map((c, idx) => (
               <div
                 key={c.id}
                 className={cn("flex flex-wrap items-center gap-3 py-2 text-sm", idx > 0 && "border-t border-border")}
@@ -519,6 +586,15 @@ export function AdminCapitalTab() {
                 <Badge variant={c.status === "active" ? "default" : "secondary"}>
                   {contractStatusLabel(c.status)}
                 </Badge>
+                {(() => {
+                  const acc = accountByUser.get(c.user_id);
+                  const achieved = acc ? Number(acc.achieved) : 0;
+                  return acc && achieved < 0 ? (
+                    <Badge variant="destructive">
+                      Dívida {money(Math.abs(achieved), acc.currency)}
+                    </Badge>
+                  ) : null;
+                })()}
                 {c.status === "active" ? (
                   <div className="flex gap-1">
                     <Button size="sm" variant="outline" disabled={busy} onClick={() => void manageContract(c, "renew")}>
