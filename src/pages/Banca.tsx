@@ -190,7 +190,10 @@ export default function Banca() {
     );
   }
 
-  const maxWithdrawable = withdrawable(current);
+  const pendingWithdrawalTotal = withdrawalRequests
+    .filter((r) => r.currency === cur && (r.status === "pending" || r.status === "approved"))
+    .reduce((sum, r) => sum + Number(r.amount || 0), 0);
+  const maxWithdrawable = Math.max(0, withdrawable(current) - pendingWithdrawalTotal);
   const signedMoney = (n: number) => `${n >= 0 ? "+" : "−"}${formatBancaMoney(Math.abs(n), cur)}`;
   const signedPct = (n: number) => `${n >= 0 ? "+" : "−"}${Math.abs(n).toFixed(1)}%`;
 
@@ -222,12 +225,18 @@ export default function Banca() {
         ...(requestId ? { requestId } : {}),
       });
       setWithdrawOpen(false);
+      void refetchWithdrawals();
       toast.success(t("depositos.confirmWithdrawOk"), {
         description: t("depositos.confirmWithdrawMsg"),
       });
-    } catch {
+    } catch (error) {
       toast.error(t("capital.withdrawErrorTitle"), {
-        description: t("capital.withdrawErrorMsg"),
+        description:
+          error instanceof Error
+            ? error.message
+            : typeof error === "object" && error !== null && "message" in error && typeof error.message === "string"
+              ? error.message
+              : t("capital.withdrawErrorMsg"),
       });
     } finally {
       setWithdrawBusy(false);
@@ -239,6 +248,49 @@ export default function Banca() {
     { icon: TrendingUp, color: PROVIDER_COLORS.accent, title: t("capital.step2Title"), desc: t("capital.step2Desc") },
     { icon: Coins, color: PROVIDER_COLORS.warning, title: t("capital.step3Title"), desc: t("capital.step3Desc") },
   ];
+
+  const withdrawalCard = (
+    <Card>
+      <CardContent className="space-y-4 pt-6">
+        <div className="flex items-center justify-between">
+          <p className="font-semibold">{t("capital.withdrawalTitle")}</p>
+          <Badge className="border-success/30 bg-success/20 text-success">{t("capital.weekly")}</Badge>
+        </div>
+        <div className="flex items-center justify-between rounded-xl border border-border bg-secondary/60 px-4 py-3">
+          <span className="text-sm font-semibold text-muted-foreground">
+            {t("depositos.withdrawAvailable")}
+          </span>
+          <span className="font-semibold text-success">
+            {formatBancaMoney(maxWithdrawable, cur)}
+          </span>
+        </div>
+        <p className="text-sm text-muted-foreground">
+          {t("capital.withdrawalDesc")}
+        </p>
+        <Button
+          variant="secondary"
+          className="h-[54px] w-full"
+          onClick={() => setWithdrawOpen(true)}
+        >
+          <FileBarChart className="mr-2 h-4 w-4 text-accent" />
+          {t("capital.requestWithdrawal")}
+        </Button>
+      </CardContent>
+    </Card>
+  );
+
+  const withdrawDialog = withdrawOpen ? (
+    <WithdrawModal
+      available={maxWithdrawable}
+      balanceCurrency={cur}
+      contractEndDate={contractRunning ? contract?.end_date : undefined}
+      penaltyPct={contractRunning ? contract?.penalty_pct : undefined}
+      maxAmount={maxWithdrawable}
+      busy={withdrawBusy}
+      onClose={() => setWithdrawOpen(false)}
+      onSubmit={submitWithdrawal}
+    />
+  ) : null;
 
   if (!hasManagement) {
     return (
@@ -310,6 +362,8 @@ export default function Banca() {
             profitValue={profitValue}
             defaultPlanId={planId}
           />
+          {withdrawalCard}
+          {withdrawDialog}
         </section>
       </Layout>
     );
@@ -562,25 +616,7 @@ export default function Banca() {
 
         <CapitalSimulatorCard capital={capital} currency={cur} strategy={config.planId} />
 
-        <Card>
-          <CardContent className="space-y-4 pt-6">
-            <div className="flex items-center justify-between">
-              <p className="font-semibold">{t("capital.withdrawalTitle")}</p>
-              <Badge className="border-success/30 bg-success/20 text-success">{t("capital.weekly")}</Badge>
-            </div>
-            <p className="text-sm text-muted-foreground">
-              {t("capital.withdrawalDesc")}
-            </p>
-            <Button
-              variant="secondary"
-              className="h-[54px] w-full"
-              onClick={() => setWithdrawOpen(true)}
-            >
-              <FileBarChart className="mr-2 h-4 w-4 text-accent" />
-              {t("capital.requestWithdrawal")}
-            </Button>
-          </CardContent>
-        </Card>
+        {withdrawalCard}
 
         <Card>
           <CardContent className="space-y-3 pt-6">
@@ -617,18 +653,7 @@ export default function Banca() {
           onWithdraw={() => setWithdrawOpen(true)}
         />
 
-        {withdrawOpen ? (
-          <WithdrawModal
-            available={maxWithdrawable}
-            balanceCurrency={cur}
-            contractEndDate={contract?.end_date}
-            penaltyPct={contract?.penalty_pct}
-            maxAmount={maxWithdrawable}
-            busy={withdrawBusy}
-            onClose={() => setWithdrawOpen(false)}
-            onSubmit={submitWithdrawal}
-          />
-        ) : null}
+        {withdrawDialog}
       </section>
     </Layout>
   );

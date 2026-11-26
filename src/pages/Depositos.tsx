@@ -23,7 +23,8 @@ import { PaymentModal } from "@/components/banca/PaymentModal";
 import { WithdrawModal } from "@/components/banca/WithdrawModal";
 import { ReceiptSuccessModal } from "@/components/banca/ReceiptSuccessModal";
 import { useAuth } from "@/contexts/AuthContext";
-import { useBanca } from "@/hooks/useBanca";
+import { useCapitalAccount } from "@/hooks/useCapitalAccount";
+import { useWithdrawalRequests } from "@/hooks/useWithdrawalRequests";
 import { useMovements, type WalletMovement } from "@/hooks/useMovements";
 import { supabase } from "@/lib/supabaseClient";
 import { uploadReceipt, type ReceiptFile } from "@/lib/payments";
@@ -91,8 +92,14 @@ const formatMovementAmount = (amount: number, curr: Currency) =>
 export default function Depositos() {
   const { t, i18n } = useTranslation();
   const { user, loading: authLoading } = useAuth();
-  const { config: banca } = useBanca();
+  const { account } = useCapitalAccount();
+  const { requests: withdrawalRequests } = useWithdrawalRequests();
   const { movements, loading, addMovement, deleteMovement } = useMovements();
+  const serverCurrency: Currency = account?.currency ?? "usd";
+  const pendingWithdrawalTotal = withdrawalRequests
+    .filter((r) => r.currency === serverCurrency && (r.status === "pending" || r.status === "approved"))
+    .reduce((sum, r) => sum + Number(r.amount || 0), 0);
+  const serverBalance = Math.max(0, Number(account?.achieved ?? 0) - pendingWithdrawalTotal);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const params = {
@@ -147,7 +154,7 @@ export default function Depositos() {
 
   const price = PRICES[currency][plan];
   const planPrice = PLAN_PRICES[currency][plan];
-  const currencySymbol = currency === "usd" ? "USD" : "AOA";
+  const currencySymbol = serverCurrency === "usd" ? "USD" : "AOA";
   const selectedPlan = PLANS.find((p) => p.id === plan);
 
   const hasPendingDepositRequest = async (): Promise<boolean> => {
@@ -322,19 +329,18 @@ export default function Depositos() {
       if (!authLoading) redirectToLogin();
       return;
     }
+    if (input.currency === serverCurrency && input.amount > serverBalance) {
+      toast.error(t("capital.withdrawAboveBalance"));
+      return;
+    }
     setWithdrawBusy(true);
     try {
-      let requestId: string | null = null;
-      try {
-        requestId = await submitWithdrawalRequest({
-          method: input.method,
-          amount: input.amount,
-          currency: input.currency,
-          details: input.details,
-        });
-      } catch {
-        /* mantém apenas local */
-      }
+      const requestId = await submitWithdrawalRequest({
+        method: input.method,
+        amount: input.amount,
+        currency: input.currency,
+        details: input.details,
+      });
       void addMovement({
         type: "withdrawal",
         method: input.method,
@@ -347,6 +353,10 @@ export default function Depositos() {
       setWithdrawOpen(false);
       toast.success(t("depositos.confirmWithdrawOk"), {
         description: t("depositos.confirmWithdrawMsg"),
+      });
+    } catch (error) {
+      toast.error(t("capital.withdrawErrorTitle"), {
+        description: error instanceof Error ? error.message : t("capital.withdrawErrorMsg"),
       });
     } finally {
       setWithdrawBusy(false);
@@ -451,7 +461,7 @@ export default function Depositos() {
             </span>
           </div>
           <p className="text-4xl font-extrabold tracking-tight text-white">
-            {formatBancaMoney(banca.achieved, banca.currency ?? "usd")}
+            {formatBancaMoney(serverBalance, serverCurrency)}
           </p>
           <div className="flex items-center gap-1.5">
             <Lock className="h-3.5 w-3.5 text-white/65" />
@@ -586,7 +596,7 @@ export default function Depositos() {
                       {t("depositos.withdrawAvailable")}
                     </span>
                     <span className="font-semibold text-success">
-                      {formatBancaMoney(banca.achieved, banca.currency ?? "usd")}
+                      {formatBancaMoney(serverBalance, serverCurrency)}
                     </span>
                   </div>
                   <Button
@@ -675,9 +685,9 @@ export default function Depositos() {
 
         {withdrawOpen ? (
           <WithdrawModal
-            available={banca.achieved}
-            maxAmount={banca.achieved}
-            balanceCurrency={banca.currency ?? "usd"}
+            available={serverBalance}
+            maxAmount={serverBalance}
+            balanceCurrency={serverCurrency}
             onClose={() => setWithdrawOpen(false)}
             onSubmit={submitWithdrawal}
             busy={withdrawBusy}
