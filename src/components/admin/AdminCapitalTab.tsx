@@ -697,7 +697,7 @@ export function AdminCapitalTab() {
                     </Button>
                   </div>
 
-                  <div className="mt-3 grid grid-cols-2 md:grid-cols-6 gap-2 items-end">
+                  <div className="mt-3 grid grid-cols-2 md:grid-cols-7 gap-2 items-end">
                     <div>
                       <Label className="text-[10px] text-muted-foreground">MOEDA</Label>
                       <select
@@ -725,6 +725,17 @@ export function AdminCapitalTab() {
                         step="0.01"
                         defaultValue={Number(acc.achieved)}
                         onChange={(e) => setEdit(acc.user_id, "achieved", e.target.value)}
+                        className="mt-1 h-9"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-[10px] text-muted-foreground">LEVANTÁVEL</Label>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        defaultValue={Number(acc.withdrawable_amount ?? 0)}
+                        onChange={(e) => setEdit(acc.user_id, "withdrawable_amount", e.target.value)}
                         className="mt-1 h-9"
                       />
                     </div>
@@ -758,6 +769,7 @@ export function AdminCapitalTab() {
                   <div className="mt-2 flex flex-wrap gap-4 text-xs text-muted-foreground">
                     <span>Capital: <b className="text-foreground">{money(Number(draft.capital ?? acc.capital), acc.currency)}</b></span>
                     <span>Resultado: <b className="text-foreground">{money(Number(draft.achieved ?? acc.achieved), acc.currency)}</b></span>
+                    <span>Levantável: <b className="text-foreground">{money(Number(draft.withdrawable_amount ?? acc.withdrawable_amount ?? 0), acc.currency)}</b></span>
                     <span>Levantado: <b className="text-foreground">{money(Number(draft.total_withdrawn ?? acc.total_withdrawn), acc.currency)}</b></span>
                     <span>
                       Meta: <b className="text-foreground">
