@@ -75,6 +75,7 @@ export function AdminCapitalTab() {
   const [activeCount, setActiveCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState<Record<string, Partial<AdminCapitalAccount>>>({});
+  const [releaseAmounts, setReleaseAmounts] = useState<Record<string, string>>({});
   const [reporting, setReporting] = useState<string | null>(null);
   const [reports, setReports] = useState<Record<string, AdminCapitalReport[]>>({});
   const [busy, setBusy] = useState(false);
@@ -238,6 +239,25 @@ export function AdminCapitalTab() {
     };
     void runAction(async () => upsertCapitalAccount(payload), "Conta atualizada");
     setEditing((prev) => ({ ...prev, [acc.user_id]: {} }));
+  };
+
+  const releaseCapital = async (acc: AdminCapitalAccount) => {
+    const raw = (releaseAmounts[acc.user_id] ?? "").trim().replace(",", ".");
+    const amount = parseFloat(raw);
+    if (!raw || !Number.isFinite(amount) || amount <= 0) {
+      toast.error("Valor inválido", { description: "Introduz um valor superior a zero." });
+      return;
+    }
+    const current = Number(acc.achieved) || 0;
+    const next = current + amount;
+    const ok = await confirmAdmin(
+      `Disponibilizar ${money(amount, acc.currency)} a ${acc.email || "utilizador"}? Saldo: ${money(current, acc.currency)} → ${money(next, acc.currency)}.`,
+    );
+    if (!ok) return;
+    await runAction(async () => {
+      await upsertCapitalAccount({ user_id: acc.user_id, achieved: next });
+      setReleaseAmounts((prev) => ({ ...prev, [acc.user_id]: "" }));
+    }, "Capital disponibilizado");
   };
 
   const addToManagement = async () => {
@@ -654,6 +674,24 @@ export function AdminCapitalTab() {
                       onClick={async () => { setReporting(reporting === acc.user_id ? null : acc.user_id); if (reporting !== acc.user_id) await loadReports(acc.user_id); }}
                     >
                       Relatório
+                    </Button>
+                  </div>
+
+                  <div className="mt-3 flex flex-wrap items-end gap-2 rounded-lg border border-border bg-secondary/30 p-2">
+                    <div className="min-w-[140px] flex-1">
+                      <Label className="text-[10px] text-muted-foreground">DISPONIBILIZAR</Label>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        value={releaseAmounts[acc.user_id] ?? ""}
+                        onChange={(e) => setReleaseAmounts((prev) => ({ ...prev, [acc.user_id]: e.target.value }))}
+                        placeholder="Valor a creditar"
+                        className="mt-1 h-9"
+                      />
+                    </div>
+                    <Button size="sm" disabled={busy} onClick={() => void releaseCapital(acc)}>
+                      Disponibilizar
                     </Button>
                   </div>
 
