@@ -57,7 +57,7 @@ export function PaymentModal({
   const { t } = useTranslation();
   // os metodos dependem da moeda: cada provider so aceita uma ou outra
   const availableMethods = useMemo(
-    () => PAYMENT_METHODS.filter((m) => (currency === "usd" ? m.usd : m.aoa)),
+    () => PAYMENT_METHODS.filter((m) => !m.withdrawalOnly && (currency === "usd" ? m.usd : m.aoa)),
     [currency],
   );
   const selectedMethod = method ? availableMethods.find((m) => m.id === method) : null;

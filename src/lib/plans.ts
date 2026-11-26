@@ -31,7 +31,8 @@ export type PaymentMethod =
   | "rodotpay"
   | "express"
   | "afrimoney"
-  | "unitelmoney";
+  | "unitelmoney"
+  | "iban";
 
 export const WA_GREEN = "#25D366";
 
@@ -50,6 +51,7 @@ export interface PaymentMethodInfo {
   aoa: boolean;
   copyValue: string;
   getDetails: () => string;
+  withdrawalOnly?: boolean;
 }
 
 export const PAYMENT_METHODS: PaymentMethodInfo[] = [
@@ -102,6 +104,17 @@ export const PAYMENT_METHODS: PaymentMethodInfo[] = [
     aoa: true,
     copyValue: EXPRESS_PHONE,
     getDetails: () => "Telefone: " + EXPRESS_PHONE,
+  },
+  {
+    id: "iban",
+    label: "Transferência bancária (IBAN)",
+    icon: "credit-card",
+    color: "#2563EB",
+    usd: true,
+    aoa: true,
+    copyValue: "IBAN",
+    getDetails: () => "IBAN / titular / banco",
+    withdrawalOnly: true,
   },
 ];
 
