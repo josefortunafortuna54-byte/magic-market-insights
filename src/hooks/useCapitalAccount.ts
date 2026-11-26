@@ -9,6 +9,7 @@ interface CapitalAccountRow {
   currency: "usd" | "aoa";
   capital: number | string;
   achieved: number | string;
+  withdrawable_amount?: number | string;
   total_withdrawn: number | string;
   status: string;
   updated_at?: string;
@@ -33,6 +34,7 @@ function toAccount(row: CapitalAccountRow): CapitalAccount {
     currency: row.currency,
     capital: Number(row.capital) || 0,
     achieved: Number(row.achieved) || 0,
+    withdrawable_amount: Number(row.withdrawable_amount) || 0,
     total_withdrawn: Number(row.total_withdrawn) || 0,
     status: row.status,
     updated_at: row.updated_at,

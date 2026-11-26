@@ -193,7 +193,11 @@ export default function Banca() {
   const pendingWithdrawalTotal = withdrawalRequests
     .filter((r) => r.currency === cur && (r.status === "pending" || r.status === "approved"))
     .reduce((sum, r) => sum + Number(r.amount || 0), 0);
-  const maxWithdrawable = Math.max(0, withdrawable(current) - pendingWithdrawalTotal);
+  const allowance = account ? Number(account.withdrawable_amount) : 0;
+  const maxWithdrawable = Math.max(
+    0,
+    Math.min(Number.isFinite(allowance) ? allowance : current, withdrawable(current)) - pendingWithdrawalTotal,
+  );
   const signedMoney = (n: number) => `${n >= 0 ? "+" : "−"}${formatBancaMoney(Math.abs(n), cur)}`;
   const signedPct = (n: number) => `${n >= 0 ? "+" : "−"}${Math.abs(n).toFixed(1)}%`;
 

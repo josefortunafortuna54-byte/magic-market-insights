@@ -135,6 +135,7 @@ export interface CapitalAccount {
   currency: 'usd' | 'aoa';
   capital: number;
   achieved: number;
+  withdrawable_amount: number;
   total_withdrawn: number;
   status: string;
   updated_at?: string;

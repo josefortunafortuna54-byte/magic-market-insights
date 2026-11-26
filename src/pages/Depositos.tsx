@@ -99,7 +99,12 @@ export default function Depositos() {
   const pendingWithdrawalTotal = withdrawalRequests
     .filter((r) => r.currency === serverCurrency && (r.status === "pending" || r.status === "approved"))
     .reduce((sum, r) => sum + Number(r.amount || 0), 0);
-  const serverBalance = Math.max(0, Number(account?.achieved ?? 0) - pendingWithdrawalTotal);
+  const allowance = account ? Number(account.withdrawable_amount) : 0;
+  const cashBalance = Number(account?.achieved ?? 0);
+  const serverBalance = Math.max(
+    0,
+    Math.min(Number.isFinite(allowance) ? allowance : cashBalance, cashBalance) - pendingWithdrawalTotal,
+  );
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const params = {
