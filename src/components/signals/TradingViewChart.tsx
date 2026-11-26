@@ -4,26 +4,15 @@ interface TradingViewChartProps {
   symbol: string;
   interval?: string;
   height?: string;
-  showStudies?: boolean;
 }
 
-export function TradingViewChart({ symbol, interval = "60", height = "560px", showStudies = true }: TradingViewChartProps) {
+export function TradingViewChart({ symbol, interval = "60", height = "560px" }: TradingViewChartProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!containerRef.current) return;
     const raw = symbol.replace("/", "");
     const prefix = raw === "BTCUSD" ? "COINBASE" : "FX";
-
-    const studies = showStudies
-      ? [
-          "MASimple@tv-basicstudies",
-          "RSI@tv-basicstudies",
-          "MACD@tv-basicstudies",
-          "BollingerBands@tv-basicstudies",
-          "Stochastic@tv-basicstudies",
-        ]
-      : [];
 
     const widgetConfig = {
       autosize: true,
@@ -53,7 +42,7 @@ export function TradingViewChart({ symbol, interval = "60", height = "560px", sh
 
       // Studies
       studies_overlay: false,
-      studies,
+      studies: [],
 
       // Layout
       drawings_access: { type: "none" },
@@ -75,7 +64,7 @@ export function TradingViewChart({ symbol, interval = "60", height = "560px", sh
     return () => {
       if (containerRef.current) containerRef.current.innerHTML = "";
     };
-  }, [symbol, interval, showStudies]);
+  }, [symbol, interval]);
 
   return (
     <div className="relative rounded-xl overflow-hidden border border-border/40 bg-black/20" style={{ height }}>
