@@ -16,6 +16,7 @@ import {
   manageCapitalContract,
   postCapitalReport,
   rejectManagementRequest,
+  releaseWithdrawalFunds,
   searchCapitalUsers,
   upsertCapitalAccount,
   type AdminCapitalAccount,
@@ -218,7 +219,7 @@ export function AdminCapitalTab() {
 
   const setEdit = (
     userId: string,
-    field: "capital" | "achieved" | "total_withdrawn" | "meta_percent",
+    field: "capital" | "achieved" | "withdrawable_amount" | "total_withdrawn" | "meta_percent",
     value: string,
   ) => {
     setEditing((prev) => ({
@@ -233,6 +234,7 @@ export function AdminCapitalTab() {
       user_id: acc.user_id,
       ...(draft.capital != null ? { capital: draft.capital } : {}),
       ...(draft.achieved != null ? { achieved: draft.achieved } : {}),
+      ...(draft.withdrawable_amount != null ? { withdrawable_amount: draft.withdrawable_amount } : {}),
       ...(draft.total_withdrawn != null ? { total_withdrawn: draft.total_withdrawn } : {}),
       ...(draft.currency ? { currency: draft.currency } : {}),
       ...(draft.meta_percent != null ? { meta_percent: draft.meta_percent } : {}),
@@ -248,16 +250,16 @@ export function AdminCapitalTab() {
       toast.error("Valor inválido", { description: "Introduz um valor superior a zero." });
       return;
     }
-    const current = Number(acc.achieved) || 0;
+    const current = Number(acc.withdrawable_amount) || 0;
     const next = current + amount;
     const ok = await confirmAdmin(
-      `Disponibilizar ${money(amount, acc.currency)} a ${acc.email || "utilizador"}? Saldo: ${money(current, acc.currency)} → ${money(next, acc.currency)}.`,
+      `Disponibilizar ${money(amount, acc.currency)} para levantamento a ${acc.email || "utilizador"}? Limite: ${money(current, acc.currency)} → ${money(next, acc.currency)}.`,
     );
     if (!ok) return;
     await runAction(async () => {
-      await upsertCapitalAccount({ user_id: acc.user_id, achieved: next });
+      await releaseWithdrawalFunds({ user_id: acc.user_id, amount, currency: acc.currency });
       setReleaseAmounts((prev) => ({ ...prev, [acc.user_id]: "" }));
-    }, "Capital disponibilizado");
+    }, "Valor disponibilizado para levantamento");
   };
 
   const addToManagement = async () => {

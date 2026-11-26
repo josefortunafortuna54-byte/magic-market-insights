@@ -475,6 +475,7 @@ export interface AdminCapitalAccount {
   currency: "usd" | "aoa";
   capital: number;
   achieved: number;
+  withdrawable_amount: number;
   total_withdrawn: number;
   status: string;
   meta_percent?: number | null;
@@ -490,11 +491,20 @@ export async function upsertCapitalAccount(data: {
   user_id: string;
   capital?: number;
   achieved?: number;
+  withdrawable_amount?: number;
   total_withdrawn?: number;
   currency?: "usd" | "aoa";
   meta_percent?: number;
 }): Promise<void> {
   await callAdminFn("upsert_capital_account", data);
+}
+
+export async function releaseWithdrawalFunds(data: {
+  user_id: string;
+  amount: number;
+  currency: "usd" | "aoa";
+}): Promise<void> {
+  await callAdminFn("release_withdrawal_funds", data);
 }
 
 export async function postCapitalReport(data: {
