@@ -27,8 +27,9 @@ import { isAdminEmail } from "@/lib/admin";
 import { claimUsername } from "@/lib/usernameAuth";
 import { planLabel, type PlanId } from "@/lib/plans";
 import { useCapitalAccount } from "@/hooks/useCapitalAccount";
+import { useWithdrawalRequests } from "@/hooks/useWithdrawalRequests";
 import { formatBancaMoney } from "@/lib/format";
-import { profit as calcProfit } from "@/lib/capital";
+import { dailyGain, withdrawable } from "@/lib/capital";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
 
@@ -54,7 +55,8 @@ export default function Perfil() {
   const { user, signOut } = useAuth();
   const { tier } = useSubscription();
   const { profiles, refresh } = useProfiles();
-  const { account } = useCapitalAccount();
+  const { account, reports } = useCapitalAccount();
+  const { requests } = useWithdrawalRequests();
   const navigate = useNavigate();
   const { t } = useTranslation();
 
@@ -134,6 +136,27 @@ export default function Perfil() {
     menuRows.push({ href: "/admin-gate", label: t("admin.title"), icon: Shield });
   }
 
+  const walletMetrics = account ? (() => {
+    const invested = Number(account.capital) || 0;
+    const current = Number(account.achieved) || 0;
+    const latestReport = reports[0];
+    const today = latestReport ? dailyGain(latestReport) : 0;
+    const reserved = requests
+      .filter((r) => r.currency === account.currency && (r.status === "pending" || r.status === "approved"))
+      .reduce((sum, r) => sum + (Number(r.amount) || 0), 0);
+    const available = withdrawable(current - reserved);
+    return [
+      { label: t("perfil.capitalInvested"), value: formatBancaMoney(invested, account.currency) },
+      { label: t("perfil.currentCapital"), value: formatBancaMoney(current, account.currency) },
+      {
+        label: t("perfil.dailyResult"),
+        value: formatBancaMoney(today, account.currency),
+        className: today > 0 ? "text-success" : today < 0 ? "text-destructive" : "",
+      },
+      { label: t("perfil.availableWithdrawal"), value: formatBancaMoney(available, account.currency) },
+    ];
+  })() : null;
+
   const handleLogout = async () => {
     await signOut();
     navigate("/");
@@ -209,31 +232,20 @@ export default function Perfil() {
 
           {/* Resumo da carteira — dados reais da gestão de capital (capital_accounts) */}
           <Card className="glass-card mb-6">
-            <CardContent className="pt-6 grid grid-cols-3 gap-4 text-center">
-              <div>
-                <p className="text-xs text-muted-foreground mb-1">{t("components.walletCard.capital")}</p>
-                <p className="text-sm font-semibold">
-                  {account ? formatBancaMoney(account.capital, account.currency) : "—"}
-                </p>
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground mb-1">{t("components.walletCard.profit")}</p>
-                <p
-                  className={cn(
-                    "text-sm font-semibold",
-                    account && calcProfit(account.achieved, account.capital) > 0 && "text-success",
-                    account && calcProfit(account.achieved, account.capital) < 0 && "text-destructive",
-                  )}
-                >
-                  {account ? formatBancaMoney(calcProfit(account.achieved, account.capital), account.currency) : "—"}
-                </p>
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground mb-1">{t("components.walletCard.withdrawals")}</p>
-                <p className="text-sm font-semibold">
-                  {account ? formatBancaMoney(account.total_withdrawn, account.currency) : "—"}
-                </p>
-              </div>
+            <CardContent className="pt-6 grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+              {(walletMetrics ?? [
+                { label: t("perfil.capitalInvested"), value: "—" },
+                { label: t("perfil.currentCapital"), value: "—" },
+                { label: t("perfil.dailyResult"), value: "—" },
+                { label: t("perfil.availableWithdrawal"), value: "—" },
+              ]).map((metric) => (
+                <div key={metric.label}>
+                  <p className="text-xs text-muted-foreground mb-1">{metric.label}</p>
+                  <p className={cn("text-sm font-semibold", "className" in metric ? metric.className : "")}>
+                    {metric.value}
+                  </p>
+                </div>
+              ))}
             </CardContent>
           </Card>
 
