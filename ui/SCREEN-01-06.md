@@ -284,7 +284,7 @@
 ### Layout
 - Header com nome do par + timeframe
 - Gráfico TradingView (WebView) ocupando ~60% da tela
-- Indicadores abaixo do gráfico
+- Sem indicadores
 - Sem tab bar
 
 ### Header
@@ -303,20 +303,11 @@
   - Linha Entrada: `#FFC915` tracejada, label `Entrada`
   - Linha preço atual: `#FFFFFF` sólida
 
-### Indicadores (abaixo do gráfico)
-- Layout: row, gap 12px, scroll horizontal
-- Cada indicador: pill/badge
-  - Fundo: `#1F2937`
-  - Texto: Inter 12px `#E5E7EB`
-  - Padding: 8px 14px
-  - BorderRadius: 8px
-- Indicadores visíveis: `EMA 20/50`, `MACD`, `RSI`
-
 ### Notas
 - Gráfico responsivo (altura ~50-60% da tela)
 - Suporte a zoom (pinch) e pan (drag)
 - Toolbar oculta (hide_top_toolbar, hide_side_toolbar)
-- Estudos: MASimple, RSI
+- Sem estudos/indicadores no widget
 
 ---
 

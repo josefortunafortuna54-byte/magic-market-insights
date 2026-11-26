@@ -119,7 +119,7 @@ export function TradingViewChart({
     allow_symbol_change: false,
     save_image: false,
     withdateranges: false,
-    studies: ["MASimple@tv-basicstudies", "RSI@tv-basicstudies"],
+    studies: [],
     container_id: "tv",
     onChartReady: function () {
       try {
