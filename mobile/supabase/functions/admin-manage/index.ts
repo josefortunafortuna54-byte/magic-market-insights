@@ -965,13 +965,18 @@ serve(async (req) => {
       });
     }
     case 'upsert_capital_account': {
-      const { user_id, capital, achieved, currency, total_withdrawn, meta_percent } = body;
+      const { user_id, capital, achieved, currency, total_withdrawn, meta_percent, withdrawable_amount } = body;
       if (!user_id) return errorJson('user_id em falta.');
       const row: Record<string, unknown> = { user_id: String(user_id), updated_at: new Date().toISOString() };
       if (capital != null) row.capital = Number(capital);
       if (achieved != null) row.achieved = Number(achieved);
       if (total_withdrawn != null) row.total_withdrawn = Number(total_withdrawn);
       if (currency === 'usd' || currency === 'aoa') row.currency = currency;
+      if (withdrawable_amount != null) {
+        const amount = Number(withdrawable_amount);
+        if (!Number.isFinite(amount) || amount < 0) return errorJson('Valor levantável inválido.');
+        row.withdrawable_amount = amount;
+      }
       if (meta_percent != null) {
         const mp = Number(meta_percent);
         if (mp >= 0 && mp <= 100) row.meta_percent = mp;
@@ -984,6 +989,21 @@ serve(async (req) => {
         .single();
       if (error) return errorJson(error.message, 500);
       return json({ account: data });
+    }
+    case 'release_withdrawal_funds': {
+      const { user_id, amount, currency } = body;
+      if (!user_id) return errorJson('user_id em falta.');
+      const value = Number(amount);
+      if (!Number.isFinite(value) || value <= 0) return errorJson('Valor inválido.');
+      if (currency !== 'usd' && currency !== 'aoa') return errorJson('Moeda inválida.');
+
+      const { error } = await supabase.rpc('release_withdrawal_funds', {
+        p_user_id: String(user_id),
+        p_amount: value,
+        p_currency: currency,
+      });
+      if (error) return errorJson(error.message, 500);
+      return json({ released: value });
     }
     case 'post_capital_report': {
       const { user_id, period_start, period_end, starting_balance, ending_balance, note, currency } = body;
@@ -1636,25 +1656,20 @@ serve(async (req) => {
     case 'approve_withdrawal': {
       const { id } = body;
       if (!id) return errorJson('id em falta.');
-      const { data: updated, error } = await supabase
-        .from('withdrawal_requests')
-        .update({
-          status: 'approved',
-          reviewed_by: user.id,
-          reviewed_at: new Date().toISOString(),
-        })
-        .eq('id', id)
-        .select('user_id, method, amount, currency')
-        .maybeSingle();
-      if (error) return errorJson(error.message, 500);
+      const { data: updated, error } = await supabase.rpc('approve_withdrawal_request', {
+        p_id: String(id),
+        p_admin: user.id,
+      });
+      if (error) return errorJson(error.message, 409);
       if (updated) {
+        const row = updated as Record<string, unknown>;
         void notifyAdminChannels(
           'withdrawal_approved',
           'Levantamento aprovado',
-          `${updated.method} | ${updated.amount} ${String(updated.currency).toUpperCase()}`,
+          `${String(row.method)} | ${String(row.amount)} ${String(row.currency).toUpperCase()}`,
           'withdrawal',
           String(id),
-          updated,
+          row,
         );
       }
       return json({ ok: true });
@@ -1671,19 +1686,19 @@ serve(async (req) => {
           notes: notes || null,
         })
         .eq('id', id)
+        .eq('status', 'pending')
         .select('user_id, method, amount, currency')
         .maybeSingle();
       if (error) return errorJson(error.message, 500);
-      if (updated) {
-        void notifyAdminChannels(
-          'withdrawal_rejected',
-          'Levantamento recusado',
-          `${updated.method} | ${updated.amount} ${String(updated.currency).toUpperCase()}`,
-          'withdrawal',
-          String(id),
-          updated,
-        );
-      }
+      if (!updated) return errorJson('Levantamento não está pendente.', 409);
+      void notifyAdminChannels(
+        'withdrawal_rejected',
+        'Levantamento recusado',
+        `${updated.method} | ${updated.amount} ${String(updated.currency).toUpperCase()}`,
+        'withdrawal',
+        String(id),
+        updated,
+      );
       return json({ ok: true });
     }
     case 'mark_withdrawal_paid': {
@@ -1703,7 +1718,7 @@ serve(async (req) => {
         })
         .eq('id', id)
         .eq('status', 'approved')
-        .select('user_id, amount, currency, net_amount, penalty_amount')
+        .select('user_id, amount, currency, net_amount, penalty_amount, debited_at')
         .maybeSingle();
 
       if (updateErr) return errorJson(updateErr.message, 500);
@@ -1727,11 +1742,12 @@ serve(async (req) => {
         .eq('currency', currency)
         .maybeSingle();
 
-      if (!acctErr && account) {
+      if (!transitioned.debited_at && !acctErr && account) {
         const { error: debitErr } = await supabase
           .from('capital_accounts')
           .update({
             achieved: Math.max(0, Number(account.achieved ?? 0) - Number(transitioned.amount)),
+            withdrawable_amount: Math.max(0, Number(account.withdrawable_amount ?? 0) - Number(transitioned.amount)),
             total_withdrawn: (Number(account.total_withdrawn ?? 0) + Number(transitioned.amount)),
             updated_at: new Date().toISOString(),
           })
